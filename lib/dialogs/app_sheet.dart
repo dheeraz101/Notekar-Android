@@ -18,6 +18,7 @@ class AppSheet extends StatefulWidget {
     this.showLargeTitle = false,
     this.onBack,
     this.leadingAction,
+    this.scrollLeadingAction,
     this.trailingAction,
     this.largeText = false,
     this.removeBottomPadding = false,
@@ -32,6 +33,7 @@ class AppSheet extends StatefulWidget {
   final bool showLargeTitle;
   final VoidCallback? onBack;
   final Widget? leadingAction;
+  final Widget? scrollLeadingAction;
   final Widget? trailingAction;
   final bool largeText;
   final bool removeBottomPadding;
@@ -131,7 +133,9 @@ class _AppSheetState extends State<AppSheet> {
               // Header Area (Stack for absolute horizontal centering)
               () {
                 final hasLeading =
-                    widget.onBack != null || widget.leadingAction != null;
+                    widget.onBack != null ||
+                    widget.leadingAction != null ||
+                    widget.scrollLeadingAction != null;
                 final hasTrailingAction = widget.trailingAction != null;
                 final leadingWidth = hasLeading ? 40.0 : 0.0;
                 final trailingWidth = 40.0 + (hasTrailingAction ? 40.0 : 0.0);
@@ -159,7 +163,17 @@ class _AppSheetState extends State<AppSheet> {
                           ),
                         )
                       else if (widget.leadingAction != null)
-                        Positioned(left: 0, child: widget.leadingAction!),
+                        Positioned(left: 0, child: widget.leadingAction!)
+                      else if (widget.scrollLeadingAction != null)
+                        Positioned(
+                          left: 0,
+                          child: Opacity(
+                            opacity: widget.showLargeTitle
+                                ? _titleOpacity
+                                : 1.0,
+                            child: widget.scrollLeadingAction!,
+                          ),
+                        ),
                       Positioned.fill(
                         child: Center(
                           child: Padding(

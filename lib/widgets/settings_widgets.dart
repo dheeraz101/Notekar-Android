@@ -1058,8 +1058,8 @@ class SliderScale extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: 26,
-      ), // Increased by 2px for final exact visual alignment
+        horizontal: 21,
+      ), // Matches CupertinoSlider thumb center (8px track margin + 14px thumb radius - 1px half-bar)
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

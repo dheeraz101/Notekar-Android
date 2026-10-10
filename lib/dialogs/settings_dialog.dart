@@ -66,6 +66,7 @@ import 'package:notekar/utils/update_service.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/widgets/guide_help_rows.dart';
+import 'package:notekar/widgets/photo_lightbox_dialog.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -545,6 +546,36 @@ class _SettingsDialogState extends State<SettingsDialog> {
     );
   }
 
+  void _previewProfileAvatar(
+    BuildContext context,
+    UserProfileService profile,
+    Palette p,
+  ) {
+    if (profile.avatarBytes != null && profile.avatarBytes!.isNotEmpty) {
+      PhotoLightboxDialog.show(
+        context,
+        p: p,
+        imageBytes: profile.avatarBytes,
+        title: 'Profile Photo'.localized(context),
+      );
+    } else if (profile.presetAvatarIndex != null &&
+        profile.presetAvatarIndex! >= 0 &&
+        profile.presetAvatarIndex! <
+            UserProfileService.curatedPresetAvatars.length) {
+      final assetPath = UserProfileService
+          .curatedPresetAvatars[profile.presetAvatarIndex!]
+          .assetPath;
+      PhotoLightboxDialog.show(
+        context,
+        p: p,
+        assetPath: assetPath,
+        title: 'Profile Photo'.localized(context),
+      );
+    } else {
+      _openCategory('Personal Profile');
+    }
+  }
+
   Widget _buildAppleIdProfileCard(Palette p) {
     return AnimatedBuilder(
       animation: UserProfileService(),
@@ -595,7 +626,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
               ),
               child: Row(
                 children: [
-                  profile.buildAvatarWidget(p: p, size: 54),
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      NotekarHaptics.selection('standard');
+                      _previewProfileAvatar(context, profile, p);
+                    },
+                    child: profile.buildAvatarWidget(p: p, size: 54),
+                  ),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(
@@ -632,25 +670,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                     width: 0.8,
                                   ),
                                 ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      CupertinoIcons.sparkles,
-                                      size: 11,
-                                      color: p.accent,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      'Member',
-                                      style: TextStyle(
-                                        color: p.accent,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: 0.2,
-                                      ),
-                                    ),
-                                  ],
+                                child: Text(
+                                  'Member',
+                                  style: TextStyle(
+                                    color: p.accent,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0.2,
+                                  ),
                                 ),
                               ),
                             ],
@@ -2238,6 +2265,30 @@ $cleanStack
         controller: category == null ? _activeController : null,
         showLargeTitle: category == null,
         removeBottomPadding: true,
+        scrollLeadingAction: category == null
+            ? ListenableBuilder(
+                listenable: UserProfileService(),
+                builder: (context, _) {
+                  final profile = UserProfileService();
+                  return PressableScale(
+                    onTap: () {
+                      NotekarHaptics.selection('standard');
+                      _previewProfileAvatar(context, profile, p);
+                    },
+                    child: Container(
+                      width: 38,
+                      height: 38,
+                      alignment: Alignment.center,
+                      child: profile.buildAvatarWidget(
+                        p: p,
+                        size: 32,
+                        showBorder: true,
+                      ),
+                    ),
+                  );
+                },
+              )
+            : null,
         child: Builder(
           builder: (ctx) {
             final mediaQuery = MediaQuery.of(ctx);

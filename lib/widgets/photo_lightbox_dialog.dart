@@ -14,18 +14,24 @@ class PhotoLightboxDialog extends StatefulWidget {
   const PhotoLightboxDialog({
     super.key,
     required this.p,
-    required this.imagePath,
+    this.imagePath,
+    this.imageBytes,
+    this.assetPath,
     this.title = 'Photo',
   });
 
   final Palette p;
-  final String imagePath;
+  final String? imagePath;
+  final Uint8List? imageBytes;
+  final String? assetPath;
   final String title;
 
   static Future<void> show(
     BuildContext context, {
     required Palette p,
-    required String imagePath,
+    String? imagePath,
+    Uint8List? imageBytes,
+    String? assetPath,
     String title = 'Photo',
   }) {
     HapticFeedback.lightImpact();
@@ -35,8 +41,13 @@ class PhotoLightboxDialog extends StatefulWidget {
       barrierLabel: 'Dismiss photo',
       barrierColor: Colors.black.withValues(alpha: 0.88),
       transitionDuration: const Duration(milliseconds: 220),
-      pageBuilder: (_, _, _) =>
-          PhotoLightboxDialog(p: p, imagePath: imagePath, title: title),
+      pageBuilder: (_, _, _) => PhotoLightboxDialog(
+        p: p,
+        imagePath: imagePath,
+        imageBytes: imageBytes,
+        assetPath: assetPath,
+        title: title,
+      ),
     );
   }
 
@@ -55,20 +66,53 @@ class _PhotoLightboxDialogState extends State<PhotoLightboxDialog> {
   }
 
   Future<void> _resolveImage() async {
-    final file = await MediaStorageService.instance.resolveFile(
-      widget.imagePath,
-    );
+    if (widget.imageBytes != null || widget.assetPath != null) {
+      if (mounted) setState(() => _isLoading = false);
+      return;
+    }
+    if (widget.imagePath != null && widget.imagePath!.isNotEmpty) {
+      final file = await MediaStorageService.instance.resolveFile(
+        widget.imagePath!,
+      );
+      if (mounted) {
+        setState(() {
+          _resolvedFile = file;
+          _isLoading = false;
+        });
+      }
+      return;
+    }
     if (mounted) {
-      setState(() {
-        _resolvedFile = file;
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final p = widget.p;
+
+    Widget imageWidget;
+    if (widget.imageBytes != null) {
+      imageWidget = Image.memory(
+        widget.imageBytes!,
+        fit: BoxFit.contain,
+        errorBuilder: (_, _, _) => _buildError(p),
+      );
+    } else if (widget.assetPath != null) {
+      imageWidget = Image.asset(
+        widget.assetPath!,
+        fit: BoxFit.contain,
+        errorBuilder: (_, _, _) => _buildError(p),
+      );
+    } else if (_resolvedFile != null && _resolvedFile!.existsSync()) {
+      imageWidget = Image.file(
+        _resolvedFile!,
+        fit: BoxFit.contain,
+        errorBuilder: (_, _, _) => _buildError(p),
+      );
+    } else {
+      imageWidget = _buildError(p);
+    }
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -79,18 +123,12 @@ class _PhotoLightboxDialogState extends State<PhotoLightboxDialog> {
             Center(
               child: _isLoading
                   ? CupertinoActivityIndicator(radius: 14, color: p.accent)
-                  : (_resolvedFile != null && _resolvedFile!.existsSync())
-                  ? InteractiveViewer(
+                  : InteractiveViewer(
                       minScale: 0.8,
                       maxScale: 4.5,
                       clipBehavior: Clip.none,
-                      child: Image.file(
-                        _resolvedFile!,
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, _, _) => _buildError(p),
-                      ),
-                    )
-                  : _buildError(p),
+                      child: imageWidget,
+                    ),
             ),
 
             // Top Bar
@@ -181,12 +219,14 @@ class _PhotoLightboxDialogState extends State<PhotoLightboxDialog> {
             'Unable to load photo',
             style: TextStyle(color: p.text, fontWeight: FontWeight.w700),
           ),
-          const SizedBox(height: 4),
-          Text(
-            widget.imagePath,
-            style: TextStyle(color: p.text3, fontSize: 11),
-            textAlign: TextAlign.center,
-          ),
+          if (widget.imagePath != null && widget.imagePath!.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              widget.imagePath!,
+              style: TextStyle(color: p.text3, fontSize: 11),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ],
       ),
     );

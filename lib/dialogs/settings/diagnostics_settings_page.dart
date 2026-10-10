@@ -741,8 +741,6 @@ class _LiveDeviceHealthGovernorCardState
   Widget build(BuildContext context) {
     final engine = widget.engine;
     final p = widget.p;
-    final budgetMs = (1000.0 / engine.targetFps);
-    final simulatedFrametime = (budgetMs * 0.46).toStringAsFixed(1);
 
     return AnimatedBuilder(
       animation: _pulseController,
@@ -799,7 +797,7 @@ class _LiveDeviceHealthGovernorCardState
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'ADAPTIVE GOVERNOR LIVE'.localized(context),
+                        'ADAPTIVE PERFORMANCE'.localized(context),
                         style: TextStyle(
                           color: p.accent,
                           fontSize: 11,
@@ -837,7 +835,7 @@ class _LiveDeviceHealthGovernorCardState
               const SizedBox(height: 12),
               // Real-time Tuning Overview description merged right here
               Text(
-                'Dynamic Hardware Regulation'.localized(context),
+                'Optimized for Your Device'.localized(context),
                 style: TextStyle(
                   color: p.text,
                   fontWeight: FontWeight.w800,
@@ -847,7 +845,7 @@ class _LiveDeviceHealthGovernorCardState
               ),
               const SizedBox(height: 4),
               Text(
-                'NoteKar continuously benchmarks RAM capacity, core frequencies, and GPU pipeline latency to guarantee fluid 60 FPS scrolling with zero frame dropping or thermal heating.'
+                'NoteKar automatically tunes visual effects, animations, and background tasks to ensure your phone stays smooth, fast, and battery efficient.'
                     .localized(context),
                 style: TextStyle(color: p.text2, fontSize: 12.5, height: 1.38),
               ),
@@ -872,7 +870,7 @@ class _LiveDeviceHealthGovernorCardState
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'HARDWARE FREQUENCY SPECTRUM'.localized(context),
+                          'LIVE SYSTEM ACTIVITY'.localized(context),
                           style: TextStyle(
                             color: p.text3,
                             fontSize: 9.5,
@@ -881,7 +879,7 @@ class _LiveDeviceHealthGovernorCardState
                           ),
                         ),
                         Text(
-                          '${(54 + 6 * pulse).toInt()} FPS Nominal',
+                          'Optimal Performance'.localized(context),
                           style: TextStyle(
                             color: p.green,
                             fontSize: 10.5,
@@ -930,7 +928,7 @@ class _LiveDeviceHealthGovernorCardState
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Render Budget ($simulatedFrametime ms / ${budgetMs.toStringAsFixed(1)} ms)',
+                          'Frame Timing (Optimal)'.localized(context),
                           style: TextStyle(
                             color: p.text2,
                             fontSize: 11.5,
@@ -946,7 +944,7 @@ class _LiveDeviceHealthGovernorCardState
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              '54% Headroom',
+                              '${engine.targetFps} Hz Refresh',
                               style: TextStyle(
                                 color: p.green,
                                 fontSize: 11,

@@ -1631,7 +1631,32 @@ class _HistoryDialogState extends State<HistoryDialog> {
     );
   }
 
-  void _removeEntry(Moment entry) {
+  Future<void> _removeEntry(Moment entry, {bool skipConfirm = false}) async {
+    if (!skipConfirm && widget.confirmDelete) {
+      final confirmed = await showCupertinoDialog<bool>(
+        context: context,
+        builder: (ctx) => CupertinoAlertDialog(
+          title: Text('Delete Moment?'.localized(ctx)),
+          content: Text(
+            'Are you sure you want to delete this moment? This cannot be undone.'
+                .localized(ctx),
+          ),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text('Cancel'.localized(ctx)),
+            ),
+            CupertinoDialogAction(
+              isDestructiveAction: true,
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text('Delete'.localized(ctx)),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true || !mounted) return;
+    }
+
     NotekarHaptics.success(
       'standard',
     ); // History delete is an intentional success action
@@ -1761,10 +1786,38 @@ class _HistoryDialogState extends State<HistoryDialog> {
     );
   }
 
-  void _removeSession(TimelineSessionItem session) {
+  Future<void> _removeSession(
+    TimelineSessionItem session, {
+    bool skipConfirm = false,
+  }) async {
     final ids = session.momentIds;
     final toRemove = _entries.where((m) => ids.contains(m.id)).toList();
     if (toRemove.isEmpty) return;
+
+    if (!skipConfirm && widget.confirmDelete) {
+      final confirmed = await showCupertinoDialog<bool>(
+        context: context,
+        builder: (ctx) => CupertinoAlertDialog(
+          title: Text('Delete Session?'.localized(ctx)),
+          content: Text(
+            'Are you sure you want to delete this entire session? This cannot be undone.'
+                .localized(ctx),
+          ),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text('Cancel'.localized(ctx)),
+            ),
+            CupertinoDialogAction(
+              isDestructiveAction: true,
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text('Delete'.localized(ctx)),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true || !mounted) return;
+    }
 
     NotekarHaptics.success('standard');
     setState(() {
@@ -1856,6 +1909,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
             unawaited(_persistClaimedGaps());
             _removeSession(
               TimelineSessionItem(inMoment: inMoment, outMoment: outMoment),
+              skipConfirm: true,
             );
           },
         );
@@ -2669,7 +2723,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
               },
         onDeleteMoment: () {
           Navigator.pop(context);
-          _removeEntry(entry);
+          _removeEntry(entry, skipConfirm: true);
         },
       ),
     );

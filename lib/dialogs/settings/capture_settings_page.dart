@@ -131,19 +131,22 @@ class CaptureSettingsPage extends StatelessWidget {
                   Expanded(
                     child: Column(
                       children: [
-                        CupertinoSlider(
-                          min: 0,
-                          max: 6,
-                          divisions: 6,
-                          value: (delayIndex < 0 ? 0 : delayIndex).toDouble(),
-                          activeColor: p.accent,
-                          thumbColor: p.text,
-                          onChanged: (value) {
-                            final next = delayValues[value.round()];
-                            if (next == tapDelay) return;
-                            NotekarHaptics.selection('soft');
-                            onTapDelayChanged(next);
-                          },
+                        SizedBox(
+                          width: double.infinity,
+                          child: CupertinoSlider(
+                            min: 0,
+                            max: 6,
+                            divisions: 6,
+                            value: (delayIndex < 0 ? 0 : delayIndex).toDouble(),
+                            activeColor: p.accent,
+                            thumbColor: p.text,
+                            onChanged: (value) {
+                              final next = delayValues[value.round()];
+                              if (next == tapDelay) return;
+                              NotekarHaptics.selection('soft');
+                              onTapDelayChanged(next);
+                            },
+                          ),
                         ),
                         Transform.translate(
                           offset: const Offset(0, -4),

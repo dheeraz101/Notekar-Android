@@ -335,22 +335,27 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
                           ),
                         ),
                       ],
-                      if (isBeta && isSelected) ...[
-                        Container(
-                          width: 7,
-                          height: 7,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFFFCC00),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                      ],
                       if (isSelected)
-                        Icon(
-                          CupertinoIcons.checkmark,
-                          color: p.accent,
-                          size: 18,
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              CupertinoIcons.checkmark,
+                              color: p.accent,
+                              size: 18,
+                            ),
+                            if (isBeta) ...[
+                              const SizedBox(height: 2),
+                              Container(
+                                width: 14,
+                                height: 2.5,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFFCC00),
+                                  borderRadius: BorderRadius.circular(1.5),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                     ],
                   ),
