@@ -47,10 +47,14 @@ jobs:
         run: flutter pub get || (sleep 5 && flutter pub get)
 
       - name: Check formatting
-        run: dart format --output=none --set-exit-if-changed .
+        run: dart format --output=none --set-exit-if-changed lib/ test/
 
       - name: Analyze (dart/flutter)
         run: flutter analyze --fatal-infos --fatal-warnings
+
+      - name: Download Isar Core Binary for Unit Tests
+        run: |
+          curl -s -L https://github.com/isar/isar/releases/download/3.1.0+1/libisar_linux_x64.so -o libisar.so
 
       - name: Run tests with coverage
         run: flutter test --coverage

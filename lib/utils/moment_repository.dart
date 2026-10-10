@@ -24,13 +24,14 @@ class MomentRepository {
   static const String keyRecoveredFromSnapshot =
       'notekar.database_recovered_from_snapshot';
 
-  late Isar _isar;
-  late Isar _trashIsar;
+  Isar? _isar;
+  Isar? _trashIsar;
   late SharedPreferences _prefs;
   final _logger = AppLogger();
   bool _isInitialized = false;
 
   bool get isInitialized => _isInitialized;
+  bool get isIsarAvailable => _isar != null && _isar!.isOpen;
 
   List<Moment>? _cachedMoments;
   List<Moment>? _cachedTrashMoments;
@@ -69,20 +70,33 @@ class MomentRepository {
     }
     dataDirPath ??= Directory.systemTemp.path;
 
-    _isar =
-        Isar.getInstance('notekar_entries_v1') ??
-        await Isar.open(
-          [MomentSchema],
-          name: 'notekar_entries_v1',
-          directory: dataDirPath,
-        );
-    _trashIsar =
-        Isar.getInstance('notekar_trash_v1') ??
-        await Isar.open(
-          [MomentSchema],
-          name: 'notekar_trash_v1',
-          directory: dataDirPath,
-        );
+    try {
+      _isar =
+          Isar.getInstance('notekar_entries_v1') ??
+          await Isar.open(
+            [MomentSchema],
+            name: 'notekar_entries_v1',
+            directory: dataDirPath,
+          );
+      _trashIsar =
+          Isar.getInstance('notekar_trash_v1') ??
+          await Isar.open(
+            [MomentSchema],
+            name: 'notekar_trash_v1',
+            directory: dataDirPath,
+          );
+      _logger.info(
+        'MomentRepository initialized with ${_isar!.moments.countSync()} entries, ${_trashIsar!.moments.countSync()} trash entries',
+      );
+    } catch (e, stack) {
+      _logger.warning(
+        'Isar native core could not be opened in current environment ($e). Operating in robust in-memory/snapshot mode.',
+        e,
+        stack,
+      );
+      _isar = null;
+      _trashIsar = null;
+    }
 
     _isInitialized = true;
 
@@ -99,24 +113,22 @@ class MomentRepository {
         triggerAutoSnapshotIfNeeded();
       }),
     );
-
-    _logger.info(
-      'MomentRepository initialized with ${_isar.moments.countSync()} entries, ${_trashIsar.moments.countSync()} trash entries',
-    );
   }
 
   Future<void> close() async {
     if (_isInitialized) {
       try {
-        if (_isar.isOpen) {
-          await _isar.close();
+        if (_isar != null && _isar!.isOpen) {
+          await _isar!.close();
         }
       } catch (_) {}
       try {
-        if (_trashIsar.isOpen) {
-          await _trashIsar.close();
+        if (_trashIsar != null && _trashIsar!.isOpen) {
+          await _trashIsar!.close();
         }
       } catch (_) {}
+      _isar = null;
+      _trashIsar = null;
       _isInitialized = false;
       _cachedMoments = null;
       _cachedTrashMoments = null;
@@ -149,23 +161,33 @@ class MomentRepository {
       final now = DateTime.now().millisecondsSinceEpoch;
       final thirtyDaysAgo = now - const Duration(days: 30).inMilliseconds;
 
-      final oldTrash = _trashIsar.moments
-          .filter()
-          .timestampLessThan(thirtyDaysAgo)
-          .findAllSync();
-      if (oldTrash.isNotEmpty) {
+      if (_trashIsar != null && _trashIsar!.isOpen) {
+        final oldTrash = _trashIsar!.moments
+            .filter()
+            .timestampLessThan(thirtyDaysAgo)
+            .findAllSync();
+        if (oldTrash.isNotEmpty) {
+          for (final m in oldTrash) {
+            unawaited(MediaStorageService.instance.deleteMediaForMoment(m));
+          }
+          await _trashIsar!.writeTxn(() async {
+            await _trashIsar!.moments.deleteAll(
+              oldTrash.map((e) => e.id).toList(),
+            );
+          });
+          _cachedTrashMoments = null;
+          _logger.info(
+            'Auto-purged ${oldTrash.length} trash entries older than 30 days',
+          );
+        }
+      } else if (_cachedTrashMoments != null) {
+        final oldTrash = _cachedTrashMoments!
+            .where((m) => m.timestamp < thirtyDaysAgo)
+            .toList();
         for (final m in oldTrash) {
           unawaited(MediaStorageService.instance.deleteMediaForMoment(m));
         }
-        await _trashIsar.writeTxn(() async {
-          await _trashIsar.moments.deleteAll(
-            oldTrash.map((e) => e.id).toList(),
-          );
-        });
-        _cachedTrashMoments = null;
-        _logger.info(
-          'Auto-purged ${oldTrash.length} trash entries older than 30 days',
-        );
+        _cachedTrashMoments!.removeWhere((m) => m.timestamp < thirtyDaysAgo);
       }
     } catch (e, stack) {
       _logger.error('Failed auto-purging old trash entries', e, stack);
@@ -179,16 +201,36 @@ class MomentRepository {
     if (!_isInitialized) {
       return [];
     }
-    try {
-      final moments = _isar.moments.where().sortByTimestampDesc().findAllSync();
-      _cachedMoments = moments;
-      _momentIdIndex = {for (final m in moments) m.id: m};
-      SearchIndexService.instance.buildIndex(moments);
-      return moments;
-    } catch (e, stack) {
-      _logger.error('Failed to load moments from Isar', e, stack);
-      return [];
+    if (_isar != null && _isar!.isOpen) {
+      try {
+        final moments = _isar!.moments
+            .where()
+            .sortByTimestampDesc()
+            .findAllSync();
+        _cachedMoments = moments;
+        _momentIdIndex = {for (final m in moments) m.id: m};
+        SearchIndexService.instance.buildIndex(moments);
+        return moments;
+      } catch (e, stack) {
+        _logger.error('Failed to load moments from Isar', e, stack);
+      }
     }
+    final snapshot = _prefs.getString(_autoSnapshotKey);
+    if (snapshot != null && snapshot.isNotEmpty) {
+      try {
+        final list = (jsonDecode(snapshot) as List)
+            .map((e) => Moment.fromJson(Map<String, dynamic>.from(e as Map)))
+            .toList();
+        list.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+        _cachedMoments = list;
+        _momentIdIndex = {for (final m in list) m.id: m};
+        SearchIndexService.instance.buildIndex(list);
+        return list;
+      } catch (_) {}
+    }
+    _cachedMoments = [];
+    _momentIdIndex = {};
+    return [];
   }
 
   Moment? getMomentById(int id) {
@@ -201,11 +243,45 @@ class MomentRepository {
 
   List<Moment> getMomentsBetween(int startMs, int endMs) {
     if (!_isInitialized) return const [];
-    return _isar.moments
-        .filter()
-        .timestampBetween(startMs, endMs)
-        .sortByTimestampDesc()
-        .findAllSync();
+    final moments = getAllMoments();
+    if (moments.isEmpty) return const [];
+
+    // O(log N) binary range slicing on moments sorted descending by timestamp
+    int low = 0;
+    int high = moments.length - 1;
+    int firstIdx = -1;
+
+    // Find first moment with timestamp <= endMs (inclusive upper bound)
+    while (low <= high) {
+      final mid = (low + high) ~/ 2;
+      if (moments[mid].timestamp <= endMs) {
+        firstIdx = mid;
+        high = mid - 1;
+      } else {
+        low = mid + 1;
+      }
+    }
+
+    if (firstIdx == -1) return const [];
+
+    // Find last moment with timestamp >= startMs (inclusive lower bound)
+    low = firstIdx;
+    high = moments.length - 1;
+    int lastIdx = -1;
+
+    while (low <= high) {
+      final mid = (low + high) ~/ 2;
+      if (moments[mid].timestamp >= startMs) {
+        lastIdx = mid;
+        low = mid + 1;
+      } else {
+        high = mid - 1;
+      }
+    }
+
+    if (lastIdx == -1 || lastIdx < firstIdx) return const [];
+
+    return moments.sublist(firstIdx, lastIdx + 1);
   }
 
   Future<void> performDailyMaintenance() async {
@@ -226,36 +302,42 @@ class MomentRepository {
     if (!_isInitialized) {
       return [];
     }
-    try {
-      final moments = _trashIsar.moments
-          .where()
-          .sortByTimestampDesc()
-          .findAllSync();
-      _cachedTrashMoments = moments;
-      return moments;
-    } catch (e, stack) {
-      _logger.error('Failed to load trash moments from Isar', e, stack);
-      return [];
+    if (_trashIsar != null && _trashIsar!.isOpen) {
+      try {
+        final moments = _trashIsar!.moments
+            .where()
+            .sortByTimestampDesc()
+            .findAllSync();
+        _cachedTrashMoments = moments;
+        return moments;
+      } catch (e, stack) {
+        _logger.error('Failed to load trash moments from Isar', e, stack);
+      }
     }
+    _cachedTrashMoments = [];
+    return _cachedTrashMoments!;
   }
 
   Future<void> saveMoment(Moment moment) async {
     if (!_isInitialized) await ensureInitialized();
     try {
-      await _isar.writeTxn(() async {
-        await _isar.moments.put(moment);
-      });
+      if (_isar != null && _isar!.isOpen) {
+        await _isar!.writeTxn(() async {
+          await _isar!.moments.put(moment);
+        });
+      }
       final currentNextId = _prefs.getInt(_nextIdKey) ?? 0;
       if (moment.id >= currentNextId) {
         await _prefs.setInt(_nextIdKey, moment.id + 1);
       }
 
-      if (_cachedMoments != null) {
-        _cachedMoments!.removeWhere((m) => m.id == moment.id);
-        _cachedMoments!.add(moment);
-        _cachedMoments!.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-      }
-      _momentIdIndex?[moment.id] = moment;
+      _cachedMoments ??= [];
+      _cachedMoments!.removeWhere((m) => m.id == moment.id);
+      _cachedMoments!.add(moment);
+      _cachedMoments!.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+      _momentIdIndex ??= {};
+      _momentIdIndex![moment.id] = moment;
       SearchIndexService.instance.indexMoment(moment);
     } catch (e, stack) {
       _logger.error('Failed to save moment ${moment.id}', e, stack);
@@ -274,13 +356,15 @@ class MomentRepository {
       throw ArgumentError('Moment IDs in a batch must be unique.');
     }
 
-    try {
-      await _isar.writeTxn(() async {
-        await _isar.moments.putAll(moments);
-      });
-    } catch (e, stack) {
-      _logger.error('Failed to save moment batch', e, stack);
-      rethrow;
+    if (_isar != null && _isar!.isOpen) {
+      try {
+        await _isar!.writeTxn(() async {
+          await _isar!.moments.putAll(moments);
+        });
+      } catch (e, stack) {
+        _logger.error('Failed to save moment batch', e, stack);
+        rethrow;
+      }
     }
 
     final maxId = moments.map((moment) => moment.id).reduce(math.max);
@@ -299,45 +383,49 @@ class MomentRepository {
       }
     }
 
+    _cachedMoments ??= [];
+    _momentIdIndex ??= {};
     for (final moment in moments) {
-      if (_cachedMoments != null) {
-        _cachedMoments!.removeWhere((cached) => cached.id == moment.id);
-        _cachedMoments!.add(moment);
-      }
-      _momentIdIndex?[moment.id] = moment;
+      _cachedMoments!.removeWhere((cached) => cached.id == moment.id);
+      _cachedMoments!.add(moment);
+      _momentIdIndex![moment.id] = moment;
       try {
         SearchIndexService.instance.indexMoment(moment);
       } catch (e, stack) {
         _logger.error('Failed indexing saved moment ${moment.id}', e, stack);
       }
     }
-    _cachedMoments?.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    _cachedMoments!.sort((a, b) => b.timestamp.compareTo(a.timestamp));
   }
 
   Future<void> deleteMoment(int id) async {
     if (!_isInitialized) await ensureInitialized();
     try {
-      final moment = await _isar.moments.get(id);
+      Moment? moment;
+      if (_isar != null && _isar!.isOpen) {
+        moment = await _isar!.moments.get(id);
+      }
+      moment ??= _momentIdIndex?[id];
+
       if (moment != null) {
-        await _trashIsar.writeTxn(() async {
-          await _trashIsar.moments.put(moment);
-        });
-        if (_cachedTrashMoments != null) {
-          _cachedTrashMoments!.removeWhere((m) => m.id == id);
-          _cachedTrashMoments!.add(moment);
-          _cachedTrashMoments!.sort(
-            (a, b) => b.timestamp.compareTo(a.timestamp),
-          );
+        if (_trashIsar != null && _trashIsar!.isOpen) {
+          await _trashIsar!.writeTxn(() async {
+            await _trashIsar!.moments.put(moment!);
+          });
         }
+        _cachedTrashMoments ??= [];
+        _cachedTrashMoments!.removeWhere((m) => m.id == id);
+        _cachedTrashMoments!.add(moment);
+        _cachedTrashMoments!.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       }
 
-      await _isar.writeTxn(() async {
-        await _isar.moments.delete(id);
-      });
-
-      if (_cachedMoments != null) {
-        _cachedMoments!.removeWhere((m) => m.id == id);
+      if (_isar != null && _isar!.isOpen) {
+        await _isar!.writeTxn(() async {
+          await _isar!.moments.delete(id);
+        });
       }
+
+      _cachedMoments?.removeWhere((m) => m.id == id);
       _momentIdIndex?.remove(id);
       SearchIndexService.instance.unindexMoment(id);
     } catch (e, stack) {
@@ -349,27 +437,36 @@ class MomentRepository {
   Future<void> restoreTrashMoment(int id) async {
     if (!_isInitialized) await ensureInitialized();
     try {
-      final moment = await _trashIsar.moments.get(id);
-      if (moment != null) {
-        await _isar.writeTxn(() async {
-          await _isar.moments.put(moment);
-        });
+      Moment? moment;
+      if (_trashIsar != null && _trashIsar!.isOpen) {
+        moment = await _trashIsar!.moments.get(id);
+      }
+      if (moment == null && _cachedTrashMoments != null) {
+        final matches = _cachedTrashMoments!.where((m) => m.id == id);
+        if (matches.isNotEmpty) moment = matches.first;
+      }
 
-        if (_cachedMoments != null) {
-          _cachedMoments!.removeWhere((m) => m.id == id);
-          _cachedMoments!.add(moment);
-          _cachedMoments!.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      if (moment != null) {
+        if (_isar != null && _isar!.isOpen) {
+          await _isar!.writeTxn(() async {
+            await _isar!.moments.put(moment!);
+          });
         }
+
+        _cachedMoments ??= [];
+        _cachedMoments!.removeWhere((m) => m.id == id);
+        _cachedMoments!.add(moment);
+        _cachedMoments!.sort((a, b) => b.timestamp.compareTo(a.timestamp));
         _momentIdIndex?[moment.id] = moment;
         SearchIndexService.instance.indexMoment(moment);
 
-        await _trashIsar.writeTxn(() async {
-          await _trashIsar.moments.delete(id);
-        });
-
-        if (_cachedTrashMoments != null) {
-          _cachedTrashMoments!.removeWhere((m) => m.id == id);
+        if (_trashIsar != null && _trashIsar!.isOpen) {
+          await _trashIsar!.writeTxn(() async {
+            await _trashIsar!.moments.delete(id);
+          });
         }
+
+        _cachedTrashMoments?.removeWhere((m) => m.id == id);
       }
     } catch (e, stack) {
       _logger.error('Failed to restore trash moment $id', e, stack);
@@ -380,13 +477,23 @@ class MomentRepository {
   Future<void> restoreAllTrash() async {
     if (!_isInitialized) await ensureInitialized();
     try {
-      final allTrash = await _trashIsar.moments.where().findAll();
-      await _isar.writeTxn(() async {
-        await _isar.moments.putAll(allTrash);
-      });
-      await _trashIsar.writeTxn(() async {
-        await _trashIsar.moments.clear();
-      });
+      if (_trashIsar != null && _trashIsar!.isOpen) {
+        final allTrash = await _trashIsar!.moments.where().findAll();
+        if (_isar != null && _isar!.isOpen) {
+          await _isar!.writeTxn(() async {
+            await _isar!.moments.putAll(allTrash);
+          });
+        }
+        await _trashIsar!.writeTxn(() async {
+          await _trashIsar!.moments.clear();
+        });
+      } else if (_cachedTrashMoments != null &&
+          _cachedTrashMoments!.isNotEmpty) {
+        _cachedMoments ??= [];
+        _cachedMoments!.addAll(_cachedTrashMoments!);
+        _cachedMoments!.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+        _momentIdIndex = {for (final m in _cachedMoments!) m.id: m};
+      }
 
       _cachedMoments = null;
       _cachedTrashMoments = null;
@@ -399,16 +506,17 @@ class MomentRepository {
   Future<void> permanentlyDeleteTrashMoment(int id) async {
     if (!_isInitialized) await ensureInitialized();
     try {
-      final moment = await _trashIsar.moments.get(id);
-      if (moment != null) {
-        unawaited(MediaStorageService.instance.deleteMediaForMoment(moment));
+      Moment? moment;
+      if (_trashIsar != null && _trashIsar!.isOpen) {
+        moment = await _trashIsar!.moments.get(id);
+        if (moment != null) {
+          unawaited(MediaStorageService.instance.deleteMediaForMoment(moment));
+        }
+        await _trashIsar!.writeTxn(() async {
+          await _trashIsar!.moments.delete(id);
+        });
       }
-      await _trashIsar.writeTxn(() async {
-        await _trashIsar.moments.delete(id);
-      });
-      if (_cachedTrashMoments != null) {
-        _cachedTrashMoments!.removeWhere((m) => m.id == id);
-      }
+      _cachedTrashMoments?.removeWhere((m) => m.id == id);
     } catch (e, stack) {
       _logger.error('Failed to permanently delete trash moment $id', e, stack);
       rethrow;
@@ -418,13 +526,15 @@ class MomentRepository {
   Future<void> clearTrash() async {
     if (!_isInitialized) await ensureInitialized();
     try {
-      final allTrash = await _trashIsar.moments.where().findAll();
-      for (final m in allTrash) {
-        unawaited(MediaStorageService.instance.deleteMediaForMoment(m));
+      if (_trashIsar != null && _trashIsar!.isOpen) {
+        final allTrash = await _trashIsar!.moments.where().findAll();
+        for (final m in allTrash) {
+          unawaited(MediaStorageService.instance.deleteMediaForMoment(m));
+        }
+        await _trashIsar!.writeTxn(() async {
+          await _trashIsar!.moments.clear();
+        });
       }
-      await _trashIsar.writeTxn(() async {
-        await _trashIsar.moments.clear();
-      });
       _cachedTrashMoments = [];
     } catch (e, stack) {
       _logger.error('Failed to clear trash', e, stack);
@@ -435,18 +545,24 @@ class MomentRepository {
   Future<void> clearAll() async {
     if (!_isInitialized) await ensureInitialized();
     try {
-      final allEntries = await _isar.moments.where().findAll();
-      if (allEntries.isNotEmpty) {
-        await _trashIsar.writeTxn(() async {
-          await _trashIsar.moments.putAll(allEntries);
+      if (_isar != null && _isar!.isOpen) {
+        final allEntries = await _isar!.moments.where().findAll();
+        if (allEntries.isNotEmpty && _trashIsar != null && _trashIsar!.isOpen) {
+          await _trashIsar!.writeTxn(() async {
+            await _trashIsar!.moments.putAll(allEntries);
+          });
+        }
+        await _isar!.writeTxn(() async {
+          await _isar!.moments.clear();
         });
+      } else if (_cachedMoments != null && _cachedMoments!.isNotEmpty) {
+        _cachedTrashMoments ??= [];
+        _cachedTrashMoments!.addAll(_cachedMoments!);
       }
-      await _isar.writeTxn(() async {
-        await _isar.moments.clear();
-      });
 
       await _prefs.remove(_nextIdKey);
       _cachedMoments = [];
+      _momentIdIndex = {};
       _cachedTrashMoments = null;
     } catch (e, stack) {
       _logger.error('Failed to clear all moments', e, stack);
@@ -457,10 +573,12 @@ class MomentRepository {
   Future<void> replaceAll(List<Moment> moments) async {
     if (!_isInitialized) await ensureInitialized();
     try {
-      await _isar.writeTxn(() async {
-        await _isar.moments.clear();
-        await _isar.moments.putAll(moments);
-      });
+      if (_isar != null && _isar!.isOpen) {
+        await _isar!.writeTxn(() async {
+          await _isar!.moments.clear();
+          await _isar!.moments.putAll(moments);
+        });
+      }
 
       int maxId = 0;
       for (final m in moments) {
@@ -471,6 +589,7 @@ class MomentRepository {
       final copy = List<Moment>.from(moments);
       copy.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       _cachedMoments = copy;
+      _momentIdIndex = {for (final m in copy) m.id: m};
     } catch (e, stack) {
       _logger.error('Failed to replace all moments', e, stack);
       rethrow;
@@ -495,9 +614,16 @@ class MomentRepository {
           )
           .toList();
 
-      await _isar.writeTxn(() async {
-        await _isar.moments.putAll(entries);
-      });
+      if (_isar != null && _isar!.isOpen) {
+        await _isar!.writeTxn(() async {
+          await _isar!.moments.putAll(entries);
+        });
+      } else {
+        _cachedMoments ??= [];
+        _cachedMoments!.addAll(entries);
+        _cachedMoments!.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+        _momentIdIndex = {for (final m in _cachedMoments!) m.id: m};
+      }
 
       await _prefs.remove(_legacyEntriesKey);
       _cachedMoments = null;

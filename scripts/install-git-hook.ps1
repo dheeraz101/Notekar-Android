@@ -15,17 +15,15 @@ $preCommitContent = @'
 #!/bin/sh
 echo "🔍 Running Git Pre-Commit Hook checks..."
 
-# Auto-format files on commit
-echo "💅 Formatting code with dart format..."
-dart format lib/ test/
+# Check code formatting
+echo "💅 Checking code formatting with dart format..."
+dart format --output=none --set-exit-if-changed lib/ test/
 RESULT_FORMAT=$?
 if [ $RESULT_FORMAT -ne 0 ]; then
-  echo "❌ [PRE-COMMIT ERROR] Code formatting failed."
+  echo "❌ [PRE-COMMIT ERROR] Unformatted code detected."
+  echo "👉 Fix: Run 'dart format lib/ test/' and stage the changes before committing."
   exit 1
 fi
-
-# Re-stage formatted files
-git add -u
 
 # Run flutter analyze to prevent committing broken files
 echo "🔍 Running static analysis with flutter analyze..."
@@ -43,46 +41,87 @@ exit 0
 # 2. Pre-push hook: Full CI parity check before git push
 $prePushContent = @'
 #!/bin/sh
-echo "🛡️  [PRE-PUSH HOOK] Running CI verification checks before push..."
+# NoteKar Pre-Push Guard Hook
+# Ensures 100% CI parity before any branch is pushed to remote.
 
-# 1. Format check
-echo "💅 (1/3) Checking code formatting..."
+echo ""
+echo "=========================================================="
+echo "🛡️  [PRE-PUSH GUARD] Verifying NoteKar quality gates..."
+echo "=========================================================="
+
+# Check if standard input indicates branch deletion
+has_input=false
+is_delete=false
+if [ ! -t 0 ]; then
+  while read -r local_ref local_sha remote_ref remote_sha; do
+    has_input=true
+    if [ "$local_sha" = "0000000000000000000000000000000000000000" ]; then
+      is_delete=true
+    else
+      is_delete=false
+      break
+    fi
+  done
+fi
+
+if [ "$has_input" = true ] && [ "$is_delete" = true ]; then
+  echo "ℹ️  Branch deletion detected. Skipping quality checks."
+  exit 0
+fi
+
+# Step 1: Format check
+echo ""
+echo "💅 (1/3) Checking code formatting ('dart format --output=none --set-exit-if-changed lib/ test/')..."
 dart format --output=none --set-exit-if-changed lib/ test/
-RESULT_FORMAT=$?
-if [ $RESULT_FORMAT -ne 0 ]; then
+FORMAT_EXIT=$?
+if [ $FORMAT_EXIT -ne 0 ]; then
   echo ""
-  echo "❌ [PRE-PUSH ERROR] Unformatted Dart code detected."
+  echo "❌ [PRE-PUSH BLOCKED] Unformatted Dart code detected!"
   echo "👉 Fix: Run 'dart format lib/ test/' and commit the changes before pushing."
+  echo "=========================================================="
   exit 1
 fi
+echo "✅ Code formatting is clean."
 
-# 2. Static analysis
-echo "🔍 (2/3) Running static analysis (flutter analyze --fatal-infos --fatal-warnings)..."
+# Step 2: Static Analysis
+echo ""
+echo "🔍 (2/3) Running static analysis ('flutter analyze --fatal-infos --fatal-warnings')..."
 flutter analyze --fatal-infos --fatal-warnings
-RESULT_ANALYZE=$?
-if [ $RESULT_ANALYZE -ne 0 ]; then
+ANALYZE_EXIT=$?
+if [ $ANALYZE_EXIT -ne 0 ]; then
   echo ""
-  echo "❌ [PRE-PUSH ERROR] Static analysis check failed! Please fix issues before pushing."
+  echo "❌ [PRE-PUSH BLOCKED] Static analysis failed with fatal warnings or errors!"
+  echo "👉 Fix: Resolve all analysis warnings and errors listed above before pushing."
+  echo "=========================================================="
   exit 1
 fi
+echo "✅ Flutter static analysis passed with zero warnings and zero errors."
 
-# 3. Test suite
-echo "🧪 (3/3) Running complete automated test suite (flutter test)..."
+# Step 3: Test Suite
+echo ""
+echo "🧪 (3/3) Running complete test suite ('flutter test')..."
 flutter test
-RESULT_TEST=$?
-if [ $RESULT_TEST -ne 0 ]; then
+TEST_EXIT=$?
+if [ $TEST_EXIT -ne 0 ]; then
   echo ""
-  echo "❌ [PRE-PUSH ERROR] Test suite failed! One or more tests did not pass."
-  echo "👉 Fix: Ensure all tests pass locally before pushing to remote."
+  echo "❌ [PRE-PUSH BLOCKED] Test suite failed! One or more tests did not pass."
+  echo "👉 Fix: Resolve all failing tests shown above before pushing."
+  echo "=========================================================="
   exit 1
 fi
+echo "✅ All tests passed successfully."
 
-echo "✅ [PRE-PUSH PASSED] All checks (Format, Static Analysis, Unit & Widget Tests) passed! Proceeding with push."
+echo ""
+echo "=========================================================="
+echo "🎉 [PRE-PUSH PASSED] All quality gates passed! Proceeding with push."
+echo "=========================================================="
+echo ""
 exit 0
 '@
 
-Set-Content -LiteralPath $preCommitFile -Value $preCommitContent -NoNewline
-Set-Content -LiteralPath $prePushFile -Value $prePushContent -NoNewline
+$utf8NoBom = New-Object System.Text.UTF8Encoding $false
+[System.IO.File]::WriteAllText($preCommitFile, ($preCommitContent.Trim() -replace "`r`n", "`n") + "`n", $utf8NoBom)
+[System.IO.File]::WriteAllText($prePushFile, ($prePushContent.Trim() -replace "`r`n", "`n") + "`n", $utf8NoBom)
 
 Write-Host "✅ Git hooks installed successfully!" -ForegroundColor Green
 Write-Host "  • Pre-Commit: $preCommitFile (Auto-format + static analysis)"
