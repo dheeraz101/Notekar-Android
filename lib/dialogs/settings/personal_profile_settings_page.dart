@@ -284,70 +284,43 @@ class _PersonalProfileSettingsPageState
                                         ? () {
                                             final preset = UserProfileService
                                                 .curatedPresetAvatars[_presetIndex!];
-                                            return DecoratedBox(
-                                              decoration: BoxDecoration(
-                                                gradient: LinearGradient(
-                                                  colors: preset.gradientColors,
-                                                  begin: Alignment.topLeft,
-                                                  end: Alignment.bottomRight,
-                                                ),
-                                              ),
-                                              child: Stack(
-                                                alignment: Alignment.center,
-                                                children: [
-                                                  Positioned(
-                                                    top: 0,
-                                                    left: 0,
-                                                    right: 0,
-                                                    height: 132 * 0.44,
-                                                    child: DecoratedBox(
+                                            return ClipOval(
+                                              child: Image.asset(
+                                                preset.assetPath,
+                                                fit: BoxFit.cover,
+                                                width: 132,
+                                                height: 132,
+                                                errorBuilder: (_, _, _) =>
+                                                    DecoratedBox(
                                                       decoration: BoxDecoration(
-                                                        gradient:
-                                                            LinearGradient(
-                                                              begin: Alignment
-                                                                  .topCenter,
-                                                              end: Alignment
-                                                                  .bottomCenter,
-                                                              colors: [
-                                                                Colors.white
-                                                                    .withValues(
-                                                                      alpha:
-                                                                          0.35,
-                                                                    ),
-                                                                Colors.white
-                                                                    .withValues(
-                                                                      alpha:
-                                                                          0.0,
-                                                                    ),
-                                                              ],
-                                                            ),
+                                                        gradient: LinearGradient(
+                                                          colors: preset
+                                                              .gradientColors,
+                                                          begin:
+                                                              Alignment.topLeft,
+                                                          end: Alignment
+                                                              .bottomRight,
+                                                        ),
+                                                      ),
+                                                      child: Center(
+                                                        child: Text(
+                                                          preset
+                                                                  .label
+                                                                  .isNotEmpty
+                                                              ? preset.label[0]
+                                                              : '?',
+                                                          style:
+                                                              const TextStyle(
+                                                                fontSize: 54,
+                                                                color: Colors
+                                                                    .white,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                              ),
+                                                        ),
                                                       ),
                                                     ),
-                                                  ),
-                                                  Center(
-                                                    child: Text(
-                                                      preset.emoji,
-                                                      style: TextStyle(
-                                                        fontSize: 66,
-                                                        height: 1.0,
-                                                        shadows: [
-                                                          Shadow(
-                                                            color: Colors.black
-                                                                .withValues(
-                                                                  alpha: 0.38,
-                                                                ),
-                                                            offset:
-                                                                const Offset(
-                                                                  0,
-                                                                  2,
-                                                                ),
-                                                            blurRadius: 4,
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
                                               ),
                                             );
                                           }()
@@ -473,27 +446,29 @@ class _PersonalProfileSettingsPageState
                             child: Padding(
                               padding: const EdgeInsets.all(2.0),
                               child: ClipOval(
-                                child: DecoratedBox(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: preset.gradientColors,
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
+                                child: Image.asset(
+                                  preset.assetPath,
+                                  fit: BoxFit.cover,
+                                  width: 46,
+                                  height: 46,
+                                  errorBuilder: (_, _, _) => DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: preset.gradientColors,
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
                                     ),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      preset.emoji,
-                                      style: const TextStyle(
-                                        shadows: [
-                                          Shadow(
-                                            color: Colors.black38,
-                                            offset: Offset(0, 1),
-                                            blurRadius: 2,
-                                          ),
-                                        ],
-                                        fontSize: 24,
-                                        height: 1.0,
+                                    child: Center(
+                                      child: Text(
+                                        preset.label.isNotEmpty
+                                            ? preset.label[0]
+                                            : '?',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18,
+                                        ),
                                       ),
                                     ),
                                   ),

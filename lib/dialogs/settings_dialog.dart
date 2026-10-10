@@ -602,16 +602,59 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          displayName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: p.text,
-                            fontSize: 19.5,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.4,
-                          ),
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                displayName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: p.text,
+                                  fontSize: 19.5,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.4,
+                                ),
+                              ),
+                            ),
+                            if (_isGodModeUnlocked) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: p.accent.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: p.accent.withValues(alpha: 0.35),
+                                    width: 0.8,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      CupertinoIcons.sparkles,
+                                      size: 11,
+                                      color: p.accent,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'Member',
+                                      style: TextStyle(
+                                        color: p.accent,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 0.2,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                         const SizedBox(height: 3),
                         Text(
@@ -3726,12 +3769,38 @@ $cleanStack
                               ),
                             if (show('Commits')) ...[
                               CupertinoSliverRefreshControl(
+                                refreshTriggerPullDistance: 95.0,
+                                refreshIndicatorExtent: 64.0,
+                                builder:
+                                    (
+                                      context,
+                                      refreshState,
+                                      pulledExtent,
+                                      refreshTriggerPullDistance,
+                                      refreshIndicatorExtent,
+                                    ) {
+                                      return ClipRect(
+                                        child:
+                                            CupertinoSliverRefreshControl.buildRefreshIndicator(
+                                              context,
+                                              refreshState,
+                                              pulledExtent,
+                                              refreshTriggerPullDistance,
+                                              refreshIndicatorExtent,
+                                            ),
+                                      );
+                                    },
                                 onRefresh: () async {
-                                  HapticFeedback.lightImpact();
-                                  await CommitsSettingsPage
+                                  HapticFeedback.mediumImpact();
+                                  final refreshFuture = CommitsSettingsPage
                                       .commitsKey
                                       .currentState
                                       ?.refresh();
+                                  final minDelay = Future.delayed(
+                                    const Duration(milliseconds: 1200),
+                                  );
+                                  await Future.wait([?refreshFuture, minDelay]);
+                                  HapticFeedback.lightImpact();
                                 },
                               ),
                               SliverToBoxAdapter(

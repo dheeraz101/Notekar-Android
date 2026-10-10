@@ -13,12 +13,14 @@ class PresetAvatarOption {
   final String id;
   final String label;
   final String emoji;
+  final String assetPath;
   final List<Color> gradientColors;
 
   const PresetAvatarOption({
     required this.id,
     required this.label,
-    required this.emoji,
+    required this.assetPath,
+    this.emoji = '',
     required this.gradientColors,
   });
 }
@@ -98,79 +100,63 @@ class UserProfileService extends ChangeNotifier {
   static const int maxMementoMoriYears = 100;
   static const int defaultMementoMoriYears = 80;
 
-  /// Curated 3D-styled Angry Birds collection on vibrant Apple HIG gradients
+  /// Curated 3D-styled Angry Birds collection with high-resolution renders
   static const List<PresetAvatarOption> curatedPresetAvatars = [
     PresetAvatarOption(
       id: 'angry_red',
       label: 'Red',
+      assetPath: 'assets/images/angry_red.jpg',
       emoji: '🔴',
       gradientColors: [Color(0xFFFF3B30), Color(0xFFC41C16)],
     ),
     PresetAvatarOption(
       id: 'angry_chuck',
       label: 'Chuck',
+      assetPath: 'assets/images/angry_chuck.jpg',
       emoji: '⚡',
       gradientColors: [Color(0xFFFFCC00), Color(0xFFFF9500)],
     ),
     PresetAvatarOption(
       id: 'angry_bomb',
       label: 'Bomb',
+      assetPath: 'assets/images/angry_bomb.jpg',
       emoji: '💣',
       gradientColors: [Color(0xFF3A3A3C), Color(0xFF1C1C1E)],
     ),
     PresetAvatarOption(
       id: 'angry_stella',
       label: 'Stella',
+      assetPath: 'assets/images/angry_stella.jpg',
       emoji: '🌸',
       gradientColors: [Color(0xFFFF2D55), Color(0xFFFF375F)],
     ),
     PresetAvatarOption(
+      id: 'angry_king_pig',
+      label: 'King Pig',
+      assetPath: 'assets/images/angry_pig.jpg',
+      emoji: '👑',
+      gradientColors: [Color(0xFF34C759), Color(0xFF30D158)],
+    ),
+    PresetAvatarOption(
       id: 'angry_blues',
       label: 'The Blues',
+      assetPath: 'assets/images/angry_blues.jpg',
       emoji: '💎',
       gradientColors: [Color(0xFF007AFF), Color(0xFF5AC8FA)],
     ),
     PresetAvatarOption(
       id: 'angry_terence',
       label: 'Terence',
+      assetPath: 'assets/images/angry_terence.jpg',
       emoji: '🗿',
       gradientColors: [Color(0xFF8B0000), Color(0xFF4A0000)],
     ),
     PresetAvatarOption(
       id: 'angry_matilda',
       label: 'Matilda',
+      assetPath: 'assets/images/angry_matilda.jpg',
       emoji: '🥚',
       gradientColors: [Color(0xFFF2F2F7), Color(0xFFC7C7CC)],
-    ),
-    PresetAvatarOption(
-      id: 'angry_king_pig',
-      label: 'King Pig',
-      emoji: '👑',
-      gradientColors: [Color(0xFF34C759), Color(0xFF30D158)],
-    ),
-    PresetAvatarOption(
-      id: 'angry_mighty_eagle',
-      label: 'Mighty Eagle',
-      emoji: '🦅',
-      gradientColors: [Color(0xFF1D2A44), Color(0xFFD4AF37)],
-    ),
-    PresetAvatarOption(
-      id: 'angry_hal',
-      label: 'Hal',
-      emoji: '🪃',
-      gradientColors: [Color(0xFF30D158), Color(0xFF1B6B2F)],
-    ),
-    PresetAvatarOption(
-      id: 'angry_bubbles',
-      label: 'Bubbles',
-      emoji: '🎈',
-      gradientColors: [Color(0xFFFF9500), Color(0xFFFF3B30)],
-    ),
-    PresetAvatarOption(
-      id: 'angry_silver',
-      label: 'Silver',
-      emoji: '🌪️',
-      gradientColors: [Color(0xFF8E8E93), Color(0xFF636366)],
     ),
   ];
 
@@ -470,53 +456,31 @@ class UserProfileService extends ChangeNotifier {
         _presetAvatarIndex! >= 0 &&
         _presetAvatarIndex! < curatedPresetAvatars.length) {
       final preset = curatedPresetAvatars[_presetAvatarIndex!];
-      content = DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: preset.gradientColors,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // 3D Apple HIG Gloss Specular Arc
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: size * 0.44,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.white.withValues(alpha: 0.35),
-                      Colors.white.withValues(alpha: 0.0),
-                    ],
-                  ),
-                ),
+      content = ClipOval(
+        child: Image.asset(
+          preset.assetPath,
+          fit: BoxFit.cover,
+          width: size,
+          height: size,
+          errorBuilder: (_, _, _) => DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: preset.gradientColors,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
-            Center(
+            child: Center(
               child: Text(
-                preset.emoji,
+                preset.label.isNotEmpty ? preset.label[0] : '?',
                 style: TextStyle(
-                  fontSize: size * 0.52,
-                  height: 1.0,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black.withValues(alpha: 0.38),
-                      offset: const Offset(0, 1.5),
-                      blurRadius: 3.5,
-                    ),
-                  ],
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: size * 0.44,
                 ),
               ),
             ),
-          ],
+          ),
         ),
       );
     } else if (_name.trim().isNotEmpty) {

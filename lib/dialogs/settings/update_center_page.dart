@@ -1372,162 +1372,230 @@ class _AnimatedUpdateCheckCard extends StatefulWidget {
 
 class _AnimatedUpdateCheckCardState extends State<_AnimatedUpdateCheckCard>
     with SingleTickerProviderStateMixin {
-  late final Timer _timer;
-  int _stage = 0;
-  late final AnimationController _pulseController;
+  late final AnimationController _progressController;
 
   static const _stages = [
     (
       title: 'Connecting to GitHub...',
-      subtitle: 'Securing encrypted HTTPS connection to api.github.com',
+      subtitle: 'Establishing encrypted HTTPS handshake with api.github.com',
       icon: CupertinoIcons.globe,
     ),
     (
       title: 'Querying Release Tags...',
-      subtitle: 'Inspecting latest production and beta release manifests',
-      icon: CupertinoIcons.tag,
+      subtitle: 'Inspecting latest production and beta release channels',
+      icon: CupertinoIcons.tag_fill,
     ),
     (
-      title: 'Comparing Build Deltas...',
-      subtitle: 'Validating build signatures against installed version',
+      title: 'Validating Signatures...',
+      subtitle: 'Comparing cryptographic build deltas and manifests',
       icon: CupertinoIcons.arrow_2_circlepath,
+    ),
+    (
+      title: 'Verifying Integrity...',
+      subtitle: 'Finalizing sovereign update manifest and APK checksums',
+      icon: CupertinoIcons.checkmark_shield_fill,
     ),
   ];
 
   @override
   void initState() {
     super.initState();
-    _pulseController = AnimationController(
+    _progressController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    )..repeat(reverse: true);
-    _timer = Timer.periodic(const Duration(milliseconds: 900), (_) {
-      if (mounted) {
-        setState(() {
-          _stage = (_stage + 1) % _stages.length;
-        });
-      }
-    });
+      duration: const Duration(milliseconds: 3600),
+    )..repeat();
   }
 
   @override
   void dispose() {
-    _timer.cancel();
-    _pulseController.dispose();
+    _progressController.dispose();
     super.dispose();
+  }
+
+  int _calculateStage(double t) {
+    if (t < 0.28) return 0;
+    if (t < 0.58) return 1;
+    if (t < 0.84) return 2;
+    return 3;
   }
 
   @override
   Widget build(BuildContext context) {
     final p = widget.p;
-    final current = _stages[_stage];
 
     return Glass(
       p: p,
-      radius: 24,
+      radius: 28,
       blur: widget.blur,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 26),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AnimatedBuilder(
-            animation: _pulseController,
-            builder: (ctx, child) {
-              final pulse = _pulseController.value;
-              return Stack(
+      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 26),
+      child: AnimatedBuilder(
+        animation: _progressController,
+        builder: (ctx, child) {
+          final t = _progressController.value;
+          final stageIndex = _calculateStage(t);
+          final current = _stages[stageIndex];
+          final percent = (t * 100).toInt().clamp(1, 99);
+
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Animated icon container with pulsing halo
+              Stack(
                 alignment: Alignment.center,
                 children: [
                   Container(
-                    width: 56 + 10 * pulse,
-                    height: 56 + 10 * pulse,
+                    width: 58,
+                    height: 58,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: p.accent.withValues(alpha: 0.12 * (1.0 - pulse)),
+                      color: p.accent.withValues(alpha: 0.10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: p.accent.withValues(alpha: 0.25),
+                          blurRadius: 16,
+                          spreadRadius: 2,
+                        ),
+                      ],
                     ),
                   ),
                   Container(
-                    width: 50,
-                    height: 50,
+                    width: 48,
+                    height: 48,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: p.accent.withValues(alpha: 0.14),
+                      color: p.accent.withValues(alpha: 0.16),
                       border: Border.all(
-                        color: p.accent.withValues(alpha: 0.35 + 0.25 * pulse),
+                        color: p.accent.withValues(alpha: 0.45),
                         width: 1.5,
                       ),
                     ),
                     child: Center(
-                      child: Icon(current.icon, size: 22, color: p.accent),
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 350),
+                        transitionBuilder: (w, anim) => ScaleTransition(
+                          scale: anim,
+                          child: FadeTransition(opacity: anim, child: w),
+                        ),
+                        child: Icon(
+                          current.icon,
+                          key: ValueKey<int>(stageIndex),
+                          size: 22,
+                          color: p.accent,
+                        ),
+                      ),
                     ),
                   ),
                 ],
-              );
-            },
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Checking for updates...'.localized(context),
-            style: TextStyle(
-              color: p.text,
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.3,
-            ),
-          ),
-          const SizedBox(height: 6),
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 240),
-            transitionBuilder: (child, anim) => FadeTransition(
-              opacity: anim,
-              child: SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0, 0.15),
-                  end: Offset.zero,
-                ).animate(anim),
-                child: child,
               ),
-            ),
-            child: Column(
-              key: ValueKey<int>(_stage),
-              children: [
-                Text(
-                  current.title.localized(context),
-                  style: TextStyle(
-                    color: p.accent,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.2,
+              const SizedBox(height: 16),
+              Text(
+                'Checking for updates...'.localized(context),
+                style: TextStyle(
+                  color: p.text,
+                  fontSize: 16.5,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.3,
+                ),
+              ),
+              const SizedBox(height: 6),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                transitionBuilder: (childWidget, anim) => FadeTransition(
+                  opacity: anim,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0, 0.12),
+                      end: Offset.zero,
+                    ).animate(anim),
+                    child: childWidget,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  current.subtitle.localized(context),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: p.text3, fontSize: 12, height: 1.35),
+                child: Column(
+                  key: ValueKey<int>(stageIndex),
+                  children: [
+                    Text(
+                      current.title.localized(context),
+                      style: TextStyle(
+                        color: p.accent,
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      current.subtitle.localized(context),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: p.text3,
+                        fontSize: 12,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              for (int i = 0; i < _stages.length; i++)
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 220),
-                  width: _stage == i ? 18 : 6,
+              ),
+              const SizedBox(height: 20),
+              // Progress telemetry header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'STAGE ${stageIndex + 1} OF ${_stages.length}'
+                        .toUpperCase(),
+                    style: TextStyle(
+                      color: p.text3,
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.6,
+                    ),
+                  ),
+                  Text(
+                    '$percent%',
+                    style: TextStyle(
+                      color: p.accent,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w800,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 7),
+              // Progress line track
+              ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: Container(
                   height: 6,
-                  margin: const EdgeInsets.symmetric(horizontal: 3),
-                  decoration: BoxDecoration(
-                    color: _stage == i
-                        ? p.accent
-                        : p.text3.withValues(alpha: 0.25),
-                    borderRadius: BorderRadius.circular(999),
+                  width: double.infinity,
+                  color: p.surface3,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: FractionallySizedBox(
+                      widthFactor: t.clamp(0.04, 1.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              p.accent.withValues(alpha: 0.75),
+                              p.accent,
+                            ],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: p.accent.withValues(alpha: 0.5),
+                              blurRadius: 4,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
+              ),
             ],
-          ),
-        ],
+          );
+        },
       ),
     );
   }

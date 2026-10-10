@@ -1,6 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -189,13 +189,14 @@ class _PersonalizationSetupDialogState
                                                 UserProfileService
                                                     .presetAvatars
                                                     .length
-                                        ? Center(
-                                            child: Text(
+                                        ? ClipOval(
+                                            child: Image.asset(
                                               UserProfileService
-                                                  .presetAvatars[_presetIndex!],
-                                              style: const TextStyle(
-                                                fontSize: 42,
-                                              ),
+                                                  .curatedPresetAvatars[_presetIndex!]
+                                                  .assetPath,
+                                              fit: BoxFit.cover,
+                                              width: 72,
+                                              height: 72,
                                             ),
                                           )
                                         : Center(
@@ -297,10 +298,14 @@ class _PersonalizationSetupDialogState
                               width: 1.5,
                             ),
                           ),
-                          child: Center(
-                            child: Text(
-                              UserProfileService.presetAvatars[i],
-                              style: const TextStyle(fontSize: 16),
+                          child: ClipOval(
+                            child: Image.asset(
+                              UserProfileService
+                                  .curatedPresetAvatars[i]
+                                  .assetPath,
+                              fit: BoxFit.cover,
+                              width: 34,
+                              height: 34,
                             ),
                           ),
                         ),

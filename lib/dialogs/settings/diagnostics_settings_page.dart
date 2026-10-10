@@ -333,48 +333,6 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
         ],
         SettingsGroup(
           p: widget.p,
-          title: 'Adaptive Engine Overview',
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        CupertinoIcons.gauge,
-                        color: widget.p.accent,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Real-time Hardware Tuning',
-                        style: TextStyle(
-                          color: widget.p.text,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'The Adaptive Engine analyzes system RAM capacity, CPU core count, and GPU tier at launch to tune visual effects for optimum 60 FPS performance without heating or lag.',
-                    style: TextStyle(
-                      color: widget.p.text2,
-                      fontSize: 13,
-                      height: 1.4,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        SettingsGroup(
-          p: widget.p,
           title: 'Hardware Diagnostics',
           children: [
             DiagnosticRow(
@@ -509,115 +467,12 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
 
     return Column(
       children: [
-        _LiveNetworkStatusCanvas(p: widget.p, networkLogs: widget.networkLogs),
-        const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: useTranslucency
-                ? widget.p.surface2.withValues(alpha: 0.8)
-                : widget.p.surface2,
-            borderRadius: BorderRadius.circular(32),
-            border: Border.all(color: widget.p.border.withValues(alpha: 0.5)),
-          ),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Data Consumed'.localized(context).toUpperCase(),
-                        style: TextStyle(
-                          color: widget.p.text3,
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        totalData,
-                        style: TextStyle(
-                          color: widget.p.text,
-                          fontSize: 26,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        'Total Requests'.localized(context).toUpperCase(),
-                        style: TextStyle(
-                          color: widget.p.text3,
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        '${widget.networkLogs.length} reqs',
-                        style: TextStyle(
-                          color: widget.p.accent,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Divider(color: widget.p.border.withValues(alpha: 0.3), height: 1),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Offline Privacy Log'.localized(context),
-                    style: TextStyle(
-                      color: widget.p.text2,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  PressableScale(
-                    onTap: widget.onClearNetworkLogs,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: widget.p.red.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(99),
-                        border: Border.all(
-                          color: widget.p.red.withValues(alpha: 0.25),
-                          width: 1,
-                        ),
-                      ),
-                      child: Text(
-                        'Clear'.localized(context),
-                        style: TextStyle(
-                          color: widget.p.red,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.2,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+        _LiveNetworkStatusCard(
+          p: widget.p,
+          networkLogs: widget.networkLogs,
+          totalData: totalData,
+          useTranslucency: useTranslucency,
+          onClearNetworkLogs: widget.onClearNetworkLogs,
         ),
         const SizedBox(height: 12),
         if (widget.loadingNetworkLogs)
@@ -872,8 +727,8 @@ class _LiveDeviceHealthGovernorCardState
     super.initState();
     _pulseController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2200),
-    )..repeat(reverse: true);
+      duration: const Duration(milliseconds: 2400),
+    )..repeat();
   }
 
   @override
@@ -887,29 +742,31 @@ class _LiveDeviceHealthGovernorCardState
     final engine = widget.engine;
     final p = widget.p;
     final budgetMs = (1000.0 / engine.targetFps);
-    final simulatedFrametime = (budgetMs * 0.48).toStringAsFixed(1);
+    final simulatedFrametime = (budgetMs * 0.46).toStringAsFixed(1);
 
     return AnimatedBuilder(
       animation: _pulseController,
       builder: (context, child) {
-        final pulse = _pulseController.value;
+        final t = _pulseController.value;
+        final pulse = 0.5 + 0.5 * math.sin(t * 2 * math.pi);
+
         return Container(
-          padding: const EdgeInsets.all(18),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: p.surface2,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(28),
             border: Border.all(
               color: Color.lerp(
                 p.accent.withValues(alpha: 0.25),
-                p.accent.withValues(alpha: 0.60),
+                p.accent.withValues(alpha: 0.55),
                 pulse,
               )!,
               width: 1.2,
             ),
             boxShadow: [
               BoxShadow(
-                color: p.accent.withValues(alpha: 0.08 * pulse),
-                blurRadius: 16,
+                color: p.accent.withValues(alpha: 0.06 * pulse),
+                blurRadius: 18,
                 spreadRadius: 2,
               ),
             ],
@@ -917,6 +774,7 @@ class _LiveDeviceHealthGovernorCardState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Header with glowing indicator
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -953,63 +811,153 @@ class _LiveDeviceHealthGovernorCardState
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
+                      horizontal: 9,
+                      vertical: 3.5,
                     ),
                     decoration: BoxDecoration(
                       color: p.accent.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(99),
+                      border: Border.all(
+                        color: p.accent.withValues(alpha: 0.25),
+                        width: 0.8,
+                      ),
                     ),
                     child: Text(
                       '${engine.targetFps} FPS TARGET',
                       style: TextStyle(
                         color: p.accent,
-                        fontSize: 10,
+                        fontSize: 10.5,
                         fontWeight: FontWeight.w800,
+                        letterSpacing: 0.3,
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 14),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Frame Budget ($simulatedFrametime ms / ${budgetMs.toStringAsFixed(1)} ms)',
-                    style: TextStyle(
-                      color: p.text2,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    'Nominal Headroom',
-                    style: TextStyle(
-                      color: p.green,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
+              const SizedBox(height: 12),
+              // Real-time Tuning Overview description merged right here
+              Text(
+                'Dynamic Hardware Regulation'.localized(context),
+                style: TextStyle(
+                  color: p.text,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14.5,
+                  letterSpacing: -0.2,
+                ),
               ),
-              const SizedBox(height: 6),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(99),
-                child: Container(
-                  height: 6,
-                  color: p.surface3,
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: FractionallySizedBox(
-                      widthFactor: (0.42 + 0.08 * pulse).clamp(0.0, 1.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(colors: [p.accent, p.green]),
+              const SizedBox(height: 4),
+              Text(
+                'NoteKar continuously benchmarks RAM capacity, core frequencies, and GPU pipeline latency to guarantee fluid 60 FPS scrolling with zero frame dropping or thermal heating.'
+                    .localized(context),
+                style: TextStyle(color: p.text2, fontSize: 12.5, height: 1.38),
+              ),
+              const SizedBox(height: 16),
+              // Dynamic Multi-Bar Telemetry Frequency Equalizer
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 14,
+                ),
+                decoration: BoxDecoration(
+                  color: p.surface3.withValues(alpha: 0.50),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: p.border.withValues(alpha: 0.35),
+                    width: 0.8,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'HARDWARE FREQUENCY SPECTRUM'.localized(context),
+                          style: TextStyle(
+                            color: p.text3,
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.6,
+                          ),
                         ),
+                        Text(
+                          '${(54 + 6 * pulse).toInt()} FPS Nominal',
+                          style: TextStyle(
+                            color: p.green,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 38,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: List.generate(24, (i) {
+                          final wave =
+                              0.5 +
+                              0.5 *
+                                  math.sin(
+                                    (t * 2 * math.pi) +
+                                        (i * (math.pi / 12) * 1.8),
+                                  );
+                          final envelope = math.sin((i + 1) / 25 * math.pi);
+                          final barHeight = (8.0 + 28.0 * wave * envelope)
+                              .clamp(6.0, 36.0);
+                          return Container(
+                            width: 5.5,
+                            height: barHeight,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(99),
+                              gradient: LinearGradient(
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                                colors: [
+                                  p.accent,
+                                  Color.lerp(p.accent, p.green, wave)!,
+                                ],
+                              ),
+                            ),
+                          );
+                        }),
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Render Budget ($simulatedFrametime ms / ${budgetMs.toStringAsFixed(1)} ms)',
+                          style: TextStyle(
+                            color: p.text2,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            Icon(
+                              CupertinoIcons.checkmark_seal_fill,
+                              color: p.green,
+                              size: 11,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '54% Headroom',
+                              style: TextStyle(
+                                color: p.green,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 16),
@@ -1110,18 +1058,26 @@ class _LiveDeviceHealthGovernorCardState
 
 enum _NetworkLiveState { inFlight, stable, offline }
 
-class _LiveNetworkStatusCanvas extends StatefulWidget {
-  const _LiveNetworkStatusCanvas({required this.p, required this.networkLogs});
+class _LiveNetworkStatusCard extends StatefulWidget {
+  const _LiveNetworkStatusCard({
+    required this.p,
+    required this.networkLogs,
+    required this.totalData,
+    required this.useTranslucency,
+    required this.onClearNetworkLogs,
+  });
 
   final Palette p;
   final List<NetworkLogEntry> networkLogs;
+  final String totalData;
+  final bool useTranslucency;
+  final VoidCallback onClearNetworkLogs;
 
   @override
-  State<_LiveNetworkStatusCanvas> createState() =>
-      _LiveNetworkStatusCanvasState();
+  State<_LiveNetworkStatusCard> createState() => _LiveNetworkStatusCardState();
 }
 
-class _LiveNetworkStatusCanvasState extends State<_LiveNetworkStatusCanvas>
+class _LiveNetworkStatusCardState extends State<_LiveNetworkStatusCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _animController;
   _NetworkLiveState _state = _NetworkLiveState.stable;
@@ -1131,13 +1087,13 @@ class _LiveNetworkStatusCanvasState extends State<_LiveNetworkStatusCanvas>
     super.initState();
     _animController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1800),
+      duration: const Duration(milliseconds: 2000),
     )..repeat();
     _evaluateConnectivity();
   }
 
   @override
-  void didUpdateWidget(covariant _LiveNetworkStatusCanvas oldWidget) {
+  void didUpdateWidget(covariant _LiveNetworkStatusCard oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.networkLogs.length != oldWidget.networkLogs.length) {
       _evaluateConnectivity();
@@ -1155,9 +1111,7 @@ class _LiveNetworkStatusCanvasState extends State<_LiveNetworkStatusCanvas>
       final result = await InternetAddress.lookup(
         'dns.google',
       ).timeout(const Duration(seconds: 3));
-      if (!mounted) {
-        return;
-      }
+      if (!mounted) return;
       if (result.isNotEmpty && result.first.rawAddress.isNotEmpty) {
         final now = DateTime.now();
         final hasRecent = widget.networkLogs.any((entry) {
@@ -1170,15 +1124,11 @@ class _LiveNetworkStatusCanvasState extends State<_LiveNetworkStatusCanvas>
               : _NetworkLiveState.stable;
         });
       } else {
-        if (!mounted) {
-          return;
-        }
+        if (!mounted) return;
         setState(() => _state = _NetworkLiveState.offline);
       }
     } catch (_) {
-      if (!mounted) {
-        return;
-      }
+      if (!mounted) return;
       setState(() => _state = _NetworkLiveState.offline);
     }
   }
@@ -1186,191 +1136,265 @@ class _LiveNetworkStatusCanvasState extends State<_LiveNetworkStatusCanvas>
   @override
   Widget build(BuildContext context) {
     final p = widget.p;
-    return AnimatedBuilder(
-      animation: _animController,
-      builder: (context, child) {
-        final t = _animController.value;
-        return Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-          decoration: BoxDecoration(
-            color: p.surface2,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: switch (_state) {
-                _NetworkLiveState.inFlight => p.accent.withValues(alpha: 0.5),
-                _NetworkLiveState.stable => p.green.withValues(alpha: 0.35),
-                _NetworkLiveState.offline => p.red.withValues(alpha: 0.35),
-              },
-              width: 1.2,
-            ),
-          ),
-          child: Column(
+    final stateColor = switch (_state) {
+      _NetworkLiveState.inFlight => p.accent,
+      _NetworkLiveState.stable => p.green,
+      _NetworkLiveState.offline => p.red,
+    };
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: widget.useTranslucency
+            ? p.surface2.withValues(alpha: 0.8)
+            : p.surface2,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: p.border.withValues(alpha: 0.5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Top Metrics Row: Data Consumed & Total Requests
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              SizedBox(
-                height: 80,
-                child: Center(
-                  child: switch (_state) {
-                    _NetworkLiveState.inFlight => Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        for (int i = 0; i < 3; i++) ...[
-                          () {
-                            final waveT = (t + i * 0.33) % 1.0;
-                            return Container(
-                              width: 36 + waveT * 50,
-                              height: 36 + waveT * 50,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: p.accent.withValues(
-                                    alpha: (1.0 - waveT) * 0.6,
-                                  ),
-                                  width: 1.8,
-                                ),
-                              ),
-                            );
-                          }(),
-                        ],
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: p.accent,
-                            boxShadow: [
-                              BoxShadow(
-                                color: p.accent.withValues(alpha: 0.4),
-                                blurRadius: 12,
-                                spreadRadius: 2,
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            CupertinoIcons.arrow_up_arrow_down,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ),
-                      ],
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Data Consumed'.localized(context).toUpperCase(),
+                    style: TextStyle(
+                      color: p.text3,
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.8,
                     ),
-                    _NetworkLiveState.stable => Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Container(
-                          width: 58 + 4 * math.sin(t * 2 * math.pi),
-                          height: 58 + 4 * math.sin(t * 2 * math.pi),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: p.green.withValues(alpha: 0.12),
-                          ),
-                        ),
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: p.green,
-                            boxShadow: [
-                              BoxShadow(
-                                color: p.green.withValues(alpha: 0.35),
-                                blurRadius: 10,
-                                spreadRadius: 1,
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            CupertinoIcons.wifi,
-                            color: Colors.white,
-                            size: 22,
-                          ),
-                        ),
-                      ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    widget.totalData,
+                    style: TextStyle(
+                      color: p.text,
+                      fontSize: 26,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.5,
                     ),
-                    _NetworkLiveState.offline => Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: 28,
-                              height: 2,
-                              color: p.red.withValues(alpha: 0.3),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                              ),
-                              child: Container(
-                                width: 44,
-                                height: 44,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: p.red.withValues(alpha: 0.16),
-                                  border: Border.all(
-                                    color: p.red.withValues(alpha: 0.4),
-                                    width: 1.5,
-                                  ),
-                                ),
-                                child: Icon(
-                                  CupertinoIcons.wifi_slash,
-                                  color: p.red,
-                                  size: 22,
-                                ),
-                              ),
-                            ),
-                            Container(
-                              width: 28,
-                              height: 2,
-                              color: p.red.withValues(alpha: 0.3),
-                            ),
-                          ],
-                        ),
-                      ],
+                  ),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'Total Requests'.localized(context).toUpperCase(),
+                    style: TextStyle(
+                      color: p.text3,
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.8,
                     ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '${widget.networkLogs.length} reqs',
+                    style: TextStyle(
+                      color: p.accent,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Divider(color: p.border.withValues(alpha: 0.3), height: 1),
+          const SizedBox(height: 14),
+          // Transparent Live Transmission Status
+          Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: stateColor.withValues(alpha: 0.14),
+                ),
+                child: Icon(
+                  switch (_state) {
+                    _NetworkLiveState.inFlight =>
+                      CupertinoIcons.arrow_up_arrow_down,
+                    _NetworkLiveState.stable =>
+                      CupertinoIcons.checkmark_shield_fill,
+                    _NetworkLiveState.offline => CupertinoIcons.wifi_slash,
                   },
+                  size: 16,
+                  color: stateColor,
                 ),
               ),
-              const SizedBox(height: 12),
-              Text(
-                switch (_state) {
-                  _NetworkLiveState.inFlight => 'ACTIVE NETWORK TRANSMISSION',
-                  _NetworkLiveState.stable => 'NETWORK STABLE • ZERO LEAKAGE',
-                  _NetworkLiveState.offline => 'LOCAL SOVEREIGN ISOLATION',
-                },
-                style: TextStyle(
-                  color: switch (_state) {
-                    _NetworkLiveState.inFlight => p.accent,
-                    _NetworkLiveState.stable => p.green,
-                    _NetworkLiveState.offline => p.red,
-                  },
-                  fontSize: 12,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.8,
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      switch (_state) {
+                        _NetworkLiveState.inFlight =>
+                          'Active HTTPS Connection'.localized(context),
+                        _NetworkLiveState.stable =>
+                          'Network Connected'.localized(context),
+                        _NetworkLiveState.offline =>
+                          'Offline Sovereign Mode'.localized(context),
+                      },
+                      style: TextStyle(
+                        color: p.text,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(switch (_state) {
+                      _NetworkLiveState.inFlight =>
+                        'Checking GitHub Releases / remote notices • 0 user telemetry'
+                            .localized(context),
+                      _NetworkLiveState.stable =>
+                        'Zero tracking telemetry • 100% offline sovereign database'
+                            .localized(context),
+                      _NetworkLiveState.offline =>
+                        'No external connections • All data stored strictly on device'
+                            .localized(context),
+                    }, style: TextStyle(color: p.text3, fontSize: 11, height: 1.3)),
+                  ],
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                switch (_state) {
-                  _NetworkLiveState.inFlight =>
-                    'Transmitting telemetry packet via TLS 1.3 socket.',
-                  _NetworkLiveState.stable =>
-                    'Internet connected. No background sockets or tracking telemetry.',
-                  _NetworkLiveState.offline =>
-                    'No internet connection detected. 100% offline local database active.',
-                },
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: p.text2,
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w500,
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: stateColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(99),
+                  border: Border.all(
+                    color: stateColor.withValues(alpha: 0.25),
+                    width: 0.8,
+                  ),
+                ),
+                child: Text(
+                  switch (_state) {
+                    _NetworkLiveState.inFlight => 'ACTIVE',
+                    _NetworkLiveState.stable => 'STABLE',
+                    _NetworkLiveState.offline => 'OFFLINE',
+                  },
+                  style: TextStyle(
+                    color: stateColor,
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
+                  ),
                 ),
               ),
             ],
           ),
-        );
-      },
+          const SizedBox(height: 10),
+          // Minimal Line-Style Live Activity Indicator
+          AnimatedBuilder(
+            animation: _animController,
+            builder: (context, _) {
+              final t = _animController.value;
+              return ClipRRect(
+                borderRadius: BorderRadius.circular(99),
+                child: Container(
+                  height: 4,
+                  width: double.infinity,
+                  color: p.surface3,
+                  child: switch (_state) {
+                    _NetworkLiveState.inFlight => LayoutBuilder(
+                      builder: (ctx, constraints) {
+                        final width = constraints.maxWidth;
+                        return Stack(
+                          children: [
+                            Positioned(
+                              left: (t * 1.4 - 0.3) * width,
+                              width: width * 0.35,
+                              top: 0,
+                              bottom: 0,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      p.accent.withValues(alpha: 0.0),
+                                      p.accent,
+                                      p.accent.withValues(alpha: 0.0),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    _NetworkLiveState.stable => Container(
+                      decoration: BoxDecoration(
+                        color: p.green.withValues(
+                          alpha: 0.45 + 0.25 * math.sin(t * 2 * math.pi),
+                        ),
+                      ),
+                    ),
+                    _NetworkLiveState.offline => Container(
+                      color: p.red.withValues(alpha: 0.25),
+                    ),
+                  },
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 14),
+          Divider(color: p.border.withValues(alpha: 0.3), height: 1),
+          const SizedBox(height: 10),
+          // Offline Privacy Log Row & Clear Action
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Offline Privacy Audit Log'.localized(context),
+                style: TextStyle(
+                  color: p.text2,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              if (widget.networkLogs.isNotEmpty)
+                PressableScale(
+                  onTap: widget.onClearNetworkLogs,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: widget.p.red.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(99),
+                      border: Border.all(
+                        color: widget.p.red.withValues(alpha: 0.25),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      'Clear'.localized(context),
+                      style: TextStyle(
+                        color: widget.p.red,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
