@@ -46,11 +46,11 @@ void main() {
     );
 
     test(
-      'H-37: current 7.5.7 excludes outdated fallback notice, but eligible fixture receives it',
+      'H-37: current appVersion excludes outdated fallback notice, but eligible fixture receives it',
       () async {
         final noticesForCurrent = await NoticeService.instance
             .getCachedNotices();
-        // Since current version is 7.5.7 and maxVersion is 7.5.0, it should be excluded
+        // Since current version is 7.5.8+ and maxVersion is 7.5.0, it should be excluded
         expect(
           noticesForCurrent.any(
             (n) => n.id == 'life-ledger-calibration-advisory',
@@ -188,7 +188,7 @@ void main() {
               'channels': ['stable', 'beta'],
               'platforms': ['android'],
               'minVersion': '7.0.0',
-              'maxVersion': '7.5.7',
+              'maxVersion': '8.0.0',
             },
           ]),
         );

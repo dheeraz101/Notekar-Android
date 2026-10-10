@@ -89,6 +89,8 @@ void main() {
     testWidgets(
       'ErrorWidget.builder displays Apple recovery screen gracefully on widget error',
       (tester) async {
+        final originalBuilder = ErrorWidget.builder;
+        addTearDown(() => ErrorWidget.builder = originalBuilder);
         setupErrorHandling();
         final details = FlutterErrorDetails(
           exception: Exception('Simulated GPU or Shader Failure'),
