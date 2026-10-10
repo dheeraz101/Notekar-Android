@@ -398,7 +398,6 @@ List<TimelineDaySection> buildTimelineDaySections(
           TimelineSessionItem(
             inMoment: activeInTracks.remove(exactKey)!,
             outMoment: null,
-            isOngoing: false,
           ),
         );
       }
