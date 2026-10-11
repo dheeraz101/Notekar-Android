@@ -1822,7 +1822,7 @@ class MainActivity : FlutterActivity() {
                     )
                     builder.addAction(R.drawable.ic_stat_notekar, "🏷️ Modes", modesPending)
                 } else {
-                    builder.addAction(R.drawable.ic_stat_notekar, "Log IN", sessionInPending)
+                    builder.addAction(R.drawable.ic_stat_notekar, "📝 Log", singleLogActionPending)
                     builder.addAction(R.drawable.ic_stat_notekar, "🏷️ Modes", modesPending)
                     builder.addAction(R.drawable.ic_stat_notekar, "⇄ Single", togglePending)
                 }

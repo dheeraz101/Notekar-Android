@@ -42,6 +42,8 @@ class HistoryCalendarView extends StatefulWidget {
     this.onToggleMomentImageCollapse,
     this.goals,
     this.endingSessionIds,
+    this.filterCriteria,
+    this.onFilterChanged,
   });
 
   final Palette p;
@@ -66,6 +68,8 @@ class HistoryCalendarView extends StatefulWidget {
   final ValueChanged<int>? onToggleMomentImageCollapse;
   final List<Goal>? goals;
   final Set<int>? endingSessionIds;
+  final TimelineFilterCriteria? filterCriteria;
+  final ValueChanged<TimelineFilterCriteria>? onFilterChanged;
 
   @override
   State<HistoryCalendarView> createState() => _HistoryCalendarViewState();
@@ -456,6 +460,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
   @override
   void initState() {
     super.initState();
+    _filterCriteria = widget.filterCriteria ?? const TimelineFilterCriteria();
     _loadHistoryPreferences();
     _sectionMap = {for (final s in widget.sections) s.dateKey: s};
 
@@ -491,8 +496,13 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
   void didUpdateWidget(HistoryCalendarView oldWidget) {
     super.didUpdateWidget(oldWidget);
     _sectionMap = {for (final s in widget.sections) s.dateKey: s};
+    if (widget.filterCriteria != null &&
+        widget.filterCriteria != oldWidget.filterCriteria) {
+      _filterCriteria = widget.filterCriteria!;
+    }
     if (oldWidget.sections != widget.sections ||
-        oldWidget.claimedGaps != widget.claimedGaps) {
+        oldWidget.claimedGaps != widget.claimedGaps ||
+        oldWidget.filterCriteria != widget.filterCriteria) {
       setState(() {});
     }
   }
@@ -1009,6 +1019,24 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
         if (!itemNote.contains(cleanTag)) return false;
       }
 
+      if (_filterCriteria.goalId != null &&
+          _filterCriteria.goalId!.isNotEmpty) {
+        if (it is TimelineSessionItem) {
+          final inGoal = it.inMoment.goalId;
+          final outGoal = it.outMoment?.goalId;
+          if (inGoal != _filterCriteria.goalId &&
+              outGoal != _filterCriteria.goalId) {
+            return false;
+          }
+        } else if (it is TimelineSingleItem) {
+          if (it.moment.goalId != _filterCriteria.goalId) {
+            return false;
+          }
+        } else {
+          return false;
+        }
+      }
+
       return true;
     }).toList();
 
@@ -1038,6 +1066,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                 setState(
                   () => _filterCriteria = const TimelineFilterCriteria(),
                 );
+                widget.onFilterChanged?.call(const TimelineFilterCriteria());
               },
               child: Text('Reset Filter'.localized(context)),
             ),
@@ -1327,11 +1356,11 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                         ),
                       ),
                     ],
-                    if (it.noteMoment.voicePath != null) ...[
+                    for (final vp in it.noteMoment.voicePaths) ...[
                       const SizedBox(height: 5),
                       TimelineVoicePlayerPill(
                         p: widget.p,
-                        voicePath: it.noteMoment.voicePath!,
+                        voicePath: vp,
                         durationMs: it.noteMoment.voiceDurationMs ?? 0,
                       ),
                     ],
@@ -1571,11 +1600,11 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                         ],
                       ],
                     ),
-                    if (it.moment.voicePath != null) ...[
+                    for (final vp in it.moment.voicePaths) ...[
                       const SizedBox(height: 6),
                       TimelineVoicePlayerPill(
                         p: widget.p,
-                        voicePath: it.moment.voicePath!,
+                        voicePath: vp,
                         durationMs: it.moment.voiceDurationMs ?? 0,
                       ),
                     ],

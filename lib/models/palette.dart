@@ -96,6 +96,8 @@ class Palette extends ThemeExtension<Palette> {
 
   bool get isDark => name != 'light' && name != 'eink';
   Color get onAccent => name == 'matrix' ? Colors.black : Colors.white;
+  Color get subtext => text2;
+  Color get surface1 => surface;
 }
 
 extension PaletteContextExtension on BuildContext {

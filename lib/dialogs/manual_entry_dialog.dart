@@ -198,16 +198,62 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
     _loadTags();
     _loadGoals();
     _loadMoments();
+    _loadAllCategories();
+  }
+
+  Future<void> _loadAllCategories() async {
+    final serviceCats = await CategoryService().getCategories();
+    final Set<String> merged = {};
+
+    for (final c in serviceCats) {
+      final clean = c.trim();
+      if (clean.isNotEmpty && clean != 'All') merged.add(clean);
+    }
+
+    for (final c in widget.categories) {
+      final clean = c.trim();
+      if (clean.isNotEmpty && clean != 'All') merged.add(clean);
+    }
+
+    for (final g in _goals) {
+      if (g.category != null &&
+          g.category!.trim().isNotEmpty &&
+          g.category != 'All') {
+        merged.add(g.category!.trim());
+      }
+    }
+
+    for (final m in _allMoments) {
+      if (m.category != null &&
+          m.category!.trim().isNotEmpty &&
+          m.category != 'All') {
+        merged.add(m.category!.trim());
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _categories = merged.toList();
+        if (_activeCategory != 'All' &&
+            !_categories.contains(_activeCategory)) {
+          _categories.insert(0, _activeCategory);
+        }
+      });
+    }
   }
 
   Future<void> _loadMoments() async {
     if (widget.moments != null) {
-      if (mounted) setState(() => _allMoments = widget.moments!);
+      if (mounted) {
+        setState(() => _allMoments = widget.moments!);
+        _loadAllCategories();
+      }
       return;
     }
     final list = MomentRepository().getAllMoments();
     if (mounted) {
       setState(() => _allMoments = list);
+      _loadAllCategories();
     }
   }
 
@@ -390,6 +436,7 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
       setState(() {
         _goals = list.where((g) => !g.isArchived).toList();
       });
+      _loadAllCategories();
     }
   }
 

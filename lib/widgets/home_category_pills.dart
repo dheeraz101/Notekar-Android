@@ -14,6 +14,8 @@ class HomeCategoryPills extends StatelessWidget {
     required this.onAddCategory,
     this.onManageCategories,
     this.onLongPressCategory,
+    this.onOpenFilter,
+    this.isFilterActive = false,
   });
 
   final Palette p;
@@ -23,6 +25,8 @@ class HomeCategoryPills extends StatelessWidget {
   final VoidCallback onAddCategory;
   final VoidCallback? onManageCategories;
   final void Function(String category)? onLongPressCategory;
+  final VoidCallback? onOpenFilter;
+  final bool isFilterActive;
 
   @override
   Widget build(BuildContext context) {
@@ -141,6 +145,52 @@ class HomeCategoryPills extends StatelessWidget {
               ),
             ),
           ),
+          if (onOpenFilter != null) ...[
+            const SizedBox(width: 6),
+            PressableScale(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                onOpenFilter!();
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isFilterActive
+                      ? p.accent.withValues(alpha: 0.18)
+                      : p.surface2.withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(
+                    color: isFilterActive
+                        ? p.accent
+                        : p.border.withValues(alpha: 0.4),
+                    width: isFilterActive ? 1.2 : 0.8,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.tune_rounded,
+                      size: 13,
+                      color: isFilterActive ? p.accent : p.text3,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Filter',
+                      style: TextStyle(
+                        color: isFilterActive ? p.accent : p.text2,
+                        fontSize: 12,
+                        fontWeight: isFilterActive
+                            ? FontWeight.w700
+                            : FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

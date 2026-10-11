@@ -47,6 +47,8 @@ class DynamicHeaderCapsule extends StatefulWidget {
     this.activeGoal,
     this.onSelectGoal,
     this.onAddGoal,
+    this.onOpenFilter,
+    this.isFilterActive = false,
   });
 
   final Palette p;
@@ -57,6 +59,8 @@ class DynamicHeaderCapsule extends StatefulWidget {
   final VoidCallback onAddCategory;
   final VoidCallback? onManageCategories;
   final void Function(String category)? onLongPressCategory;
+  final VoidCallback? onOpenFilter;
+  final bool isFilterActive;
   final bool blur;
   final bool isExpanded;
   final ValueChanged<bool>? onExpansionChanged;
@@ -429,6 +433,8 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
             onAddCategory: widget.onAddCategory,
             onManageCategories: widget.onManageCategories,
             onLongPressCategory: widget.onLongPressCategory,
+            onOpenFilter: widget.onOpenFilter,
+            isFilterActive: widget.isFilterActive,
           ),
 
           if (widget.goals != null && widget.goals!.isNotEmpty) ...[

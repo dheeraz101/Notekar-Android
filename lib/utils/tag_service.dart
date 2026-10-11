@@ -231,15 +231,36 @@ class TagService {
     return all.toList()..sort();
   }
 
-  /// Suggest tags matching a prefix (for autocomplete).
-  List<String> suggestTags(String prefix, List<Moment> entries) {
-    final normalizedPrefix = prefix.toLowerCase().replaceAll('#', '');
-    if (normalizedPrefix.isEmpty) return [];
+  /// Get all unique tags asynchronously, loading moments if not provided.
+  Future<List<String>> getAllTags([List<Moment>? entries]) async {
+    await load();
+    if (entries != null) {
+      return getAllKnownTags(entries);
+    }
+    final moments = MomentRepository().getAllMoments();
+    return getAllKnownTags(moments);
+  }
 
+  /// Suggest tags matching a prefix (for autocomplete). If prefix is empty or just #, returns recent and popular tags.
+  List<String> suggestTags(String prefix, [List<Moment> entries = const []]) {
+    final normalizedPrefix = prefix.toLowerCase().replaceAll('#', '').trim();
     final all = getAllKnownTags(entries);
+    if (normalizedPrefix.isEmpty) {
+      final top = <String>{
+        ..._recentTags.take(6),
+        ...customTags.take(10),
+        ...all.take(10),
+      };
+      return top.toList();
+    }
+
     return all
-        .where((tag) => TagService.stripHash(tag).startsWith(normalizedPrefix))
-        .take(8)
+        .where(
+          (tag) => TagService.stripHash(
+            tag,
+          ).toLowerCase().startsWith(normalizedPrefix),
+        )
+        .take(10)
         .toList();
   }
 

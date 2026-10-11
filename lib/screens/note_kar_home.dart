@@ -22,11 +22,14 @@ import 'package:notekar/dialogs/history_dialog.dart';
 import 'package:notekar/dialogs/manual_entry_dialog.dart';
 import 'package:notekar/dialogs/note_dialog.dart';
 import 'package:notekar/dialogs/privacy_overlay.dart';
+import 'package:notekar/dialogs/project_reflection_dialog.dart';
+import 'package:notekar/dialogs/projects_sheet.dart';
 import 'package:notekar/dialogs/recently_deleted_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/settings_dialog.dart';
 import 'package:notekar/dialogs/smart_trim_sheet.dart';
 import 'package:notekar/dialogs/time_reflection_sheet.dart';
+import 'package:notekar/dialogs/timeline_filter_sheet.dart';
 import 'package:notekar/dialogs/urge_surfing_dialog.dart';
 import 'package:notekar/main.dart';
 import 'package:notekar/models/backup_models.dart';
@@ -34,11 +37,14 @@ import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/models/project.dart';
 import 'package:notekar/models/sobriety_milestones.dart';
+import 'package:notekar/screens/device_health_intro_screen.dart';
 import 'package:notekar/screens/executive_intelligence_hub_screen.dart';
 import 'package:notekar/screens/welcome_screen.dart';
 import 'package:notekar/services/digital_wellbeing_service.dart';
 import 'package:notekar/services/goals_service.dart';
+import 'package:notekar/services/project_service.dart';
 import 'package:notekar/services/user_profile_service.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_logger.dart';
@@ -222,6 +228,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
     }
     return null;
   }
+
+  String? _activeProjectId;
+
+  Palette get _p =>
+      paletteFor(_theme, highContrast: _highContrast, accentName: _accentColor);
 
   List<String> get _allModesList {
     final list = <String>['All'];
@@ -712,6 +723,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       }
       _inout = prefs.getString('m-inout') ?? 'in';
       _activeGoalId = prefs.getString('m-active-goal-id');
+      _activeProjectId = prefs.getString('m-active-project-id');
       _tapDelay = prefs.getInt('m-delay') ?? 0;
       _remoteNotices = prefs.getBool('m-remote-notices') ?? false;
       _reduceMotion = prefs.getBool('m-reduce-motion') ?? false;
@@ -1255,6 +1267,15 @@ class _NoteKarHomeState extends State<NoteKarHome>
       await prefs.setBool('notekar.singleNumberingWalkthroughSeen_v7', true);
       await prefs.setBool('notekar.mindfulnessWalkthroughSeen_v10', true);
     }
+
+    final healthIntroSeen =
+        prefs.getBool('notekar.device_health_intro_v1') ?? false;
+    if (!healthIntroSeen) {
+      await prefs.setBool('notekar.device_health_intro_v1', true);
+      if (mounted) {
+        await DeviceHealthIntroScreen.show(context, p: _p);
+      }
+    }
   }
 
   Future<void> _logEntry({
@@ -1431,6 +1452,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
         effectiveTags.add(goalTag);
       }
     }
+    if (_activeProjectId != null) {
+      final projTag = 'proj:$_activeProjectId';
+      if (!effectiveTags.contains(projTag)) {
+        effectiveTags.add(projTag);
+      }
+    }
 
     final entry = Moment(
       id: _nextId,
@@ -1441,6 +1468,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       category: resolvedCategory,
       tags: effectiveTags,
       goalId: _activeGoalId,
+      projectId: _activeProjectId,
       imagePath: imagePath,
       voicePath: voicePath,
       voiceDurationMs: voiceDurationMs,
@@ -1547,6 +1575,46 @@ class _NoteKarHomeState extends State<NoteKarHome>
             goal: completedGoal,
           );
         }
+      }
+
+      if (type == 'out' && _activeProjectId != null) {
+        final finishedProjId = _activeProjectId!;
+        _activeProjectId = null;
+        unawaited(_prefs?.remove('m-active-project-id'));
+        final sessionDur = oldSessionStart != null
+            ? Duration(
+                milliseconds:
+                    effectiveNow.millisecondsSinceEpoch - oldSessionStart,
+              )
+            : null;
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          final projects = await ProjectService.instance.getProjects();
+          final proj = projects
+              .where((p) => p.id == finishedProjId)
+              .firstOrNull;
+          if (proj != null && mounted) {
+            final reflection = await ProjectReflectionDialog.show(
+              context,
+              p: _p,
+              project: proj,
+              sessionDuration: sessionDur,
+            );
+            if (reflection != null && reflection.note.isNotEmpty) {
+              final updatedEntry = entry.copyWith(
+                note: entry.note.isNotEmpty
+                    ? '${entry.note}\n${reflection.note}'
+                    : reflection.note,
+              );
+              await _repository.saveMoment(updatedEntry);
+              if (mounted) {
+                setState(() {
+                  final idx = _entries.indexWhere((e) => e.id == entry.id);
+                  if (idx >= 0) _entries[idx] = updatedEntry;
+                });
+              }
+            }
+          }
+        });
       }
 
       if (_mode == 'two-way' && type == 'out') {
@@ -2139,6 +2207,15 @@ class _NoteKarHomeState extends State<NoteKarHome>
           await prefs.setInt('m-ses', entry.timestamp);
           await prefs.setBool('m-paused', false);
           await prefs.remove('m-paused-at');
+          if (entry.category != null &&
+              entry.category!.trim().isNotEmpty &&
+              entry.category != 'All') {
+            final cat = entry.category!.trim();
+            _activeCategory = cat;
+            await _categoryService.setActiveCategory(cat, prefs: prefs);
+            await prefs.setString('notekar.active_category', cat);
+            await prefs.setString('active_category', cat);
+          }
         } else if (entry.type == 'out') {
           _inout = 'in';
           _sessionStart = null;
@@ -2212,6 +2289,42 @@ class _NoteKarHomeState extends State<NoteKarHome>
     _activeGoalId = null;
     await _prefs?.remove('m-active-goal-id');
     if (mounted) setState(() {});
+  }
+
+  Future<void> _startProjectSession({required Project project}) async {
+    _activeProjectId = project.id;
+    await _saveSetting('m-active-project-id', project.id);
+    if (project.category != null && project.category!.isNotEmpty) {
+      await _setActiveCategory(project.category!);
+    }
+    if (_mode != 'two-way') {
+      setState(() => _mode = 'two-way');
+      await _saveSetting('m-mode', 'two-way');
+    }
+    if (_inout == 'out') {
+      _showToast('Switched to ${project.title} session');
+    } else {
+      await _logEntry(forcedType: 'in');
+      _showToast('Started ${project.title} session');
+    }
+    if (mounted) setState(() {});
+  }
+
+  void _openProjects() {
+    ProjectsSheet.show(
+      context,
+      p: _p,
+      moments: _entries,
+      activeCategory: _activeCategory,
+      activeProjectId: _activeProjectId,
+      isSessionRunning: _mode == 'two-way' && _sessionStart != null,
+      onStartSession: (proj) => _startProjectSession(project: proj),
+      onStopSession: () async {
+        if (_mode == 'two-way' && _sessionStart != null) {
+          await _logEntry(forcedType: 'out');
+        }
+      },
+    );
   }
 
   void _startGoalCelebrationWatcher() {
@@ -2544,7 +2657,38 @@ class _NoteKarHomeState extends State<NoteKarHome>
     );
   }
 
-  Future<void> _openHistory({String? initialView}) async {
+  TimelineFilterCriteria _homeTimelineFilter = const TimelineFilterCriteria();
+
+  Future<void> _openHomeTimelineFilter() async {
+    final tags = TagService.instance.getAllKnownTags(_entries);
+    if (!mounted) return;
+    final res = await TimelineFilterSheet.show(
+      context,
+      p: _p,
+      initial: _homeTimelineFilter,
+      categories: _categories,
+      hashtags: tags,
+      goals: _cachedGoals,
+      largeText: _largeText,
+      blur:
+          _enableTranslucency &&
+          AdaptiveEngine().supportsBlur &&
+          !_reduceMotion,
+    );
+    if (res != null) {
+      setState(() {
+        _homeTimelineFilter = res;
+      });
+      if (res.isActive) {
+        await _openHistory(initialFilter: res);
+      }
+    }
+  }
+
+  Future<void> _openHistory({
+    String? initialView,
+    TimelineFilterCriteria? initialFilter,
+  }) async {
     _collapseHeaderIfExpanded();
     if (!_startupComplete) {
       _showToast('Loading database...', warning: true);
@@ -2563,6 +2707,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
       ),
       builder: (sheetContext) => HistoryDialog(
         initialView: initialView,
+        initialFilterCriteria:
+            initialFilter ??
+            (_homeTimelineFilter.isActive ? _homeTimelineFilter : null),
         p: p,
         entries: _entries,
         compactRows: _historyDensity == 'compact',
@@ -2663,6 +2810,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
         initialGoal: goal,
         initialCategory: goal?.category,
       );
+    } else if (result is Map &&
+        result['action'] == 'start_project_session' &&
+        mounted) {
+      final proj = result['project'] as Project;
+      await _startProjectSession(project: proj);
+    } else if (result == 'projects' && mounted) {
+      _openProjects();
     }
     _cachedGoals = await GoalsService.instance.getGoals();
     if (mounted) setState(() {});
@@ -3277,6 +3431,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
         initialGoal: goal,
         initialCategory: goal?.category,
       );
+    } else if (result is Map &&
+        result['action'] == 'start_project_session' &&
+        mounted) {
+      final proj = result['project'] as Project;
+      await _startProjectSession(project: proj);
+    } else if (result == 'projects' && mounted) {
+      _openProjects();
     }
     _cachedGoals = await GoalsService.instance.getGoals();
     if (mounted) setState(() {});
@@ -4571,6 +4732,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
                     }
                   },
                   onAddGoal: () => _openHistory(initialView: 'create_goal'),
+                  onOpenFilter: _openHomeTimelineFilter,
+                  isFilterActive: _homeTimelineFilter.isActive,
                 ),
               ],
             ),

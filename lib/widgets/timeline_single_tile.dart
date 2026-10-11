@@ -399,11 +399,11 @@ class TimelineSingleTile extends StatelessWidget {
                               ],
 
                               // Voice Notes below text
-                              if (moment.voicePath != null) ...[
+                              for (final vp in moment.voicePaths) ...[
                                 const SizedBox(height: 6),
                                 TimelineVoicePlayerPill(
                                   p: p,
-                                  voicePath: moment.voicePath!,
+                                  voicePath: vp,
                                   durationMs: moment.voiceDurationMs ?? 0,
                                   compact: compact,
                                 ),

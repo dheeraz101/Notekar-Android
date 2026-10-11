@@ -1,12 +1,16 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:notekar/dialogs/daily_wrapup_sheet.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class LoggingSettingsPage extends StatelessWidget {
+class LoggingSettingsPage extends StatefulWidget {
   const LoggingSettingsPage({
     super.key,
     required this.p,
@@ -41,6 +45,172 @@ class LoggingSettingsPage extends StatelessWidget {
   final ValueChanged<bool>? onRainbowCardsChanged;
   final ValueChanged<bool> onShowPersistentNotificationChanged;
   final void Function(String category, {required String parent}) onOpenCategory;
+
+  @override
+  State<LoggingSettingsPage> createState() => _LoggingSettingsPageState();
+}
+
+class _LoggingSettingsPageState extends State<LoggingSettingsPage> {
+  static const _channel = MethodChannel('notekar/files');
+
+  Palette get p => widget.p;
+  String get defaultMode => widget.defaultMode;
+  int get entriesCount => widget.entriesCount;
+  int get notesCount => widget.notesCount;
+  String get remindersStatus => widget.remindersStatus;
+  bool get enableSobrietyMode => widget.enableSobrietyMode;
+  bool get showPersistentNotification => widget.showPersistentNotification;
+  String get notifLogAction => widget.notifLogAction;
+  ValueChanged<bool>? get onNotifLogActionChanged =>
+      widget.onNotifLogActionChanged;
+  bool get showTrashBin => widget.showTrashBin;
+  List<Moment> get trash => widget.trash;
+  bool get rainbowCards => widget.rainbowCards;
+  ValueChanged<bool>? get onRainbowCardsChanged => widget.onRainbowCardsChanged;
+  ValueChanged<bool> get onShowPersistentNotificationChanged =>
+      widget.onShowPersistentNotificationChanged;
+  void Function(String category, {required String parent}) get onOpenCategory =>
+      widget.onOpenCategory;
+
+  bool _floatingBubbleEnabled = false;
+  String _singleTapAction = 'quick_log';
+  String _doubleTapAction = 'quick_menu';
+  String _concurrencyMode = 'exclusive';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPreferences();
+  }
+
+  Future<void> _loadPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        _floatingBubbleEnabled =
+            prefs.getBool('floating_timer_enabled') ?? false;
+        _singleTapAction =
+            prefs.getString('floating_single_tap_action') ?? 'quick_log';
+        _doubleTapAction =
+            prefs.getString('floating_double_tap_action') ?? 'quick_menu';
+        _concurrencyMode =
+            prefs.getString('timer_concurrency_mode') ?? 'exclusive';
+      });
+    }
+  }
+
+  Future<void> _toggleConcurrencyMode() async {
+    HapticFeedback.lightImpact();
+    final newMode = _concurrencyMode == 'exclusive' ? 'parallel' : 'exclusive';
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('timer_concurrency_mode', newMode);
+    setState(() => _concurrencyMode = newMode);
+  }
+
+  Future<void> _toggleFloatingBubble(bool val) async {
+    HapticFeedback.lightImpact();
+    final prefs = await SharedPreferences.getInstance();
+    if (val) {
+      final canDraw =
+          await _channel.invokeMethod<bool>('canDrawOverlays') ?? false;
+      if (!canDraw) {
+        await _channel.invokeMethod('requestOverlayPermission');
+      } else {
+        await _channel.invokeMethod('startFloatingTimer');
+      }
+    } else {
+      await _channel.invokeMethod('stopFloatingTimer');
+    }
+    await prefs.setBool('floating_timer_enabled', val);
+    setState(() => _floatingBubbleEnabled = val);
+  }
+
+  Future<void> _showGesturePicker({required bool isSingleTap}) async {
+    HapticFeedback.lightImpact();
+    final prefs = await SharedPreferences.getInstance();
+    final p = widget.p;
+
+    final options = isSingleTap
+        ? [
+            {'key': 'quick_log', 'label': 'Quick Log Entry (Haptic Instant)'},
+            {'key': 'toggle_expand', 'label': 'Expand Floating Controls'},
+          ]
+        : [
+            {'key': 'quick_menu', 'label': 'Open Modes & Activity Menu'},
+            {'key': 'toggle_expand', 'label': 'Toggle Expand / Collapse'},
+          ];
+
+    if (!mounted) return;
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: p.surface1,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                isSingleTap ? 'Single Tap Action' : 'Double Tap Action',
+                style: TextStyle(
+                  color: p.text,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ...options.map((opt) {
+                final isSelected = isSingleTap
+                    ? _singleTapAction == opt['key']
+                    : _doubleTapAction == opt['key'];
+                return ListTile(
+                  title: Text(
+                    opt['label']!,
+                    style: TextStyle(
+                      color: isSelected ? p.accent : p.text,
+                      fontWeight: isSelected
+                          ? FontWeight.w700
+                          : FontWeight.w500,
+                    ),
+                  ),
+                  trailing: isSelected
+                      ? Icon(Icons.check_rounded, color: p.accent)
+                      : null,
+                  onTap: () async {
+                    HapticFeedback.selectionClick();
+                    final key = opt['key']!;
+                    if (isSingleTap) {
+                      await prefs.setString('floating_single_tap_action', key);
+                      if (mounted) setState(() => _singleTapAction = key);
+                    } else {
+                      await prefs.setString('floating_double_tap_action', key);
+                      if (mounted) setState(() => _doubleTapAction = key);
+                    }
+                    if (ctx.mounted) Navigator.pop(ctx);
+                  },
+                );
+              }),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _openDailyWrapup() {
+    final moments = MomentRepository().getAllMoments();
+    DailyWrapupSheet.show(
+      context,
+      p: widget.p,
+      moments: moments,
+      onEndActiveSessions: () async {
+        await _channel.invokeMethod('stopFloatingTimer');
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -231,6 +401,88 @@ class LoggingSettingsPage extends StatelessWidget {
           p: p,
           text:
               'Subtle chromatic tinting provides effortless visual distinction between categories without visual fatigue.'
+                  .localized(context),
+        ),
+        const SizedBox(height: 12),
+        SettingsGroup(
+          p: p,
+          title: 'Floating Quick-Action Overlay'.localized(context),
+          children: [
+            SettingsSwitchRow(
+              p: p,
+              title: 'Persistent Floating Bubble'.localized(context),
+              subtitle:
+                  'Keep a floating bubble over all apps to log moments and start timers with a single tap.'
+                      .localized(context),
+              value: _floatingBubbleEnabled,
+              color: p.accent,
+              onChanged: _toggleFloatingBubble,
+            ),
+            if (_floatingBubbleEnabled) ...[
+              SettingsRow(
+                p: p,
+                icon: CupertinoIcons.hand_point_right,
+                title: 'Single Tap Action'.localized(context),
+                status: _singleTapAction == 'quick_log'
+                    ? 'Quick Log Note'.localized(context)
+                    : 'Expand Controls'.localized(context),
+                color: p.accent,
+                onTap: () => _showGesturePicker(isSingleTap: true),
+              ),
+              SettingsRow(
+                p: p,
+                icon: CupertinoIcons.bolt,
+                title: 'Double Tap Action'.localized(context),
+                status: _doubleTapAction == 'quick_menu'
+                    ? 'Modes & Tags Menu'.localized(context)
+                    : 'Toggle Expand'.localized(context),
+                color: p.accent,
+                onTap: () => _showGesturePicker(isSingleTap: false),
+              ),
+            ],
+          ],
+        ),
+        SettingsPageDescription(
+          p: p,
+          text:
+              'The floating overlay provides frictionless access anywhere on Android. Single-tap to log notes and double-tap to start mode sessions.'
+                  .localized(context),
+        ),
+        const SizedBox(height: 12),
+        SettingsGroup(
+          p: p,
+          title: 'Time-Awareness & Concurrency'.localized(context),
+          children: [
+            SettingsRow(
+              p: p,
+              icon: CupertinoIcons.arrow_2_circlepath,
+              title: 'Timer Concurrency'.localized(context),
+              subtitle:
+                  'Auto-pause previous timer when starting a new mode to prevent overlapping hours.'
+                      .localized(context),
+              status: _concurrencyMode == 'exclusive'
+                  ? 'Auto-Pause (Exclusive)'
+                  : 'Parallel Timers',
+              color: p.accent,
+              onTap: _toggleConcurrencyMode,
+            ),
+            SettingsRow(
+              p: p,
+              icon: CupertinoIcons.moon_stars,
+              title: 'Daily Wrap-up (End All)'.localized(context),
+              subtitle:
+                  'Seal open sessions and review today’s conscious time breakdown and calendar sync.'
+                      .localized(context),
+              status: 'Wrap Up',
+              color: p.green,
+              onTap: _openDailyWrapup,
+            ),
+          ],
+        ),
+        SettingsPageDescription(
+          p: p,
+          text:
+              'Concurrency controls prevent unintentional time overlapping. The daily wrap-up seals active timers and tallies conscious vs unconscious hours.'
                   .localized(context),
         ),
         const SizedBox(height: spacing48),

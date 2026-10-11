@@ -12,8 +12,10 @@ import 'package:notekar/dialogs/goals_sheet.dart';
 import 'package:notekar/dialogs/manual_entry_dialog.dart';
 import 'package:notekar/dialogs/note_dialog.dart';
 import 'package:notekar/dialogs/personalization_setup_dialog.dart';
+import 'package:notekar/dialogs/projects_sheet.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/settings/life_audit_page.dart';
+import 'package:notekar/dialogs/timeline_filter_sheet.dart';
 import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
@@ -63,6 +65,7 @@ class HistoryDialog extends StatefulWidget {
     this.useNumbersInSingle = false,
     this.resetSingleDaily = false,
     this.initialView,
+    this.initialFilterCriteria,
   });
 
   final Palette p;
@@ -108,6 +111,7 @@ class HistoryDialog extends StatefulWidget {
   final bool useNumbersInSingle;
   final bool resetSingleDaily;
   final String? initialView;
+  final TimelineFilterCriteria? initialFilterCriteria;
 
   @override
   State<HistoryDialog> createState() => _HistoryDialogState();
@@ -133,9 +137,12 @@ class _HistoryDialogState extends State<HistoryDialog> {
   static const _pageSize = 100;
   String _filter = 'all';
   String? _selectedDateKey;
+  TimelineFilterCriteria _timelineFilterCriteria =
+      const TimelineFilterCriteria();
   final List<Moment> _selected = [];
   late List<Moment> _entries;
   late Set<String> _availableDateKeys;
+
   Set<String> get availableDateKeys => _availableDateKeys;
   String? _notice;
   VoidCallback? _noticeUndo;
@@ -203,6 +210,11 @@ class _HistoryDialogState extends State<HistoryDialog> {
     _compactRows = widget.compactRows;
     _entries = List<Moment>.from(widget.entries);
     _availableDateKeys = _entries.map((entry) => entry.date).toSet();
+    if (widget.initialFilterCriteria != null &&
+        widget.initialFilterCriteria!.isActive) {
+      _timelineFilterCriteria = widget.initialFilterCriteria!;
+      _filter = 'advanced';
+    }
     _rebuildMemoizedLists();
     _loadHistoryPreferences();
     _loadGoals();
@@ -282,6 +294,10 @@ class _HistoryDialogState extends State<HistoryDialog> {
       selectedDateKey: _selectedDateKey,
       today: dateKey(DateTime.now()),
       weekAgo: DateTime.now().subtract(const Duration(days: 7)),
+      criteriaCategory: _timelineFilterCriteria.category,
+      criteriaHashtag: _timelineFilterCriteria.hashtag,
+      criteriaGoalId: _timelineFilterCriteria.goalId,
+      criteriaMode: _timelineFilterCriteria.mode,
     );
 
     // Fast synchronous path for smaller datasets (<200 moments) avoids isolate spawning overhead,
@@ -338,6 +354,37 @@ class _HistoryDialogState extends State<HistoryDialog> {
 
   bool get _hasOlderRows => _visibleCount < _allTimelineRows.length;
 
+  Future<void> _openAdvancedFilter() async {
+    final cats = await CategoryService().getCategories();
+    final tags = await TagService.instance.getAllTags();
+    if (!mounted) return;
+    final res = await TimelineFilterSheet.show(
+      context,
+      p: widget.p,
+      initial: _timelineFilterCriteria,
+      categories: cats,
+      hashtags: tags,
+      goals: _goals,
+      largeText: widget.largeText,
+      blur: widget.blur,
+    );
+    if (res != null) {
+      setState(() {
+        _timelineFilterCriteria = res;
+        if (res.isActive) {
+          _filter = 'advanced';
+        } else {
+          _filter = 'all';
+        }
+        _visibleCount = _pageSize;
+        _rebuildMemoizedLists();
+      });
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(0.0);
+      }
+    }
+  }
+
   IconData get _emptyIcon {
     return switch (_filter) {
       'today' => Icons.today_rounded,
@@ -349,6 +396,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
       'single' => Icons.radio_button_checked_rounded,
       'notes' => Icons.speaker_notes_off_rounded,
       'media' => Icons.perm_media_rounded,
+      'advanced' => Icons.tune_rounded,
       _ => Icons.history_toggle_off_rounded,
     };
   }
@@ -364,6 +412,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
       'single' => 'No Single Logs',
       'notes' => 'No Notes Found',
       'media' => 'No Media Moments',
+      'advanced' => 'No Filter Matches',
       _ => 'No History',
     };
   }
@@ -373,6 +422,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
       'today' => 'Your moments for today will appear here as you log them.',
       'week' => 'You haven\'t saved any moments during the last seven days.',
       'date' => 'There are no records for this specific calendar day.',
+      'advanced' => 'Try adjusting your filter criteria or resetting filters.',
       'sessions' =>
         'Two-Way IN and OUT moments are automatically grouped into sessions.',
       'in' => 'IN moments are created when using Two-Way logging mode.',
@@ -774,6 +824,14 @@ class _HistoryDialogState extends State<HistoryDialog> {
                   onOpenGodModeSettings: _openGodModeSettings,
                   isMomentImageCollapsed: _isMomentImageCollapsed,
                   onToggleMomentImageCollapse: _toggleMomentImageCollapse,
+                  filterCriteria: _timelineFilterCriteria,
+                  onFilterChanged: (newCriteria) {
+                    setState(() {
+                      _timelineFilterCriteria = newCriteria;
+                      _filter = newCriteria.isActive ? 'advanced' : 'all';
+                      _rebuildMemoizedLists();
+                    });
+                  },
                 )
               : Stack(
                   children: [
@@ -933,6 +991,25 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                             : null,
                                                       ),
                                                     ),
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                          right: spacing8,
+                                                        ),
+                                                    child: ChipButton(
+                                                      p: widget.p,
+                                                      label: 'Advanced'
+                                                          .localized(context),
+                                                      icon: Icons.tune_rounded,
+                                                      active:
+                                                          _filter ==
+                                                              'advanced' ||
+                                                          _timelineFilterCriteria
+                                                              .isActive,
+                                                      onTap:
+                                                          _openAdvancedFilter,
+                                                    ),
+                                                  ),
                                                 ],
                                               ),
                                             ),
@@ -2202,6 +2279,27 @@ class _HistoryDialogState extends State<HistoryDialog> {
               ],
             ),
           ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _openProjects();
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.flag_rounded, size: 20, color: widget.p.accent),
+                const SizedBox(width: 10),
+                Text(
+                  'Projects & Milestones'.localized(context),
+                  style: TextStyle(
+                    color: widget.p.accent,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
           if (_viewMode == 'calendar')
             CupertinoActionSheetAction(
               onPressed: () {
@@ -2337,6 +2435,40 @@ class _HistoryDialogState extends State<HistoryDialog> {
                 ],
               ),
             ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _openAdvancedFilter();
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (_filter == 'advanced' ||
+                    _timelineFilterCriteria.isActive) ...[
+                  Icon(Icons.check_rounded, size: 16, color: widget.p.accent),
+                  const SizedBox(width: 8),
+                ],
+                Icon(Icons.tune_rounded, size: 16, color: widget.p.accent),
+                const SizedBox(width: 6),
+                Text(
+                  'Advanced'.localized(context),
+                  style: TextStyle(
+                    color:
+                        (_filter == 'advanced' ||
+                            _timelineFilterCriteria.isActive)
+                        ? widget.p.accent
+                        : widget.p.text,
+                    fontWeight:
+                        (_filter == 'advanced' ||
+                            _timelineFilterCriteria.isActive)
+                        ? FontWeight.w700
+                        : FontWeight.w500,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
         cancelButton: CupertinoActionSheetAction(
           isDefaultAction: true,
@@ -2513,6 +2645,23 @@ class _HistoryDialogState extends State<HistoryDialog> {
       });
       await _loadGoals();
     }
+  }
+
+  void _openProjects() {
+    ProjectsSheet.show(
+      context,
+      p: widget.p,
+      moments: _entries,
+      activeCategory: widget.activeCategory,
+      isSessionRunning: _isSessionRunning,
+      onStartSession: (proj) {
+        Navigator.pop(context, {
+          'action': 'start_project_session',
+          'project': proj,
+        });
+      },
+      onStopSession: _stopActiveSessionFromGoals,
+    );
   }
 
   void _restoreRemovedEntries(List<Moment> moments) {

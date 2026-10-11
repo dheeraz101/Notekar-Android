@@ -215,6 +215,9 @@ class FloatingTimerService : Service() {
         var initialY = 0
         var initialTouchX = 0f
         var initialTouchY = 0f
+        var lastTapTime = 0L
+        val tapHandler = android.os.Handler(android.os.Looper.getMainLooper())
+        var pendingSingleTap: Runnable? = null
 
         root.setOnTouchListener { _, event ->
             when (event.action) {
@@ -235,8 +238,41 @@ class FloatingTimerService : Service() {
                     val dx = Math.abs(event.rawX - initialTouchX)
                     val dy = Math.abs(event.rawY - initialTouchY)
                     if (dx < 10 && dy < 10) {
-                        isExpanded = !isExpanded
-                        actionsContainer?.visibility = if (isExpanded) View.VISIBLE else View.GONE
+                        val now = System.currentTimeMillis()
+                        val flutterPrefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+
+                        if (now - lastTapTime < 300) {
+                            // Double tap detected
+                            pendingSingleTap?.let { tapHandler.removeCallbacks(it) }
+                            lastTapTime = 0L
+                            root.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP)
+
+                            val doubleTapAction = flutterPrefs.getString("flutter.floating_double_tap_action", "quick_menu") ?: "quick_menu"
+                            if (doubleTapAction == "quick_menu") {
+                                val intent = Intent(this@FloatingTimerService, QuickNoteActivity::class.java).apply {
+                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                                }
+                                startActivity(intent)
+                            } else {
+                                isExpanded = !isExpanded
+                                actionsContainer?.visibility = if (isExpanded) View.VISIBLE else View.GONE
+                            }
+                        } else {
+                            // Possible single tap
+                            lastTapTime = now
+                            val singleTapAction = flutterPrefs.getString("flutter.floating_single_tap_action", "toggle_expand") ?: "toggle_expand"
+
+                            pendingSingleTap = Runnable {
+                                root.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP)
+                                if (singleTapAction == "quick_log") {
+                                    NoteKarWidgetProvider.performBackgroundLog(this@FloatingTimerService, "single", "")
+                                } else {
+                                    isExpanded = !isExpanded
+                                    actionsContainer?.visibility = if (isExpanded) View.VISIBLE else View.GONE
+                                }
+                            }
+                            tapHandler.postDelayed(pendingSingleTap!!, 260)
+                        }
                     }
                     true
                 }

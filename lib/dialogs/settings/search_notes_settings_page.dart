@@ -460,7 +460,9 @@ class _SearchNoteCardState extends State<_SearchNoteCard> {
           )
         : p.border.withValues(alpha: 0.6);
 
-    final effectiveVoicePath = entry.voicePath ?? session?.voicePath;
+    final effectiveVoicePaths = entry.voicePaths.isNotEmpty
+        ? entry.voicePaths
+        : (session?.voicePaths ?? const <String>[]);
     final effectiveVoiceDuration =
         entry.voiceDurationMs ?? session?.voiceDurationMs;
     final effectiveImagePath = entry.imagePath ?? session?.imagePath;
@@ -760,11 +762,11 @@ class _SearchNoteCardState extends State<_SearchNoteCard> {
             ],
 
             // Dedicated Full-Width Voice Player Pill
-            if (effectiveVoicePath != null) ...[
+            for (final vp in effectiveVoicePaths) ...[
               const SizedBox(height: 8),
               TimelineVoicePlayerPill(
                 p: p,
-                voicePath: effectiveVoicePath,
+                voicePath: vp,
                 durationMs: effectiveVoiceDuration ?? 0,
               ),
             ],

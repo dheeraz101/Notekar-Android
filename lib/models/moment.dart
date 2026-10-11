@@ -35,11 +35,17 @@ class Moment {
     this.voicePath,
     this.voiceDurationMs,
     this.goalId,
+    this.projectId,
   }) {
     if (goalId != null &&
         goalId!.isNotEmpty &&
         !tags.contains('goal:$goalId')) {
       tags = [...tags, 'goal:$goalId'];
+    }
+    if (projectId != null &&
+        projectId!.isNotEmpty &&
+        !tags.contains('proj:$projectId')) {
+      tags = [...tags, 'proj:$projectId'];
     }
   }
 
@@ -58,6 +64,9 @@ class Moment {
   String? goalId;
 
   @ignore
+  String? projectId;
+
+  @ignore
   String? get effectiveGoalId {
     if (goalId != null && goalId!.trim().isNotEmpty) return goalId!.trim();
     for (final t in tags) {
@@ -67,6 +76,25 @@ class Moment {
     }
     return null;
   }
+
+  @ignore
+  String? get effectiveProjectId {
+    if (projectId != null && projectId!.trim().isNotEmpty) {
+      return projectId!.trim();
+    }
+    for (final t in tags) {
+      if (t.startsWith('proj:')) {
+        return t.substring(5).trim();
+      }
+    }
+    return null;
+  }
+
+  @ignore
+  String get effectiveCategory =>
+      (category != null && category!.trim().isNotEmpty)
+      ? category!.trim()
+      : (extractHashtagCategory(note) ?? 'All');
 
   factory Moment.fromJson(Map<String, dynamic> json) {
     final type = (json['type'] as String?) ?? 'single';
@@ -92,6 +120,15 @@ class Moment {
         ? rawGoalId.trim()
         : (tagGoalId.isNotEmpty ? tagGoalId.substring(5).trim() : null);
 
+    final rawProjectId = json['projectId'] as String?;
+    final tagProjectId = tagsList
+        .firstWhere((t) => t.startsWith('proj:'), orElse: () => '')
+        .trim();
+    final resolvedProjectId =
+        (rawProjectId != null && rawProjectId.trim().isNotEmpty)
+        ? rawProjectId.trim()
+        : (tagProjectId.isNotEmpty ? tagProjectId.substring(5).trim() : null);
+
     return Moment(
       id: (json['id'] as num).toInt(),
       timestamp: timestamp,
@@ -105,6 +142,7 @@ class Moment {
       voicePath: json['voicePath'] as String?,
       voiceDurationMs: (json['voiceDurationMs'] as num?)?.toInt(),
       goalId: resolvedGoalId,
+      projectId: resolvedProjectId,
     );
   }
 
@@ -135,6 +173,35 @@ class Moment {
     return result.toList();
   }
 
+  /// Multi-asset support: Returns all attached image paths (split by '|').
+  @ignore
+  List<String> get imagePaths {
+    if (imagePath == null || imagePath!.trim().isEmpty) return const [];
+    return imagePath!
+        .split('|')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
+  }
+
+  /// Multi-asset support: Returns all attached voice paths (split by '|').
+  @ignore
+  List<String> get voicePaths {
+    if (voicePath == null || voicePath!.trim().isEmpty) return const [];
+    return voicePath!
+        .split('|')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
+  }
+
+  /// Multi-asset support: Returns all voice durations (split by '|' or single int).
+  @ignore
+  List<int> get voiceDurations {
+    if (voiceDurationMs == null) return const [];
+    return [voiceDurationMs!];
+  }
+
   Moment copyWith({
     int? id,
     int? timestamp,
@@ -149,6 +216,8 @@ class Moment {
     bool clearVoicePath = false,
     int? voiceDurationMs,
     String? goalId,
+    String? projectId,
+    bool clearProjectId = false,
   }) {
     return Moment(
       id: id ?? this.id,
@@ -164,6 +233,7 @@ class Moment {
           ? null
           : (voiceDurationMs ?? this.voiceDurationMs),
       goalId: goalId ?? this.goalId,
+      projectId: clearProjectId ? null : (projectId ?? this.projectId),
     );
   }
 
@@ -181,6 +251,7 @@ class Moment {
     if (voiceDurationMs != null && voiceDurationMs! > 0)
       'voiceDurationMs': voiceDurationMs,
     if (effectiveGoalId != null) 'goalId': effectiveGoalId,
+    if (effectiveProjectId != null) 'projectId': effectiveProjectId,
   };
 }
 
@@ -193,6 +264,9 @@ class NoteResult {
     this.imagePath,
     this.voicePath,
     this.voiceDurationMs,
+    this.imagePaths = const [],
+    this.voicePaths = const [],
+    this.voiceDurations = const [],
   });
 
   final String note;
@@ -200,6 +274,33 @@ class NoteResult {
   final String? imagePath;
   final String? voicePath;
   final int? voiceDurationMs;
+  final List<String> imagePaths;
+  final List<String> voicePaths;
+  final List<int> voiceDurations;
+
+  List<String> get effectiveImagePaths {
+    if (imagePaths.isNotEmpty) return imagePaths;
+    if (imagePath != null && imagePath!.trim().isNotEmpty) {
+      return imagePath!
+          .split('|')
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
+    }
+    return const [];
+  }
+
+  List<String> get effectiveVoicePaths {
+    if (voicePaths.isNotEmpty) return voicePaths;
+    if (voicePath != null && voicePath!.trim().isNotEmpty) {
+      return voicePath!
+          .split('|')
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
+    }
+    return const [];
+  }
 }
 
 class HistoryListItem {

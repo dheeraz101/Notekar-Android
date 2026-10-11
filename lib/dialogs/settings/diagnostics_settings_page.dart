@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/screens/device_health_intro_screen.dart';
 import 'package:notekar/services/circuit_breaker_service.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_logger.dart';
@@ -285,6 +286,66 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _LiveDeviceHealthGovernorCard(p: widget.p, engine: engine),
+        const SizedBox(height: 12),
+        PressableScale(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            DeviceHealthIntroScreen.show(
+              context,
+              p: widget.p,
+              isStandaloneFromSettings: true,
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: widget.p.accent.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: widget.p.accent.withValues(alpha: 0.28),
+                width: 1.0,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  CupertinoIcons.doc_plaintext,
+                  size: 20,
+                  color: widget.p.accent,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Device Health & Feature Restrictions'.localized(
+                          context,
+                        ),
+                        style: TextStyle(
+                          color: widget.p.accent,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'View the full guide on how features adapt to your hardware'
+                            .localized(context),
+                        style: TextStyle(color: widget.p.text2, fontSize: 11),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 18,
+                  color: widget.p.accent,
+                ),
+              ],
+            ),
+          ),
+        ),
         const SizedBox(height: 16),
         if (engine.isLowEnd || engine.tier == PerformanceTier.low) ...[
           Container(

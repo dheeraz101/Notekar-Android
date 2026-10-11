@@ -97,8 +97,11 @@ class TimelineSessionItem extends TimelineItem {
   }
 
   String? get imagePath => noteMoment.imagePath;
+  List<String> get imagePaths => noteMoment.imagePaths;
   String? get voicePath => noteMoment.voicePath;
+  List<String> get voicePaths => noteMoment.voicePaths;
   int? get voiceDurationMs => noteMoment.voiceDurationMs;
+  List<int> get voiceDurations => noteMoment.voiceDurations;
 
   @override
   String? get category {
@@ -597,6 +600,10 @@ class TimelineIsolatePayload {
   final String? selectedDateKey;
   final String today;
   final DateTime weekAgo;
+  final String? criteriaCategory;
+  final String? criteriaHashtag;
+  final String? criteriaGoalId;
+  final String? criteriaMode;
 
   TimelineIsolatePayload({
     required this.entries,
@@ -605,6 +612,10 @@ class TimelineIsolatePayload {
     this.selectedDateKey,
     required this.today,
     required this.weekAgo,
+    this.criteriaCategory,
+    this.criteriaHashtag,
+    this.criteriaGoalId,
+    this.criteriaMode,
   });
 }
 
@@ -732,6 +743,84 @@ TimelineIsolateResult buildTimelineDataInIsolate(
                 return hasInMedia || hasOutMedia;
               }
               return false;
+            }).toList(),
+          ),
+        )
+        .where((s) => s.items.isNotEmpty)
+        .toList();
+  }
+
+  final hasCriteria =
+      payload.filter == 'advanced' ||
+      payload.criteriaCategory != null ||
+      payload.criteriaHashtag != null ||
+      payload.criteriaGoalId != null ||
+      (payload.criteriaMode != null && payload.criteriaMode != 'all');
+
+  if (hasCriteria) {
+    final catLower = payload.criteriaCategory?.trim().toLowerCase();
+    final tagLower = payload.criteriaHashtag?.trim().toLowerCase();
+    final cleanTag = tagLower == null
+        ? null
+        : (tagLower.startsWith('#') ? tagLower : '#$tagLower');
+    final goalId = payload.criteriaGoalId;
+    final mode = payload.criteriaMode ?? 'all';
+
+    sections = sections
+        .map(
+          (s) => TimelineDaySection(
+            dateKey: s.dateKey,
+            date: s.date,
+            displayTitle: s.displayTitle,
+            totalTrackedDuration: s.totalTrackedDuration,
+            totalLogs: s.totalLogs,
+            items: s.items.where((it) {
+              if (mode == 'single' && it is! TimelineSingleItem) return false;
+              if (mode == 'two-way' && it is! TimelineSessionItem) return false;
+              if (mode == 'media') {
+                if (it is TimelineSingleItem) {
+                  final m = it.moment;
+                  if ((m.imagePath == null || m.imagePath!.isEmpty) &&
+                      (m.voicePath == null || m.voicePath!.isEmpty)) {
+                    return false;
+                  }
+                } else if (it is TimelineSessionItem) {
+                  final hasInMedia =
+                      (it.inMoment.imagePath != null &&
+                          it.inMoment.imagePath!.isNotEmpty) ||
+                      (it.inMoment.voicePath != null &&
+                          it.inMoment.voicePath!.isNotEmpty);
+                  final hasOutMedia =
+                      it.outMoment != null &&
+                      ((it.outMoment!.imagePath != null &&
+                              it.outMoment!.imagePath!.isNotEmpty) ||
+                          (it.outMoment!.voicePath != null &&
+                              it.outMoment!.voicePath!.isNotEmpty));
+                  if (!hasInMedia && !hasOutMedia) return false;
+                }
+              }
+              if (catLower != null && catLower.isNotEmpty) {
+                final itCat = it.category?.toLowerCase() ?? '';
+                final itNote = it.note.toLowerCase();
+                if (itCat != catLower && !itNote.contains('#$catLower')) {
+                  return false;
+                }
+              }
+              if (cleanTag != null && cleanTag.isNotEmpty) {
+                if (!it.note.toLowerCase().contains(cleanTag)) return false;
+              }
+              if (goalId != null && goalId.isNotEmpty) {
+                if (it is TimelineSessionItem) {
+                  final inG = it.inMoment.goalId;
+                  final outG = it.outMoment?.goalId;
+                  if (inG != goalId && outG != goalId) return false;
+                } else if (it is TimelineSingleItem) {
+                  if (it.moment.goalId != goalId) return false;
+                } else {
+                  return false;
+                }
+              }
+              return true;
             }).toList(),
           ),
         )

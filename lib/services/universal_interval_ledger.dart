@@ -83,8 +83,13 @@ class CanonicalInterval {
 /// and handles multi-track category/goal reconciliation without orphaned endpoints.
 class UniversalIntervalLedger {
   const UniversalIntervalLedger._();
+  static const UniversalIntervalLedger instance = UniversalIntervalLedger._();
 
-  /// Reconstructs canonical intervals from raw moments with multi-track category pairing
+  List<CanonicalInterval> computeIntervals(
+    List<Moment> rawMoments, {
+    DateTime? referenceNow,
+  }) => reconstructAndSlice(rawMoments, referenceNow: referenceNow);
+
   /// and midnight boundary slicing.
   static List<CanonicalInterval> reconstructAndSlice(
     List<Moment> rawMoments, {

@@ -572,11 +572,11 @@ class TimelineSessionCard extends StatelessWidget {
                 ],
 
                 // Dedicated Full-Width Voice Notes Player
-                if (noteMoment.voicePath != null) ...[
+                for (final vp in noteMoment.voicePaths) ...[
                   SizedBox(height: compact ? 5 : 7),
                   TimelineVoicePlayerPill(
                     p: p,
-                    voicePath: noteMoment.voicePath!,
+                    voicePath: vp,
                     durationMs: noteMoment.voiceDurationMs ?? 0,
                     compact: compact,
                   ),

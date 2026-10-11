@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
+import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
@@ -12,23 +13,28 @@ class TimelineFilterCriteria {
     this.mode = 'all',
     this.category,
     this.hashtag,
+    this.goalId,
   });
 
   final String mode; // 'all' | 'single' | 'two-way' | 'media'
   final String? category;
   final String? hashtag;
+  final String? goalId;
 
-  bool get isActive => mode != 'all' || category != null || hashtag != null;
+  bool get isActive =>
+      mode != 'all' || category != null || hashtag != null || goalId != null;
 
   TimelineFilterCriteria copyWith({
     String? mode,
     String? Function()? category,
     String? Function()? hashtag,
+    String? Function()? goalId,
   }) {
     return TimelineFilterCriteria(
       mode: mode ?? this.mode,
       category: category != null ? category() : this.category,
       hashtag: hashtag != null ? hashtag() : this.hashtag,
+      goalId: goalId != null ? goalId() : this.goalId,
     );
   }
 }
@@ -40,6 +46,7 @@ class TimelineFilterSheet extends StatefulWidget {
     required this.initial,
     required this.categories,
     required this.hashtags,
+    this.goals = const [],
     this.largeText = false,
     this.blur = false,
   });
@@ -48,6 +55,7 @@ class TimelineFilterSheet extends StatefulWidget {
   final TimelineFilterCriteria initial;
   final List<String> categories;
   final List<String> hashtags;
+  final List<Goal> goals;
   final bool largeText;
   final bool blur;
 
@@ -57,6 +65,7 @@ class TimelineFilterSheet extends StatefulWidget {
     required TimelineFilterCriteria initial,
     required List<String> categories,
     required List<String> hashtags,
+    List<Goal> goals = const [],
     bool largeText = false,
     bool blur = false,
   }) {
@@ -71,6 +80,7 @@ class TimelineFilterSheet extends StatefulWidget {
         initial: initial,
         categories: categories,
         hashtags: hashtags,
+        goals: goals,
         largeText: largeText,
         blur: blur,
       ),
@@ -85,6 +95,7 @@ class _TimelineFilterSheetState extends State<TimelineFilterSheet> {
   late String _mode;
   String? _category;
   String? _hashtag;
+  String? _goalId;
 
   @override
   void initState() {
@@ -92,6 +103,7 @@ class _TimelineFilterSheetState extends State<TimelineFilterSheet> {
     _mode = widget.initial.mode;
     _category = widget.initial.category;
     _hashtag = widget.initial.hashtag;
+    _goalId = widget.initial.goalId;
   }
 
   void _reset() {
@@ -100,6 +112,7 @@ class _TimelineFilterSheetState extends State<TimelineFilterSheet> {
       _mode = 'all';
       _category = null;
       _hashtag = null;
+      _goalId = null;
     });
   }
 
@@ -110,6 +123,7 @@ class _TimelineFilterSheetState extends State<TimelineFilterSheet> {
         mode: _mode,
         category: _category,
         hashtag: _hashtag,
+        goalId: _goalId,
       ),
     );
   }
@@ -260,7 +274,60 @@ class _TimelineFilterSheetState extends State<TimelineFilterSheet> {
             const SizedBox(height: 20),
           ],
 
-          // Section 3: Hashtags
+          // Section 3: Target Goals (Distinct from hashtags)
+          if (widget.goals.isNotEmpty) ...[
+            Text(
+              'TARGET GOALS'.localized(context),
+              style: TextStyle(
+                color: p.text3,
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.8,
+              ),
+            ),
+            const SizedBox(height: 8),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                children: [
+                  _FilterChip(
+                    p: p,
+                    label: 'All Goals'.localized(context),
+                    isSelected: _goalId == null,
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      setState(() => _goalId = null);
+                    },
+                  ),
+                  for (final goal in widget.goals) ...[
+                    const SizedBox(width: 8),
+                    _FilterChip(
+                      p: p,
+                      label: '🎯 ${goal.title}',
+                      color: goal.category != null
+                          ? getCategoryMeta(goal.category!, p).color
+                          : p.accent,
+                      isSelected: _goalId == goal.id,
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        setState(() {
+                          if (_goalId == goal.id) {
+                            _goalId = null;
+                          } else {
+                            _goalId = goal.id;
+                          }
+                        });
+                      },
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+
+          // Section 4: Hashtags
           if (widget.hashtags.isNotEmpty) ...[
             Text(
               'HASHTAGS'.localized(context),

@@ -188,11 +188,11 @@ class MediaStorageService {
 
   /// Deletes associated media files when a moment is permanently purged.
   Future<void> deleteMediaForMoment(Moment moment) async {
-    if (moment.imagePath != null && moment.imagePath!.isNotEmpty) {
-      await deleteMediaFile(moment.imagePath);
+    for (final img in moment.imagePaths) {
+      await deleteMediaFile(img);
     }
-    if (moment.voicePath != null && moment.voicePath!.isNotEmpty) {
-      await deleteMediaFile(moment.voicePath);
+    for (final voice in moment.voicePaths) {
+      await deleteMediaFile(voice);
     }
   }
 

@@ -494,12 +494,64 @@ class QuickNoteActivity : Activity() {
         }
         card.addView(input)
 
-        // Quick Tag Chips (15 Researched Daily Activities)
+        // Quick Tag Chips (Researched Daily Activities & User Custom Tags)
         try {
             val customTags = mutableListOf<String>()
+            val seenTags = mutableSetOf<String>()
+
+            // 1. Load from notekar_activity_tags_v2
+            val activityJson = flutterPrefs.getString("flutter.notekar_activity_tags_v2", null)
+            if (!activityJson.isNullOrEmpty() && activityJson.startsWith("[")) {
+                try {
+                    val arr = JSONArray(activityJson)
+                    for (i in 0 until arr.length()) {
+                        val obj = arr.optJSONObject(i)
+                        val label = obj?.optString("label")?.trim() ?: arr.optString(i)?.trim()
+                        if (!label.isNullOrEmpty()) {
+                            val clean = if (label.startsWith("#")) label else "#$label"
+                            if (seenTags.add(clean.lowercase())) {
+                                customTags.add(clean)
+                            }
+                        }
+                    }
+                } catch (_: Exception) {}
+            }
+
+            // 2. Load from notekar.recent_tags
+            val recentJson = flutterPrefs.getString("flutter.notekar.recent_tags", null)
+            if (!recentJson.isNullOrEmpty() && recentJson.startsWith("[")) {
+                try {
+                    val arr = JSONArray(recentJson)
+                    for (i in 0 until arr.length()) {
+                        val tag = arr.optString(i)?.trim()
+                        if (!tag.isNullOrEmpty()) {
+                            val clean = if (tag.startsWith("#")) tag else "#$tag"
+                            if (seenTags.add(clean.lowercase())) {
+                                customTags.add(clean)
+                            }
+                        }
+                    }
+                } catch (_: Exception) {}
+            }
+            val recentSet = flutterPrefs.getStringSet("flutter.notekar.recent_tags", null)
+            if (recentSet != null) {
+                for (tag in recentSet) {
+                    val clean = if (tag.startsWith("#")) tag else "#$tag"
+                    if (seenTags.add(clean.lowercase())) {
+                        customTags.add(clean)
+                    }
+                }
+            }
+
+            // 3. Load from custom_note_tags (legacy/fallback)
             val stringSet = flutterPrefs.getStringSet("flutter.custom_note_tags", null)
             if (stringSet != null && stringSet.isNotEmpty()) {
-                customTags.addAll(stringSet)
+                for (tag in stringSet) {
+                    val clean = if (tag.startsWith("#")) tag else "#$tag"
+                    if (seenTags.add(clean.lowercase())) {
+                        customTags.add(clean)
+                    }
+                }
             } else {
                 val jsonString = flutterPrefs.getString("flutter.custom_note_tags", null)
                 if (jsonString != null && jsonString.startsWith("[")) {
@@ -507,7 +559,10 @@ class QuickNoteActivity : Activity() {
                     for (i in 0 until jsonArray.length()) {
                         val tag = jsonArray.optString(i)?.trim()
                         if (!tag.isNullOrEmpty()) {
-                            customTags.add(tag)
+                            val clean = if (tag.startsWith("#")) tag else "#$tag"
+                            if (seenTags.add(clean.lowercase())) {
+                                customTags.add(clean)
+                            }
                         }
                     }
                 }
@@ -516,21 +571,21 @@ class QuickNoteActivity : Activity() {
             if (customTags.isEmpty()) {
                 customTags.addAll(
                     listOf(
-                        "Walking",
-                        "Gym",
-                        "Studying",
-                        "Deep Work",
-                        "Bathing",
-                        "Washroom",
-                        "Reading",
-                        "Meditation",
-                        "Commute",
-                        "Cooking",
-                        "Chores",
-                        "Gaming",
-                        "Family",
-                        "Dining",
-                        "Sleep"
+                        "#Walking",
+                        "#Gym",
+                        "#Studying",
+                        "#Deep Work",
+                        "#Bathing",
+                        "#Washroom",
+                        "#Reading",
+                        "#Meditation",
+                        "#Commute",
+                        "#Cooking",
+                        "#Chores",
+                        "#Gaming",
+                        "#Family",
+                        "#Dining",
+                        "#Sleep"
                     )
                 )
             }
@@ -557,7 +612,10 @@ class QuickNoteActivity : Activity() {
                 val filteredTags = if (q.isNullOrEmpty()) {
                     customTags
                 } else {
-                    customTags.filter { it.removePrefix("#").lowercase().contains(q) }
+                    customTags.filter {
+                        val clean = it.removePrefix("#").lowercase()
+                        clean.startsWith(q) || clean.contains(q)
+                    }
                 }
 
                 for (tag in filteredTags) {
@@ -604,16 +662,19 @@ class QuickNoteActivity : Activity() {
                             val prefix = currentText.substring(0, safeCursor)
                             val suffix = currentText.substring(safeCursor)
                             val hashIndex = prefix.lastIndexOf('#')
-                            val newText =
-                                if (hashIndex != -1 && !prefix.substring(hashIndex).contains(" ")) {
-                                    prefix.substring(0, hashIndex) + cleanTag + " " + suffix
-                                } else {
-                                    val separator =
-                                        if (currentText.isEmpty() || currentText.endsWith(" ")) "" else " "
-                                    "$currentText$separator$cleanTag "
-                                }
+                            val newText: String
+                            val newPos: Int
+                            if (hashIndex != -1 && !prefix.substring(hashIndex).contains(" ")) {
+                                newText = prefix.substring(0, hashIndex) + cleanTag + " " + suffix
+                                newPos = hashIndex + cleanTag.length + 1
+                            } else {
+                                val separator =
+                                    if (currentText.isEmpty() || currentText.endsWith(" ")) "" else " "
+                                newText = "$currentText$separator$cleanTag "
+                                newPos = newText.length
+                            }
                             input.setText(newText)
-                            input.setSelection(newText.length)
+                            input.setSelection(newPos.coerceIn(0, newText.length))
                         }
                     }
                     tagRow.addView(chip)
@@ -904,6 +965,10 @@ class QuickNoteActivity : Activity() {
                     widgetPrefs.edit()
                         .putString(NoteKarWidgetProvider.KEY_ACTIVE_CATEGORY, selectedCategory)
                         .apply()
+                    flutterPrefs.edit()
+                        .putString("flutter.notekar.active_category", selectedCategory)
+                        .putString("flutter.active_category", selectedCategory)
+                        .apply()
                 }
 
                 NoteKarWidgetProvider.performBackgroundLog(
@@ -920,48 +985,54 @@ class QuickNoteActivity : Activity() {
             }
         }
         if (showModes) {
-            val btnLogNote = TextView(this).apply {
-                text = "Log Note"
-                setTextColor(Color.WHITE)
-                textSize = 13.5f
-                gravity = Gravity.CENTER
-                typeface =
-                    android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
-                background = GradientDrawable().apply {
-                    setColor(Color.parseColor("#FF0A84FF"))
-                    cornerRadius = 20 * density
-                }
-                val lp = LinearLayout.LayoutParams(0, (40 * density).toInt(), 1f).apply {
-                    marginStart = (4 * density).toInt()
-                    marginEnd = (4 * density).toInt()
-                }
-                layoutParams = lp
-                setOnClickListener {
-                    var noteText = input.text.toString().trim()
-                    if (selectedGoalTitle != null && selectedGoalTitle!!.isNotEmpty()) {
-                        noteText =
-                            if (noteText.isEmpty()) "[${selectedGoalTitle}]" else "[${selectedGoalTitle}] $noteText"
+            if (mode != "two-way") {
+                val btnLogNote = TextView(this).apply {
+                    text = "Log Note"
+                    setTextColor(Color.WHITE)
+                    textSize = 13.5f
+                    gravity = Gravity.CENTER
+                    typeface =
+                        android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
+                    background = GradientDrawable().apply {
+                        setColor(Color.parseColor("#FF0A84FF"))
+                        cornerRadius = 20 * density
                     }
-                    widgetPrefs.edit()
-                        .putString(NoteKarWidgetProvider.KEY_ACTIVE_CATEGORY, selectedCategory)
-                        .apply()
-                    NoteKarWidgetProvider.performBackgroundLog(
-                        this@QuickNoteActivity,
-                        "note",
-                        noteText,
-                        category = selectedCategory,
-                        goalId = selectedGoalId,
-                        imagePath = stagedImagePath,
-                        voicePath = stagedVoicePath,
-                        voiceDurationMs = stagedVoiceDurationMs
-                    )
-                    finish()
+                    val lp = LinearLayout.LayoutParams(0, (40 * density).toInt(), 1f).apply {
+                        marginStart = (4 * density).toInt()
+                        marginEnd = (4 * density).toInt()
+                    }
+                    layoutParams = lp
+                    setOnClickListener {
+                        var noteText = input.text.toString().trim()
+                        if (selectedGoalTitle != null && selectedGoalTitle!!.isNotEmpty()) {
+                            noteText =
+                                if (noteText.isEmpty()) "[${selectedGoalTitle}]" else "[${selectedGoalTitle}] $noteText"
+                        }
+                        widgetPrefs.edit()
+                            .putString(NoteKarWidgetProvider.KEY_ACTIVE_CATEGORY, selectedCategory)
+                            .apply()
+                        flutterPrefs.edit()
+                            .putString("flutter.notekar.active_category", selectedCategory)
+                            .putString("flutter.active_category", selectedCategory)
+                            .apply()
+                        NoteKarWidgetProvider.performBackgroundLog(
+                            this@QuickNoteActivity,
+                            "note",
+                            noteText,
+                            category = selectedCategory,
+                            goalId = selectedGoalId,
+                            imagePath = stagedImagePath,
+                            voicePath = stagedVoicePath,
+                            voiceDurationMs = stagedVoiceDurationMs
+                        )
+                        finish()
+                    }
                 }
+                buttonsContainer.addView(btnLogNote)
             }
-            buttonsContainer.addView(btnLogNote)
 
             val btnStart = TextView(this).apply {
-                text = if (mode == "two-way") "Start Session" else "⚡ Log"
+                text = if (mode == "two-way") "▶ Start" else "⚡ Log"
                 setTextColor(Color.WHITE)
                 textSize = 13.5f
                 gravity = Gravity.CENTER
@@ -983,6 +1054,10 @@ class QuickNoteActivity : Activity() {
                     }
                     widgetPrefs.edit()
                         .putString(NoteKarWidgetProvider.KEY_ACTIVE_CATEGORY, selectedCategory)
+                        .apply()
+                    flutterPrefs.edit()
+                        .putString("flutter.notekar.active_category", selectedCategory)
+                        .putString("flutter.active_category", selectedCategory)
                         .apply()
                     val targetType = if (mode == "two-way") "in" else "single"
                     NoteKarWidgetProvider.performBackgroundLog(

@@ -13,6 +13,8 @@ import 'package:notekar/services/audio_service.dart';
 import 'package:notekar/services/media_storage_service.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/tag_service.dart';
+import 'package:notekar/widgets/hashtag_suggestion_overlay.dart';
+import 'package:notekar/widgets/photo_lightbox_dialog.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -64,9 +66,9 @@ class _NoteDialogState extends State<NoteDialog> {
   int _availableShields = 0;
   bool _shieldActivated = false;
 
-  String? _stagedImagePath;
-  String? _stagedVoicePath;
-  int? _stagedVoiceDurationMs;
+  List<String> _stagedImagePaths = [];
+  List<String> _stagedVoicePaths = [];
+  List<int> _stagedVoiceDurations = [];
   bool _isRecording = false;
   int _recordingSeconds = 0;
   Timer? _recordingTimer;
@@ -77,9 +79,25 @@ class _NoteDialogState extends State<NoteDialog> {
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.initialNote);
-    _stagedImagePath = widget.initialImagePath;
-    _stagedVoicePath = widget.initialVoicePath;
-    _stagedVoiceDurationMs = widget.initialVoiceDurationMs;
+    if (widget.initialImagePath != null &&
+        widget.initialImagePath!.trim().isNotEmpty) {
+      _stagedImagePaths = widget.initialImagePath!
+          .split('|')
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
+    }
+    if (widget.initialVoicePath != null &&
+        widget.initialVoicePath!.trim().isNotEmpty) {
+      _stagedVoicePaths = widget.initialVoicePath!
+          .split('|')
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
+      if (widget.initialVoiceDurationMs != null) {
+        _stagedVoiceDurations = [widget.initialVoiceDurationMs!];
+      }
+    }
     _loadSobrietyMode();
     _loadTags();
 
@@ -110,6 +128,10 @@ class _NoteDialogState extends State<NoteDialog> {
   }
 
   Future<void> _pickPhoto(ImageSource source) async {
+    if (_stagedImagePaths.length >= 5) {
+      HapticFeedback.heavyImpact();
+      return;
+    }
     HapticFeedback.selectionClick();
     try {
       final picker = ImagePicker();
@@ -125,7 +147,7 @@ class _NoteDialogState extends State<NoteDialog> {
         );
         if (mounted) {
           setState(() {
-            _stagedImagePath = saved;
+            _stagedImagePaths.add(saved);
           });
         }
       }
@@ -139,6 +161,10 @@ class _NoteDialogState extends State<NoteDialog> {
     if (_isRecording) {
       await _stopVoiceRecording();
     } else {
+      if (_stagedVoicePaths.length >= 5) {
+        HapticFeedback.heavyImpact();
+        return;
+      }
       await _startVoiceRecording();
     }
   }
@@ -167,10 +193,14 @@ class _NoteDialogState extends State<NoteDialog> {
       setState(() {
         _isRecording = false;
         if (res != null) {
-          _stagedVoicePath = res['filePath'] as String?;
-          _stagedVoiceDurationMs =
+          final path = res['filePath'] as String?;
+          final dur =
               (res['durationMs'] as num?)?.toInt() ??
               (_recordingSeconds * 1000);
+          if (path != null && path.isNotEmpty) {
+            _stagedVoicePaths.add(path);
+            _stagedVoiceDurations.add(dur);
+          }
         }
       });
     }
@@ -205,9 +235,15 @@ class _NoteDialogState extends State<NoteDialog> {
       builder: (ctx) => BigNoteDialog(
         p: widget.p,
         initialNote: _controller.text,
-        initialImagePath: _stagedImagePath,
-        initialVoicePath: _stagedVoicePath,
-        initialVoiceDurationMs: _stagedVoiceDurationMs,
+        initialImagePath: _stagedImagePaths.isEmpty
+            ? null
+            : _stagedImagePaths.join('|'),
+        initialVoicePath: _stagedVoicePaths.isEmpty
+            ? null
+            : _stagedVoicePaths.join('|'),
+        initialVoiceDurationMs: _stagedVoiceDurations.isEmpty
+            ? null
+            : _stagedVoiceDurations.fold<int>(0, (int a, int b) => a + b),
         title: 'Plus Note',
         blur: widget.blur,
         largeText: widget.largeText,
@@ -215,6 +251,11 @@ class _NoteDialogState extends State<NoteDialog> {
     );
     if (result != null && mounted) {
       _controller.text = result.note;
+      setState(() {
+        _stagedImagePaths = result.effectiveImagePaths;
+        _stagedVoicePaths = result.effectiveVoicePaths;
+        _stagedVoiceDurations = result.voiceDurations;
+      });
       Navigator.pop(context, result);
     }
   }
@@ -915,66 +956,106 @@ class _NoteDialogState extends State<NoteDialog> {
                         ),
                       ],
 
-                      // Staged Image Preview Bar
-                      if (_stagedImagePath != null) ...[
+                      // Staged Image Preview Bar (Multi-photo strip)
+                      if (_stagedImagePaths.isNotEmpty) ...[
                         Container(
                           margin: const EdgeInsets.only(bottom: 8),
-                          padding: const EdgeInsets.all(6),
+                          padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
                             color: widget.p.surface2,
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(14),
                             border: Border.all(
                               color: widget.p.border.withValues(alpha: 0.6),
                             ),
                           ),
-                          child: Row(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: SizedBox(
-                                  width: 44,
-                                  height: 44,
-                                  child: _buildStagedImageThumbnail(),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Photo attached',
-                                      style: TextStyle(
-                                        color: widget.p.text,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      'Tap ✕ to remove',
-                                      style: TextStyle(
-                                        color: widget.p.text3,
-                                        fontSize: 10.5,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              PressableScale(
-                                onTap: () =>
-                                    setState(() => _stagedImagePath = null),
-                                child: Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: BoxDecoration(
-                                    color: widget.p.surface3,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    CupertinoIcons.xmark,
+                              Row(
+                                children: [
+                                  Icon(
+                                    CupertinoIcons.photo_fill_on_rectangle_fill,
                                     size: 13,
-                                    color: widget.p.text2,
+                                    color: widget.p.accent,
                                   ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    '${_stagedImagePaths.length}/5 Photos attached',
+                                    style: TextStyle(
+                                      color: widget.p.text,
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              SizedBox(
+                                height: 52,
+                                child: ListView.separated(
+                                  scrollDirection: Axis.horizontal,
+                                  physics: const BouncingScrollPhysics(),
+                                  itemCount: _stagedImagePaths.length,
+                                  separatorBuilder: (_, _) =>
+                                      const SizedBox(width: 8),
+                                  itemBuilder: (context, idx) {
+                                    final imgPath = _stagedImagePaths[idx];
+                                    return Stack(
+                                      children: [
+                                        PressableScale(
+                                          onTap: () {
+                                            PhotoLightboxDialog.show(
+                                              context,
+                                              p: widget.p,
+                                              imagePaths: _stagedImagePaths,
+                                              initialIndex: idx,
+                                            );
+                                          },
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                            child: SizedBox(
+                                              width: 52,
+                                              height: 52,
+                                              child: _buildStagedImageThumbnail(
+                                                imgPath,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          top: 2,
+                                          right: 2,
+                                          child: PressableScale(
+                                            onTap: () {
+                                              HapticFeedback.selectionClick();
+                                              setState(() {
+                                                _stagedImagePaths.removeAt(idx);
+                                              });
+                                            },
+                                            child: Container(
+                                              width: 18,
+                                              height: 18,
+                                              decoration: BoxDecoration(
+                                                color: Colors.black.withValues(
+                                                  alpha: 0.65,
+                                                ),
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: const Center(
+                                                child: Icon(
+                                                  CupertinoIcons.xmark,
+                                                  size: 10,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
                                 ),
                               ),
                             ],
@@ -982,58 +1063,73 @@ class _NoteDialogState extends State<NoteDialog> {
                         ),
                       ],
 
-                      // Staged Voice Preview Bar
-                      if (_stagedVoicePath != null) ...[
-                        Container(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: widget.p.surface2,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: widget.p.border.withValues(alpha: 0.6),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                CupertinoIcons.mic_fill,
-                                size: 16,
-                                color: widget.p.accent,
+                      // Staged Voice Preview Bar (Multi-voice notes)
+                      if (_stagedVoicePaths.isNotEmpty) ...[
+                        Column(
+                          children: List.generate(_stagedVoicePaths.length, (
+                            idx,
+                          ) {
+                            final dur = idx < _stagedVoiceDurations.length
+                                ? _stagedVoiceDurations[idx]
+                                : 0;
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 6),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
                               ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Voice Note (${_formatMs(_stagedVoiceDurationMs ?? 0)})',
-                                style: TextStyle(
-                                  color: widget.p.text,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
+                              decoration: BoxDecoration(
+                                color: widget.p.surface2,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: widget.p.border.withValues(alpha: 0.6),
                                 ),
                               ),
-                              const Spacer(),
-                              PressableScale(
-                                onTap: () => setState(() {
-                                  _stagedVoicePath = null;
-                                  _stagedVoiceDurationMs = null;
-                                }),
-                                child: Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: BoxDecoration(
-                                    color: widget.p.surface3,
-                                    shape: BoxShape.circle,
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    CupertinoIcons.mic_fill,
+                                    size: 15,
+                                    color: widget.p.accent,
                                   ),
-                                  child: Icon(
-                                    CupertinoIcons.xmark,
-                                    size: 13,
-                                    color: widget.p.text2,
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Voice Note ${idx + 1} (${_formatMs(dur)})',
+                                    style: TextStyle(
+                                      color: widget.p.text,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
-                                ),
+                                  const Spacer(),
+                                  PressableScale(
+                                    onTap: () {
+                                      HapticFeedback.selectionClick();
+                                      setState(() {
+                                        _stagedVoicePaths.removeAt(idx);
+                                        if (idx <
+                                            _stagedVoiceDurations.length) {
+                                          _stagedVoiceDurations.removeAt(idx);
+                                        }
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        color: widget.p.surface3,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        CupertinoIcons.xmark,
+                                        size: 12,
+                                        color: widget.p.text2,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
+                            );
+                          }),
                         ),
                       ],
 
@@ -1168,6 +1264,12 @@ class _NoteDialogState extends State<NoteDialog> {
                             ),
                           ],
                         ),
+                      ),
+
+                      // Inline Hashtag Autocomplete Suggestions Overlay
+                      HashtagSuggestionOverlay(
+                        controller: _controller,
+                        p: widget.p,
                       ),
 
                       // Input Bar Row: WhatsApp style (Input box on left + Circular action button on right)
@@ -1320,14 +1422,13 @@ class _NoteDialogState extends State<NoteDialog> {
     );
   }
 
-  Widget _buildStagedImageThumbnail() {
-    if (_stagedImagePath == null) return const SizedBox.shrink();
-    final file = MediaStorageService.instance.resolveFileSync(_stagedImagePath);
+  Widget _buildStagedImageThumbnail(String imagePath) {
+    final file = MediaStorageService.instance.resolveFileSync(imagePath);
     if (file.existsSync()) {
       return Image.file(file, fit: BoxFit.cover);
     }
     return FutureBuilder<File>(
-      future: MediaStorageService.instance.resolveFile(_stagedImagePath),
+      future: MediaStorageService.instance.resolveFile(imagePath),
       builder: (context, snapshot) {
         if (snapshot.hasData && snapshot.data!.existsSync()) {
           return Image.file(snapshot.data!, fit: BoxFit.cover);
@@ -1377,7 +1478,8 @@ class _NoteDialogState extends State<NoteDialog> {
       }
     }
 
-    final hasMedia = _stagedImagePath != null || _stagedVoicePath != null;
+    final hasMedia =
+        _stagedImagePaths.isNotEmpty || _stagedVoicePaths.isNotEmpty;
     if (!widget.allowEmpty && note.isEmpty && !hasMedia) {
       HapticFeedback.selectionClick();
       setState(() => _showWarning = true);
@@ -1399,14 +1501,27 @@ class _NoteDialogState extends State<NoteDialog> {
       );
     }
 
+    final pipeImages = _stagedImagePaths.isEmpty
+        ? null
+        : _stagedImagePaths.join('|');
+    final pipeVoices = _stagedVoicePaths.isEmpty
+        ? null
+        : _stagedVoicePaths.join('|');
+    final totalDuration = _stagedVoiceDurations.isEmpty
+        ? null
+        : _stagedVoiceDurations.fold(0, (a, b) => a + b);
+
     Navigator.pop(
       context,
       NoteResult(
         note,
         extractedTags,
-        imagePath: _stagedImagePath,
-        voicePath: _stagedVoicePath,
-        voiceDurationMs: _stagedVoiceDurationMs,
+        imagePath: pipeImages,
+        voicePath: pipeVoices,
+        voiceDurationMs: totalDuration,
+        imagePaths: _stagedImagePaths,
+        voicePaths: _stagedVoicePaths,
+        voiceDurations: _stagedVoiceDurations,
       ),
     );
   }

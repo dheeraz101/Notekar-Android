@@ -11,8 +11,9 @@ import 'package:notekar/widgets/pressable_scale.dart';
 /// Twitter/X style photo attachment card for the Life Ledger history timeline.
 ///
 /// Provides responsive full-width display with bounded height, smooth rounded corners,
-/// inline collapse/expand chevron, and tap-to-open full-screen lightbox.
-class TimelineMediaAttachmentCard extends StatelessWidget {
+/// multi-photo swipe carousel support (split by '|'), inline collapse/expand chevron,
+/// and tap-to-open full-screen lightbox.
+class TimelineMediaAttachmentCard extends StatefulWidget {
   const TimelineMediaAttachmentCard({
     super.key,
     required this.p,
@@ -29,10 +30,40 @@ class TimelineMediaAttachmentCard extends StatelessWidget {
   final bool compact;
 
   @override
+  State<TimelineMediaAttachmentCard> createState() =>
+      _TimelineMediaAttachmentCardState();
+}
+
+class _TimelineMediaAttachmentCardState
+    extends State<TimelineMediaAttachmentCard> {
+  int _currentPage = 0;
+  final PageController _pageController = PageController();
+
+  List<String> get _paths {
+    return widget.imagePath
+        .split('|')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final resolvedFile = MediaStorageService.instance.resolveFileSync(
-      imagePath,
-    );
+    final p = widget.p;
+    final compact = widget.compact;
+    final isCollapsed = widget.isCollapsed;
+    final onToggleCollapse = widget.onToggleCollapse;
+    final paths = _paths;
+
+    if (paths.isEmpty) return const SizedBox.shrink();
+
+    final isMulti = paths.length > 1;
     final borderRadius = BorderRadius.circular(compact ? 12 : 16);
 
     if (isCollapsed) {
@@ -61,10 +92,23 @@ class TimelineMediaAttachmentCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    CupertinoIcons.photo,
+                    isMulti
+                        ? CupertinoIcons.photo_on_rectangle
+                        : CupertinoIcons.photo,
                     size: compact ? 13 : 14,
                     color: p.accent,
                   ),
+                  if (isMulti) ...[
+                    const SizedBox(width: 5),
+                    Text(
+                      '${paths.length}',
+                      style: TextStyle(
+                        color: p.text2,
+                        fontSize: compact ? 11 : 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                   const SizedBox(width: 6),
                   Icon(
                     CupertinoIcons.chevron_down,
@@ -100,47 +144,51 @@ class TimelineMediaAttachmentCard extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              // Photo Image with Lightbox Tap Trigger
-              GestureDetector(
-                onTap: () {
-                  PhotoLightboxDialog.show(context, p: p, imagePath: imagePath);
-                },
-                behavior: HitTestBehavior.opaque,
-                child: Hero(
-                  tag: 'media_$imagePath',
-                  child: resolvedFile.existsSync()
-                      ? Image.file(
-                          resolvedFile,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => _buildFallback(p),
-                        )
-                      : FutureBuilder<File>(
-                          future: MediaStorageService.instance.resolveFile(
-                            imagePath,
-                          ),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData &&
-                                snapshot.data!.existsSync()) {
-                              return Image.file(
-                                snapshot.data!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, _, _) => _buildFallback(p),
-                              );
-                            }
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return Center(
-                                child: CupertinoActivityIndicator(
-                                  radius: 10,
-                                  color: p.accent,
-                                ),
-                              );
-                            }
-                            return _buildFallback(p);
-                          },
-                        ),
+              if (!isMulti)
+                _buildSingleImageTile(context, paths.first, 0, paths)
+              else
+                PageView.builder(
+                  controller: _pageController,
+                  itemCount: paths.length,
+                  physics: const BouncingScrollPhysics(),
+                  onPageChanged: (i) {
+                    HapticFeedback.selectionClick();
+                    setState(() => _currentPage = i);
+                  },
+                  itemBuilder: (ctx, i) {
+                    return _buildSingleImageTile(ctx, paths[i], i, paths);
+                  },
                 ),
-              ),
+
+              // Multi-Photo Page Indicator Pill
+              if (isMulti)
+                Positioned(
+                  bottom: 10,
+                  right: 10,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3.5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        width: 0.6,
+                      ),
+                    ),
+                    child: Text(
+                      '${_currentPage + 1}/${paths.length}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ),
+                ),
 
               // Top-Right Glass Collapse Button
               if (onToggleCollapse != null)
@@ -150,7 +198,7 @@ class TimelineMediaAttachmentCard extends StatelessWidget {
                   child: PressableScale(
                     onTap: () {
                       HapticFeedback.selectionClick();
-                      onToggleCollapse!();
+                      onToggleCollapse();
                     },
                     child: Container(
                       width: 26,
@@ -175,6 +223,62 @@ class TimelineMediaAttachmentCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSingleImageTile(
+    BuildContext context,
+    String path,
+    int index,
+    List<String> allPaths,
+  ) {
+    final p = widget.p;
+    final resolvedFile = MediaStorageService.instance.resolveFileSync(path);
+
+    return GestureDetector(
+      onTap: () {
+        if (allPaths.length > 1) {
+          PhotoLightboxDialog.show(
+            context,
+            p: p,
+            imagePaths: allPaths,
+            initialIndex: index,
+          );
+        } else {
+          PhotoLightboxDialog.show(context, p: p, imagePath: path);
+        }
+      },
+      behavior: HitTestBehavior.opaque,
+      child: Hero(
+        tag: 'media_$path',
+        child: resolvedFile.existsSync()
+            ? Image.file(
+                resolvedFile,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => _buildFallback(p),
+              )
+            : FutureBuilder<File>(
+                future: MediaStorageService.instance.resolveFile(path),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData && snapshot.data!.existsSync()) {
+                    return Image.file(
+                      snapshot.data!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => _buildFallback(p),
+                    );
+                  }
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: CupertinoActivityIndicator(
+                        radius: 10,
+                        color: p.accent,
+                      ),
+                    );
+                  }
+                  return _buildFallback(p);
+                },
+              ),
       ),
     );
   }
