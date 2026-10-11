@@ -100,6 +100,10 @@ void main() {
 
         await tester.pumpAndSettle();
 
+        // Switch to 'All' timeframe to ensure test is immune to midnight/weekly boundary slicing
+        await tester.tap(find.text('All'));
+        await tester.pumpAndSettle();
+
         // Check for "THE STORY OF YOUR TIME" editorial headline
         expect(find.text('THE STORY OF YOUR TIME'), findsWidgets);
         // Narrative should mention 1h of focused attention and entries
