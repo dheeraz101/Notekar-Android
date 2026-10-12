@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/goals_sheet.dart';
 import 'package:notekar/dialogs/personalization_setup_dialog.dart';
@@ -224,7 +224,8 @@ void main() {
         final session = TimelineSessionItem(
           inMoment: Moment(
             id: 101,
-            timestamp: now - (30 * 60 * 1000), // 30 mins ago
+            timestamp: now - (30 * 60 * 1000),
+            // 30 mins ago
             type: 'in',
             category: 'Focus',
             date: '2026-09-27',
@@ -257,6 +258,27 @@ void main() {
         // Verify that the goal attribution pill is visible with the goal title
         expect(find.textContaining('Master Flutter'), findsOneWidget);
         expect(find.textContaining('30m'), findsWidgets);
+      },
+    );
+
+    test(
+      'autoMigrateLegacyProjects migrates legacy projects without recursive deadlock',
+      () async {
+        SharedPreferences.setMockInitialValues({
+          'notekar_projects_list_v1':
+              '[{"id":"proj_legacy_1","title":"Ship Feature X","description":"Critical feature","category":"Work","targetMinutes":120,"deadline":1700000000000,"createdAt":1690000000000,"isCompleted":false,"completedAt":null,"milestones":[{"id":"m1","title":"Design UI","isCompleted":true,"completedAt":1695000000000}],"colorHex":"#30D158"}]',
+        });
+
+        final goals = await GoalsService.instance.getGoals();
+        expect(goals.any((g) => g.id == 'proj_legacy_1'), isTrue);
+        final migrated = goals.firstWhere((g) => g.id == 'proj_legacy_1');
+        expect(migrated.title, 'Ship Feature X');
+        expect(migrated.milestones.length, 1);
+        expect(migrated.milestones.first.title, 'Design UI');
+        expect(migrated.milestones.first.isCompleted, isTrue);
+
+        final prefs = await SharedPreferences.getInstance();
+        expect(prefs.containsKey('notekar_projects_list_v1'), isFalse);
       },
     );
   });

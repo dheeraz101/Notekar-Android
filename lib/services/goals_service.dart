@@ -13,12 +13,7 @@ class GoalsService {
 
   static const String _storageKey = 'notekar_goals_list_v1';
 
-  /// Retrieves all configured user goals. Does not seed dummy defaults.
-  Future<List<Goal>> getGoals() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (prefs.containsKey('notekar_projects_list_v1')) {
-      await autoMigrateLegacyProjects();
-    }
+  List<Goal> _loadGoalsFromPrefs(SharedPreferences prefs) {
     final raw = prefs.getString(_storageKey);
     if (raw == null || raw.isEmpty) {
       return [];
@@ -36,6 +31,15 @@ class GoalsService {
     } catch (_) {
       return [];
     }
+  }
+
+  /// Retrieves all configured user goals. Does not seed dummy defaults.
+  Future<List<Goal>> getGoals() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey('notekar_projects_list_v1')) {
+      await autoMigrateLegacyProjects();
+    }
+    return _loadGoalsFromPrefs(prefs);
   }
 
   /// Saves or updates a goal.
@@ -132,13 +136,19 @@ class GoalsService {
   Future<void> autoMigrateLegacyProjects() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString('notekar_projects_list_v1');
-    if (raw == null || raw.isEmpty) return;
+    if (raw == null || raw.isEmpty) {
+      await prefs.remove('notekar_projects_list_v1');
+      return;
+    }
+
+    // Immediately remove key from SharedPreferences so re-entrant calls are impossible
+    await prefs.remove('notekar_projects_list_v1');
 
     try {
       final decoded = jsonDecode(raw) as List<dynamic>;
       if (decoded.isEmpty) return;
 
-      final currentGoals = await getGoals();
+      final currentGoals = _loadGoalsFromPrefs(prefs);
       bool modified = false;
 
       for (final item in decoded) {
@@ -180,7 +190,6 @@ class GoalsService {
       if (modified) {
         await _persistGoals(currentGoals);
       }
-      await prefs.remove('notekar_projects_list_v1');
     } catch (_) {}
   }
 

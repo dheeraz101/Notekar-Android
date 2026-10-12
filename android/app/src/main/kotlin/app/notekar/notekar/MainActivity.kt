@@ -72,26 +72,33 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        initSoundPool()
         pendingLaunchPayload = payloadFromIntent(intent)
         pendingLaunchAction =
             actionFromIntent(intent) ?: pendingLaunchPayload?.get("action") as? String
 
-        try {
-            ReminderReceiver.rescheduleAll(applicationContext)
-        } catch (e: Exception) {
-            android.util.Log.e("MainActivity", "Failed to reschedule reminders on launch", e)
-        }
-
-        try {
-            val prefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-            val showPanel = prefs.getBoolean("flutter.show_persistent_notification", false)
-            if (showPanel) {
-                showPersistentControlPanel(this)
+        Thread {
+            try {
+                ReminderReceiver.rescheduleAll(applicationContext)
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Failed to reschedule reminders on launch", e)
             }
-        } catch (e: Exception) {
-            android.util.Log.e("MainActivity", "Failed to initialize persistent control panel", e)
-        }
+        }.start()
+
+        Thread {
+            try {
+                val prefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+                val showPanel = prefs.getBoolean("flutter.show_persistent_notification", false)
+                if (showPanel) {
+                    showPersistentControlPanel(applicationContext)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Failed to initialize persistent control panel", e)
+            }
+        }.start()
+
+        Thread {
+            initSoundPool()
+        }.start()
 
         val channel = MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
@@ -920,6 +927,7 @@ class MainActivity : FlutterActivity() {
         }
     }
 
+    @Synchronized
     private fun initSoundPool() {
         if (soundPool != null) return
         try {
