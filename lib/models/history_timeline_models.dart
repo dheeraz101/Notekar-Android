@@ -811,11 +811,11 @@ TimelineIsolateResult buildTimelineDataInIsolate(
               }
               if (goalId != null && goalId.isNotEmpty) {
                 if (it is TimelineSessionItem) {
-                  final inG = it.inMoment.goalId;
-                  final outG = it.outMoment?.goalId;
+                  final inG = it.inMoment.effectiveGoalId;
+                  final outG = it.outMoment?.effectiveGoalId;
                   if (inG != goalId && outG != goalId) return false;
                 } else if (it is TimelineSingleItem) {
-                  if (it.moment.goalId != goalId) return false;
+                  if (it.moment.effectiveGoalId != goalId) return false;
                 } else {
                   return false;
                 }

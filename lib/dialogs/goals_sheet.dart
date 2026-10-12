@@ -932,8 +932,11 @@ class GoalsContentViewState extends State<GoalsContentView>
                     Text(
                       progress.isCompleted
                           ? 'Target Achieved!'.localized(context)
-                          : '${progress.dailyPaceFormatted} / day needed'
-                                .localized(context),
+                          : (goal.targetMinutes <= 0 && goal.hasMilestones
+                                ? '${goal.completedMilestonesCount} of ${goal.milestones.length} checkpoints'
+                                      .localized(context)
+                                : '${progress.dailyPaceFormatted} / day needed'
+                                      .localized(context)),
                       style: TextStyle(
                         color: progress.isCompleted
                             ? widget.p.green
@@ -977,7 +980,11 @@ class GoalsContentViewState extends State<GoalsContentView>
                 if (!progress.isCompleted) ...[
                   const SizedBox(height: 3),
                   Text(
-                    'Invest ${progress.dailyPaceFormatted} daily over the next ${progress.daysRemainingInTimeframe} days to achieve your target on schedule.',
+                    goal.targetMinutes <= 0 && goal.hasMilestones
+                        ? '${math.max(0, goal.milestones.length - goal.completedMilestonesCount)} checkpoints remaining to complete this project.'
+                              .localized(context)
+                        : 'Invest ${progress.dailyPaceFormatted} daily over the next ${progress.daysRemainingInTimeframe} days to achieve your target on schedule.'
+                              .localized(context),
                     style: TextStyle(
                       color: widget.p.text2,
                       fontSize: 11,
@@ -1094,6 +1101,28 @@ class GoalsContentViewState extends State<GoalsContentView>
                                   decoration: ms.isCompleted
                                       ? TextDecoration.lineThrough
                                       : null,
+                                ),
+                              ),
+                            ),
+                            GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () async {
+                                HapticFeedback.lightImpact();
+                                await GoalsService.instance.deleteMilestone(
+                                  goal.id,
+                                  ms.id,
+                                );
+                                await loadGoals();
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 6,
+                                  right: 2,
+                                ),
+                                child: Icon(
+                                  Icons.close_rounded,
+                                  size: 13,
+                                  color: widget.p.text3.withValues(alpha: 0.6),
                                 ),
                               ),
                             ),
@@ -1620,10 +1649,11 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
       description: desc,
       category: _category,
       mode: 'two-way',
-      targetMinutes: math.max(1, _targetHours) * 60,
+      targetMinutes: _targetHours * 60,
       dailyTargetMinutes:
-          (_timeframe == GoalTimeframe.month ||
-              _timeframe == GoalTimeframe.year)
+          (_targetHours > 0 &&
+              (_timeframe == GoalTimeframe.month ||
+                  _timeframe == GoalTimeframe.year))
           ? (_dailyTargetMinutes ??
                 _computeDefaultDailyMinutes(_targetHours, _timeframe))
           : null,
@@ -1835,7 +1865,9 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '$_targetHours hrs'.localized(context),
+                          _targetHours > 0
+                              ? '$_targetHours hrs'.localized(context)
+                              : 'Checklist Only'.localized(context),
                           style: TextStyle(
                             color: widget.p.text,
                             fontSize: 18,
@@ -1867,7 +1899,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                         children: [
                           PressableScale(
                             onTap: () {
-                              if (_targetHours > 1) {
+                              if (_targetHours > 0) {
                                 HapticFeedback.lightImpact();
                                 setState(() => _targetHours--);
                               }
@@ -1880,7 +1912,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                               child: Icon(
                                 Icons.remove_rounded,
                                 size: 14,
-                                color: _targetHours > 1
+                                color: _targetHours > 0
                                     ? widget.p.text
                                     : widget.p.text3.withValues(alpha: 0.3),
                               ),
@@ -1918,8 +1950,9 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
-                    children: [2, 5, 10, 15, 20, 30, 40].map((hrs) {
+                    children: [0, 2, 5, 10, 15, 20, 30, 40].map((hrs) {
                       final selected = _targetHours == hrs;
+                      final label = hrs == 0 ? 'Checklist' : '${hrs}h';
                       return Padding(
                         padding: const EdgeInsets.only(right: 6),
                         child: PressableScale(
@@ -1945,7 +1978,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                               ),
                             ),
                             child: Text(
-                              '${hrs}h',
+                              label,
                               style: TextStyle(
                                 color: selected ? Colors.white : widget.p.text,
                                 fontSize: 12,

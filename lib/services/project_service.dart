@@ -1,21 +1,76 @@
-import 'dart:convert';
+import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/project.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:notekar/services/goals_service.dart';
 
-/// Service managing short-term initiatives, milestones, and project sessions in NoteKar.
+/// Compatibility facade managing projects by delegating directly to the unified [GoalsService].
+///
+/// Ensures short-term initiatives, milestones, and project sessions are 100% synchronized
+/// with NoteKar's Apple HIG Targets and Goals engine with zero split-brain or data loss.
 class ProjectService {
   ProjectService._();
 
   static final ProjectService instance = ProjectService._();
 
-  static const String _storageKey = 'notekar_projects_list_v1';
-
   final ValueNotifier<List<Project>> projectsNotifier =
       ValueNotifier<List<Project>>([]);
 
   bool _isInitialized = false;
+
+  Project _goalToProject(Goal g) {
+    return Project(
+      id: g.id,
+      title: g.title,
+      description: g.description,
+      category: g.category,
+      targetMinutes: g.targetMinutes,
+      deadline: g.targetDate,
+      createdAt: g.createdAt,
+      isCompleted: g.isCompleted,
+      completedAt: g.completedAt,
+      linkedGoalId: g.id,
+      colorHex: g.colorHex,
+      milestones: g.milestones
+          .map(
+            (m) => ProjectMilestone(
+              id: m.id,
+              title: m.title,
+              isCompleted: m.isCompleted,
+              completedAt: m.completedAt,
+            ),
+          )
+          .toList(),
+    );
+  }
+
+  Goal _projectToGoal(Project p) {
+    return Goal(
+      id: p.id,
+      title: p.title,
+      description: p.description,
+      category: p.category,
+      mode: 'two-way',
+      targetMinutes: p.targetMinutes,
+      timeframe: p.deadline != null ? GoalTimeframe.custom : GoalTimeframe.none,
+      targetDate: p.deadline,
+      createdAt: p.createdAt,
+      isCompleted: p.isCompleted,
+      completedAt: p.completedAt,
+      colorHex: p.colorHex,
+      milestones: p.milestones
+          .map(
+            (m) => GoalMilestone(
+              id: m.id,
+              title: m.title,
+              isCompleted: m.isCompleted,
+              completedAt: m.completedAt,
+            ),
+          )
+          .toList(),
+    );
+  }
 
   /// Ensures projects are loaded into memory and [projectsNotifier] is primed.
   Future<List<Project>> ensureInitialized() async {
@@ -28,134 +83,59 @@ class ProjectService {
     return projectsNotifier.value;
   }
 
-  /// Retrieves all configured projects from persistent storage.
+  /// Retrieves all configured projects from the unified [GoalsService].
   Future<List<Project>> getProjects() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_storageKey);
-    if (raw == null || raw.isEmpty) {
-      return [];
-    }
-
-    try {
-      final decoded = jsonDecode(raw) as List<dynamic>;
-      final list = decoded
-          .map((item) => Project.fromJson(item as Map<String, dynamic>))
-          .toList();
-      projectsNotifier.value = list;
-      return list;
-    } catch (_) {
-      return [];
-    }
+    final goals = await GoalsService.instance.getGoals();
+    final list = goals.map(_goalToProject).toList();
+    projectsNotifier.value = List.unmodifiable(list);
+    return list;
   }
 
-  /// Saves or updates a project.
+  /// Saves or updates a project within the unified [GoalsService].
   Future<void> saveProject(Project project) async {
-    final list = await getProjects();
-    final idx = list.indexWhere((p) => p.id == project.id);
-    if (idx >= 0) {
-      list[idx] = project;
-    } else {
-      list.insert(0, project);
-    }
-    await _persistProjects(list);
+    final goal = _projectToGoal(project);
+    await GoalsService.instance.saveGoal(goal);
+    await getProjects();
   }
 
-  /// Deletes a project by ID.
+  /// Deletes a project by ID from the unified [GoalsService].
   Future<void> deleteProject(String id) async {
-    final list = await getProjects();
-    list.removeWhere((p) => p.id == id);
-    await _persistProjects(list);
+    await GoalsService.instance.deleteGoal(id);
+    await getProjects();
   }
 
   /// Toggles the completion status of a project.
   Future<void> toggleProjectCompletion(String id) async {
-    final list = await getProjects();
-    final idx = list.indexWhere((p) => p.id == id);
+    final goals = await GoalsService.instance.getGoals();
+    final idx = goals.indexWhere((g) => g.id == id);
     if (idx >= 0) {
-      final current = list[idx];
+      final current = goals[idx];
       final newStatus = !current.isCompleted;
-      list[idx] = current.copyWith(
-        isCompleted: newStatus,
-        completedAt: newStatus ? DateTime.now().millisecondsSinceEpoch : null,
+      await GoalsService.instance.saveGoal(
+        current.copyWith(
+          isCompleted: newStatus,
+          completedAt: newStatus ? DateTime.now().millisecondsSinceEpoch : null,
+        ),
       );
-      await _persistProjects(list);
+      await getProjects();
     }
   }
 
   /// Toggles the completion status of a milestone within a project.
   Future<void> toggleMilestone(String projectId, String milestoneId) async {
-    final list = await getProjects();
-    final pIdx = list.indexWhere((p) => p.id == projectId);
-    if (pIdx < 0) return;
-
-    final project = list[pIdx];
-    final updatedMilestones = project.milestones.map((m) {
-      if (m.id == milestoneId) {
-        final newCompleted = !m.isCompleted;
-        return m.copyWith(
-          isCompleted: newCompleted,
-          completedAt: newCompleted
-              ? DateTime.now().millisecondsSinceEpoch
-              : null,
-        );
-      }
-      return m;
-    }).toList();
-
-    // If all milestones are completed, auto-mark project completed if user has milestones
-    final allMilestonesDone =
-        updatedMilestones.isNotEmpty &&
-        updatedMilestones.every((m) => m.isCompleted);
-
-    list[pIdx] = project.copyWith(
-      milestones: updatedMilestones,
-      isCompleted: allMilestonesDone ? true : project.isCompleted,
-      completedAt: allMilestonesDone && project.completedAt == null
-          ? DateTime.now().millisecondsSinceEpoch
-          : project.completedAt,
-    );
-
-    await _persistProjects(list);
+    await GoalsService.instance.toggleMilestone(projectId, milestoneId);
+    await getProjects();
   }
 
   /// Adds a new milestone to an existing project.
   Future<void> addMilestone(String projectId, String title) async {
-    final list = await getProjects();
-    final pIdx = list.indexWhere((p) => p.id == projectId);
-    if (pIdx < 0) return;
-
-    final project = list[pIdx];
-    final newMilestone = ProjectMilestone(
-      id: 'ms_${DateTime.now().millisecondsSinceEpoch}_${project.milestones.length}',
-      title: title.trim(),
-    );
-
-    list[pIdx] = project.copyWith(
-      milestones: [...project.milestones, newMilestone],
-    );
-
-    await _persistProjects(list);
+    await GoalsService.instance.addMilestone(projectId, title);
+    await getProjects();
   }
 
   /// Deletes a milestone from a project.
   Future<void> deleteMilestone(String projectId, String milestoneId) async {
-    final list = await getProjects();
-    final pIdx = list.indexWhere((p) => p.id == projectId);
-    if (pIdx < 0) return;
-
-    final project = list[pIdx];
-    final updatedMilestones = project.milestones
-        .where((m) => m.id != milestoneId)
-        .toList();
-
-    list[pIdx] = project.copyWith(milestones: updatedMilestones);
-    await _persistProjects(list);
-  }
-
-  Future<void> _persistProjects(List<Project> list) async {
-    final prefs = await SharedPreferences.getInstance();
-    final encoded = jsonEncode(list.map((p) => p.toJson()).toList());
-    await prefs.setString(_storageKey, encoded);
-    projectsNotifier.value = List.unmodifiable(list);
+    await GoalsService.instance.deleteMilestone(projectId, milestoneId);
+    await getProjects();
   }
 }

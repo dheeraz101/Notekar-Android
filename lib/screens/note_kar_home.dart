@@ -23,7 +23,6 @@ import 'package:notekar/dialogs/manual_entry_dialog.dart';
 import 'package:notekar/dialogs/note_dialog.dart';
 import 'package:notekar/dialogs/privacy_overlay.dart';
 import 'package:notekar/dialogs/project_reflection_dialog.dart';
-import 'package:notekar/dialogs/projects_sheet.dart';
 import 'package:notekar/dialogs/recently_deleted_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/settings_dialog.dart';
@@ -220,10 +219,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
   String? _activeGoalId;
 
   Goal? get _activeGoal {
-    if (_activeGoalId != null) {
-      final match = _cachedGoals
-          .where((g) => g.id == _activeGoalId)
-          .firstOrNull;
+    final effectiveId = _activeGoalId ?? _activeProjectId;
+    if (effectiveId != null) {
+      final match = _cachedGoals.where((g) => g.id == effectiveId).firstOrNull;
       if (match != null) return match;
     }
     return null;
@@ -1578,6 +1576,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       }
 
       final bool reflectionEnabled =
+          _prefs?.getBool('goals_reflection_enabled') ??
           _prefs?.getBool('targets_session_reflection') ??
           _prefs?.getBool('projects_session_reflection') ??
           true;
@@ -1602,17 +1601,16 @@ class _NoteKarHomeState extends State<NoteKarHome>
           WidgetsBinding.instance.addPostFrameCallback((_) async {
             Goal? finishedGoal;
             Project? finishedProj;
-            if (finishedGoalId != null) {
+            final targetId = finishedGoalId ?? finishedProjId;
+            if (targetId != null) {
               final goals = await GoalsService.instance.getGoals();
-              finishedGoal = goals
-                  .where((g) => g.id == finishedGoalId)
-                  .firstOrNull;
-            }
-            if (finishedProjId != null) {
-              final projects = await ProjectService.instance.getProjects();
-              finishedProj = projects
-                  .where((p) => p.id == finishedProjId)
-                  .firstOrNull;
+              finishedGoal = goals.where((g) => g.id == targetId).firstOrNull;
+              if (finishedGoal != null) {
+                final projects = await ProjectService.instance.getProjects();
+                finishedProj = projects
+                    .where((p) => p.id == targetId)
+                    .firstOrNull;
+              }
             }
             if ((finishedGoal != null || finishedProj != null) && mounted) {
               final reflection = await ProjectReflectionDialog.show(
@@ -2318,39 +2316,15 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   Future<void> _startProjectSession({required Project project}) async {
-    _activeProjectId = project.id;
-    await _saveSetting('m-active-project-id', project.id);
-    if (project.category != null && project.category!.isNotEmpty) {
-      await _setActiveCategory(project.category!);
-    }
-    if (_mode != 'two-way') {
-      setState(() => _mode = 'two-way');
-      await _saveSetting('m-mode', 'two-way');
-    }
-    if (_inout == 'out') {
-      _showToast('Switched to ${project.title} session');
-    } else {
-      await _logEntry(forcedType: 'in');
-      _showToast('Started ${project.title} session');
-    }
-    if (mounted) setState(() {});
+    await _startGoalSession(
+      category: project.category,
+      goalId: project.id,
+      mode: 'two-way',
+    );
   }
 
   void _openProjects() {
-    ProjectsSheet.show(
-      context,
-      p: _p,
-      moments: _entries,
-      activeCategory: _activeCategory,
-      activeProjectId: _activeProjectId,
-      isSessionRunning: _mode == 'two-way' && _sessionStart != null,
-      onStartSession: (proj) => _startProjectSession(project: proj),
-      onStopSession: () async {
-        if (_mode == 'two-way' && _sessionStart != null) {
-          await _logEntry(forcedType: 'out');
-        }
-      },
-    );
+    _openHistory(initialView: 'goals');
   }
 
   void _startGoalCelebrationWatcher() {

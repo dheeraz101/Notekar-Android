@@ -45,7 +45,11 @@ class _TargetsProjectsSettingsPageState
     final prefs = await SharedPreferences.getInstance();
     if (mounted) {
       setState(() {
-        _reflectionEnabled = prefs.getBool('goals_reflection_enabled') ?? true;
+        _reflectionEnabled =
+            prefs.getBool('goals_reflection_enabled') ??
+            prefs.getBool('targets_session_reflection') ??
+            prefs.getBool('projects_session_reflection') ??
+            true;
         _celebrationEnabled =
             prefs.getBool('goals_celebration_enabled') ?? true;
         _dailyPacingEnabled =
@@ -62,6 +66,10 @@ class _TargetsProjectsSettingsPageState
     HapticFeedback.lightImpact();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(key, val);
+    if (key == 'goals_reflection_enabled') {
+      await prefs.setBool('targets_session_reflection', val);
+      await prefs.setBool('projects_session_reflection', val);
+    }
     setState(update);
   }
 

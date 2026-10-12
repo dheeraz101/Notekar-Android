@@ -236,16 +236,31 @@ class GoalProgress {
   int get currentMinutes => trackedMinutes;
   int get targetMinutes => goal.targetMinutes;
   double get ratio => targetMinutes <= 0
-      ? 1.0
+      ? (goal.hasMilestones
+            ? goal.milestoneProgress
+            : (goal.isCompleted ? 1.0 : 0.0))
       : (trackedMinutes / targetMinutes).clamp(0.0, 1.0);
   int get remainingMinutes =>
       (targetMinutes - trackedMinutes).clamp(0, targetMinutes);
   int get surplusMinutes => math.max(0, trackedMinutes - targetMinutes);
-  bool get isCompleted => trackedMinutes >= targetMinutes;
+  bool get isCompleted => targetMinutes <= 0
+      ? (goal.hasMilestones
+            ? (goal.milestones.isNotEmpty &&
+                  goal.completedMilestonesCount == goal.milestones.length)
+            : goal.isCompleted)
+      : trackedMinutes >= targetMinutes;
 
   String get trackedFormatted => _formatMinutes(trackedMinutes);
-  String get targetFormatted => _formatMinutes(targetMinutes);
-  String get remainingFormatted => _formatMinutes(remainingMinutes);
+  String get targetFormatted => targetMinutes <= 0
+      ? (goal.hasMilestones
+            ? '${goal.milestones.length} checkpoints'
+            : 'Open-ended')
+      : _formatMinutes(targetMinutes);
+  String get remainingFormatted => targetMinutes <= 0
+      ? (goal.hasMilestones
+            ? '${math.max(0, goal.milestones.length - goal.completedMilestonesCount)} left'
+            : '0m')
+      : _formatMinutes(remainingMinutes);
   String get surplusFormatted => _formatMinutes(surplusMinutes);
 
   /// Days remaining in the evaluation timeframe (inclusive of today).
@@ -281,7 +296,7 @@ class GoalProgress {
 
   /// Minutes per day required to reach the target before the timeframe ends.
   int get dailyPaceMinutes {
-    if (isCompleted || remainingMinutes <= 0) return 0;
+    if (isCompleted || remainingMinutes <= 0 || targetMinutes <= 0) return 0;
     final days = daysRemainingInTimeframe;
     return (remainingMinutes / days).ceil();
   }
@@ -296,6 +311,13 @@ class GoalProgress {
         return 'Target achieved! (+$surplusFormatted extra logged 🎉)';
       }
       return 'Target achieved! 🎉';
+    }
+    if (targetMinutes <= 0 && goal.hasMilestones) {
+      final left = math.max(
+        0,
+        goal.milestones.length - goal.completedMilestonesCount,
+      );
+      return '$left ${left == 1 ? 'checkpoint' : 'checkpoints'} remaining';
     }
     final days = daysRemainingInTimeframe;
     switch (goal.timeframe) {

@@ -7,6 +7,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/moment_repository.dart';
+import 'package:notekar/widgets/apple_hig_action_sheet.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -130,73 +131,80 @@ class _LoggingSettingsPageState extends State<LoggingSettingsPage> {
     final prefs = await SharedPreferences.getInstance();
     final p = widget.p;
 
-    final options = isSingleTap
+    final title = isSingleTap ? 'Single Tap Action' : 'Double Tap Action';
+    final subtitle = isSingleTap
+        ? 'Choose what happens when tapping the floating bubble'
+        : 'Choose what happens when double tapping the floating bubble';
+
+    final actions = isSingleTap
         ? [
-            {'key': 'quick_log', 'label': 'Quick Log Entry (Haptic Instant)'},
-            {'key': 'toggle_expand', 'label': 'Expand Floating Controls'},
+            AppleHigActionItem(
+              title: 'Quick Log Entry',
+              subtitle: 'Haptic instant logging without opening the app',
+              icon: CupertinoIcons.bolt_fill,
+              color: p.accent,
+              isSelected: _singleTapAction == 'quick_log',
+              onTap: () async {
+                await prefs.setString(
+                  'floating_single_tap_action',
+                  'quick_log',
+                );
+                if (mounted) setState(() => _singleTapAction = 'quick_log');
+              },
+            ),
+            AppleHigActionItem(
+              title: 'Expand Controls',
+              subtitle: 'Reveal pause, resume, note, and stop actions',
+              icon: CupertinoIcons.arrow_up_left_arrow_down_right,
+              color: p.blue,
+              isSelected: _singleTapAction == 'toggle_expand',
+              onTap: () async {
+                await prefs.setString(
+                  'floating_single_tap_action',
+                  'toggle_expand',
+                );
+                if (mounted) setState(() => _singleTapAction = 'toggle_expand');
+              },
+            ),
           ]
         : [
-            {'key': 'quick_menu', 'label': 'Open Modes & Activity Menu'},
-            {'key': 'toggle_expand', 'label': 'Toggle Expand / Collapse'},
+            AppleHigActionItem(
+              title: 'Modes & Activity Menu',
+              subtitle: 'Open the floating quick note and mode picker',
+              icon: CupertinoIcons.square_grid_2x2,
+              color: p.accent,
+              isSelected: _doubleTapAction == 'quick_menu',
+              onTap: () async {
+                await prefs.setString(
+                  'floating_double_tap_action',
+                  'quick_menu',
+                );
+                if (mounted) setState(() => _doubleTapAction = 'quick_menu');
+              },
+            ),
+            AppleHigActionItem(
+              title: 'Expand / Collapse',
+              subtitle: 'Toggle the action toolbar visibility',
+              icon: CupertinoIcons.arrow_up_left_arrow_down_right,
+              color: p.blue,
+              isSelected: _doubleTapAction == 'toggle_expand',
+              onTap: () async {
+                await prefs.setString(
+                  'floating_double_tap_action',
+                  'toggle_expand',
+                );
+                if (mounted) setState(() => _doubleTapAction = 'toggle_expand');
+              },
+            ),
           ];
 
     if (!mounted) return;
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: p.surface1,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                isSingleTap ? 'Single Tap Action' : 'Double Tap Action',
-                style: TextStyle(
-                  color: p.text,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 12),
-              ...options.map((opt) {
-                final isSelected = isSingleTap
-                    ? _singleTapAction == opt['key']
-                    : _doubleTapAction == opt['key'];
-                return ListTile(
-                  title: Text(
-                    opt['label']!,
-                    style: TextStyle(
-                      color: isSelected ? p.accent : p.text,
-                      fontWeight: isSelected
-                          ? FontWeight.w700
-                          : FontWeight.w500,
-                    ),
-                  ),
-                  trailing: isSelected
-                      ? Icon(Icons.check_rounded, color: p.accent)
-                      : null,
-                  onTap: () async {
-                    HapticFeedback.selectionClick();
-                    final key = opt['key']!;
-                    if (isSingleTap) {
-                      await prefs.setString('floating_single_tap_action', key);
-                      if (mounted) setState(() => _singleTapAction = key);
-                    } else {
-                      await prefs.setString('floating_double_tap_action', key);
-                      if (mounted) setState(() => _doubleTapAction = key);
-                    }
-                    if (ctx.mounted) Navigator.pop(ctx);
-                  },
-                );
-              }),
-            ],
-          ),
-        ),
-      ),
+    await AppleHigActionSheet.show<void>(
+      context,
+      p: p,
+      title: title.localized(context),
+      subtitle: subtitle.localized(context),
+      actions: actions,
     );
   }
 

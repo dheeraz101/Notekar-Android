@@ -5,7 +5,6 @@ import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/models/project.dart';
 import 'package:notekar/services/goals_service.dart';
-import 'package:notekar/services/project_service.dart';
 import 'package:notekar/widgets/hashtag_suggestion_overlay.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
@@ -143,11 +142,11 @@ class _ProjectReflectionDialogState extends State<ProjectReflectionDialog> {
         .toSet();
 
     final newlyCompleted = _checkedMilestones.difference(originalCompleted);
-    for (final msId in newlyCompleted) {
-      if (widget.project != null) {
-        await ProjectService.instance.toggleMilestone(widget.project!.id, msId);
-      } else if (widget.goal != null) {
-        await GoalsService.instance.toggleMilestone(widget.goal!.id, msId);
+    final newlyUncompleted = originalCompleted.difference(_checkedMilestones);
+    for (final msId in newlyCompleted.union(newlyUncompleted)) {
+      final targetId = widget.goal?.id ?? widget.project?.id;
+      if (targetId != null) {
+        await GoalsService.instance.toggleMilestone(targetId, msId);
       }
     }
 

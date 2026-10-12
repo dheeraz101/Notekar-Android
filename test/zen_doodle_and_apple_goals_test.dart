@@ -8,6 +8,7 @@ import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/goals_service.dart';
+import 'package:notekar/services/project_service.dart';
 import 'package:notekar/widgets/timeline_session_card.dart';
 import 'package:notekar/widgets/zen_doodle_splash.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -279,6 +280,91 @@ void main() {
 
         final prefs = await SharedPreferences.getInstance();
         expect(prefs.containsKey('notekar_projects_list_v1'), isFalse);
+      },
+    );
+
+    test(
+      'ProjectService facade seamlessly reads and mutates GoalsService',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+
+        final testGoal = Goal(
+          id: 'proj_facade_test',
+          title: 'Launch NoteKar',
+          category: 'Work',
+          targetMinutes: 0,
+          createdAt: 1700000000000,
+          milestones: const [
+            GoalMilestone(
+              id: 'm1',
+              title: 'Prepare Assets',
+              isCompleted: false,
+            ),
+            GoalMilestone(
+              id: 'm2',
+              title: 'Publish Release',
+              isCompleted: false,
+            ),
+          ],
+        );
+
+        await GoalsService.instance.saveGoal(testGoal);
+
+        // Verify ProjectService reads from GoalsService
+        final projects = await ProjectService.instance.getProjects();
+        expect(projects.any((p) => p.id == 'proj_facade_test'), isTrue);
+        final p = projects.firstWhere((p) => p.id == 'proj_facade_test');
+        expect(p.title, 'Launch NoteKar');
+        expect(p.milestones.length, 2);
+
+        // Toggle milestone via ProjectService facade
+        await ProjectService.instance.toggleMilestone('proj_facade_test', 'm1');
+
+        // Verify GoalsService received the change
+        final updatedGoals = await GoalsService.instance.getGoals();
+        final updatedGoal = updatedGoals.firstWhere(
+          (g) => g.id == 'proj_facade_test',
+        );
+        expect(updatedGoal.milestones.first.isCompleted, isTrue);
+        expect(updatedGoal.completedMilestonesCount, 1);
+      },
+    );
+
+    test(
+      'GoalProgress computes milestone-driven progress for pure checklist targets',
+      () {
+        final goal = Goal(
+          id: 'checklist_goal',
+          title: 'Checklist Task',
+          targetMinutes: 0,
+          createdAt: 1700000000000,
+          milestones: const [
+            GoalMilestone(id: 'm1', title: 'Step 1', isCompleted: true),
+            GoalMilestone(id: 'm2', title: 'Step 2', isCompleted: false),
+          ],
+        );
+
+        final progress = GoalsService.instance.calculateProgress(goal, []);
+        expect(progress.targetMinutes, 0);
+        expect(progress.ratio, 0.5);
+        expect(progress.isCompleted, isFalse);
+        expect(progress.targetFormatted, '2 checkpoints');
+        expect(progress.remainingFormatted, '1 left');
+        expect(progress.pacingDescription, '1 checkpoint remaining');
+
+        final completedGoal = goal.copyWith(
+          milestones: const [
+            GoalMilestone(id: 'm1', title: 'Step 1', isCompleted: true),
+            GoalMilestone(id: 'm2', title: 'Step 2', isCompleted: true),
+          ],
+        );
+        final completedProgress = GoalsService.instance.calculateProgress(
+          completedGoal,
+          [],
+        );
+        expect(completedProgress.ratio, 1.0);
+        expect(completedProgress.isCompleted, isTrue);
+        expect(completedProgress.pacingDescription, 'Target achieved! 🎉');
       },
     );
   });
