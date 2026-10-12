@@ -16,6 +16,9 @@ class GoalsService {
   /// Retrieves all configured user goals. Does not seed dummy defaults.
   Future<List<Goal>> getGoals() async {
     final prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey('notekar_projects_list_v1')) {
+      await autoMigrateLegacyProjects();
+    }
     final raw = prefs.getString(_storageKey);
     if (raw == null || raw.isEmpty) {
       return [];
@@ -62,6 +65,123 @@ class GoalsService {
       list[idx] = list[idx].copyWith(isArchived: !list[idx].isArchived);
       await _persistGoals(list);
     }
+  }
+
+  /// Toggles a milestone within a goal.
+  Future<void> toggleMilestone(String goalId, String milestoneId) async {
+    final list = await getGoals();
+    final idx = list.indexWhere((g) => g.id == goalId);
+    if (idx < 0) return;
+
+    final goal = list[idx];
+    final updatedMilestones = goal.milestones.map((m) {
+      if (m.id == milestoneId) {
+        final nextState = !m.isCompleted;
+        return m.copyWith(
+          isCompleted: nextState,
+          completedAt: nextState ? DateTime.now().millisecondsSinceEpoch : null,
+        );
+      }
+      return m;
+    }).toList();
+
+    final allDone =
+        updatedMilestones.isNotEmpty &&
+        updatedMilestones.every((m) => m.isCompleted);
+
+    list[idx] = goal.copyWith(
+      milestones: updatedMilestones,
+      isCompleted: allDone,
+      completedAt: allDone ? DateTime.now().millisecondsSinceEpoch : null,
+    );
+    await _persistGoals(list);
+  }
+
+  /// Adds a milestone to a goal.
+  Future<void> addMilestone(String goalId, String title) async {
+    if (title.trim().isEmpty) return;
+    final list = await getGoals();
+    final idx = list.indexWhere((g) => g.id == goalId);
+    if (idx < 0) return;
+
+    final goal = list[idx];
+    final newMilestone = GoalMilestone(
+      id: 'ms_${DateTime.now().millisecondsSinceEpoch}',
+      title: title.trim(),
+    );
+    list[idx] = goal.copyWith(
+      milestones: [...goal.milestones, newMilestone],
+      isCompleted: false,
+    );
+    await _persistGoals(list);
+  }
+
+  /// Deletes a milestone from a goal.
+  Future<void> deleteMilestone(String goalId, String milestoneId) async {
+    final list = await getGoals();
+    final idx = list.indexWhere((g) => g.id == goalId);
+    if (idx < 0) return;
+
+    final goal = list[idx];
+    final updated = goal.milestones.where((m) => m.id != milestoneId).toList();
+    list[idx] = goal.copyWith(milestones: updated);
+    await _persistGoals(list);
+  }
+
+  /// Automatically migrates legacy projects into unified Goals without data loss.
+  Future<void> autoMigrateLegacyProjects() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString('notekar_projects_list_v1');
+    if (raw == null || raw.isEmpty) return;
+
+    try {
+      final decoded = jsonDecode(raw) as List<dynamic>;
+      if (decoded.isEmpty) return;
+
+      final currentGoals = await getGoals();
+      bool modified = false;
+
+      for (final item in decoded) {
+        final map = item as Map<String, dynamic>;
+        final id = map['id'] as String;
+        if (!currentGoals.any((g) => g.id == id)) {
+          final rawMilestones = map['milestones'] as List<dynamic>?;
+          final milestones = rawMilestones != null
+              ? rawMilestones
+                    .map(
+                      (m) => GoalMilestone.fromJson(m as Map<String, dynamic>),
+                    )
+                    .toList()
+              : const <GoalMilestone>[];
+
+          final goal = Goal(
+            id: id,
+            title: map['title'] as String? ?? 'Project',
+            description: map['description'] as String? ?? '',
+            category: map['category'] as String?,
+            targetMinutes: (map['targetMinutes'] as num?)?.toInt() ?? 0,
+            timeframe: map['deadline'] != null
+                ? GoalTimeframe.custom
+                : GoalTimeframe.none,
+            targetDate: (map['deadline'] as num?)?.toInt(),
+            createdAt:
+                (map['createdAt'] as num?)?.toInt() ??
+                DateTime.now().millisecondsSinceEpoch,
+            isCompleted: map['isCompleted'] as bool? ?? false,
+            completedAt: (map['completedAt'] as num?)?.toInt(),
+            milestones: milestones,
+            colorHex: map['colorHex'] as String?,
+          );
+          currentGoals.add(goal);
+          modified = true;
+        }
+      }
+
+      if (modified) {
+        await _persistGoals(currentGoals);
+      }
+      await prefs.remove('notekar_projects_list_v1');
+    } catch (_) {}
   }
 
   /// Computes real-time progress and remaining deficit against logged moments.

@@ -1577,9 +1577,19 @@ class _NoteKarHomeState extends State<NoteKarHome>
         }
       }
 
-      if (type == 'out' && _activeProjectId != null) {
-        final finishedProjId = _activeProjectId!;
+      final bool reflectionEnabled =
+          _prefs?.getBool('targets_session_reflection') ??
+          _prefs?.getBool('projects_session_reflection') ??
+          true;
+      final bool hasActiveInitiative =
+          _activeGoalId != null || _activeProjectId != null;
+
+      if (type == 'out' && hasActiveInitiative) {
+        final finishedGoalId = _activeGoalId;
+        final finishedProjId = _activeProjectId;
+        _activeGoalId = null;
         _activeProjectId = null;
+        unawaited(_prefs?.remove('m-active-goal-id'));
         unawaited(_prefs?.remove('m-active-project-id'));
         final sessionDur = oldSessionStart != null
             ? Duration(
@@ -1587,37 +1597,53 @@ class _NoteKarHomeState extends State<NoteKarHome>
                     effectiveNow.millisecondsSinceEpoch - oldSessionStart,
               )
             : null;
-        WidgetsBinding.instance.addPostFrameCallback((_) async {
-          final projects = await ProjectService.instance.getProjects();
-          final proj = projects
-              .where((p) => p.id == finishedProjId)
-              .firstOrNull;
-          if (proj != null && mounted) {
-            final reflection = await ProjectReflectionDialog.show(
-              context,
-              p: _p,
-              project: proj,
-              sessionDuration: sessionDur,
-            );
-            if (reflection != null && reflection.note.isNotEmpty) {
-              final updatedEntry = entry.copyWith(
-                note: entry.note.isNotEmpty
-                    ? '${entry.note}\n${reflection.note}'
-                    : reflection.note,
+
+        if (reflectionEnabled) {
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            Goal? finishedGoal;
+            Project? finishedProj;
+            if (finishedGoalId != null) {
+              final goals = await GoalsService.instance.getGoals();
+              finishedGoal = goals
+                  .where((g) => g.id == finishedGoalId)
+                  .firstOrNull;
+            }
+            if (finishedProjId != null) {
+              final projects = await ProjectService.instance.getProjects();
+              finishedProj = projects
+                  .where((p) => p.id == finishedProjId)
+                  .firstOrNull;
+            }
+            if ((finishedGoal != null || finishedProj != null) && mounted) {
+              final reflection = await ProjectReflectionDialog.show(
+                context,
+                p: _p,
+                goal: finishedGoal,
+                project: finishedProj,
+                sessionDuration: sessionDur,
               );
-              await _repository.saveMoment(updatedEntry);
-              if (mounted) {
-                setState(() {
-                  final idx = _entries.indexWhere((e) => e.id == entry.id);
-                  if (idx >= 0) _entries[idx] = updatedEntry;
-                });
+              if (reflection != null && reflection.note.isNotEmpty) {
+                final updatedEntry = entry.copyWith(
+                  note: entry.note.isNotEmpty
+                      ? '${entry.note}\n${reflection.note}'
+                      : reflection.note,
+                );
+                await _repository.saveMoment(updatedEntry);
+                if (mounted) {
+                  setState(() {
+                    final idx = _entries.indexWhere((e) => e.id == entry.id);
+                    if (idx >= 0) _entries[idx] = updatedEntry;
+                  });
+                }
               }
             }
-          }
-        });
+          });
+        }
       }
 
-      if (_mode == 'two-way' && type == 'out') {
+      if (_mode == 'two-way' &&
+          type == 'out' &&
+          (!hasActiveInitiative || !reflectionEnabled)) {
         Future.delayed(const Duration(milliseconds: 320), () {
           if (mounted) {
             _openNoteForLastCapture();
@@ -2780,6 +2806,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
       await _openSettings(initialCategory: 'Search Notes');
     } else if (result == 'god_mode_settings' && mounted) {
       await _openSettings(initialCategory: 'God Mode');
+    } else if (result == 'targets_projects_settings' && mounted) {
+      await _openSettings(initialCategory: 'Targets & Projects');
     } else if (result == 'manual_entry' && mounted) {
       await _openManualEntry();
     } else if (result is Map && result['action'] == 'manual_entry' && mounted) {

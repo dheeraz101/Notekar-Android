@@ -389,6 +389,58 @@ class GoalsContentViewState extends State<GoalsContentView>
     );
   }
 
+  void _showAddMilestoneDialog(Goal goal) {
+    HapticFeedback.lightImpact();
+    final ctrl = TextEditingController();
+    showCupertinoDialog<void>(
+      context: context,
+      builder: (ctx) => CupertinoTheme(
+        data: CupertinoThemeData(
+          brightness: !widget.p.isDark ? Brightness.light : Brightness.dark,
+          primaryColor: widget.p.accent,
+        ),
+        child: CupertinoAlertDialog(
+          title: Text('New Checkpoint'.localized(context)),
+          content: Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: CupertinoTextField(
+              controller: ctrl,
+              placeholder: 'Checkpoint (e.g. Draft proposal)',
+              placeholderStyle: TextStyle(color: widget.p.text3),
+              autofocus: true,
+              style: TextStyle(color: widget.p.text),
+              decoration: BoxDecoration(
+                color: widget.p.surface3,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: widget.p.border.withValues(alpha: 0.5),
+                ),
+              ),
+            ),
+          ),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text('Cancel'.localized(context)),
+            ),
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              onPressed: () async {
+                final text = ctrl.text.trim();
+                if (text.isNotEmpty) {
+                  Navigator.pop(ctx);
+                  await GoalsService.instance.addMilestone(goal.id, text);
+                  await loadGoals();
+                }
+              },
+              child: Text('Add'.localized(context)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -692,6 +744,17 @@ class GoalsContentViewState extends State<GoalsContentView>
               ),
             ],
           ),
+          if (goal.description.trim().isNotEmpty) ...[
+            const SizedBox(height: 5),
+            Text(
+              goal.description.trim(),
+              style: TextStyle(
+                color: widget.p.text2,
+                fontSize: 12.5,
+                height: 1.3,
+              ),
+            ),
+          ],
           const SizedBox(height: 10),
 
           // Continuous Gauge Track
@@ -925,6 +988,167 @@ class GoalsContentViewState extends State<GoalsContentView>
               ],
             ),
           ),
+
+          // Milestones & Checkpoints Block
+          if (goal.milestones.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: widget.p.surface3.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: widget.p.border.withValues(alpha: 0.4),
+                  width: 0.8,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.check_circle_outline_rounded,
+                            size: 13,
+                            color: widget.p.accent,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            'CHECKPOINTS (${goal.completedMilestonesCount}/${goal.milestones.length})'
+                                .localized(context),
+                            style: TextStyle(
+                              color: widget.p.text3,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                        ],
+                      ),
+                      PressableScale(
+                        onTap: () => _showAddMilestoneDialog(goal),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.add_rounded,
+                              size: 12,
+                              color: widget.p.accent,
+                            ),
+                            const SizedBox(width: 2),
+                            Text(
+                              'Add'.localized(context),
+                              style: TextStyle(
+                                color: widget.p.accent,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  for (int i = 0; i < goal.milestones.length; i++) ...[
+                    if (i > 0)
+                      Divider(
+                        height: 12,
+                        thickness: 0.6,
+                        color: widget.p.border.withValues(alpha: 0.35),
+                      ),
+                    () {
+                      final ms = goal.milestones[i];
+                      return PressableScale(
+                        onTap: () async {
+                          HapticFeedback.lightImpact();
+                          await GoalsService.instance.toggleMilestone(
+                            goal.id,
+                            ms.id,
+                          );
+                          await loadGoals();
+                        },
+                        child: Row(
+                          children: [
+                            Icon(
+                              ms.isCompleted
+                                  ? Icons.check_circle_rounded
+                                  : Icons.radio_button_unchecked_rounded,
+                              size: 16,
+                              color: ms.isCompleted
+                                  ? widget.p.green
+                                  : widget.p.text3,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                ms.title,
+                                style: TextStyle(
+                                  color: ms.isCompleted
+                                      ? widget.p.text3
+                                      : widget.p.text,
+                                  fontSize: 12.5,
+                                  decoration: ms.isCompleted
+                                      ? TextDecoration.lineThrough
+                                      : null,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }(),
+                  ],
+                ],
+              ),
+            ),
+          ] else ...[
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: PressableScale(
+                  onTap: () => _showAddMilestoneDialog(goal),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: widget.p.surface3.withValues(alpha: 0.45),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: widget.p.border.withValues(alpha: 0.35),
+                        width: 0.7,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.add_task_rounded,
+                          size: 12,
+                          color: widget.p.accent,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '+ Checkpoint'.localized(context),
+                          style: TextStyle(
+                            color: widget.p.accent,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
 
           // Action Buttons: [Stop/Start Session] + [+ Manual Entry]
@@ -1190,6 +1414,10 @@ class CreateOrEditGoalView extends StatefulWidget {
 
 class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
   late final TextEditingController _titleController;
+  late final TextEditingController _descController;
+  final TextEditingController _milestoneInputController =
+      TextEditingController();
+  late List<GoalMilestone> _milestones;
   late int _targetHours;
   late GoalTimeframe _timeframe;
   int? _targetDate;
@@ -1219,6 +1447,10 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.goal?.title ?? '');
+    _descController = TextEditingController(
+      text: widget.goal?.description ?? '',
+    );
+    _milestones = List<GoalMilestone>.from(widget.goal?.milestones ?? []);
     _targetHours = (widget.goal?.targetMinutes ?? 1200) ~/ 60;
     _timeframe = widget.goal?.timeframe ?? GoalTimeframe.week;
     _targetDate = widget.goal?.targetDate;
@@ -1370,6 +1602,8 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
   @override
   void dispose() {
     _titleController.dispose();
+    _descController.dispose();
+    _milestoneInputController.dispose();
     super.dispose();
   }
 
@@ -1379,9 +1613,11 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
 
     final id =
         widget.goal?.id ?? 'goal_${DateTime.now().millisecondsSinceEpoch}';
+    final desc = _descController.text.trim();
     final saved = Goal(
       id: id,
       title: title,
+      description: desc,
       category: _category,
       mode: 'two-way',
       targetMinutes: math.max(1, _targetHours) * 60,
@@ -1396,6 +1632,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
       createdAt:
           widget.goal?.createdAt ?? DateTime.now().millisecondsSinceEpoch,
       isArchived: widget.goal?.isArchived ?? false,
+      milestones: _milestones,
     );
 
     HapticFeedback.mediumImpact();
@@ -1528,6 +1765,51 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                   style: TextStyle(
                     color: widget.p.text3.withValues(alpha: 0.8),
                     fontSize: 10.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          // Optional Description / Scope (Apple HIG Inset Grouped)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: widget.p.surface3,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: widget.p.border.withValues(alpha: 0.6)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Description / Scope (Optional)'
+                      .localized(context)
+                      .toUpperCase(),
+                  style: TextStyle(
+                    color: widget.p.text3,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                CupertinoTextField(
+                  controller: _descController,
+                  maxLines: 2,
+                  padding: EdgeInsets.zero,
+                  decoration: null,
+                  cursorColor: widget.p.accent,
+                  style: TextStyle(
+                    color: widget.p.text,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  placeholder: 'Key deliverables, focus context or notes...',
+                  placeholderStyle: TextStyle(
+                    color: widget.p.text3.withValues(alpha: 0.6),
+                    fontSize: 14,
                   ),
                 ),
               ],
@@ -2233,7 +2515,186 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
+
+          // 5. Checkpoints / Milestones Editor (Apple HIG Inset Grouped)
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: widget.p.surface3,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: widget.p.border.withValues(alpha: 0.6)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'CHECKPOINTS / MILESTONES'.localized(context),
+                      style: TextStyle(
+                        color: widget.p.text3,
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    if (_milestones.isNotEmpty)
+                      Text(
+                        '${_milestones.where((m) => m.isCompleted).length}/${_milestones.length}',
+                        style: TextStyle(
+                          color: widget.p.accent,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: CupertinoTextField(
+                        controller: _milestoneInputController,
+                        placeholder: 'Add checkpoint title...',
+                        placeholderStyle: TextStyle(
+                          color: widget.p.text3.withValues(alpha: 0.6),
+                          fontSize: 13,
+                        ),
+                        style: TextStyle(color: widget.p.text, fontSize: 13),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: widget.p.surface2,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: widget.p.border.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        onSubmitted: (val) {
+                          final t = val.trim();
+                          if (t.isNotEmpty) {
+                            HapticFeedback.lightImpact();
+                            setState(() {
+                              _milestones.add(
+                                GoalMilestone(
+                                  id: 'ms_${DateTime.now().millisecondsSinceEpoch}_${_milestones.length}',
+                                  title: t,
+                                ),
+                              );
+                              _milestoneInputController.clear();
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    PressableScale(
+                      onTap: () {
+                        final t = _milestoneInputController.text.trim();
+                        if (t.isNotEmpty) {
+                          HapticFeedback.lightImpact();
+                          setState(() {
+                            _milestones.add(
+                              GoalMilestone(
+                                id: 'ms_${DateTime.now().millisecondsSinceEpoch}_${_milestones.length}',
+                                title: t,
+                              ),
+                            );
+                            _milestoneInputController.clear();
+                          });
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: widget.p.accent,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          'Add'.localized(context),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (_milestones.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  for (int i = 0; i < _milestones.length; i++) ...[
+                    () {
+                      final ms = _milestones[i];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 3),
+                        child: Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                HapticFeedback.selectionClick();
+                                setState(() {
+                                  _milestones[i] = ms.copyWith(
+                                    isCompleted: !ms.isCompleted,
+                                  );
+                                });
+                              },
+                              child: Icon(
+                                ms.isCompleted
+                                    ? Icons.check_circle_rounded
+                                    : Icons.radio_button_unchecked_rounded,
+                                size: 16,
+                                color: ms.isCompleted
+                                    ? widget.p.green
+                                    : widget.p.text3,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                ms.title,
+                                style: TextStyle(
+                                  color: ms.isCompleted
+                                      ? widget.p.text3
+                                      : widget.p.text,
+                                  fontSize: 12.5,
+                                  decoration: ms.isCompleted
+                                      ? TextDecoration.lineThrough
+                                      : null,
+                                ),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                                setState(() {
+                                  _milestones.removeAt(i);
+                                });
+                              },
+                              child: Icon(
+                                Icons.close_rounded,
+                                size: 14,
+                                color: widget.p.text3,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }(),
+                  ],
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
 
           // 6. Action Buttons
           Row(

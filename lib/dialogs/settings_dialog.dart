@@ -39,6 +39,7 @@ import 'package:notekar/dialogs/settings/search_notes_settings_page.dart';
 import 'package:notekar/dialogs/settings/security_privacy_details_sheets.dart';
 import 'package:notekar/dialogs/settings/settings_dashboard_page.dart';
 import 'package:notekar/dialogs/settings/sobriety_companion_settings_page.dart';
+import 'package:notekar/dialogs/settings/targets_projects_settings_page.dart';
 import 'package:notekar/dialogs/settings/time_reflection_settings_page.dart';
 import 'package:notekar/dialogs/settings/trash_bin_settings_page.dart';
 import 'package:notekar/dialogs/settings/upcoming_features_settings_page.dart';
@@ -2929,6 +2930,18 @@ $cleanStack
                                     );
                                   },
                                   onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                                ),
+                              ),
+                            if (show('Targets & Projects') || show('Projects'))
+                              SliverToBoxAdapter(
+                                child: TargetsProjectsSettingsPage(
+                                  p: p,
+                                  onOpenCategory:
+                                      (category, {required parent}) =>
+                                          _openCategory(
+                                            category,
+                                            parent: parent,
+                                          ),
                                 ),
                               ),
                             if (show('Capture'))

@@ -154,7 +154,7 @@ void main() {
         expect(find.text('CATEGORY SCOPE'), findsOneWidget);
 
         // Enter title (<= 9 chars)
-        await tester.enterText(find.byType(CupertinoTextField), 'Memoir');
+        await tester.enterText(find.byType(CupertinoTextField).first, 'Memoir');
 
         // Tap Save
         await tester.tap(find.text('Save Goal'));
@@ -194,10 +194,11 @@ void main() {
         expect(find.text('Target Deadline'), findsOneWidget);
 
         await tester.enterText(
-          find.byType(CupertinoTextField),
+          find.byType(CupertinoTextField).first,
           'Thesis Completion',
         );
 
+        await tester.ensureVisible(find.text('Save Goal'));
         await tester.tap(find.text('Save Goal'));
         await tester.pumpAndSettle();
 

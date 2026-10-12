@@ -17,6 +17,7 @@ import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/timeline_gap_card.dart';
 import 'package:notekar/widgets/timeline_media_attachment_card.dart';
 import 'package:notekar/widgets/timeline_voice_player_pill.dart';
+import 'package:notekar/widgets/apple_hig_action_sheet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Apple HIG Calendar Day-Swipe Timeline View.
@@ -169,89 +170,39 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
   void _showMomentContextMenu(Moment moment) {
     HapticFeedback.mediumImpact();
     final hasNote = moment.note.trim().isNotEmpty;
+    final title = hasNote
+        ? (moment.note.length > 36
+              ? '${moment.note.substring(0, 36)}...'
+              : moment.note)
+        : '${moment.category ?? 'Moment'} • ${timeOnly(moment.timestamp)}';
+    final subtitle =
+        '${datePretty(moment.timestamp)} at ${timeOnly(moment.timestamp)}';
 
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        title: Text(
-          hasNote
-              ? (moment.note.length > 36
-                    ? '${moment.note.substring(0, 36)}...'
-                    : moment.note)
-              : '${moment.category ?? 'Moment'} • ${timeOnly(moment.timestamp)}',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: widget.p.text,
+    AppleHigActionSheet.show<void>(
+      context,
+      p: widget.p,
+      title: title,
+      subtitle: subtitle,
+      actions: [
+        if (widget.onEditNote != null)
+          AppleHigActionItem(
+            title: hasNote ? 'Edit Note' : 'Add Note',
+            icon: hasNote ? Icons.edit_rounded : Icons.add_comment_rounded,
+            color: widget.p.accent,
+            onTap: () {
+              widget.onEditNote!(moment);
+            },
           ),
-        ),
-        message: Text(
-          '${datePretty(moment.timestamp)} at ${timeOnly(moment.timestamp)}',
-          style: TextStyle(fontSize: 12, color: widget.p.text3),
-        ),
-        actions: [
-          if (widget.onEditNote != null)
-            CupertinoActionSheetAction(
-              onPressed: () {
-                Navigator.pop(ctx);
-                widget.onEditNote!(moment);
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    hasNote ? Icons.edit_rounded : Icons.add_comment_rounded,
-                    size: 19,
-                    color: widget.p.accent,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    (hasNote ? 'Edit Note' : 'Add Note').localized(context),
-                    style: TextStyle(
-                      color: widget.p.accent,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          if (widget.onDelete != null)
-            CupertinoActionSheetAction(
-              isDestructiveAction: true,
-              onPressed: () {
-                Navigator.pop(ctx);
-                _confirmDeleteMoment(moment);
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.delete_rounded,
-                    size: 19,
-                    color: CupertinoColors.destructiveRed,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Delete Moment'.localized(context),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          isDefaultAction: true,
-          onPressed: () => Navigator.pop(ctx),
-          child: Text(
-            'Cancel'.localized(context),
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        if (widget.onDelete != null)
+          AppleHigActionItem(
+            title: 'Delete Moment',
+            icon: Icons.delete_rounded,
+            isDestructive: true,
+            onTap: () {
+              _confirmDeleteMoment(moment);
+            },
           ),
-        ),
-      ),
+      ],
     );
   }
 
@@ -287,146 +238,62 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
     final noteMoment = session.noteMoment;
     final hasNote = session.note.isNotEmpty;
     final cat = session.category ?? 'Session';
+    final title = hasNote
+        ? (session.note.length > 36
+              ? '${session.note.substring(0, 36)}...'
+              : session.note)
+        : '$cat • ${_formatDuration(session.duration)}';
+    final subtitle =
+        '${datePretty(session.startTimestamp)} at ${timeOnly(session.startTimestamp)}'
+        '${session.endTimestamp != null ? ' - ${timeOnly(session.endTimestamp!)}' : (session.isOngoing ? ' (Live)' : '')}';
 
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        title: Text(
-          hasNote
-              ? (session.note.length > 36
-                    ? '${session.note.substring(0, 36)}...'
-                    : session.note)
-              : '$cat • ${_formatDuration(session.duration)}',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: widget.p.text,
+    AppleHigActionSheet.show<void>(
+      context,
+      p: widget.p,
+      title: title,
+      subtitle: subtitle,
+      actions: [
+        if (widget.onEditNote != null)
+          AppleHigActionItem(
+            title: hasNote ? 'Edit Note' : 'Add Note',
+            icon: hasNote ? Icons.edit_rounded : Icons.add_comment_rounded,
+            color: widget.p.accent,
+            onTap: () {
+              widget.onEditNote!(noteMoment);
+            },
           ),
-        ),
-        message: Text(
-          '${datePretty(session.startTimestamp)} at ${timeOnly(session.startTimestamp)}'
-          '${session.endTimestamp != null ? ' - ${timeOnly(session.endTimestamp!)}' : (session.isOngoing ? ' (Live)' : '')}',
-          style: TextStyle(fontSize: 12, color: widget.p.text3),
-        ),
-        actions: [
-          if (widget.onEditNote != null)
-            CupertinoActionSheetAction(
-              onPressed: () {
-                Navigator.pop(ctx);
-                widget.onEditNote!(noteMoment);
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    hasNote ? Icons.edit_rounded : Icons.add_comment_rounded,
-                    size: 19,
-                    color: widget.p.accent,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    (hasNote ? 'Edit Note' : 'Add Note').localized(context),
-                    style: TextStyle(
-                      color: widget.p.accent,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          if (session.isOngoing && widget.onEndLiveSession != null)
-            CupertinoActionSheetAction(
-              onPressed: () {
-                Navigator.pop(ctx);
-                HapticFeedback.heavyImpact();
-                setState(() {
-                  _endingSessionIds.add(session.inMoment.id);
-                });
-                widget.onEndLiveSession!(session);
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.stop_circle_rounded,
-                    size: 19,
-                    color: widget.p.red,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Stop Live Session'.localized(context),
-                    style: TextStyle(
-                      color: widget.p.red,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          if (widget.onDeleteSession != null)
-            CupertinoActionSheetAction(
-              isDestructiveAction: true,
-              onPressed: () {
-                Navigator.pop(ctx);
-                _confirmDeleteSession(session);
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.delete_sweep_rounded,
-                    size: 19,
-                    color: CupertinoColors.destructiveRed,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Delete Entire Session'.localized(context),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          if (widget.onDelete != null)
-            CupertinoActionSheetAction(
-              isDestructiveAction: true,
-              onPressed: () {
-                Navigator.pop(ctx);
-                _confirmDeleteMoment(noteMoment);
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.delete_outline_rounded,
-                    size: 19,
-                    color: CupertinoColors.destructiveRed,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Delete Moment Only'.localized(context),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          isDefaultAction: true,
-          onPressed: () => Navigator.pop(ctx),
-          child: Text(
-            'Cancel'.localized(context),
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        if (session.isOngoing && widget.onEndLiveSession != null)
+          AppleHigActionItem(
+            title: 'Stop Live Session',
+            icon: Icons.stop_circle_rounded,
+            color: widget.p.red,
+            onTap: () {
+              HapticFeedback.heavyImpact();
+              setState(() {
+                _endingSessionIds.add(session.inMoment.id);
+              });
+              widget.onEndLiveSession!(session);
+            },
           ),
-        ),
-      ),
+        if (widget.onDeleteSession != null)
+          AppleHigActionItem(
+            title: 'Delete Entire Session',
+            icon: Icons.delete_sweep_rounded,
+            isDestructive: true,
+            onTap: () {
+              _confirmDeleteSession(session);
+            },
+          ),
+        if (widget.onDelete != null)
+          AppleHigActionItem(
+            title: 'Delete Moment Only',
+            icon: Icons.delete_outline_rounded,
+            isDestructive: true,
+            onTap: () {
+              _confirmDeleteMoment(noteMoment);
+            },
+          ),
+      ],
     );
   }
 

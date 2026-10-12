@@ -29,11 +29,55 @@ enum GoalTimeframe {
   }
 }
 
-/// Represents an intentional allocation target in Notekar.
+/// Represents an actionable checkpoint / milestone within a Goal or Project.
+class GoalMilestone {
+  const GoalMilestone({
+    required this.id,
+    required this.title,
+    this.isCompleted = false,
+    this.completedAt,
+  });
+
+  final String id;
+  final String title;
+  final bool isCompleted;
+  final int? completedAt; // epoch ms
+
+  GoalMilestone copyWith({
+    String? id,
+    String? title,
+    bool? isCompleted,
+    int? completedAt,
+  }) {
+    return GoalMilestone(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      isCompleted: isCompleted ?? this.isCompleted,
+      completedAt: completedAt ?? this.completedAt,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'title': title,
+    'isCompleted': isCompleted,
+    'completedAt': completedAt,
+  };
+
+  factory GoalMilestone.fromJson(Map<String, dynamic> json) => GoalMilestone(
+    id: json['id'] as String? ?? UniqueKey().toString(),
+    title: (json['title'] as String? ?? '').trim(),
+    isCompleted: json['isCompleted'] as bool? ?? false,
+    completedAt: (json['completedAt'] as num?)?.toInt(),
+  );
+}
+
+/// Represents an intentional allocation target or milestone initiative in Notekar.
 class Goal {
   const Goal({
     required this.id,
     required this.title,
+    this.description = '',
     this.category,
     this.mode,
     required this.targetMinutes,
@@ -42,10 +86,15 @@ class Goal {
     this.targetDate,
     required this.createdAt,
     this.isArchived = false,
+    this.isCompleted = false,
+    this.completedAt,
+    this.milestones = const [],
+    this.colorHex,
   });
 
   final String id;
   final String title;
+  final String description;
   final String? category; // null = all categories
   final String? mode; // 'two-way' or null = sessions
   final int targetMinutes;
@@ -54,13 +103,29 @@ class Goal {
   final int? targetDate; // epoch ms for custom target deadline
   final int createdAt; // epoch ms
   final bool isArchived;
+  final bool isCompleted;
+  final int? completedAt;
+  final List<GoalMilestone> milestones;
+  final String? colorHex;
 
   Duration get targetDuration => Duration(minutes: targetMinutes);
   int get targetHours => (targetMinutes / 60).round();
 
+  bool get hasMilestones => milestones.isNotEmpty;
+  int get completedMilestonesCount =>
+      milestones.where((m) => m.isCompleted).length;
+  double get milestoneProgress => milestones.isEmpty
+      ? (isCompleted ? 1.0 : 0.0)
+      : (completedMilestonesCount / milestones.length);
+
+  bool get isProjectInitiative =>
+      milestones.isNotEmpty ||
+      (timeframe == GoalTimeframe.custom && targetDate != null);
+
   Goal copyWith({
     String? id,
     String? title,
+    String? description,
     String? category,
     String? mode,
     int? targetMinutes,
@@ -69,10 +134,15 @@ class Goal {
     int? targetDate,
     int? createdAt,
     bool? isArchived,
+    bool? isCompleted,
+    int? completedAt,
+    List<GoalMilestone>? milestones,
+    String? colorHex,
   }) {
     return Goal(
       id: id ?? this.id,
       title: title ?? this.title,
+      description: description ?? this.description,
       category: category ?? this.category,
       mode: mode ?? this.mode,
       targetMinutes: targetMinutes ?? this.targetMinutes,
@@ -81,12 +151,17 @@ class Goal {
       targetDate: targetDate ?? this.targetDate,
       createdAt: createdAt ?? this.createdAt,
       isArchived: isArchived ?? this.isArchived,
+      isCompleted: isCompleted ?? this.isCompleted,
+      completedAt: completedAt ?? this.completedAt,
+      milestones: milestones ?? this.milestones,
+      colorHex: colorHex ?? this.colorHex,
     );
   }
 
   Map<String, dynamic> toJson() => {
     'id': id,
     'title': title,
+    'description': description,
     'category': category,
     'mode': mode,
     'targetMinutes': targetMinutes,
@@ -95,12 +170,26 @@ class Goal {
     'targetDate': targetDate,
     'createdAt': createdAt,
     'isArchived': isArchived,
+    'isCompleted': isCompleted,
+    'completedAt': completedAt,
+    'milestones': milestones.map((m) => m.toJson()).toList(),
+    if (colorHex != null) 'colorHex': colorHex,
   };
 
   factory Goal.fromJson(Map<String, dynamic> json) {
+    final rawMilestones = json['milestones'] as List<dynamic>?;
+    final parsedMilestones = rawMilestones != null
+        ? rawMilestones
+              .map(
+                (item) => GoalMilestone.fromJson(item as Map<String, dynamic>),
+              )
+              .toList()
+        : const <GoalMilestone>[];
+
     return Goal(
       id: json['id'] as String? ?? UniqueKey().toString(),
       title: _clampTitle(json['title'] as String? ?? 'Target'),
+      description: (json['description'] as String?) ?? '',
       category: json['category'] as String?,
       mode: json['mode'] as String?,
       targetMinutes: (json['targetMinutes'] as num?)?.toInt() ?? 600,
@@ -111,13 +200,17 @@ class Goal {
           (json['createdAt'] as num?)?.toInt() ??
           DateTime.now().millisecondsSinceEpoch,
       isArchived: json['isArchived'] as bool? ?? false,
+      isCompleted: json['isCompleted'] as bool? ?? false,
+      completedAt: (json['completedAt'] as num?)?.toInt(),
+      milestones: parsedMilestones,
+      colorHex: json['colorHex'] as String?,
     );
   }
 
   static String _clampTitle(String raw) {
     final t = raw.trim();
-    if (t.length <= 9) return t;
-    return t.substring(0, 9);
+    if (t.length <= 32) return t;
+    return t.substring(0, 32);
   }
 }
 

@@ -12,7 +12,6 @@ import 'package:notekar/dialogs/goals_sheet.dart';
 import 'package:notekar/dialogs/manual_entry_dialog.dart';
 import 'package:notekar/dialogs/note_dialog.dart';
 import 'package:notekar/dialogs/personalization_setup_dialog.dart';
-import 'package:notekar/dialogs/projects_sheet.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/settings/life_audit_page.dart';
 import 'package:notekar/dialogs/timeline_filter_sheet.dart';
@@ -25,6 +24,7 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/tag_service.dart';
+import 'package:notekar/widgets/apple_hig_action_sheet.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/history_calendar_view.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
@@ -2181,304 +2181,146 @@ class _HistoryDialogState extends State<HistoryDialog> {
   }
 
   void _showThreeDotsMenu() {
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        title: Text(
-          'Timeline Options'.localized(context),
-          style: TextStyle(
-            color: widget.p.text,
-            fontWeight: FontWeight.w700,
-            fontSize: 14,
+    AppleHigActionSheet.show<void>(
+      context,
+      p: widget.p,
+      title: 'Timeline Options',
+      subtitle: 'Timeline views, audits & project settings',
+      actions: [
+        if (widget.onOpenManualEntry != null)
+          AppleHigActionItem(
+            title: 'Add Manual Moment',
+            icon: Icons.add_circle_outline_rounded,
+            color: widget.p.accent,
+            onTap: () {
+              setState(() => _inSheetView = 'manual');
+            },
           ),
+        AppleHigActionItem(
+          title: _viewMode == 'list' ? 'Calendar View' : 'Timeline View',
+          icon: _viewMode == 'list'
+              ? Icons.calendar_today_rounded
+              : Icons.format_list_bulleted_rounded,
+          onTap: () {
+            final nextMode = _viewMode == 'list' ? 'calendar' : 'list';
+            setState(() => _viewMode = nextMode);
+            unawaited(
+              SharedPreferences.getInstance().then(
+                (prefs) => prefs.setString('history_view_mode', nextMode),
+              ),
+            );
+          },
         ),
-        actions: [
-          if (widget.onOpenManualEntry != null)
-            CupertinoActionSheetAction(
-              onPressed: () {
-                Navigator.pop(ctx);
-                setState(() => _inSheetView = 'manual');
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.add_circle_outline_rounded,
-                    size: 20,
-                    color: widget.p.accent,
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    'Add Manual Moment'.localized(context),
-                    style: TextStyle(
-                      color: widget.p.accent,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(ctx);
-              final nextMode = _viewMode == 'list' ? 'calendar' : 'list';
-              setState(() => _viewMode = nextMode);
-              unawaited(
-                SharedPreferences.getInstance().then(
-                  (prefs) => prefs.setString('history_view_mode', nextMode),
-                ),
-              );
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  _viewMode == 'list'
-                      ? Icons.calendar_today_rounded
-                      : Icons.format_list_bulleted_rounded,
-                  size: 20,
-                  color: widget.p.text,
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  _viewMode == 'list'
-                      ? 'Calendar View'.localized(context)
-                      : 'Timeline View'.localized(context),
-                  style: TextStyle(
-                    color: widget.p.text,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(ctx);
-              setState(() => _inSheetView = 'life_audit');
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.hourglass_bottom_rounded,
-                  size: 20,
-                  color: widget.p.text,
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  'Life Audit & Horizon'.localized(context),
-                  style: TextStyle(
-                    color: widget.p.text,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _openProjects();
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.flag_rounded, size: 20, color: widget.p.accent),
-                const SizedBox(width: 10),
-                Text(
-                  'Projects & Milestones'.localized(context),
-                  style: TextStyle(
-                    color: widget.p.accent,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (_viewMode == 'calendar')
-            CupertinoActionSheetAction(
-              onPressed: () {
-                Navigator.pop(ctx);
-                _openFilterSheet();
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.tune_rounded, size: 20, color: widget.p.text),
-                  const SizedBox(width: 10),
-                  Text(
-                    'Filter Timeline'.localized(context),
-                    style: TextStyle(
-                      color: widget.p.text,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          if (widget.onClearAll != null && _entries.isNotEmpty)
-            CupertinoActionSheetAction(
-              isDestructiveAction: true,
-              onPressed: () {
-                Navigator.pop(ctx);
-                _confirmDeleteAll();
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.delete_rounded,
-                    size: 20,
-                    color: CupertinoColors.destructiveRed,
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    'Delete All Moments'.localized(context),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          isDefaultAction: true,
-          onPressed: () => Navigator.pop(ctx),
-          child: Text(
-            'Cancel'.localized(context),
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
+        AppleHigActionItem(
+          title: 'Life Audit & Horizon',
+          icon: Icons.hourglass_bottom_rounded,
+          onTap: () {
+            setState(() => _inSheetView = 'life_audit');
+          },
         ),
-      ),
+        AppleHigActionItem(
+          title: 'Targets & Projects',
+          icon: Icons.flag_rounded,
+          color: widget.p.accent,
+          onTap: () {
+            setState(() => _inSheetView = 'goals');
+          },
+        ),
+        AppleHigActionItem(
+          title: 'Targets & Projects Settings',
+          icon: Icons.tune_rounded,
+          color: widget.p.accent,
+          onTap: () {
+            Navigator.of(context).pop('targets_projects_settings');
+          },
+        ),
+        if (_viewMode == 'calendar')
+          AppleHigActionItem(
+            title: 'Filter Timeline',
+            icon: Icons.filter_list_rounded,
+            onTap: () {
+              _openFilterSheet();
+            },
+          ),
+        if (widget.onClearAll != null && _entries.isNotEmpty)
+          AppleHigActionItem(
+            title: 'Delete All Moments',
+            icon: Icons.delete_rounded,
+            isDestructive: true,
+            onTap: () {
+              _confirmDeleteAll();
+            },
+          ),
+      ],
     );
   }
 
   void _openFilterSheet() {
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        title: Text(
-          'Filter Timeline'.localized(context),
-          style: TextStyle(
-            color: widget.p.text,
-            fontWeight: FontWeight.w700,
-            fontSize: 14,
-          ),
-        ),
-        message: Text(
-          'Select moments to display'.localized(context),
-          style: TextStyle(color: widget.p.text3, fontSize: 12),
-        ),
-        actions: [
-          for (final f in [
-            'all',
-            'today',
-            'week',
-            'sessions',
-            'single',
-            'notes',
-            'media',
-            'date',
-          ])
-            CupertinoActionSheetAction(
-              onPressed: () {
-                Navigator.pop(ctx);
-                if (f == 'date') {
-                  _openDateFilter();
-                } else {
-                  setState(() {
-                    _filter = f;
-                    _selectedDateKey = null;
-                    _visibleCount = _pageSize;
-                    _rebuildMemoizedLists();
-                  });
-                  if (_scrollController.hasClients) {
-                    _scrollController.jumpTo(0.0);
-                  }
-                }
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (_filter == f) ...[
-                    Icon(Icons.check_rounded, size: 16, color: widget.p.accent),
-                    const SizedBox(width: 8),
-                  ],
-                  Text(
-                    switch (f) {
-                      'all' => 'All Moments'.localized(context),
-                      'today' => 'Today'.localized(context),
-                      'week' => 'This Week'.localized(context),
-                      'sessions' => 'Sessions (In/Out)'.localized(context),
-                      'single' => 'Single Logs'.localized(context),
-                      'notes' => 'With Notes'.localized(context),
-                      'media' => 'Media (Voice/Images)'.localized(context),
-                      'date' => 'Pick Specific Date...'.localized(context),
-                      _ => f,
-                    },
-                    style: TextStyle(
-                      color: _filter == f ? widget.p.accent : widget.p.text,
-                      fontWeight: _filter == f
-                          ? FontWeight.w700
-                          : FontWeight.w500,
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _openAdvancedFilter();
+    AppleHigActionSheet.show<void>(
+      context,
+      p: widget.p,
+      title: 'Filter Timeline',
+      subtitle: 'Select moments to display',
+      actions: [
+        for (final f in [
+          'all',
+          'today',
+          'week',
+          'sessions',
+          'single',
+          'notes',
+          'media',
+          'date',
+        ])
+          AppleHigActionItem(
+            title: switch (f) {
+              'all' => 'All Moments',
+              'today' => 'Today',
+              'week' => 'This Week',
+              'sessions' => 'Sessions (In/Out)',
+              'single' => 'Single Logs',
+              'notes' => 'With Notes',
+              'media' => 'Media (Voice/Images)',
+              'date' => 'Pick Specific Date...',
+              _ => f,
             },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (_filter == 'advanced' ||
-                    _timelineFilterCriteria.isActive) ...[
-                  Icon(Icons.check_rounded, size: 16, color: widget.p.accent),
-                  const SizedBox(width: 8),
-                ],
-                Icon(Icons.tune_rounded, size: 16, color: widget.p.accent),
-                const SizedBox(width: 6),
-                Text(
-                  'Advanced'.localized(context),
-                  style: TextStyle(
-                    color:
-                        (_filter == 'advanced' ||
-                            _timelineFilterCriteria.isActive)
-                        ? widget.p.accent
-                        : widget.p.text,
-                    fontWeight:
-                        (_filter == 'advanced' ||
-                            _timelineFilterCriteria.isActive)
-                        ? FontWeight.w700
-                        : FontWeight.w500,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
+            icon: switch (f) {
+              'all' => Icons.all_inclusive_rounded,
+              'today' => Icons.today_rounded,
+              'week' => Icons.date_range_rounded,
+              'sessions' => Icons.timelapse_rounded,
+              'single' => Icons.check_circle_outline_rounded,
+              'notes' => Icons.description_rounded,
+              'media' => Icons.perm_media_rounded,
+              'date' => Icons.calendar_month_rounded,
+              _ => Icons.filter_list_rounded,
+            },
+            isSelected: _filter == f,
+            onTap: () {
+              if (f == 'date') {
+                _openDateFilter();
+              } else {
+                setState(() {
+                  _filter = f;
+                  _selectedDateKey = null;
+                  _visibleCount = _pageSize;
+                  _rebuildMemoizedLists();
+                });
+                if (_scrollController.hasClients) {
+                  _scrollController.jumpTo(0.0);
+                }
+              }
+            },
           ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          isDefaultAction: true,
-          onPressed: () => Navigator.pop(ctx),
-          child: Text(
-            'Cancel'.localized(context),
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
+        AppleHigActionItem(
+          title: 'Advanced',
+          icon: Icons.tune_rounded,
+          isSelected: _filter == 'advanced' || _timelineFilterCriteria.isActive,
+          onTap: () {
+            _openAdvancedFilter();
+          },
         ),
-      ),
+      ],
     );
   }
 
@@ -2645,23 +2487,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
       });
       await _loadGoals();
     }
-  }
-
-  void _openProjects() {
-    ProjectsSheet.show(
-      context,
-      p: widget.p,
-      moments: _entries,
-      activeCategory: widget.activeCategory,
-      isSessionRunning: _isSessionRunning,
-      onStartSession: (proj) {
-        Navigator.pop(context, {
-          'action': 'start_project_session',
-          'project': proj,
-        });
-      },
-      onStopSession: _stopActiveSessionFromGoals,
-    );
   }
 
   void _restoreRemovedEntries(List<Moment> moments) {

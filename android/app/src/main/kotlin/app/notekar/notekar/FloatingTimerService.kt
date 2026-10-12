@@ -81,16 +81,16 @@ class FloatingTimerService : Service() {
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
-            setPadding((10 * density).toInt(), (6 * density).toInt(), (10 * density).toInt(), (6 * density).toInt())
+            setPadding((14 * density).toInt(), (8 * density).toInt(), (14 * density).toInt(), (8 * density).toInt())
             background = GradientDrawable().apply {
-                setColor(Color.parseColor("#E6181B22"))
-                cornerRadius = 20 * density
-                setStroke((1 * density).toInt(), Color.parseColor("#33FFFFFF"))
+                setColor(Color.parseColor("#F20B0C0E"))
+                cornerRadius = 19 * density
+                setStroke((0.8 * density).toInt(), Color.parseColor("#26FFFFFF"))
             }
             elevation = 12 * density
         }
 
-        // Top Row: Status Dot + Chronometer + Category
+        // Top Row: Status Dot + Chronometer + Category Badge
         val mainRow = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
@@ -99,7 +99,8 @@ class FloatingTimerService : Service() {
         statusDot = View(this).apply {
             val size = (8 * density).toInt()
             layoutParams = LinearLayout.LayoutParams(size, size).apply {
-                marginEnd = (8 * density).toInt()
+                marginEnd = (9 * density).toInt()
+                gravity = Gravity.CENTER_VERTICAL
             }
             background = GradientDrawable().apply {
                 shape = GradientDrawable.OVAL
@@ -110,27 +111,35 @@ class FloatingTimerService : Service() {
 
         chronometer = Chronometer(this).apply {
             setTextColor(Color.WHITE)
-            textSize = 14f
+            textSize = 13.5f
             typeface = android.graphics.Typeface.MONOSPACE
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
-                marginEnd = (8 * density).toInt()
+                marginEnd = (9 * density).toInt()
+                gravity = Gravity.CENTER_VERTICAL
             }
         }
         mainRow.addView(chronometer)
 
         categoryText = TextView(this).apply {
-            textSize = 10.5f
+            textSize = 10f
             setTextColor(Color.parseColor("#FF64D2FF"))
             typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
+            val padH = (6 * density).toInt()
+            val padV = (2 * density).toInt()
+            setPadding(padH, padV, padH, padV)
+            background = GradientDrawable().apply {
+                setColor(Color.parseColor("#2664D2FF"))
+                cornerRadius = 6 * density
+            }
         }
         mainRow.addView(categoryText)
 
         root.addView(mainRow)
 
-        // Bottom Expandable Actions Bar (Pause/Resume, OUT, Close)
+        // Bottom Expandable Actions Bar (Pause/Resume, Note, OUT, Close)
         actionsContainer = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
@@ -145,20 +154,21 @@ class FloatingTimerService : Service() {
 
         btnPauseResume = TextView(this).apply {
             text = "⏸"
-            textSize = 13f
+            textSize = 12.5f
             setTextColor(Color.WHITE)
             gravity = Gravity.CENTER
-            val pad = (6 * density).toInt()
-            setPadding(pad * 2, pad, pad * 2, pad)
+            val padH = (11 * density).toInt()
+            val padV = (5 * density).toInt()
+            setPadding(padH, padV, padH, padV)
             background = GradientDrawable().apply {
-                setColor(Color.parseColor("#33FFFFFF"))
-                cornerRadius = 10 * density
+                setColor(Color.parseColor("#26FFFFFF"))
+                cornerRadius = 14 * density
             }
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
-                marginEnd = (6 * density).toInt()
+                marginEnd = (5 * density).toInt()
             }
             setOnClickListener {
                 NoteKarWidgetProvider.togglePauseResume(this@FloatingTimerService)
@@ -166,23 +176,52 @@ class FloatingTimerService : Service() {
         }
         actionsContainer?.addView(btnPauseResume)
 
-        val btnOut = TextView(this).apply {
-            text = "OUT"
-            textSize = 11.5f
+        val btnQuickNote = TextView(this).apply {
+            text = "✎ Note"
+            textSize = 11f
             typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
             setTextColor(Color.WHITE)
             gravity = Gravity.CENTER
-            val pad = (6 * density).toInt()
-            setPadding(pad * 2, pad, pad * 2, pad)
+            val padH = (10 * density).toInt()
+            val padV = (5 * density).toInt()
+            setPadding(padH, padV, padH, padV)
             background = GradientDrawable().apply {
-                setColor(Color.parseColor("#FF0A84FF"))
-                cornerRadius = 10 * density
+                setColor(Color.parseColor("#26FFFFFF"))
+                cornerRadius = 14 * density
             }
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
-                marginEnd = (6 * density).toInt()
+                marginEnd = (5 * density).toInt()
+            }
+            setOnClickListener {
+                val intent = Intent(this@FloatingTimerService, QuickNoteActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                }
+                startActivity(intent)
+            }
+        }
+        actionsContainer?.addView(btnQuickNote)
+
+        val btnOut = TextView(this).apply {
+            text = "OUT"
+            textSize = 11f
+            typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
+            setTextColor(Color.WHITE)
+            gravity = Gravity.CENTER
+            val padH = (11 * density).toInt()
+            val padV = (5 * density).toInt()
+            setPadding(padH, padV, padH, padV)
+            background = GradientDrawable().apply {
+                setColor(Color.parseColor("#FFFF3B30"))
+                cornerRadius = 14 * density
+            }
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                marginEnd = (5 * density).toInt()
             }
             setOnClickListener {
                 NoteKarWidgetProvider.performBackgroundLog(this@FloatingTimerService, "out", "")
@@ -193,14 +232,15 @@ class FloatingTimerService : Service() {
 
         val btnClose = TextView(this).apply {
             text = "✕"
-            textSize = 12f
-            setTextColor(Color.parseColor("#99FFFFFF"))
+            textSize = 11.5f
+            setTextColor(Color.parseColor("#B3FFFFFF"))
             gravity = Gravity.CENTER
-            val pad = (6 * density).toInt()
-            setPadding(pad * 2, pad, pad * 2, pad)
+            val padH = (9 * density).toInt()
+            val padV = (5 * density).toInt()
+            setPadding(padH, padV, padH, padV)
             background = GradientDrawable().apply {
-                setColor(Color.parseColor("#22FFFFFF"))
-                cornerRadius = 10 * density
+                setColor(Color.parseColor("#1AFFFFFF"))
+                cornerRadius = 14 * density
             }
             setOnClickListener {
                 stopSelf()
@@ -210,7 +250,7 @@ class FloatingTimerService : Service() {
 
         root.addView(actionsContainer)
 
-        // Touch Listener for dragging and click detection
+        // Touch Listener for dragging and magnetic edge snapping
         var initialX = 0
         var initialY = 0
         var initialTouchX = 0f
@@ -273,6 +313,24 @@ class FloatingTimerService : Service() {
                             }
                             tapHandler.postDelayed(pendingSingleTap!!, 260)
                         }
+                    } else {
+                        // Magnetic edge snapping
+                        val screenWidth = resources.displayMetrics.widthPixels
+                        val viewWidth = floatingView?.width ?: (130 * density).toInt()
+                        val targetX = if (params.x + viewWidth / 2 < screenWidth / 2) {
+                            (12 * density).toInt()
+                        } else {
+                            screenWidth - viewWidth - (12 * density).toInt()
+                        }
+                        android.animation.ValueAnimator.ofInt(params.x, targetX).apply {
+                            duration = 220
+                            interpolator = android.view.animation.DecelerateInterpolator()
+                            addUpdateListener { va ->
+                                params.x = va.animatedValue as Int
+                                windowManager?.updateViewLayout(floatingView, params)
+                            }
+                            start()
+                        }
                     }
                     true
                 }
@@ -306,9 +364,20 @@ class FloatingTimerService : Service() {
         categoryText?.text = activeCategory.uppercase(Locale.ROOT)
         btnPauseResume?.text = if (isPaused) "▶" else "⏸"
 
-        (statusDot?.background as? GradientDrawable)?.setColor(
-            if (isPaused) Color.parseColor("#FFFF9F0A") else Color.parseColor("#FF30D158")
-        )
+        if (isPaused) {
+            statusDot?.clearAnimation()
+            (statusDot?.background as? GradientDrawable)?.setColor(Color.parseColor("#FFFF9F0A"))
+        } else {
+            (statusDot?.background as? GradientDrawable)?.setColor(Color.parseColor("#FF30D158"))
+            if (statusDot?.animation == null) {
+                val pulseAnim = android.view.animation.AlphaAnimation(1.0f, 0.45f).apply {
+                    duration = 850
+                    repeatMode = android.view.animation.Animation.REVERSE
+                    repeatCount = android.view.animation.Animation.INFINITE
+                }
+                statusDot?.startAnimation(pulseAnim)
+            }
+        }
 
         val elapsed = if (isPaused && pausedAt > 0L) {
             pausedAt - lastTimestamp

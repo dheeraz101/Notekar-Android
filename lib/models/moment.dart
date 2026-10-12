@@ -74,7 +74,7 @@ class Moment {
         return t.substring(5).trim();
       }
     }
-    return null;
+    return effectiveProjectId;
   }
 
   @ignore

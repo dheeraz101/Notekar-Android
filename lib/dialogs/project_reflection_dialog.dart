@@ -1,11 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
+import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/models/project.dart';
+import 'package:notekar/services/goals_service.dart';
 import 'package:notekar/services/project_service.dart';
 import 'package:notekar/widgets/hashtag_suggestion_overlay.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
+
+class _ReflectionMilestoneItem {
+  final String id;
+  final String title;
+  final bool isCompleted;
+
+  const _ReflectionMilestoneItem({
+    required this.id,
+    required this.title,
+    required this.isCompleted,
+  });
+}
 
 /// Result returned from the Project Reflection dialog.
 class ProjectReflectionResult {
@@ -18,24 +32,30 @@ class ProjectReflectionResult {
   final List<String> completedMilestoneIds;
 }
 
-/// Apple HIG modal sheet presented when closing/pausing a project session.
+/// Apple HIG modal sheet presented when closing/pausing a project or target session.
 /// Prompts the user for reflections, key learnings, and milestone completions.
 class ProjectReflectionDialog extends StatefulWidget {
   const ProjectReflectionDialog({
     super.key,
     required this.p,
-    required this.project,
+    this.project,
+    this.goal,
     this.sessionDuration,
-  });
+  }) : assert(
+         project != null || goal != null,
+         'Either project or goal must be provided',
+       );
 
   final Palette p;
-  final Project project;
+  final Project? project;
+  final Goal? goal;
   final Duration? sessionDuration;
 
   static Future<ProjectReflectionResult?> show(
     BuildContext context, {
     required Palette p,
-    required Project project,
+    Project? project,
+    Goal? goal,
     Duration? sessionDuration,
   }) {
     return showModalBottomSheet<ProjectReflectionResult>(
@@ -45,6 +65,7 @@ class ProjectReflectionDialog extends StatefulWidget {
       builder: (_) => ProjectReflectionDialog(
         p: p,
         project: project,
+        goal: goal,
         sessionDuration: sessionDuration,
       ),
     );
@@ -60,11 +81,37 @@ class _ProjectReflectionDialogState extends State<ProjectReflectionDialog> {
   final FocusNode _focusNode = FocusNode();
   final Set<String> _checkedMilestones = <String>{};
 
+  List<_ReflectionMilestoneItem> get _milestonesList {
+    if (widget.project != null) {
+      return widget.project!.milestones
+          .map(
+            (m) => _ReflectionMilestoneItem(
+              id: m.id,
+              title: m.title,
+              isCompleted: m.isCompleted,
+            ),
+          )
+          .toList();
+    }
+    if (widget.goal != null) {
+      return widget.goal!.milestones
+          .map(
+            (m) => _ReflectionMilestoneItem(
+              id: m.id,
+              title: m.title,
+              isCompleted: m.isCompleted,
+            ),
+          )
+          .toList();
+    }
+    return [];
+  }
+
   @override
   void initState() {
     super.initState();
-    // Default checked milestones to any currently completed in the project
-    for (final m in widget.project.milestones) {
+    // Default checked milestones to any currently completed in the project/goal
+    for (final m in _milestonesList) {
       if (m.isCompleted) {
         _checkedMilestones.add(m.id);
       }
@@ -90,14 +137,18 @@ class _ProjectReflectionDialogState extends State<ProjectReflectionDialog> {
   Future<void> _handleSave() async {
     HapticFeedback.mediumImpact();
     // Persist any milestone toggles that changed
-    final originalCompleted = widget.project.milestones
+    final originalCompleted = _milestonesList
         .where((m) => m.isCompleted)
         .map((m) => m.id)
         .toSet();
 
     final newlyCompleted = _checkedMilestones.difference(originalCompleted);
     for (final msId in newlyCompleted) {
-      await ProjectService.instance.toggleMilestone(widget.project.id, msId);
+      if (widget.project != null) {
+        await ProjectService.instance.toggleMilestone(widget.project!.id, msId);
+      } else if (widget.goal != null) {
+        await GoalsService.instance.toggleMilestone(widget.goal!.id, msId);
+      }
     }
 
     if (mounted) {
@@ -115,7 +166,7 @@ class _ProjectReflectionDialogState extends State<ProjectReflectionDialog> {
   Widget build(BuildContext context) {
     final p = widget.p;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-    final uncompletedMilestones = widget.project.milestones;
+    final uncompletedMilestones = _milestonesList;
 
     return AppSheet(
       p: p,
@@ -165,7 +216,9 @@ class _ProjectReflectionDialogState extends State<ProjectReflectionDialog> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.project.title,
+                          widget.project?.title ??
+                              widget.goal?.title ??
+                              'Target',
                           style: TextStyle(
                             color: p.text,
                             fontSize: 16,
@@ -197,7 +250,9 @@ class _ProjectReflectionDialogState extends State<ProjectReflectionDialog> {
                               const SizedBox(width: 8),
                             ],
                             Text(
-                              widget.project.category ?? 'Project',
+                              widget.project?.category ??
+                                  widget.goal?.category ??
+                                  'Target',
                               style: TextStyle(
                                 color: p.accent,
                                 fontSize: 13,

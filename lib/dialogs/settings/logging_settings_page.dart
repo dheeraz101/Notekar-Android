@@ -277,6 +277,15 @@ class _LoggingSettingsPageState extends State<LoggingSettingsPage> {
             ),
             SettingsRow(
               p: p,
+              icon: CupertinoIcons.flag,
+              title: 'Targets & Projects'.localized(context),
+              status: 'Pacing & Goals'.localized(context),
+              color: p.accent,
+              onTap: () =>
+                  onOpenCategory('Targets & Projects', parent: 'Logging'),
+            ),
+            SettingsRow(
+              p: p,
               icon: CupertinoIcons.tag,
               title: 'Activity Tags'.localized(context),
               status: 'Quick Tags'.localized(context),
