@@ -48,12 +48,18 @@ class GoalMilestone {
     String? title,
     bool? isCompleted,
     int? completedAt,
+    bool clearCompletedAt = false,
   }) {
+    final nextIsCompleted = isCompleted ?? this.isCompleted;
+    final nextCompletedAt =
+        (clearCompletedAt || (isCompleted == false && completedAt == null))
+        ? null
+        : (completedAt ?? this.completedAt);
     return GoalMilestone(
       id: id ?? this.id,
       title: title ?? this.title,
-      isCompleted: isCompleted ?? this.isCompleted,
-      completedAt: completedAt ?? this.completedAt,
+      isCompleted: nextIsCompleted,
+      completedAt: nextCompletedAt,
     );
   }
 
@@ -136,9 +142,15 @@ class Goal {
     bool? isArchived,
     bool? isCompleted,
     int? completedAt,
+    bool clearCompletedAt = false,
     List<GoalMilestone>? milestones,
     String? colorHex,
   }) {
+    final nextIsCompleted = isCompleted ?? this.isCompleted;
+    final nextCompletedAt =
+        (clearCompletedAt || (isCompleted == false && completedAt == null))
+        ? null
+        : (completedAt ?? this.completedAt);
     return Goal(
       id: id ?? this.id,
       title: title ?? this.title,
@@ -151,8 +163,8 @@ class Goal {
       targetDate: targetDate ?? this.targetDate,
       createdAt: createdAt ?? this.createdAt,
       isArchived: isArchived ?? this.isArchived,
-      isCompleted: isCompleted ?? this.isCompleted,
-      completedAt: completedAt ?? this.completedAt,
+      isCompleted: nextIsCompleted,
+      completedAt: nextCompletedAt,
       milestones: milestones ?? this.milestones,
       colorHex: colorHex ?? this.colorHex,
     );

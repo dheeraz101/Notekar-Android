@@ -419,6 +419,8 @@ class TimelineSessionCard extends StatelessWidget {
                                     goalTitle: matchingGoal.title,
                                     durationStr: durationStr,
                                     compact: compact,
+                                    colorHex: matchingGoal.colorHex,
+                                    hasMilestones: matchingGoal.hasMilestones,
                                   ),
                                 ],
                               ],
@@ -659,15 +661,26 @@ class _SessionGoalBadge extends StatelessWidget {
     required this.goalTitle,
     required this.durationStr,
     required this.compact,
+    this.colorHex,
+    this.hasMilestones = false,
   });
 
   final Palette p;
   final String goalTitle;
   final String durationStr;
   final bool compact;
+  final String? colorHex;
+  final bool hasMilestones;
 
   @override
   Widget build(BuildContext context) {
+    Color badgeColor = p.accent;
+    if (colorHex != null && colorHex!.isNotEmpty) {
+      try {
+        badgeColor = Color(int.parse(colorHex!.replaceFirst('#', '0xFF')));
+      } catch (_) {}
+    }
+
     return Container(
       constraints: BoxConstraints(maxWidth: compact ? 110 : 140),
       padding: EdgeInsets.symmetric(
@@ -675,14 +688,21 @@ class _SessionGoalBadge extends StatelessWidget {
         vertical: compact ? 1.5 : 2.5,
       ),
       decoration: BoxDecoration(
-        color: p.accent.withValues(alpha: 0.12),
+        color: badgeColor.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: p.accent.withValues(alpha: 0.35), width: 0.8),
+        border: Border.all(
+          color: badgeColor.withValues(alpha: 0.35),
+          width: 0.8,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.flag_rounded, size: compact ? 9.5 : 11, color: p.accent),
+          Icon(
+            hasMilestones ? Icons.rocket_launch_rounded : Icons.flag_rounded,
+            size: compact ? 9.5 : 11,
+            color: badgeColor,
+          ),
           const SizedBox(width: 3.5),
           Flexible(
             child: Text(
@@ -690,7 +710,7 @@ class _SessionGoalBadge extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: p.accent,
+                color: badgeColor,
                 fontSize: compact ? 9.5 : 10.5,
                 fontWeight: FontWeight.w700,
                 fontFeatures: const [FontFeature.tabularFigures()],

@@ -889,14 +889,14 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
       if (_filterCriteria.goalId != null &&
           _filterCriteria.goalId!.isNotEmpty) {
         if (it is TimelineSessionItem) {
-          final inGoal = it.inMoment.goalId;
-          final outGoal = it.outMoment?.goalId;
+          final inGoal = it.inMoment.effectiveGoalId;
+          final outGoal = it.outMoment?.effectiveGoalId;
           if (inGoal != _filterCriteria.goalId &&
               outGoal != _filterCriteria.goalId) {
             return false;
           }
         } else if (it is TimelineSingleItem) {
-          if (it.moment.goalId != _filterCriteria.goalId) {
+          if (it.moment.effectiveGoalId != _filterCriteria.goalId) {
             return false;
           }
         } else {

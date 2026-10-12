@@ -116,6 +116,7 @@ class GoalsService {
     list[idx] = goal.copyWith(
       milestones: [...goal.milestones, newMilestone],
       isCompleted: false,
+      completedAt: null,
     );
     await _persistGoals(list);
   }
@@ -128,7 +129,14 @@ class GoalsService {
 
     final goal = list[idx];
     final updated = goal.milestones.where((m) => m.id != milestoneId).toList();
-    list[idx] = goal.copyWith(milestones: updated);
+    final allDone = updated.isNotEmpty && updated.every((m) => m.isCompleted);
+    list[idx] = goal.copyWith(
+      milestones: updated,
+      isCompleted: allDone,
+      completedAt: allDone
+          ? (goal.completedAt ?? DateTime.now().millisecondsSinceEpoch)
+          : null,
+    );
     await _persistGoals(list);
   }
 

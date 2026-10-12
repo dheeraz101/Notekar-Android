@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
+import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/services/goals_service.dart';
 import 'package:notekar/services/universal_interval_ledger.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
@@ -57,11 +59,20 @@ class _DailyWrapupSheetState extends State<DailyWrapupSheet> {
   final TextEditingController _noteCtrl = TextEditingController();
   bool _isEnding = false;
   late bool _hasActiveSession;
+  List<Goal> _goals = [];
 
   @override
   void initState() {
     super.initState();
     _hasActiveSession = widget.isSessionOngoing;
+    _loadGoals();
+  }
+
+  Future<void> _loadGoals() async {
+    final list = await GoalsService.instance.getGoals();
+    if (mounted) {
+      setState(() => _goals = list);
+    }
   }
 
   @override
@@ -376,7 +387,133 @@ class _DailyWrapupSheetState extends State<DailyWrapupSheet> {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            // Active Targets & Initiatives Section
+            if (_goals.where((g) => !g.isArchived).isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.only(left: 4, bottom: 8),
+                child: Text(
+                  'ACTIVE TARGETS & INITIATIVES',
+                  style: TextStyle(
+                    color: p.subtext,
+                    fontSize: 11,
+                    letterSpacing: 1.0,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: p.surface2,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: p.surface3.withAlpha(120)),
+                ),
+                child: Column(
+                  children: _goals.where((g) => !g.isArchived).take(4).map((g) {
+                    final progress = GoalsService.instance.calculateProgress(
+                      g,
+                      widget.moments,
+                    );
+                    Color goalColor = p.accent;
+                    if (g.colorHex != null && g.colorHex!.isNotEmpty) {
+                      try {
+                        goalColor = Color(
+                          int.parse(g.colorHex!.replaceFirst('#', '0xFF')),
+                        );
+                      } catch (_) {}
+                    }
+                    final isComplete = g.isCompleted || progress.isCompleted;
+
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                g.hasMilestones ? '🚀' : '🎯',
+                                style: const TextStyle(fontSize: 13),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  g.title,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: p.text,
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              if (isComplete)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: p.green.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    'Done',
+                                    style: TextStyle(
+                                      color: p.green,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                )
+                              else if (g.hasMilestones)
+                                Text(
+                                  '${g.completedMilestonesCount}/${g.milestones.length} ms',
+                                  style: TextStyle(
+                                    color: p.subtext,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                )
+                              else if (g.targetMinutes > 0)
+                                Text(
+                                  '${(progress.ratio * 100).round()}%',
+                                  style: TextStyle(
+                                    color: goalColor,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: isComplete
+                                  ? 1.0
+                                  : (g.hasMilestones
+                                        ? g.milestoneProgress
+                                        : progress.ratio),
+                              minHeight: 5,
+                              backgroundColor: p.surface3,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                isComplete ? p.green : goalColor,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
 
             // Category breakdown
             if (categoryTotals.isNotEmpty) ...[

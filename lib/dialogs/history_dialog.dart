@@ -60,6 +60,7 @@ class HistoryDialog extends StatefulWidget {
     this.onEndLiveSession,
     this.onRestoreLiveSession,
     this.activeCategory,
+    this.activeGoalId,
     this.isSessionRunning = false,
     this.onStopSession,
     this.blur = false,
@@ -106,6 +107,7 @@ class HistoryDialog extends StatefulWidget {
   onEndLiveSession;
   final Future<void> Function(Moment inMoment)? onRestoreLiveSession;
   final String? activeCategory;
+  final String? activeGoalId;
   final bool isSessionRunning;
   final VoidCallback? onStopSession;
   final bool blur;
@@ -743,6 +745,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                   p: widget.p,
                   moments: _entries,
                   activeCategory: widget.activeCategory,
+                  activeGoalId: widget.activeGoalId,
                   isSessionRunning: _isSessionRunning,
                   onStopSession: _stopActiveSessionFromGoals,
                   onManualEntry: (goal) {

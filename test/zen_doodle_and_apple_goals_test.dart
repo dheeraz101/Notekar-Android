@@ -158,6 +158,7 @@ void main() {
         await tester.enterText(find.byType(CupertinoTextField).first, 'Memoir');
 
         // Tap Save
+        await tester.ensureVisible(find.text('Save Goal'));
         await tester.tap(find.text('Save Goal'));
         await tester.pumpAndSettle();
 
@@ -414,6 +415,63 @@ void main() {
 
       // Should now be 86 Years
       expect(find.text('86 Years'), findsOneWidget);
+    });
+  });
+
+  group('Unified Target & Project Resiliency Tests', () {
+    test(
+      'Milestone deletion recalculates isCompleted and completedAt accurately',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+        final g = Goal(
+          id: 'g_test_ms',
+          title: 'Project X',
+          category: 'Work',
+          targetMinutes: 0,
+          createdAt: 1000,
+          milestones: [
+            GoalMilestone(id: 'm1', title: 'Phase 1', isCompleted: true),
+            GoalMilestone(id: 'm2', title: 'Phase 2', isCompleted: false),
+          ],
+        );
+        await GoalsService.instance.saveGoal(g);
+
+        // Initially not all completed
+        var loaded = (await GoalsService.instance.getGoals()).first;
+        expect(loaded.isCompleted, isFalse);
+
+        // Delete the incomplete milestone m2 -> remaining milestone m1 is completed
+        await GoalsService.instance.deleteMilestone('g_test_ms', 'm2');
+        loaded = (await GoalsService.instance.getGoals()).first;
+        expect(loaded.isCompleted, isTrue);
+        expect(loaded.completedAt, isNotNull);
+
+        // Adding a new milestone marks isCompleted back to false
+        await GoalsService.instance.addMilestone('g_test_ms', 'Phase 3');
+        loaded = (await GoalsService.instance.getGoals()).first;
+        expect(loaded.isCompleted, isFalse);
+        expect(loaded.completedAt, isNull);
+      },
+    );
+
+    test('Goal preserves Apple HIG color and milestone indicators', () {
+      final g = Goal(
+        id: 'g_styled',
+        title: 'Mobile App',
+        targetMinutes: 0,
+        createdAt: 1000,
+        colorHex: '#30B0C7',
+        milestones: [
+          GoalMilestone(id: 'm1', title: 'Design Mockup', isCompleted: true),
+        ],
+      );
+
+      expect(g.hasMilestones, isTrue);
+      expect(g.colorHex, '#30B0C7');
+
+      final copy = g.copyWith(title: 'Mobile App v2');
+      expect(copy.colorHex, '#30B0C7');
+      expect(copy.hasMilestones, isTrue);
     });
   });
 }

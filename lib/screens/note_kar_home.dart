@@ -1444,16 +1444,19 @@ class _NoteKarHomeState extends State<NoteKarHome>
         : null;
 
     final effectiveTags = List<String>.from(tags ?? const []);
-    if (_activeGoalId != null) {
-      final goalTag = 'goal:$_activeGoalId';
-      if (!effectiveTags.contains(goalTag)) {
-        effectiveTags.add(goalTag);
+    final autoTagEnabled = _prefs?.getBool('goals_autotag_enabled') ?? true;
+    if (autoTagEnabled) {
+      if (_activeGoalId != null) {
+        final goalTag = 'goal:$_activeGoalId';
+        if (!effectiveTags.contains(goalTag)) {
+          effectiveTags.add(goalTag);
+        }
       }
-    }
-    if (_activeProjectId != null) {
-      final projTag = 'proj:$_activeProjectId';
-      if (!effectiveTags.contains(projTag)) {
-        effectiveTags.add(projTag);
+      if (_activeProjectId != null) {
+        final projTag = 'proj:$_activeProjectId';
+        if (!effectiveTags.contains(projTag)) {
+          effectiveTags.add(projTag);
+        }
       }
     }
 
@@ -1558,7 +1561,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
           completedGoal,
           _entries,
         );
-        if (progress.isCompleted &&
+        final celebrationEnabled =
+            _prefs?.getBool('goals_celebration_enabled') ?? true;
+        if (celebrationEnabled &&
+            progress.isCompleted &&
             mounted &&
             !_celebratedGoalIds.contains(completedGoal.id)) {
           _celebratedGoalIds.add(completedGoal.id);
@@ -1586,10 +1592,19 @@ class _NoteKarHomeState extends State<NoteKarHome>
       if (type == 'out' && hasActiveInitiative) {
         final finishedGoalId = _activeGoalId;
         final finishedProjId = _activeProjectId;
-        _activeGoalId = null;
-        _activeProjectId = null;
-        unawaited(_prefs?.remove('m-active-goal-id'));
-        unawaited(_prefs?.remove('m-active-project-id'));
+
+        // Clear active initiative only if goal reached full completion
+        final isGoalCompleted =
+            _activeGoal != null &&
+            GoalsService.instance
+                .calculateProgress(_activeGoal!, _entries)
+                .isCompleted;
+        if (isGoalCompleted) {
+          _activeGoalId = null;
+          _activeProjectId = null;
+          unawaited(_prefs?.remove('m-active-goal-id'));
+          unawaited(_prefs?.remove('m-active-project-id'));
+        }
         final sessionDur = oldSessionStart != null
             ? Duration(
                 milliseconds:
@@ -2278,6 +2293,16 @@ class _NoteKarHomeState extends State<NoteKarHome>
     String mode = 'two-way',
     String? goalId,
   }) async {
+    final exclusiveMode = _prefs?.getBool('goals_exclusive_mode') ?? true;
+    final isSessionRunning =
+        _mode == 'two-way' && (_sessionStart != null || _inout == 'out');
+    if (isSessionRunning &&
+        exclusiveMode &&
+        _activeGoalId != null &&
+        _activeGoalId != goalId) {
+      await _logEntry(forcedType: 'out');
+    }
+
     _activeGoalId = goalId;
     if (goalId != null) {
       await _saveSetting('m-active-goal-id', goalId);
@@ -2718,6 +2743,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         useNumbersInSingle: _useNumbersInSingle,
         resetSingleDaily: _resetSingleDaily,
         activeCategory: _activeCategory,
+        activeGoalId: _activeGoal?.id ?? _activeGoalId,
         isSessionRunning: _mode == 'two-way' && _sessionStart != null,
         onStopSession: () {
           Navigator.pop(sheetContext, {'action': 'stop_goal_session'});

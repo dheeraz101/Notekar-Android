@@ -16,6 +16,7 @@ import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/widgets/milestone_celebration_dialog.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 String _formatDateShort(DateTime dt) {
   const months = [
@@ -45,6 +46,7 @@ class GoalsSheet extends StatefulWidget {
     required this.p,
     required this.moments,
     this.activeCategory,
+    this.activeGoalId,
     this.isSessionRunning = false,
     this.onStartSession,
     this.onStopSession,
@@ -54,6 +56,7 @@ class GoalsSheet extends StatefulWidget {
   final Palette p;
   final List<Moment> moments;
   final String? activeCategory;
+  final String? activeGoalId;
   final bool isSessionRunning;
   final ValueChanged<Goal>? onStartSession;
   final VoidCallback? onStopSession;
@@ -64,6 +67,7 @@ class GoalsSheet extends StatefulWidget {
     required Palette p,
     required List<Moment> moments,
     String? activeCategory,
+    String? activeGoalId,
     bool isSessionRunning = false,
     ValueChanged<Goal>? onStartSession,
     VoidCallback? onStopSession,
@@ -77,6 +81,7 @@ class GoalsSheet extends StatefulWidget {
         p: p,
         moments: moments,
         activeCategory: activeCategory,
+        activeGoalId: activeGoalId,
         isSessionRunning: isSessionRunning,
         onStartSession: onStartSession,
         onStopSession: onStopSession,
@@ -128,6 +133,7 @@ class _GoalsSheetState extends State<GoalsSheet> {
           p: widget.p,
           moments: widget.moments,
           activeCategory: widget.activeCategory,
+          activeGoalId: widget.activeGoalId,
           isSessionRunning: widget.isSessionRunning,
           onStartSession: widget.onStartSession,
           onStopSession: widget.onStopSession,
@@ -149,6 +155,7 @@ class GoalsContentView extends StatefulWidget {
     required this.p,
     required this.moments,
     this.activeCategory,
+    this.activeGoalId,
     this.isSessionRunning = false,
     this.onAddGoal,
     this.onEditGoal,
@@ -163,6 +170,7 @@ class GoalsContentView extends StatefulWidget {
   final Palette p;
   final List<Moment> moments;
   final String? activeCategory;
+  final String? activeGoalId;
   final bool isSessionRunning;
   final VoidCallback? onAddGoal;
   final ValueChanged<Goal>? onEditGoal;
@@ -181,6 +189,8 @@ class GoalsContentViewState extends State<GoalsContentView>
     with SingleTickerProviderStateMixin {
   List<Goal> _goals = [];
   bool _isLoading = true;
+  bool _dailyPacingEnabled = true;
+  bool _celebrationEnabled = true;
   late final AnimationController _pulseController;
 
   @override
@@ -215,10 +225,15 @@ class GoalsContentViewState extends State<GoalsContentView>
 
   Future<void> loadGoals() async {
     final list = await GoalsService.instance.getGoals();
+    final prefs = await SharedPreferences.getInstance();
     if (mounted) {
       setState(() {
         _goals = list;
         _isLoading = false;
+        _dailyPacingEnabled =
+            prefs.getBool('goals_daily_pacing_enabled') ?? true;
+        _celebrationEnabled =
+            prefs.getBool('goals_celebration_enabled') ?? true;
       });
       widget.onGoalsCountChanged?.call(list.length);
     }
@@ -532,11 +547,25 @@ class GoalsContentViewState extends State<GoalsContentView>
 
   Widget _buildGoalCard(Goal goal, GoalProgress progress) {
     final meta = getCategoryMeta(goal.category ?? 'Target', widget.p);
-    final accentCol = goal.category != null ? meta.color : widget.p.accent;
+    final Color? customCol = () {
+      if (goal.colorHex != null && goal.colorHex!.isNotEmpty) {
+        try {
+          return Color(int.parse(goal.colorHex!.replaceFirst('#', '0xFF')));
+        } catch (_) {
+          return null;
+        }
+      }
+      return null;
+    }();
+    final accentCol =
+        customCol ?? (goal.category != null ? meta.color : widget.p.accent);
     final isActiveGoal =
         widget.isSessionRunning &&
-        (goal.category == widget.activeCategory ||
-            (goal.category == null && widget.activeCategory == 'All'));
+        ((widget.activeGoalId != null && widget.activeGoalId == goal.id) ||
+            (widget.activeGoalId == null &&
+                (goal.category == widget.activeCategory ||
+                    (goal.category == null &&
+                        widget.activeCategory == 'All'))));
 
     Widget cardBody = Padding(
       padding: const EdgeInsets.all(16),
@@ -556,7 +585,11 @@ class GoalsContentViewState extends State<GoalsContentView>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      goal.category != null ? meta.icon : Icons.flag_rounded,
+                      goal.category != null
+                          ? meta.icon
+                          : (goal.hasMilestones
+                                ? Icons.rocket_launch_rounded
+                                : Icons.flag_rounded),
                       size: 12,
                       color: accentCol,
                     ),
@@ -902,99 +935,104 @@ class GoalsContentViewState extends State<GoalsContentView>
           ),
           const SizedBox(height: 10),
 
-          // Detailed Daily Investment Callout Block
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: (progress.isCompleted ? widget.p.green : widget.p.orange)
-                  .withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
+          // Detailed Daily Investment Callout Block (respects _dailyPacingEnabled)
+          if (_dailyPacingEnabled ||
+              progress.isCompleted ||
+              (goal.targetMinutes <= 0 && goal.hasMilestones)) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
                 color: (progress.isCompleted ? widget.p.green : widget.p.orange)
-                    .withValues(alpha: 0.28),
+                    .withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color:
+                      (progress.isCompleted ? widget.p.green : widget.p.orange)
+                          .withValues(alpha: 0.28),
+                ),
               ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      progress.isCompleted
-                          ? Icons.verified_rounded
-                          : Icons.local_fire_department_rounded,
-                      size: 14,
-                      color: progress.isCompleted
-                          ? widget.p.green
-                          : widget.p.orange,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      progress.isCompleted
-                          ? 'Target Achieved!'.localized(context)
-                          : (goal.targetMinutes <= 0 && goal.hasMilestones
-                                ? '${goal.completedMilestonesCount} of ${goal.milestones.length} checkpoints'
-                                      .localized(context)
-                                : '${progress.dailyPaceFormatted} / day needed'
-                                      .localized(context)),
-                      style: TextStyle(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        progress.isCompleted
+                            ? Icons.verified_rounded
+                            : Icons.local_fire_department_rounded,
+                        size: 14,
                         color: progress.isCompleted
                             ? widget.p.green
                             : widget.p.orange,
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w800,
-                        fontFeatures: const [FontFeature.tabularFigures()],
                       ),
-                    ),
-                    const Spacer(),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        for (int i = 0; i < 4; i++)
-                          Container(
-                            width: 2.5,
-                            height: 6.0 + (i % 3) * 2.5,
-                            margin: const EdgeInsets.only(right: 2),
-                            decoration: BoxDecoration(
-                              color:
-                                  (progress.isCompleted
-                                          ? widget.p.green
-                                          : widget.p.orange)
-                                      .withValues(alpha: 0.4 + i * 0.15),
-                              borderRadius: BorderRadius.circular(1),
+                      const SizedBox(width: 6),
+                      Text(
+                        progress.isCompleted
+                            ? 'Target Achieved!'.localized(context)
+                            : (goal.targetMinutes <= 0 && goal.hasMilestones
+                                  ? '${goal.completedMilestonesCount} of ${goal.milestones.length} checkpoints'
+                                        .localized(context)
+                                  : '${progress.dailyPaceFormatted} / day needed'
+                                        .localized(context)),
+                        style: TextStyle(
+                          color: progress.isCompleted
+                              ? widget.p.green
+                              : widget.p.orange,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w800,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                      const Spacer(),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          for (int i = 0; i < 4; i++)
+                            Container(
+                              width: 2.5,
+                              height: 6.0 + (i % 3) * 2.5,
+                              margin: const EdgeInsets.only(right: 2),
+                              decoration: BoxDecoration(
+                                color:
+                                    (progress.isCompleted
+                                            ? widget.p.green
+                                            : widget.p.orange)
+                                        .withValues(alpha: 0.4 + i * 0.15),
+                                borderRadius: BorderRadius.circular(1),
+                              ),
+                            ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${progress.daysRemainingInTimeframe}d left',
+                            style: TextStyle(
+                              color: widget.p.text2,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${progress.daysRemainingInTimeframe}d left',
-                          style: TextStyle(
-                            color: widget.p.text2,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
+                    ],
+                  ),
+                  if (!progress.isCompleted) ...[
+                    const SizedBox(height: 3),
+                    Text(
+                      goal.targetMinutes <= 0 && goal.hasMilestones
+                          ? '${math.max(0, goal.milestones.length - goal.completedMilestonesCount)} checkpoints remaining to complete this project.'
+                                .localized(context)
+                          : 'Invest ${progress.dailyPaceFormatted} daily over the next ${progress.daysRemainingInTimeframe} days to achieve your target on schedule.'
+                                .localized(context),
+                      style: TextStyle(
+                        color: widget.p.text2,
+                        fontSize: 11,
+                        height: 1.25,
+                      ),
                     ),
                   ],
-                ),
-                if (!progress.isCompleted) ...[
-                  const SizedBox(height: 3),
-                  Text(
-                    goal.targetMinutes <= 0 && goal.hasMilestones
-                        ? '${math.max(0, goal.milestones.length - goal.completedMilestonesCount)} checkpoints remaining to complete this project.'
-                              .localized(context)
-                        : 'Invest ${progress.dailyPaceFormatted} daily over the next ${progress.daysRemainingInTimeframe} days to achieve your target on schedule.'
-                              .localized(context),
-                    style: TextStyle(
-                      color: widget.p.text2,
-                      fontSize: 11,
-                      height: 1.25,
-                    ),
-                  ),
                 ],
-              ],
+              ),
             ),
-          ),
+          ],
 
           // Milestones & Checkpoints Block
           if (goal.milestones.isNotEmpty) ...[
@@ -1072,11 +1110,24 @@ class GoalsContentViewState extends State<GoalsContentView>
                       return PressableScale(
                         onTap: () async {
                           HapticFeedback.lightImpact();
+                          final willComplete = !ms.isCompleted;
                           await GoalsService.instance.toggleMilestone(
                             goal.id,
                             ms.id,
                           );
                           await loadGoals();
+                          if (willComplete && _celebrationEnabled && mounted) {
+                            final updated = _goals
+                                .where((g) => g.id == goal.id)
+                                .firstOrNull;
+                            if (updated != null && updated.isCompleted) {
+                              showGoalCompletionCelebrationDialog(
+                                context: context,
+                                p: widget.p,
+                                goal: updated,
+                              );
+                            }
+                          }
                         },
                         child: Row(
                           children: [
@@ -1452,6 +1503,18 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
   int? _targetDate;
   String? _category;
   int? _dailyTargetMinutes;
+  String? _colorHex;
+
+  static const List<String> _appleHigColors = [
+    '#007AFF', // System Blue
+    '#5856D6', // Indigo
+    '#AF52DE', // Purple
+    '#FF2D55', // Pink
+    '#FF9500', // Orange
+    '#34C759', // Green
+    '#30B0C7', // Teal
+    '#8E8E93', // Slate
+  ];
 
   List<String> _availableCategories = [];
 
@@ -1484,6 +1547,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
     _timeframe = widget.goal?.timeframe ?? GoalTimeframe.week;
     _targetDate = widget.goal?.targetDate;
     _category = widget.goal?.category;
+    _colorHex = widget.goal?.colorHex;
     _dailyTargetMinutes =
         widget.goal?.dailyTargetMinutes ??
         ((_timeframe == GoalTimeframe.month || _timeframe == GoalTimeframe.year)
@@ -1643,6 +1707,10 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
     final id =
         widget.goal?.id ?? 'goal_${DateTime.now().millisecondsSinceEpoch}';
     final desc = _descController.text.trim();
+    final allMilestonesDone =
+        _milestones.isNotEmpty && _milestones.every((m) => m.isCompleted);
+    final isDone = allMilestonesDone || (widget.goal?.isCompleted ?? false);
+
     final saved = Goal(
       id: id,
       title: title,
@@ -1662,7 +1730,12 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
       createdAt:
           widget.goal?.createdAt ?? DateTime.now().millisecondsSinceEpoch,
       isArchived: widget.goal?.isArchived ?? false,
+      isCompleted: isDone,
+      completedAt: isDone
+          ? (widget.goal?.completedAt ?? DateTime.now().millisecondsSinceEpoch)
+          : null,
       milestones: _milestones,
+      colorHex: _colorHex,
     );
 
     HapticFeedback.mediumImpact();
@@ -2550,7 +2623,117 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
           ),
           const SizedBox(height: 16),
 
-          // 5. Checkpoints / Milestones Editor (Apple HIG Inset Grouped)
+          // 5. Theme Color (Apple HIG Color Row)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'THEME COLOR'.localized(context),
+                style: TextStyle(
+                  color: widget.p.text3,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const SizedBox(height: 8),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                child: Row(
+                  children: [
+                    // Default / Category Pill
+                    PressableScale(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        setState(() => _colorHex = null);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 7,
+                        ),
+                        margin: const EdgeInsets.only(right: 8),
+                        decoration: BoxDecoration(
+                          color: _colorHex == null
+                              ? widget.p.accent
+                              : widget.p.surface3,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: _colorHex == null
+                                ? widget.p.accent
+                                : widget.p.border.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        child: Text(
+                          'Auto / Default'.localized(context),
+                          style: TextStyle(
+                            color: _colorHex == null
+                                ? Colors.white
+                                : widget.p.text,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    for (final hex in _appleHigColors) ...[
+                      () {
+                        final color = Color(
+                          int.parse(hex.replaceFirst('#', '0xFF')),
+                        );
+                        final isSelected =
+                            _colorHex?.toLowerCase() == hex.toLowerCase();
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: PressableScale(
+                            onTap: () {
+                              HapticFeedback.selectionClick();
+                              setState(() => _colorHex = hex);
+                            },
+                            child: Container(
+                              width: 34,
+                              height: 34,
+                              decoration: BoxDecoration(
+                                color: color,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isSelected
+                                      ? Colors.white
+                                      : Colors.transparent,
+                                  width: 2.5,
+                                ),
+                                boxShadow: isSelected
+                                    ? [
+                                        BoxShadow(
+                                          color: color.withValues(alpha: 0.45),
+                                          blurRadius: 8,
+                                          spreadRadius: 1,
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              alignment: Alignment.center,
+                              child: isSelected
+                                  ? const Icon(
+                                      Icons.check_rounded,
+                                      color: Colors.white,
+                                      size: 18,
+                                    )
+                                  : null,
+                            ),
+                          ),
+                        );
+                      }(),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // 6. Checkpoints / Milestones Editor (Apple HIG Inset Grouped)
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
@@ -2675,8 +2858,12 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                               onTap: () {
                                 HapticFeedback.selectionClick();
                                 setState(() {
+                                  final nextState = !ms.isCompleted;
                                   _milestones[i] = ms.copyWith(
-                                    isCompleted: !ms.isCompleted,
+                                    isCompleted: nextState,
+                                    completedAt: nextState
+                                        ? DateTime.now().millisecondsSinceEpoch
+                                        : null,
                                   );
                                 });
                               },

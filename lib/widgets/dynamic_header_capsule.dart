@@ -259,7 +259,7 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
             Flexible(
               child: Text(
                 widget.activeGoal != null
-                    ? '$durLabel 🎯 ${widget.activeGoal!.title}'
+                    ? '$durLabel ${widget.activeGoal!.hasMilestones ? '🚀' : '🎯'} ${widget.activeGoal!.title}'
                     : '$durLabel ${meta.name}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -504,11 +504,24 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
                   ),
                   for (final g in widget.goals!) ...[
                     const SizedBox(width: 6),
-                    _buildGoalChip(
-                      context,
-                      title: '🎯 ${g.title}',
-                      isSelected: widget.activeGoal?.id == g.id,
-                      onTap: () => widget.onSelectGoal?.call(g),
+                    Builder(
+                      builder: (context) {
+                        Color? customGoalColor;
+                        if (g.colorHex != null && g.colorHex!.isNotEmpty) {
+                          try {
+                            customGoalColor = Color(
+                              int.parse(g.colorHex!.replaceFirst('#', '0xFF')),
+                            );
+                          } catch (_) {}
+                        }
+                        return _buildGoalChip(
+                          context,
+                          title: '${g.hasMilestones ? '🚀' : '🎯'} ${g.title}',
+                          isSelected: widget.activeGoal?.id == g.id,
+                          customColor: customGoalColor,
+                          onTap: () => widget.onSelectGoal?.call(g),
+                        );
+                      },
                     ),
                   ],
                 ],
@@ -765,8 +778,10 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
     required String title,
     required bool isSelected,
     required VoidCallback onTap,
+    Color? customColor,
   }) {
     final p = widget.p;
+    final effectiveColor = customColor ?? p.accent;
     return PressableScale(
       onTap: () {
         HapticFeedback.selectionClick();
@@ -775,11 +790,13 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: isSelected ? p.accent.withValues(alpha: 0.18) : p.surface3,
+          color: isSelected
+              ? effectiveColor.withValues(alpha: 0.18)
+              : p.surface3,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isSelected
-                ? p.accent.withValues(alpha: 0.5)
+                ? effectiveColor.withValues(alpha: 0.5)
                 : p.border.withValues(alpha: 0.4),
             width: 0.8,
           ),
@@ -787,7 +804,7 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
         child: Text(
           title,
           style: TextStyle(
-            color: isSelected ? p.accent : p.text2,
+            color: isSelected ? effectiveColor : p.text2,
             fontSize: 11,
             fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
           ),
