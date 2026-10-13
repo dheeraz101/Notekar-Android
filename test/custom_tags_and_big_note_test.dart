@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/big_note_dialog.dart';
 import 'package:notekar/dialogs/note_dialog.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/utils/markdown_text_editing_controller.dart';
 import 'package:notekar/utils/tag_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -103,5 +104,43 @@ void main() {
         );
       },
     );
+
+    testWidgets('MarkdownTextEditingController formats live spans', (
+      tester,
+    ) async {
+      late MarkdownTextEditingController controller;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) {
+              controller = MarkdownTextEditingController(
+                text: 'Hello **bold world** and *italic* with #gym goal',
+                palette: p,
+              );
+              final span = controller.buildTextSpan(
+                context: context,
+                withComposing: false,
+              );
+              return Scaffold(body: RichText(text: span));
+            },
+          ),
+        ),
+      );
+
+      // Verify rich text spans
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is RichText && w.text.toPlainText().contains('bold world'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is RichText && w.text.toPlainText().contains('#gym'),
+        ),
+        findsOneWidget,
+      );
+    });
   });
 }

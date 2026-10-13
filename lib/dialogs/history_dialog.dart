@@ -14,7 +14,6 @@ import 'package:notekar/dialogs/note_dialog.dart';
 import 'package:notekar/dialogs/personalization_setup_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/settings/life_audit_page.dart';
-import 'package:notekar/dialogs/settings/targets_projects_settings_page.dart';
 import 'package:notekar/dialogs/timeline_filter_sheet.dart';
 import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/history_timeline_models.dart';
@@ -486,8 +485,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
             ? 'Log Past Moment'.localized(context)
             : _inSheetView == 'goals'
             ? 'Targets & Goals'.localized(context)
-            : _inSheetView == 'goals_settings'
-            ? 'Target Settings'.localized(context)
             : _inSheetView == 'create_goal'
             ? (_editingGoal == null ? 'New Target Goal' : 'Edit Target Goal')
                   .localized(context)
@@ -510,8 +507,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                 message: 'Back'.localized(context),
                 child: PressableScale(
                   onTap: () {
-                    if (_inSheetView == 'create_goal' ||
-                        _inSheetView == 'goals_settings') {
+                    if (_inSheetView == 'create_goal') {
                       setState(() => _inSheetView = 'goals');
                     } else if (_inSheetView == 'manual') {
                       final fromGoals = _manualInitialGoal != null;
@@ -608,35 +604,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
                 ],
               ),
         trailingAction: _inSheetView == 'goals'
-            ? Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Tooltip(
-                    message: 'Target Settings'.localized(context),
-                    child: PressableScale(
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        setState(() => _inSheetView = 'goals_settings');
-                      },
-                      child: Container(
-                        width: 36,
-                        height: 36,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: widget.p.surface3,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          CupertinoIcons.gear_alt,
-                          color: widget.p.text2,
-                          size: 18,
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (_goals.isNotEmpty) ...[
-                    const SizedBox(width: 8),
-                    Tooltip(
+            ? (_goals.isNotEmpty
+                  ? Tooltip(
                       message: 'New Goal'.localized(context),
                       child: PressableScale(
                         onTap: () {
@@ -660,10 +629,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ],
-              )
+                    )
+                  : null)
             : (_inSheetView != null || _activeInsightsSection != null)
             ? null
             : Tooltip(
@@ -798,11 +765,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
                       _inSheetView = 'goals';
                     });
                   },
-                )
-              : _inSheetView == 'goals_settings'
-              ? SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-                  child: TargetsProjectsSettingsPage(p: widget.p),
                 )
               : _inSheetView == 'life_audit'
               ? SingleChildScrollView(

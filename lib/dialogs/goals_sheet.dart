@@ -2104,19 +2104,14 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                 ),
               ),
               const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                  color: widget.p.surface3,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: widget.p.border.withValues(alpha: 0.5),
-                  ),
-                ),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
                 child: Row(
                   children: GoalTimeframe.values.map((tf) {
                     final isSelected = _timeframe == tf;
-                    return Expanded(
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
                       child: PressableScale(
                         onTap: () {
                           HapticFeedback.selectionClick();
@@ -2131,25 +2126,30 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                           });
                         },
                         child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 160),
-                          padding: const EdgeInsets.symmetric(vertical: 7),
+                          duration: const Duration(milliseconds: 180),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8.5,
+                          ),
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? (!widget.p.isDark
-                                      ? Colors.white
-                                      : (widget.p.name == 'amoled'
-                                            ? const Color(0xFF28282C)
-                                            : const Color(0xFF48484A)))
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(9),
+                                ? widget.p.accent
+                                : widget.p.surface3,
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(
+                              color: isSelected
+                                  ? widget.p.accent
+                                  : widget.p.border.withValues(alpha: 0.5),
+                              width: 1,
+                            ),
                             boxShadow: isSelected
                                 ? [
                                     BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.12,
+                                      color: widget.p.accent.withValues(
+                                        alpha: 0.28,
                                       ),
-                                      blurRadius: 4,
+                                      blurRadius: 6,
                                       offset: const Offset(0, 1.5),
                                     ),
                                   ]
@@ -2158,13 +2158,12 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                           child: Text(
                             tf.label.localized(context),
                             style: TextStyle(
-                              color: isSelected
-                                  ? widget.p.text
-                                  : widget.p.text2,
-                              fontSize: 12,
+                              color: isSelected ? Colors.white : widget.p.text2,
+                              fontSize: 13,
                               fontWeight: isSelected
                                   ? FontWeight.w700
-                                  : FontWeight.w500,
+                                  : FontWeight.w600,
+                              letterSpacing: -0.1,
                             ),
                           ),
                         ),

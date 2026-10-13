@@ -1,5 +1,7 @@
+import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
@@ -27,10 +29,13 @@ class AppleHigActionItem {
   final VoidCallback onTap;
 }
 
-/// Premium Apple HIG styled Action Sheet for NoteKar.
+/// Authentic Apple HIG styled Floating Action Sheet for NoteKar.
 ///
-/// Features frosted glassmorphism, 28pt rounded top squircles, drag handle,
-/// inset grouped action rows with tinted circular badges, and haptics.
+/// Features true iOS floating card architecture:
+/// - Grouped actions in a top floating translucent frosted card with 16pt radius.
+/// - Standalone Cancel button in a bottom floating translucent card.
+/// - Transparent margin between cards and edges, floating over modal backdrop.
+/// - Native iOS haptics, dividers, and typography.
 class AppleHigActionSheet extends StatelessWidget {
   const AppleHigActionSheet({
     super.key,
@@ -57,12 +62,9 @@ class AppleHigActionSheet extends StatelessWidget {
     String cancelLabel = 'Cancel',
   }) {
     HapticFeedback.lightImpact();
-    return showModalBottomSheet<T>(
+    return showCupertinoModalPopup<T>(
       context: context,
-      backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.45),
-      isScrollControlled: true,
-      useSafeArea: true,
+      barrierColor: Colors.black.withValues(alpha: 0.42),
       builder: (ctx) => AppleHigActionSheet(
         p: p,
         title: title,
@@ -76,205 +78,220 @@ class AppleHigActionSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.paddingOf(context).bottom;
+    final cardBg = p.isDark
+        ? (p.name == 'amoled'
+              ? const Color(0xF01C1C1E)
+              : const Color(0xE8252528))
+        : Colors.white.withValues(alpha: 0.94);
+    final borderColor = p.border.withValues(alpha: p.isDark ? 0.35 : 0.45);
 
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-        child: Container(
-          decoration: BoxDecoration(
-            color: p.surface1.withValues(alpha: 0.94),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-            border: Border.all(
-              color: p.border.withValues(alpha: 0.6),
-              width: 0.8,
-            ),
-          ),
-          padding: EdgeInsets.fromLTRB(16, 10, 16, 16 + bottomInset),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Drag Handle
-              Center(
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          12,
+          0,
+          12,
+          math.max(10.0, bottomInset > 0 ? bottomInset : 10.0),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Top Floating Card: Header (Title/Subtitle) + Action Items
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
                 child: Container(
-                  width: 36,
-                  height: 4.5,
                   decoration: BoxDecoration(
-                    color: p.subtext.withAlpha(90),
-                    borderRadius: BorderRadius.circular(999),
+                    color: cardBg,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: borderColor, width: 0.6),
                   ),
-                ),
-              ),
-              const SizedBox(height: 14),
-
-              // Title & Subtitle Header
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Column(
-                  children: [
-                    Text(
-                      title.localized(context),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: p.text,
-                        fontSize: 16.5,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                    if (subtitle != null && subtitle!.trim().isNotEmpty) ...[
-                      const SizedBox(height: 3),
-                      Text(
-                        subtitle!.localized(context),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: p.subtext,
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Grouped Actions Card
-              Container(
-                decoration: BoxDecoration(
-                  color: p.surface2.withValues(alpha: 0.8),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: p.border.withValues(alpha: 0.5),
-                    width: 0.8,
-                  ),
-                ),
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  padding: EdgeInsets.zero,
-                  itemCount: actions.length,
-                  separatorBuilder: (_, index) => Divider(
-                    height: 1,
-                    indent: 52,
-                    endIndent: 12,
-                    color: p.border.withValues(alpha: 0.4),
-                  ),
-                  itemBuilder: (ctx, index) {
-                    final item = actions[index];
-                    final itemColor = item.isDestructive
-                        ? p.red
-                        : (item.color ?? (item.isSelected ? p.accent : p.text));
-
-                    return PressableScale(
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        Navigator.pop(ctx);
-                        item.onTap();
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 12,
-                        ),
-                        child: Row(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Header
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Left Circular Icon Badge
-                            Container(
-                              width: 32,
-                              height: 32,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: (item.color ?? p.accent).withValues(
-                                  alpha: 0.14,
+                            Text(
+                              title.localized(context),
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: p.text,
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: -0.1,
+                              ),
+                            ),
+                            if (subtitle != null &&
+                                subtitle!.trim().isNotEmpty) ...[
+                              const SizedBox(height: 3),
+                              Text(
+                                subtitle!.localized(context),
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: p.subtext,
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w500,
                                 ),
-                                shape: BoxShape.circle,
                               ),
-                              child: Icon(
-                                item.icon,
-                                size: 16,
-                                color: itemColor,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-
-                            // Text Column
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    item.title.localized(context),
-                                    style: TextStyle(
-                                      color: itemColor,
-                                      fontSize: 15,
-                                      fontWeight: item.isSelected
-                                          ? FontWeight.w700
-                                          : FontWeight.w600,
-                                    ),
-                                  ),
-                                  if (item.subtitle != null) ...[
-                                    const SizedBox(height: 1),
-                                    Text(
-                                      item.subtitle!.localized(context),
-                                      style: TextStyle(
-                                        color: p.subtext,
-                                        fontSize: 11.5,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-
-                            // Trailing Selection Mark
-                            if (item.isSelected)
-                              Icon(
-                                Icons.check_rounded,
-                                size: 18,
-                                color: p.accent,
-                              ),
+                            ],
                           ],
                         ),
                       ),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 12),
+                      Divider(
+                        height: 0.6,
+                        thickness: 0.6,
+                        color: p.border.withValues(
+                          alpha: p.isDark ? 0.3 : 0.35,
+                        ),
+                      ),
 
-              // Cancel Button Pill
-              PressableScale(
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  Navigator.pop(context);
-                },
-                child: Container(
-                  height: 48,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: p.surface2.withValues(alpha: 0.9),
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(
-                      color: p.border.withValues(alpha: 0.5),
-                      width: 0.8,
-                    ),
+                      // Actions List
+                      ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        padding: EdgeInsets.zero,
+                        itemCount: actions.length,
+                        separatorBuilder: (_, _) => Divider(
+                          height: 0.6,
+                          thickness: 0.6,
+                          indent: 52,
+                          endIndent: 12,
+                          color: p.border.withValues(
+                            alpha: p.isDark ? 0.25 : 0.35,
+                          ),
+                        ),
+                        itemBuilder: (ctx, index) {
+                          final item = actions[index];
+                          final itemColor = item.isDestructive
+                              ? p.red
+                              : (item.color ??
+                                    (item.isSelected ? p.accent : p.text));
+
+                          return PressableScale(
+                            onTap: () {
+                              HapticFeedback.selectionClick();
+                              Navigator.pop(ctx);
+                              item.onTap();
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12.5,
+                              ),
+                              color: Colors.transparent,
+                              child: Row(
+                                children: [
+                                  // Leading Icon in Tinted Circle Badge
+                                  Container(
+                                    width: 32,
+                                    height: 32,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: (item.color ?? p.accent)
+                                          .withValues(alpha: 0.14),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      item.icon,
+                                      size: 16,
+                                      color: itemColor,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+
+                                  // Title & Subtitle
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          item.title.localized(context),
+                                          style: TextStyle(
+                                            color: itemColor,
+                                            fontSize: 15,
+                                            fontWeight: item.isSelected
+                                                ? FontWeight.w700
+                                                : FontWeight.w600,
+                                          ),
+                                        ),
+                                        if (item.subtitle != null) ...[
+                                          const SizedBox(height: 1),
+                                          Text(
+                                            item.subtitle!.localized(context),
+                                            style: TextStyle(
+                                              color: p.subtext,
+                                              fontSize: 11.5,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+
+                                  // Trailing check indicator
+                                  if (item.isSelected)
+                                    Icon(
+                                      Icons.check_rounded,
+                                      size: 18,
+                                      color: p.accent,
+                                    ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                  child: Text(
-                    cancelLabel.localized(context),
-                    style: TextStyle(
-                      color: p.text,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            // Bottom Floating Card: Standalone Cancel Action
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: cardBg,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: borderColor, width: 0.6),
+                  ),
+                  child: PressableScale(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      height: 52,
+                      alignment: Alignment.center,
+                      child: Text(
+                        cancelLabel.localized(context),
+                        style: TextStyle(
+                          color: p.accent,
+                          fontSize: 16.5,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

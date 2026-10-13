@@ -11,6 +11,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/audio_service.dart';
 import 'package:notekar/services/media_storage_service.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/markdown_text_editing_controller.dart';
 import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/hashtag_suggestion_overlay.dart';
 import 'package:notekar/widgets/photo_lightbox_dialog.dart';
@@ -77,7 +78,10 @@ class _NoteDialogState extends State<NoteDialog> {
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(text: widget.initialNote);
+    _controller = MarkdownTextEditingController(
+      text: widget.initialNote,
+      palette: widget.p,
+    );
     _undoController = UndoHistoryController();
     if (widget.initialImagePath != null &&
         widget.initialImagePath!.trim().isNotEmpty) {
