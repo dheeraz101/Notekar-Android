@@ -16,6 +16,7 @@ import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/hashtag_suggestion_overlay.dart';
 import 'package:notekar/widgets/photo_lightbox_dialog.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
+import 'package:notekar/widgets/settings_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// WhatsApp-style keyboard-docked note composer with quick tags carousel,
@@ -633,76 +634,39 @@ class _NoteDialogState extends State<NoteDialog> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.security_rounded,
-                                        color: widget.p.orange,
-                                        size: 18,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        'Mark as Relapse / Reset',
-                                        style: TextStyle(
-                                          color: widget.p.text,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  _IosStyleSwitch(
-                                    p: widget.p,
-                                    value: _relapseSelected,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _relapseSelected = value;
-                                        if (!value) _shieldActivated = false;
-                                      });
-                                    },
-                                  ),
-                                ],
+                              SettingsSwitchRow(
+                                p: widget.p,
+                                icon: CupertinoIcons.flame_fill,
+                                title: 'Mark as Relapse / Reset',
+                                subtitle:
+                                    'Reset active sobriety streak for this moment',
+                                value: _relapseSelected,
+                                color: widget.p.orange,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _relapseSelected = value;
+                                    if (!value) _shieldActivated = false;
+                                  });
+                                },
                               ),
                               if (_relapseSelected &&
                                   _availableShields > 0) ...[
-                                const SizedBox(height: 8),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.security_rounded,
-                                          color: widget.p.green,
-                                          size: 18,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          'Use Streak Shield ($_availableShields left)',
-                                          style: TextStyle(
-                                            color: widget.p.text,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    _IosStyleSwitch(
-                                      p: widget.p,
-                                      value: _shieldActivated,
-                                      activeColor: widget.p.green,
-                                      onChanged: (value) {
-                                        setState(
-                                          () => _shieldActivated = value,
-                                        );
-                                      },
-                                    ),
-                                  ],
+                                Divider(
+                                  height: 1,
+                                  thickness: 0.6,
+                                  color: widget.p.border.withValues(alpha: 0.6),
+                                ),
+                                SettingsSwitchRow(
+                                  p: widget.p,
+                                  icon: CupertinoIcons.shield_fill,
+                                  title: 'Use Streak Shield',
+                                  subtitle:
+                                      '$_availableShields remaining · protect streak',
+                                  value: _shieldActivated,
+                                  color: widget.p.green,
+                                  onChanged: (value) {
+                                    setState(() => _shieldActivated = value);
+                                  },
                                 ),
                               ],
                               const SizedBox(height: 8),
@@ -1586,123 +1550,6 @@ class _NoteDialogState extends State<NoteDialog> {
         imagePaths: _stagedImagePaths,
         voicePaths: _stagedVoicePaths,
         voiceDurations: _stagedVoiceDurations,
-      ),
-    );
-  }
-}
-
-class _IosStyleSwitch extends StatefulWidget {
-  const _IosStyleSwitch({
-    required this.p,
-    required this.value,
-    required this.onChanged,
-    this.activeColor,
-  });
-
-  final Palette p;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-  final Color? activeColor;
-
-  @override
-  State<_IosStyleSwitch> createState() => _IosStyleSwitchState();
-}
-
-class _IosStyleSwitchState extends State<_IosStyleSwitch>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _stretchController;
-
-  @override
-  void initState() {
-    super.initState();
-    _stretchController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 180),
-    );
-  }
-
-  @override
-  void dispose() {
-    _stretchController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final switchColor = widget.activeColor ?? widget.p.orange;
-    final value = widget.value;
-
-    return GestureDetector(
-      onTapDown: (_) {
-        _stretchController.forward();
-      },
-      onTapUp: (_) {
-        _stretchController.reverse();
-      },
-      onTapCancel: () {
-        _stretchController.reverse();
-      },
-      onTap: () {
-        widget.onChanged(!value);
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-        width: 52,
-        height: 28,
-        padding: const EdgeInsets.all(2),
-        decoration: BoxDecoration(
-          color: value ? switchColor : widget.p.surface3,
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: value ? switchColor : widget.p.border),
-        ),
-        child: RepaintBoundary(
-          child: Stack(
-            children: [
-              AnimatedOpacity(
-                duration: const Duration(milliseconds: 200),
-                opacity: value ? 1.0 : 0.0,
-                child: Align(
-                  alignment: const Alignment(-0.55, 0),
-                  child: Container(
-                    width: 1.8,
-                    height: 9,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.4),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                  ),
-                ),
-              ),
-              AnimatedAlign(
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeInOut,
-                alignment: value ? Alignment.centerRight : Alignment.centerLeft,
-                child: AnimatedBuilder(
-                  animation: _stretchController,
-                  builder: (context, child) {
-                    final stretch = _stretchController.value * 6;
-                    return Container(
-                      width: 24 + stretch,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(999),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.15),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

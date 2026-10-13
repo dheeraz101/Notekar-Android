@@ -692,146 +692,130 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
                                 ),
                               ],
 
-                              // Voice Memos (collapsed by default, tap to expand)
-                              if (entry.voicePaths.isNotEmpty) ...[
-                                if (_isVoiceCollapsed(entry.id))
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 10.0),
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: PressableScale(
-                                        onTap: () {
-                                          HapticFeedback.selectionClick();
-                                          _toggleVoiceCollapse(entry.id);
-                                        },
-                                        child: Container(
-                                          height: widget.compactRows ? 28 : 32,
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 10,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: widget.p.surface3.withValues(
-                                              alpha: 0.65,
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              widget.compactRows ? 8 : 10,
-                                            ),
-                                            border: Border.all(
-                                              color: widget.p.border.withValues(
-                                                alpha: 0.5,
-                                              ),
-                                              width: 0.8,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(
-                                                CupertinoIcons.mic_fill,
-                                                size: widget.compactRows
-                                                    ? 13
-                                                    : 14,
-                                                color: widget.p.accent,
-                                              ),
-                                              const SizedBox(width: 6),
-                                              Text(
-                                                '${entry.voicePaths.length} Voice Memo${entry.voicePaths.length > 1 ? "s" : ""}',
-                                                style: TextStyle(
-                                                  color: widget.p.text2,
-                                                  fontSize: widget.compactRows
-                                                      ? 11
-                                                      : 12,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                              ),
-                                              const SizedBox(width: 4),
-                                              Icon(
-                                                CupertinoIcons.chevron_down,
-                                                size: widget.compactRows
-                                                    ? 10
-                                                    : 11,
-                                                color: widget.p.text3,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                else
-                                  Column(
+                              // Combined collapsed voice & photo pills on same line
+                              if (_isVoiceCollapsed(entry.id) &&
+                                  _isImageCollapsed(entry.id) &&
+                                  entry.voicePaths.isNotEmpty &&
+                                  entry.imagePath != null &&
+                                  entry.imagePath!.trim().isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 10.0),
+                                  child: Wrap(
+                                    spacing: 8,
+                                    runSpacing: 4,
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                        WrapCrossAlignment.center,
                                     children: [
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                          top: 10.0,
-                                          bottom: 4.0,
-                                        ),
-                                        child: PressableScale(
-                                          onTap: () {
-                                            HapticFeedback.selectionClick();
-                                            _toggleVoiceCollapse(entry.id);
-                                          },
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(
-                                                CupertinoIcons.mic_fill,
-                                                size: 13,
-                                                color: widget.p.accent,
-                                              ),
-                                              const SizedBox(width: 5),
-                                              Text(
-                                                '${entry.voicePaths.length} Voice Memo${entry.voicePaths.length > 1 ? "s" : ""}',
-                                                style: TextStyle(
-                                                  color: widget.p.text2,
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                              ),
-                                              const SizedBox(width: 4),
-                                              Icon(
-                                                CupertinoIcons.chevron_up,
-                                                size: 11,
-                                                color: widget.p.text3,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
+                                      TimelineVoicePlayerPill.buildCollapsedPill(
+                                        p: widget.p,
+                                        count: entry.voicePaths.length,
+                                        onToggleCollapse: () =>
+                                            _toggleVoiceCollapse(entry.id),
+                                        compact: widget.compactRows,
                                       ),
-                                      for (final vp in entry.voicePaths) ...[
-                                        Padding(
-                                          padding: const EdgeInsets.only(
-                                            top: 4.0,
-                                          ),
-                                          child: TimelineVoicePlayerPill(
-                                            p: widget.p,
-                                            voicePath: vp,
-                                            durationMs:
-                                                entry.voiceDurationMs ?? 0,
-                                            compact: widget.compactRows,
-                                            onToggleCollapse: () =>
-                                                _toggleVoiceCollapse(entry.id),
-                                          ),
-                                        ),
-                                      ],
+                                      TimelineMediaAttachmentCard.buildCollapsedPill(
+                                        p: widget.p,
+                                        imagePath: entry.imagePath,
+                                        onToggleCollapse: () =>
+                                            _toggleImageCollapse(entry.id),
+                                        compact: widget.compactRows,
+                                      ),
                                     ],
                                   ),
-                              ],
+                                )
+                              else ...[
+                                // Voice Memos (collapsed by default, tap to expand)
+                                if (entry.voicePaths.isNotEmpty) ...[
+                                  if (_isVoiceCollapsed(entry.id))
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 10.0),
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child:
+                                            TimelineVoicePlayerPill.buildCollapsedPill(
+                                              p: widget.p,
+                                              count: entry.voicePaths.length,
+                                              onToggleCollapse: () =>
+                                                  _toggleVoiceCollapse(
+                                                    entry.id,
+                                                  ),
+                                              compact: widget.compactRows,
+                                            ),
+                                      ),
+                                    )
+                                  else
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            top: 10.0,
+                                            bottom: 4.0,
+                                          ),
+                                          child: PressableScale(
+                                            onTap: () {
+                                              HapticFeedback.selectionClick();
+                                              _toggleVoiceCollapse(entry.id);
+                                            },
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  CupertinoIcons.mic_fill,
+                                                  size: 13,
+                                                  color: widget.p.accent,
+                                                ),
+                                                const SizedBox(width: 5),
+                                                Text(
+                                                  '${entry.voicePaths.length} Voice Memo${entry.voicePaths.length > 1 ? "s" : ""}',
+                                                  style: TextStyle(
+                                                    color: widget.p.text2,
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Icon(
+                                                  CupertinoIcons.chevron_up,
+                                                  size: 11,
+                                                  color: widget.p.text3,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        for (final vp in entry.voicePaths) ...[
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                              top: 4.0,
+                                            ),
+                                            child: TimelineVoicePlayerPill(
+                                              p: widget.p,
+                                              voicePath: vp,
+                                              durationMs:
+                                                  entry.voiceDurationMs ?? 0,
+                                              compact: widget.compactRows,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                ],
 
-                              // Photos (collapsed by default, tap to expand)
-                              if (entry.imagePath != null &&
-                                  entry.imagePath!.isNotEmpty) ...[
-                                const SizedBox(height: 8),
-                                TimelineMediaAttachmentCard(
-                                  p: widget.p,
-                                  imagePath: entry.imagePath!,
-                                  isCollapsed: _isImageCollapsed(entry.id),
-                                  onToggleCollapse: () =>
-                                      _toggleImageCollapse(entry.id),
-                                  compact: widget.compactRows,
-                                ),
+                                // Photos (collapsed by default, tap to expand)
+                                if (entry.imagePath != null &&
+                                    entry.imagePath!.isNotEmpty) ...[
+                                  const SizedBox(height: 8),
+                                  TimelineMediaAttachmentCard(
+                                    p: widget.p,
+                                    imagePath: entry.imagePath!,
+                                    isCollapsed: _isImageCollapsed(entry.id),
+                                    onToggleCollapse: () =>
+                                        _toggleImageCollapse(entry.id),
+                                    compact: widget.compactRows,
+                                  ),
+                                ],
                               ],
                             ],
                           ),

@@ -86,9 +86,6 @@ class _LoggingSettingsPageState extends State<LoggingSettingsPage> {
   void Function(String category, {required String parent}) get onOpenCategory =>
       widget.onOpenCategory;
 
-  bool _floatingBubbleEnabled = false;
-  String _singleTapAction = 'quick_log';
-  String _doubleTapAction = 'quick_menu';
   String _concurrencyMode = 'exclusive';
 
   @override
@@ -101,12 +98,6 @@ class _LoggingSettingsPageState extends State<LoggingSettingsPage> {
     final prefs = await SharedPreferences.getInstance();
     if (mounted) {
       setState(() {
-        _floatingBubbleEnabled =
-            prefs.getBool('floating_timer_enabled') ?? false;
-        _singleTapAction =
-            prefs.getString('floating_single_tap_action') ?? 'quick_log';
-        _doubleTapAction =
-            prefs.getString('floating_double_tap_action') ?? 'quick_menu';
         _concurrencyMode =
             prefs.getString('timer_concurrency_mode') ?? 'exclusive';
       });
@@ -226,72 +217,6 @@ class _LoggingSettingsPageState extends State<LoggingSettingsPage> {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('timer_concurrency_mode', newMode);
         if (mounted) setState(() => _concurrencyMode = newMode);
-      },
-    );
-  }
-
-  Future<void> _toggleFloatingBubble(bool val) async {
-    HapticFeedback.lightImpact();
-    final prefs = await SharedPreferences.getInstance();
-    if (val) {
-      final canDraw =
-          await _channel.invokeMethod<bool>('canDrawOverlays') ?? false;
-      if (!canDraw) {
-        await _channel.invokeMethod('requestOverlayPermission');
-      } else {
-        await _channel.invokeMethod('startFloatingTimer');
-      }
-    } else {
-      await _channel.invokeMethod('stopFloatingTimer');
-    }
-    await prefs.setBool('floating_timer_enabled', val);
-    setState(() => _floatingBubbleEnabled = val);
-  }
-
-  Future<void> _showGesturePicker(
-    BuildContext anchorContext, {
-    required bool isSingleTap,
-  }) async {
-    final currentVal = isSingleTap ? _singleTapAction : _doubleTapAction;
-    final options = isSingleTap
-        ? [
-            (
-              key: 'quick_log',
-              title: 'Quick Log',
-              subtitle: 'Haptic instant note entry',
-            ),
-            (
-              key: 'toggle_expand',
-              title: 'Expand Controls',
-              subtitle: 'Show actions toolbar',
-            ),
-          ]
-        : [
-            (
-              key: 'quick_menu',
-              title: 'Modes Menu',
-              subtitle: 'Open quick mode selector',
-            ),
-            (
-              key: 'toggle_expand',
-              title: 'Toggle Expand',
-              subtitle: 'Show or hide toolbar',
-            ),
-          ];
-
-    await _showInplaceSelector(
-      anchorContext: anchorContext,
-      currentVal: currentVal,
-      options: options,
-      onSelected: (val) async {
-        final prefs = await SharedPreferences.getInstance();
-        if (isSingleTap) {
-          await prefs.setString('floating_single_tap_action', val);
-          if (mounted) setState(() => _singleTapAction = val);
-        } else {
-          await prefs.setString('floating_double_tap_action', val);
-          if (mounted) setState(() => _doubleTapAction = val);
-        }
       },
     );
   }
@@ -509,55 +434,7 @@ class _LoggingSettingsPageState extends State<LoggingSettingsPage> {
                   .localized(context),
         ),
         const SizedBox(height: 12),
-        SettingsGroup(
-          p: p,
-          title: 'Floating Quick-Action Overlay'.localized(context),
-          children: [
-            SettingsSwitchRow(
-              p: p,
-              title: 'Persistent Floating Bubble'.localized(context),
-              subtitle:
-                  'Keep a floating bubble over all apps to log moments and start timers with a single tap.'
-                      .localized(context),
-              value: _floatingBubbleEnabled,
-              color: p.accent,
-              onChanged: _toggleFloatingBubble,
-            ),
-            if (_floatingBubbleEnabled) ...[
-              Builder(
-                builder: (rowCtx) => SettingsRow(
-                  p: p,
-                  title: 'Single Tap'.localized(context),
-                  status: _singleTapAction == 'quick_log'
-                      ? 'Quick Log'.localized(context)
-                      : 'Expand'.localized(context),
-                  rowKind: 'none',
-                  color: p.accent,
-                  onTap: () => _showGesturePicker(rowCtx, isSingleTap: true),
-                ),
-              ),
-              Builder(
-                builder: (rowCtx) => SettingsRow(
-                  p: p,
-                  title: 'Double Tap'.localized(context),
-                  status: _doubleTapAction == 'quick_menu'
-                      ? 'Modes Menu'.localized(context)
-                      : 'Expand'.localized(context),
-                  rowKind: 'none',
-                  color: p.accent,
-                  onTap: () => _showGesturePicker(rowCtx, isSingleTap: false),
-                ),
-              ),
-            ],
-          ],
-        ),
-        SettingsPageDescription(
-          p: p,
-          text:
-              'The floating overlay provides frictionless access anywhere on Android. Single-tap to log notes and double-tap to start mode sessions.'
-                  .localized(context),
-        ),
-        const SizedBox(height: 12),
+
         SettingsGroup(
           p: p,
           title: 'Time-Awareness & Concurrency'.localized(context),

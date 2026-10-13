@@ -472,6 +472,9 @@ class MainActivity : FlutterActivity() {
                         val streakDays = call.argument<String>("streakDays") ?: "0h"
                         val streakMilestone = call.argument<String>("streakMilestone") ?: ""
                         val lastRelapseTime = call.argument<String>("lastRelapseTime") ?: ""
+                        val sobrietyStartTimestamp =
+                            call.argument<Number>("sobrietyStartTimestamp")?.toLong() ?: 0L
+                        val lastPhotoPath = call.argument<String>("lastPhotoPath") ?: ""
                         val activeCategory = call.argument<String>("activeCategory") ?: "All"
                         val isPaused = call.argument<Boolean>("isPaused") ?: false
                         val pausedAt = call.argument<Number>("pausedAt")?.toLong() ?: 0L
@@ -498,6 +501,8 @@ class MainActivity : FlutterActivity() {
                             .putString(NoteKarWidgetProvider.KEY_STREAK_DAYS, streakDays)
                             .putString(NoteKarWidgetProvider.KEY_STREAK_MILESTONE, streakMilestone)
                             .putString(NoteKarWidgetProvider.KEY_LAST_RELAPSE_TIME, lastRelapseTime)
+                            .putLong(NoteKarWidgetProvider.KEY_SOBRIETY_START_TS, sobrietyStartTimestamp)
+                            .putString(NoteKarWidgetProvider.KEY_LAST_PHOTO_PATH, lastPhotoPath)
                             .putString(NoteKarWidgetProvider.KEY_ACTIVE_CATEGORY, activeCategory)
                             .putBoolean(NoteKarWidgetProvider.KEY_IS_PAUSED, isPaused)
                             .putLong(NoteKarWidgetProvider.KEY_PAUSED_AT, pausedAt)
@@ -1082,10 +1087,85 @@ class MainActivity : FlutterActivity() {
         startActivity(intent)
     }
 
+    private fun copySharedStreamToCache(uri: Uri, index: Int): String? {
+        return try {
+            val cacheFolder = File(cacheDir, "shared_imports").apply { if (!exists()) mkdirs() }
+            val mimeType = contentResolver.getType(uri) ?: "image/jpeg"
+            val ext = if (mimeType.contains("png")) "png" else if (mimeType.contains("webp")) "webp" else "jpg"
+            val targetFile = File(cacheFolder, "share_${System.currentTimeMillis()}_$index.$ext")
+            contentResolver.openInputStream(uri)?.use { input ->
+                targetFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+            if (targetFile.exists() && targetFile.length() > 0) targetFile.absolutePath else null
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Failed to copy shared stream uri: $uri", e)
+            null
+        }
+    }
+
     private fun payloadFromIntent(intent: Intent?): Map<String, Any?>? {
         if (intent == null) return null
 
-        // 1. Check for Share Sheet text (ACTION_SEND with text/plain)
+        // 1. Check for Share Sheet image streams (ACTION_SEND or ACTION_SEND_MULTIPLE)
+        if (intent.action == Intent.ACTION_SEND && intent.type?.startsWith("image/") == true) {
+            val imageUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
+            }
+            if (imageUri != null) {
+                val savedPath = copySharedStreamToCache(imageUri, 0)
+                if (savedPath != null) {
+                    val caption = intent.getStringExtra(Intent.EXTRA_TEXT)
+                        ?: intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString()
+                        ?: intent.getStringExtra(Intent.EXTRA_SUBJECT)
+                        ?: ""
+                    return mapOf(
+                        "action" to "share",
+                        "images" to listOf(savedPath),
+                        "imagePath" to savedPath,
+                        "note" to caption.trim(),
+                        "type" to "single"
+                    )
+                }
+            }
+        }
+
+        if (intent.action == Intent.ACTION_SEND_MULTIPLE && intent.type?.startsWith("image/") == true) {
+            val uris = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)
+            }
+            if (!uris.isNullOrEmpty()) {
+                val savedPaths = mutableListOf<String>()
+                for ((idx, u) in uris.take(5).withIndex()) {
+                    val saved = copySharedStreamToCache(u, idx)
+                    if (saved != null) {
+                        savedPaths.add(saved)
+                    }
+                }
+                if (savedPaths.isNotEmpty()) {
+                    val caption = intent.getStringExtra(Intent.EXTRA_TEXT)
+                        ?: intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString()
+                        ?: intent.getStringExtra(Intent.EXTRA_SUBJECT)
+                        ?: ""
+                    return mapOf(
+                        "action" to "share",
+                        "images" to savedPaths,
+                        "imagePath" to savedPaths.joinToString("|"),
+                        "note" to caption.trim(),
+                        "type" to "single"
+                    )
+                }
+            }
+        }
+
+        // 2. Check for Share Sheet text (ACTION_SEND with text/plain or general text)
         if (intent.action == Intent.ACTION_SEND) {
             val text = intent.getStringExtra(Intent.EXTRA_TEXT)
                 ?: intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString()

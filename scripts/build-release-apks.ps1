@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory = $false)]
-    [ValidatePattern('^\d+\.\d+\.\d+$')]
+    [ValidatePattern('^\d+\.\d+\.\d+(?:E\d+)?$')]
     [string]$Version,
 
     [Parameter(Mandatory = $false)]
@@ -22,7 +22,7 @@ function Read-PubspecVersion
 {
     $pubspecPath = Join-Path $repoRoot 'pubspec.yaml'
     $pubspecText = Get-Content -LiteralPath $pubspecPath -Raw
-    $match = [regex]::Match($pubspecText, '(?m)^version:\s*(\d+\.\d+\.\d+)(?:\+([A-Za-z0-9\.\-]+))?\s*$')
+    $match = [regex]::Match($pubspecText, '(?m)^version:\s*(\d+\.\d+\.\d+(?:E\d+)?)(?:\+([A-Za-z0-9\.\-]+))?\s*$')
 
     if (-not $match.Success)
     {

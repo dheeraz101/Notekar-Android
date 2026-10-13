@@ -19,12 +19,14 @@ class OfficialBulletinsSheet extends StatelessWidget {
     required this.onOpenLink,
     this.onBack,
     this.onLearnMoreBeta,
+    this.onNavigateAction,
   });
 
   final Palette p;
   final void Function(String url) onOpenLink;
   final VoidCallback? onBack;
   final VoidCallback? onLearnMoreBeta;
+  final void Function(String actionRoute)? onNavigateAction;
 
   static Future<void> show(
     BuildContext context, {
@@ -32,6 +34,7 @@ class OfficialBulletinsSheet extends StatelessWidget {
     required void Function(String url) onOpenLink,
     VoidCallback? onBack,
     VoidCallback? onLearnMoreBeta,
+    void Function(String actionRoute)? onNavigateAction,
   }) {
     return showModalBottomSheet(
       context: context,
@@ -42,6 +45,7 @@ class OfficialBulletinsSheet extends StatelessWidget {
         onOpenLink: onOpenLink,
         onBack: onBack,
         onLearnMoreBeta: onLearnMoreBeta,
+        onNavigateAction: onNavigateAction,
       ),
     );
   }
@@ -62,6 +66,7 @@ class OfficialBulletinsSheet extends StatelessWidget {
             p: p,
             onOpenLink: onOpenLink,
             onLearnMoreBeta: onLearnMoreBeta,
+            onNavigateAction: onNavigateAction,
           ),
         ),
       ),
@@ -75,11 +80,13 @@ class OfficialBulletinsContent extends StatefulWidget {
     required this.p,
     required this.onOpenLink,
     this.onLearnMoreBeta,
+    this.onNavigateAction,
   });
 
   final Palette p;
   final void Function(String url) onOpenLink;
   final VoidCallback? onLearnMoreBeta;
+  final void Function(String actionRoute)? onNavigateAction;
 
   @override
   State<OfficialBulletinsContent> createState() =>
@@ -209,6 +216,7 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
     final p = widget.p;
     final critical = _notices.where((n) => n.isCritical).toList();
     final security = _notices.where((n) => n.isSecurity).toList();
+    final features = _notices.where((n) => n.isFeature).toList();
     final bulletins = _notices.where((n) => n.isReleaseBulletin).toList();
     final tips = _notices.where((n) => n.isCuratedTip).toList();
 
@@ -416,7 +424,30 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
               icon: Icons.error_outline_rounded,
             ),
             for (final n in critical)
-              _NoticeCard(p: p, notice: n, onOpenLink: widget.onOpenLink),
+              _NoticeCard(
+                p: p,
+                notice: n,
+                onOpenLink: widget.onOpenLink,
+                onNavigateAction: widget.onNavigateAction,
+              ),
+            const SizedBox(height: spacing16),
+          ],
+
+          // Feature Spotlights / Showcase (WhatsApp Status style feature highlights)
+          if (features.isNotEmpty) ...[
+            _NoticeSectionHeader(
+              p: p,
+              title: 'FEATURE SPOTLIGHT'.localized(context),
+              color: const Color(0xFF00C853),
+              icon: Icons.auto_awesome_rounded,
+            ),
+            for (final n in features)
+              _NoticeCard(
+                p: p,
+                notice: n,
+                onOpenLink: widget.onOpenLink,
+                onNavigateAction: widget.onNavigateAction,
+              ),
             const SizedBox(height: spacing16),
           ],
 
@@ -429,7 +460,12 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
               icon: Icons.security_rounded,
             ),
             for (final n in security)
-              _NoticeCard(p: p, notice: n, onOpenLink: widget.onOpenLink),
+              _NoticeCard(
+                p: p,
+                notice: n,
+                onOpenLink: widget.onOpenLink,
+                onNavigateAction: widget.onNavigateAction,
+              ),
             const SizedBox(height: spacing16),
           ],
 
@@ -442,7 +478,12 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
               icon: Icons.campaign_rounded,
             ),
             for (final n in bulletins)
-              _NoticeCard(p: p, notice: n, onOpenLink: widget.onOpenLink),
+              _NoticeCard(
+                p: p,
+                notice: n,
+                onOpenLink: widget.onOpenLink,
+                onNavigateAction: widget.onNavigateAction,
+              ),
             const SizedBox(height: spacing16),
           ],
 
@@ -455,7 +496,12 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
               icon: Icons.lightbulb_outline_rounded,
             ),
             for (final n in tips)
-              _NoticeCard(p: p, notice: n, onOpenLink: widget.onOpenLink),
+              _NoticeCard(
+                p: p,
+                notice: n,
+                onOpenLink: widget.onOpenLink,
+                onNavigateAction: widget.onNavigateAction,
+              ),
           ],
         ],
 
@@ -506,31 +552,40 @@ class _NoticeCard extends StatelessWidget {
     required this.p,
     required this.notice,
     required this.onOpenLink,
+    this.onNavigateAction,
   });
 
   final Palette p;
   final AppNotice notice;
   final void Function(String url) onOpenLink;
+  final void Function(String actionRoute)? onNavigateAction;
 
   @override
   Widget build(BuildContext context) {
     final isCritical = notice.isCritical;
     final isSecurity = notice.isSecurity;
+    final isFeature = notice.isFeature;
     final badgeColor = isCritical
         ? p.red
         : (isSecurity
               ? const Color(0xFF7C4DFF)
-              : (notice.isReleaseBulletin ? p.accent : p.orange));
+              : (isFeature
+                    ? const Color(0xFF00C853)
+                    : (notice.isReleaseBulletin ? p.accent : p.orange)));
     final cardColor = isCritical
         ? p.red.withValues(alpha: 0.06)
         : (isSecurity
               ? const Color(0xFF7C4DFF).withValues(alpha: 0.06)
-              : p.surface2);
+              : (isFeature
+                    ? const Color(0xFF00C853).withValues(alpha: 0.08)
+                    : p.surface2));
     final borderColor = isCritical
         ? p.red.withValues(alpha: 0.35)
         : (isSecurity
               ? const Color(0xFF7C4DFF).withValues(alpha: 0.35)
-              : p.border.withValues(alpha: 0.5));
+              : (isFeature
+                    ? const Color(0xFF00C853).withValues(alpha: 0.35)
+                    : p.border.withValues(alpha: 0.5)));
 
     final hasAction =
         (notice.url != null && notice.url!.trim().isNotEmpty) ||
@@ -542,26 +597,67 @@ class _NoticeCard extends StatelessWidget {
       if (act == 'releases' || act == 'update' || u.contains('/releases')) {
         return Icons.rocket_launch_rounded;
       }
-      if (act == 'settings' || u.contains('action=settings')) {
+      if (act == 'settings' ||
+          u.contains('action=settings') ||
+          act.startsWith('settings:')) {
         return Icons.settings_rounded;
       }
-      if (act == 'audit' || act == 'life_audit' || u.contains('action=audit')) {
+      if (act == 'audit' ||
+          act == 'life_audit' ||
+          u.contains('action=audit') ||
+          act == 'page:audit') {
         return Icons.auto_graph_rounded;
       }
-      if (act == 'history' || u.contains('action=history')) {
+      if (act == 'history' ||
+          u.contains('action=history') ||
+          act == 'page:history') {
         return Icons.history_rounded;
+      }
+      if (act == 'sobriety' ||
+          act == 'page:sobriety' ||
+          u.contains('sobriety')) {
+        return Icons.local_fire_department_rounded;
+      }
+      if (act == 'plus_note' || act == 'note' || act == 'page:plus_note') {
+        return Icons.edit_note_rounded;
+      }
+      if (act == 'backup' || act == 'page:backup') {
+        return Icons.backup_rounded;
+      }
+      if (act == 'camera' || act == 'page:camera') {
+        return Icons.camera_alt_rounded;
+      }
+      if (act == 'widgets' || act == 'page:widgets') {
+        return Icons.widgets_rounded;
       }
       return Icons.open_in_new_rounded;
     }
 
     void handleActionTap() {
       final u = notice.url?.trim() ?? '';
-      final act = notice.action?.trim().toLowerCase() ?? '';
+      final act = notice.action?.trim() ?? '';
+      final target = act.isNotEmpty ? act : u;
+
+      if (target.startsWith('page:') ||
+          target.startsWith('settings:') ||
+          target == 'sobriety' ||
+          target == 'audit' ||
+          target == 'history' ||
+          target == 'plus_note' ||
+          target == 'backup' ||
+          target == 'camera' ||
+          target == 'widgets') {
+        if (onNavigateAction != null) {
+          onNavigateAction!(target);
+          return;
+        }
+      }
+
       if (u.startsWith('http://') || u.startsWith('https://')) {
         onOpenLink(u);
         return;
       }
-      if (act == 'releases' ||
+      if (act.toLowerCase() == 'releases' ||
           u.contains('/releases') ||
           u.contains('action=releases')) {
         onOpenLink(githubReleases);

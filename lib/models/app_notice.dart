@@ -86,14 +86,20 @@ class AppNotice {
         p == 'recommendation';
   }
 
+  bool get isFeature {
+    final p = priority.toLowerCase().trim();
+    return p == 'feature' || p == 'showcase' || p == 'new' || p == 'spotlight';
+  }
+
   bool get isReleaseBulletin {
-    if (isCritical || isSecurity || isCuratedTip) return false;
+    if (isCritical || isSecurity || isCuratedTip || isFeature) return false;
     return true;
   }
 
   String get badgeLabel {
     if (isCritical) return 'CRITICAL';
     if (isSecurity) return 'SECURITY';
+    if (isFeature) return 'FEATURE';
     if (isCuratedTip) return 'TIP';
     return 'BULLETIN';
   }
@@ -209,7 +215,9 @@ class AppNotice {
       };
     }
 
-    if (act == 'history' || u.contains('action=history')) {
+    if (act == 'history' ||
+        u.contains('action=history') ||
+        act == 'page:history') {
       return switch (lang) {
         'hi' => 'इतिहास खोलें',
         'es' => 'Abrir historial',
@@ -218,6 +226,58 @@ class AppNotice {
         'ja' => '履歴を開く',
         'ru' => 'Открыть историю',
         _ => 'Open History',
+      };
+    }
+
+    if (act == 'sobriety' ||
+        u.contains('action=sobriety') ||
+        act == 'page:sobriety') {
+      return switch (lang) {
+        'hi' => 'संयम साथी खोलें',
+        'es' => 'Abrir Sobriedad',
+        'de' => 'Nüchternheit öffnen',
+        'fr' => 'Ouvrir Sobriété',
+        'ja' => '禁欲トラッカーを開く',
+        'ru' => 'Открыть трекер трезвости',
+        _ => 'Try Sobriety',
+      };
+    }
+
+    if (act == 'plus_note' || act == 'note' || act == 'page:plus_note') {
+      return switch (lang) {
+        'hi' => 'नोट लिखें',
+        'es' => 'Escribir nota',
+        'de' => 'Notiz schreiben',
+        'fr' => 'Écrire une note',
+        'ja' => 'メモを書く',
+        'ru' => 'Написать заметку',
+        _ => 'Write Note',
+      };
+    }
+
+    if (act == 'backup' ||
+        act == 'page:backup' ||
+        u.contains('action=backup')) {
+      return switch (lang) {
+        'hi' => 'डेटा और बैकअप',
+        'es' => 'Copia de seguridad',
+        'de' => 'Daten & Sicherung',
+        'fr' => 'Sauvegarde des données',
+        'ja' => 'データとバックアップ',
+        'ru' => 'Резервное копирование',
+        _ => 'Data & Backup',
+      };
+    }
+
+    if (act == 'camera' || act == 'page:camera') {
+      return switch (lang) {
+        'hi' => 'कैमरा खोलें',
+        'es' => 'Abrir cámara',
+        'de' => 'Kamera öffnen',
+        'fr' => 'Ouvrir l\'appareil photo',
+        'ja' => 'カメラを開く',
+        'ru' => 'Открыть камеру',
+        _ => 'Instant Camera',
       };
     }
 

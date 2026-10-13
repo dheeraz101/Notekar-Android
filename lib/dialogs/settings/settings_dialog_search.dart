@@ -87,7 +87,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
       item(
         title: 'Floating Timer Pill',
         subtitle: 'Draggable on-screen live timer during active session',
-        category: 'Workflow & Capture',
+        category: 'Targets & Projects',
         icon: CupertinoIcons.timer,
         keywords: [
           'floating timer',
@@ -1517,6 +1517,122 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         status: null,
       ),
       item(
+        title: 'Release Channels & Experiment',
+        subtitle: 'Choose Stable, Priority, Beta, or Experiment track',
+        category: 'Updates & Notices',
+        icon: CupertinoIcons.flame,
+        keywords: [
+          'build track',
+          'channel',
+          'experiment',
+          'beta',
+          'stable',
+          'priority',
+          'er',
+          'e1',
+          'e2',
+          'experimental release',
+          'track',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: null,
+      ),
+      item(
+        title: 'Minimal Sobriety Home Widget',
+        subtitle: 'Apple-inspired live counter with days and live seconds',
+        category: 'Focus & Targets',
+        icon: CupertinoIcons.timer,
+        keywords: [
+          'minimal sobriety widget',
+          'live counter',
+          'widget',
+          'home screen',
+          'seconds',
+          'sobriety widget',
+          'clean streak',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: null,
+      ),
+      item(
+        title: 'Instant Camera Photo Widget',
+        subtitle: '1-tap camera capture and last photo preview on home screen',
+        category: 'Logging',
+        icon: CupertinoIcons.camera,
+        keywords: [
+          'camera widget',
+          'instant camera',
+          'photo log',
+          'widget',
+          'home screen widget',
+          'photo preview',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: null,
+      ),
+      item(
+        title: 'Multi-Photo Import (Up to 5)',
+        subtitle: 'Attach up to 5 photos per moment with lightbox previews',
+        category: 'Logging',
+        icon: CupertinoIcons.photo_on_rectangle,
+        keywords: [
+          'multi-photo',
+          'photos',
+          '5 photos',
+          'import pictures',
+          'images',
+          'lightbox',
+          'attach photo',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: null,
+      ),
+      item(
+        title: 'Voice Audio Scrubber & Waveform',
+        subtitle: 'Seekable audio player with interactive waveform bars',
+        category: 'Logging',
+        icon: CupertinoIcons.waveform,
+        keywords: [
+          'voice memo',
+          'scrubber',
+          'waveform',
+          'audio player',
+          'seek audio',
+          'playback',
+          'voice player',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: null,
+      ),
+      item(
+        title: 'Android Share Sheet Ingestion',
+        subtitle: 'Auto-log shared photos, links, or text from other apps',
+        category: 'Logging',
+        icon: CupertinoIcons.share,
+        keywords: [
+          'share sheet',
+          'share photos',
+          'share links',
+          'intent',
+          'import',
+          'receive share',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: null,
+      ),
+      item(
         title: "What's New",
         subtitle: 'Keynote release innovations & highlights',
         category: "What's New",
@@ -2782,6 +2898,21 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
     }
     if (result.title == 'Official Bulletins') {
       _openCategory('Official Bulletins', parent: 'Updates & Notices');
+      return;
+    }
+    if (result.title == 'Release Channels & Experiment') {
+      _openCategory('Build Choose', parent: 'Updates & Notices');
+      return;
+    }
+    if (result.title == 'Minimal Sobriety Home Widget') {
+      _openCategory('Sobriety Companion', parent: 'Focus & Targets');
+      return;
+    }
+    if (result.title == 'Instant Camera Photo Widget' ||
+        result.title == 'Multi-Photo Import (Up to 5)' ||
+        result.title == 'Voice Audio Scrubber & Waveform' ||
+        result.title == 'Android Share Sheet Ingestion') {
+      _openCategory('Logging');
       return;
     }
     if (result.title == 'Media Moments Filter') {

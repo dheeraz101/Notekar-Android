@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
@@ -34,6 +35,8 @@ class _TargetsProjectsSettingsPageState
   bool _autoTagEnabled = true;
   bool _exclusiveMode = true;
   bool _floatingTimerEnabled = false;
+  String _singleTapAction = 'quick_log';
+  String _doubleTapAction = 'quick_menu';
 
   @override
   void initState() {
@@ -58,6 +61,10 @@ class _TargetsProjectsSettingsPageState
         _exclusiveMode = prefs.getBool('goals_exclusive_mode') ?? true;
         _floatingTimerEnabled =
             prefs.getBool('floating_timer_enabled') ?? false;
+        _singleTapAction =
+            prefs.getString('floating_single_tap_action') ?? 'quick_log';
+        _doubleTapAction =
+            prefs.getString('floating_double_tap_action') ?? 'quick_menu';
       });
     }
   }
@@ -89,6 +96,120 @@ class _TargetsProjectsSettingsPageState
     }
     await prefs.setBool('floating_timer_enabled', val);
     setState(() => _floatingTimerEnabled = val);
+  }
+
+  Future<void> _showGesturePicker(
+    BuildContext anchorContext, {
+    required bool isSingleTap,
+  }) async {
+    final currentVal = isSingleTap ? _singleTapAction : _doubleTapAction;
+    final options = isSingleTap
+        ? [
+            (
+              key: 'quick_log',
+              title: 'Quick Log',
+              subtitle: 'Haptic instant note entry',
+            ),
+            (
+              key: 'toggle_expand',
+              title: 'Expand Controls',
+              subtitle: 'Show actions toolbar',
+            ),
+          ]
+        : [
+            (
+              key: 'quick_menu',
+              title: 'Modes Menu',
+              subtitle: 'Open quick mode selector',
+            ),
+            (
+              key: 'toggle_expand',
+              title: 'Toggle Expand',
+              subtitle: 'Show or hide toolbar',
+            ),
+          ];
+
+    final renderBox = anchorContext.findRenderObject() as RenderBox?;
+    final overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox?;
+    if (renderBox == null || overlay == null) return;
+
+    final position = RelativeRect.fromRect(
+      renderBox.localToGlobal(Offset.zero) & renderBox.size,
+      Offset.zero & overlay.size,
+    );
+
+    final selected = await showMenu<String>(
+      context: context,
+      position: position,
+      color: widget.p.surface2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: widget.p.border.withValues(alpha: 0.6),
+          width: 0.8,
+        ),
+      ),
+      elevation: 8,
+      items: [
+        for (final opt in options)
+          PopupMenuItem<String>(
+            value: opt.key,
+            height: opt.subtitle.isNotEmpty ? 50 : 42,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        opt.title.localized(context),
+                        style: TextStyle(
+                          color: opt.key == currentVal
+                              ? widget.p.accent
+                              : widget.p.text,
+                          fontSize: 13.5,
+                          fontWeight: opt.key == currentVal
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                        ),
+                      ),
+                      if (opt.subtitle.isNotEmpty) ...[
+                        const SizedBox(height: 1),
+                        Text(
+                          opt.subtitle.localized(context),
+                          style: TextStyle(color: widget.p.text3, fontSize: 11),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (opt.key == currentVal) ...[
+                  const SizedBox(width: 8),
+                  Icon(
+                    CupertinoIcons.checkmark,
+                    size: 15,
+                    color: widget.p.accent,
+                  ),
+                ],
+              ],
+            ),
+          ),
+      ],
+    );
+
+    if (selected != null) {
+      HapticFeedback.selectionClick();
+      final prefs = await SharedPreferences.getInstance();
+      if (isSingleTap) {
+        await prefs.setString('floating_single_tap_action', selected);
+        if (mounted) setState(() => _singleTapAction = selected);
+      } else {
+        await prefs.setString('floating_double_tap_action', selected);
+        if (mounted) setState(() => _doubleTapAction = selected);
+      }
+    }
   }
 
   @override
@@ -214,6 +335,32 @@ class _TargetsProjectsSettingsPageState
               color: p.green,
               onChanged: _toggleFloatingTimer,
             ),
+            if (_floatingTimerEnabled) ...[
+              Builder(
+                builder: (rowCtx) => SettingsRow(
+                  p: p,
+                  title: 'Single Tap'.localized(context),
+                  status: _singleTapAction == 'quick_log'
+                      ? 'Quick Log'.localized(context)
+                      : 'Expand'.localized(context),
+                  rowKind: 'none',
+                  color: p.accent,
+                  onTap: () => _showGesturePicker(rowCtx, isSingleTap: true),
+                ),
+              ),
+              Builder(
+                builder: (rowCtx) => SettingsRow(
+                  p: p,
+                  title: 'Double Tap'.localized(context),
+                  status: _doubleTapAction == 'quick_menu'
+                      ? 'Modes Menu'.localized(context)
+                      : 'Expand'.localized(context),
+                  rowKind: 'none',
+                  color: p.accent,
+                  onTap: () => _showGesturePicker(rowCtx, isSingleTap: false),
+                ),
+              ),
+            ],
           ],
         ),
         SettingsPageDescription(

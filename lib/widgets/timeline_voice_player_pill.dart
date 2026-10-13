@@ -22,6 +22,58 @@ class TimelineVoicePlayerPill extends StatefulWidget {
   final bool compact;
   final VoidCallback? onToggleCollapse;
 
+  static Widget buildCollapsedPill({
+    required Palette p,
+    required int count,
+    required VoidCallback? onToggleCollapse,
+    bool compact = false,
+  }) {
+    if (count <= 0) return const SizedBox.shrink();
+    return PressableScale(
+      onTap: () {
+        HapticFeedback.selectionClick();
+        onToggleCollapse?.call();
+      },
+      child: Container(
+        height: compact ? 28 : 32,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: BoxDecoration(
+          color: p.surface3.withValues(alpha: 0.65),
+          borderRadius: BorderRadius.circular(compact ? 8 : 10),
+          border: Border.all(
+            color: p.border.withValues(alpha: 0.5),
+            width: 0.8,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              CupertinoIcons.mic_fill,
+              size: compact ? 13 : 14,
+              color: p.accent,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              '$count Voice Memo${count > 1 ? "s" : ""}',
+              style: TextStyle(
+                color: p.text2,
+                fontSize: compact ? 11 : 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              CupertinoIcons.chevron_down,
+              size: compact ? 10 : 11,
+              color: p.text3,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   State<TimelineVoicePlayerPill> createState() =>
       _TimelineVoicePlayerPillState();
@@ -274,35 +326,6 @@ class _TimelineVoicePlayerPillState extends State<TimelineVoicePlayerPill> {
                 ),
               ),
             ),
-
-            // Collapse Button
-            if (widget.onToggleCollapse != null) ...[
-              const SizedBox(width: 6),
-              PressableScale(
-                onTap: () {
-                  HapticFeedback.selectionClick();
-                  widget.onToggleCollapse!();
-                },
-                child: Container(
-                  width: isCompact ? 24 : 26,
-                  height: isCompact ? 24 : 26,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: p.surface2,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: p.border.withValues(alpha: 0.5),
-                      width: 0.6,
-                    ),
-                  ),
-                  child: Icon(
-                    CupertinoIcons.chevron_up,
-                    size: isCompact ? 11 : 12,
-                    color: p.text2,
-                  ),
-                ),
-              ),
-            ],
           ],
         ),
       ),

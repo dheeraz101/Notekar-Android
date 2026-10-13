@@ -15,6 +15,7 @@ on:
       - beta
       - priority
       - security
+      - experiment
 
 concurrency:
   group: release-build
@@ -304,6 +305,9 @@ jobs:
           if [ "${{ github.ref_name }}" = "beta" ]; then
             CHANNEL="beta"
             UPDATE_TYPE="Beta Update"
+          elif [ "${{ github.ref_name }}" = "experiment" ]; then
+            CHANNEL="experiment"
+            UPDATE_TYPE="Experimental Release"
           elif [ "${{ github.ref_name }}" = "priority" ] || [ "${{ github.ref_name }}" = "security" ]; then
             CHANNEL="priority"
             UPDATE_TYPE="Priority Release"
@@ -370,9 +374,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.tag }}
-          name: ${{ (github.ref_name == 'priority' || github.ref_name == 'security') && format('Notekar {0} (Priority Release)', steps.version.outputs.tag) || (github.ref_name == 'beta' && format('Notekar {0} (Beta)', steps.version.outputs.tag) || format('Notekar {0}', steps.version.outputs.tag)) }}
+          name: ${{ (github.ref_name == 'priority' || github.ref_name == 'security') && format('Notekar {0} (Priority Release)', steps.version.outputs.tag) || (github.ref_name == 'beta' && format('Notekar {0} (Beta)', steps.version.outputs.tag) || (github.ref_name == 'experiment' && format('Notekar {0} (Experimental Release)', steps.version.outputs.tag) || format('Notekar {0}', steps.version.outputs.tag))) }}
           make_latest: ${{ github.ref_name == 'release' || github.ref_name == 'priority' || github.ref_name == 'security' }}
-          prerelease: ${{ github.ref_name == 'beta' }}
+          prerelease: ${{ github.ref_name == 'beta' || github.ref_name == 'experiment' }}
           body_path: /tmp/release_notes.md
           files: |
             build/app/outputs/flutter-apk/notekar-*.apk

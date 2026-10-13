@@ -335,9 +335,8 @@ void main() {
     );
 
     testWidgets(
-      'TimelineVoicePlayerPill trailing collapse chevron triggers onToggleCollapse',
+      'TimelineVoicePlayerPill renders playback controls without individual collapse chevron',
       (tester) async {
-        bool collapsedToggled = false;
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -345,20 +344,57 @@ void main() {
                 p: p,
                 voicePath: 'test_memo.m4a',
                 durationMs: 8000,
-                onToggleCollapse: () {
-                  collapsedToggled = true;
-                },
               ),
             ),
           ),
         );
         await tester.pumpAndSettle();
 
-        expect(find.byIcon(CupertinoIcons.chevron_up), findsOneWidget);
-        await tester.tap(find.byIcon(CupertinoIcons.chevron_up));
+        // No individual chevron inside player pill
+        expect(find.byIcon(CupertinoIcons.chevron_up), findsNothing);
+        expect(find.byIcon(CupertinoIcons.chevron_down), findsNothing);
+        // Play button and speed pill exist
+        expect(find.byIcon(CupertinoIcons.play_arrow_solid), findsOneWidget);
+        expect(find.text('1.0x'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'When both voice memo and image are collapsed, both pills render on same line in a Wrap',
+      (tester) async {
+        final momentWithBoth = Moment(
+          id: 555,
+          type: 'single',
+          date: '2026-10-13',
+          timestamp: DateTime.now().millisecondsSinceEpoch,
+          note: 'Moment with voice and photo',
+          voicePath: 'voice_memo.m4a',
+          imagePath: 'attached_image.jpg',
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: TimelineSingleTile(
+                p: p,
+                moment: momentWithBoth,
+                onEditNote: () {},
+                onDelete: () {},
+                isVoiceCollapsed: true,
+                isImageCollapsed: true,
+              ),
+            ),
+          ),
+        );
         await tester.pumpAndSettle();
 
-        expect(collapsedToggled, isTrue);
+        // Both pills should be present simultaneously
+        expect(find.text('1 Voice Memo'), findsOneWidget);
+        expect(find.byIcon(CupertinoIcons.photo), findsOneWidget);
+
+        // They should be inside a Wrap together
+        final wrapFinder = find.byType(Wrap);
+        expect(wrapFinder, findsWidgets);
       },
     );
 

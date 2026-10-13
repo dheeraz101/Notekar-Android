@@ -88,6 +88,8 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
         const val KEY_IS_PAUSED = "is_paused"
         const val KEY_PAUSED_AT = "paused_at"
         const val KEY_AVAILABLE_CATEGORIES = "available_categories"
+        const val KEY_SOBRIETY_START_TS = "sobriety_start_ts"
+        const val KEY_LAST_PHOTO_PATH = "last_photo_path"
 
         fun launchIntent(
             context: Context,
@@ -593,6 +595,26 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
             val lifeAuditIds = manager.getAppWidgetIds(lifeAuditComponent)
             for (id in lifeAuditIds) {
                 LifeAuditWidgetProvider.updateWidget(context, manager, id)
+            }
+
+            // 4. Update Minimal Sobriety Widgets
+            val minimalSobrietyComponent = ComponentName(
+                context,
+                MinimalSobrietyWidgetProvider::class.java
+            )
+            val minimalSobrietyIds = manager.getAppWidgetIds(minimalSobrietyComponent)
+            for (id in minimalSobrietyIds) {
+                MinimalSobrietyWidgetProvider.updateWidget(context, manager, id)
+            }
+
+            // 5. Update Instant Camera Widgets
+            val instantCameraComponent = ComponentName(
+                context,
+                InstantCameraWidgetProvider::class.java
+            )
+            val instantCameraIds = manager.getAppWidgetIds(instantCameraComponent)
+            for (id in instantCameraIds) {
+                InstantCameraWidgetProvider.updateWidget(context, manager, id)
             }
 
             // 4. Also refresh persistent control panel if enabled

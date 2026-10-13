@@ -579,140 +579,133 @@ class TimelineSessionCard extends StatelessWidget {
                   ),
                 ],
 
-                // Dedicated Full-Width Voice Notes Player
-                if (isVoiceCollapsed && noteMoment.voicePaths.isNotEmpty)
+                // Combined collapsed voice & photo pills on same line
+                if (isVoiceCollapsed &&
+                    isImageCollapsed &&
+                    noteMoment.voicePaths.isNotEmpty &&
+                    noteMoment.imagePath != null &&
+                    noteMoment.imagePath!.trim().isNotEmpty)
                   Padding(
                     padding: EdgeInsets.only(top: compact ? 5.0 : 7.0),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: PressableScale(
-                        onTap: () {
-                          HapticFeedback.selectionClick();
-                          onToggleVoiceCollapse?.call();
-                        },
-                        child: Container(
-                          height: compact ? 28 : 32,
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          decoration: BoxDecoration(
-                            color: p.surface3.withValues(alpha: 0.65),
-                            borderRadius: BorderRadius.circular(
-                              compact ? 8 : 10,
-                            ),
-                            border: Border.all(
-                              color: p.border.withValues(alpha: 0.5),
-                              width: 0.8,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                CupertinoIcons.mic_fill,
-                                size: compact ? 13 : 14,
-                                color: p.accent,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                '${noteMoment.voicePaths.length} Voice Memo${noteMoment.voicePaths.length > 1 ? "s" : ""}',
-                                style: TextStyle(
-                                  color: p.text2,
-                                  fontSize: compact ? 11 : 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              Icon(
-                                CupertinoIcons.chevron_down,
-                                size: compact ? 10 : 11,
-                                color: p.text3,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
-                else if (noteMoment.voicePaths.isNotEmpty)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (onToggleVoiceCollapse != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 6.0, bottom: 2.0),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: PressableScale(
-                              onTap: () {
-                                HapticFeedback.selectionClick();
-                                onToggleVoiceCollapse?.call();
-                              },
-                              child: Container(
-                                height: compact ? 26 : 28,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 9,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: p.surface3.withValues(alpha: 0.55),
-                                  borderRadius: BorderRadius.circular(
-                                    compact ? 8 : 9,
-                                  ),
-                                  border: Border.all(
-                                    color: p.border.withValues(alpha: 0.45),
-                                    width: 0.8,
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      CupertinoIcons.mic_fill,
-                                      size: compact ? 12 : 13,
-                                      color: p.accent,
-                                    ),
-                                    const SizedBox(width: 5),
-                                    Text(
-                                      '${noteMoment.voicePaths.length} Voice Memo${noteMoment.voicePaths.length > 1 ? "s" : ""}',
-                                      style: TextStyle(
-                                        color: p.text2,
-                                        fontSize: compact ? 10.5 : 11.5,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Icon(
-                                      CupertinoIcons.chevron_up,
-                                      size: compact ? 10 : 11,
-                                      color: p.text3,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      for (final vp in noteMoment.voicePaths) ...[
-                        SizedBox(height: compact ? 4 : 6),
-                        TimelineVoicePlayerPill(
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        TimelineVoicePlayerPill.buildCollapsedPill(
                           p: p,
-                          voicePath: vp,
-                          durationMs: noteMoment.voiceDurationMs ?? 0,
-                          compact: compact,
+                          count: noteMoment.voicePaths.length,
                           onToggleCollapse: onToggleVoiceCollapse,
+                          compact: compact,
+                        ),
+                        TimelineMediaAttachmentCard.buildCollapsedPill(
+                          p: p,
+                          imagePath: noteMoment.imagePath,
+                          onToggleCollapse: onToggleImageCollapse,
+                          compact: compact,
                         ),
                       ],
-                    ],
-                  ),
+                    ),
+                  )
+                else ...[
+                  // Dedicated Full-Width Voice Notes Player
+                  if (isVoiceCollapsed && noteMoment.voicePaths.isNotEmpty)
+                    Padding(
+                      padding: EdgeInsets.only(top: compact ? 5.0 : 7.0),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: TimelineVoicePlayerPill.buildCollapsedPill(
+                          p: p,
+                          count: noteMoment.voicePaths.length,
+                          onToggleCollapse: onToggleVoiceCollapse,
+                          compact: compact,
+                        ),
+                      ),
+                    )
+                  else if (noteMoment.voicePaths.isNotEmpty)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (onToggleVoiceCollapse != null)
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              top: 6.0,
+                              bottom: 2.0,
+                            ),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: PressableScale(
+                                onTap: () {
+                                  HapticFeedback.selectionClick();
+                                  onToggleVoiceCollapse?.call();
+                                },
+                                child: Container(
+                                  height: compact ? 26 : 28,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 9,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: p.surface3.withValues(alpha: 0.55),
+                                    borderRadius: BorderRadius.circular(
+                                      compact ? 8 : 9,
+                                    ),
+                                    border: Border.all(
+                                      color: p.border.withValues(alpha: 0.45),
+                                      width: 0.8,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        CupertinoIcons.mic_fill,
+                                        size: compact ? 12 : 13,
+                                        color: p.accent,
+                                      ),
+                                      const SizedBox(width: 5),
+                                      Text(
+                                        '${noteMoment.voicePaths.length} Voice Memo${noteMoment.voicePaths.length > 1 ? "s" : ""}',
+                                        style: TextStyle(
+                                          color: p.text2,
+                                          fontSize: compact ? 10.5 : 11.5,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Icon(
+                                        CupertinoIcons.chevron_up,
+                                        size: compact ? 10 : 11,
+                                        color: p.text3,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        for (final vp in noteMoment.voicePaths) ...[
+                          SizedBox(height: compact ? 4 : 6),
+                          TimelineVoicePlayerPill(
+                            p: p,
+                            voicePath: vp,
+                            durationMs: noteMoment.voiceDurationMs ?? 0,
+                            compact: compact,
+                          ),
+                        ],
+                      ],
+                    ),
 
-                // Dedicated Full-Width Photo Attachment Card
-                if (noteMoment.imagePath != null) ...[
-                  SizedBox(height: compact ? 5 : 7),
-                  TimelineMediaAttachmentCard(
-                    p: p,
-                    imagePath: noteMoment.imagePath!,
-                    isCollapsed: isImageCollapsed,
-                    onToggleCollapse: onToggleImageCollapse,
-                    compact: compact,
-                  ),
+                  // Dedicated Full-Width Photo Attachment Card
+                  if (noteMoment.imagePath != null) ...[
+                    SizedBox(height: compact ? 5 : 7),
+                    TimelineMediaAttachmentCard(
+                      p: p,
+                      imagePath: noteMoment.imagePath!,
+                      isCollapsed: isImageCollapsed,
+                      onToggleCollapse: onToggleImageCollapse,
+                      compact: compact,
+                    ),
+                  ],
                 ],
               ],
             ),

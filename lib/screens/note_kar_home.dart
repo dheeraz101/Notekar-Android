@@ -9,6 +9,7 @@ import 'package:flutter/cupertino.dart'
     show
         CupertinoAlertDialog,
         CupertinoDialogAction,
+        CupertinoIcons,
         CupertinoTextField,
         CupertinoTheme,
         CupertinoThemeData,
@@ -2139,6 +2140,14 @@ class _NoteKarHomeState extends State<NoteKarHome>
       timeframe: LifeAuditTimeframe.today,
     );
 
+    final lastPhotoPath =
+        _entries
+            .where((e) => e.imagePath != null && e.imagePath!.trim().isNotEmpty)
+            .firstOrNull
+            ?.imagePaths
+            .firstOrNull ??
+        '';
+
     try {
       await _fileChannel.invokeMethod<void>('updateWidgetState', {
         'todayCount': todayCount,
@@ -2152,6 +2161,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
         'streakDays': streakDays,
         'streakMilestone': streakMilestone,
         'lastRelapseTime': lastRelapseTime,
+        'sobrietyStartTimestamp': DateTime.now()
+            .subtract(duration)
+            .millisecondsSinceEpoch,
+        'lastPhotoPath': lastPhotoPath,
         'activeCategory': _activeCategory,
         'isPaused': _isPaused,
         'pausedAt': _pausedAt ?? 0,
@@ -3408,6 +3421,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
       final refreshedCats = await _categoryService.getCategories(prefs: _prefs);
       setState(() {
         _categories = refreshedCats;
+        _adaptiveModeColor =
+            _prefs?.getBool('m-adaptive-color') ??
+            _prefs?.getBool('adaptive_mode_color') ??
+            false;
         _enableNoteOnClick = _prefs?.getBool('enable_note_on_click') ?? false;
         _enableSobrietyMode = _prefs?.getBool('enable_sobriety_mode') ?? false;
         _sobrietyResetType = _prefs?.getString('sobriety_reset_type') ?? 'any';
@@ -3418,6 +3435,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         _sobrietyMilestoneTheme =
             _prefs?.getString('sobriety_milestone_theme') ?? 'science';
       });
+      _applySystemUiStyle();
       unawaited(_updateAndroidWidget());
       unawaited(_updateStreakShields());
     }
@@ -3553,10 +3571,30 @@ class _NoteKarHomeState extends State<NoteKarHome>
           isFromInAppNotePopup: false,
         );
       case 'share':
-        await _openNote(
-          initialText: note.isNotEmpty ? note : null,
-          isFromInAppNotePopup: false,
+        final imagesRaw = payload?['images'] as List<dynamic>?;
+        final sharedImages =
+            imagesRaw?.map((e) => e.toString()).take(5).toList() ?? [];
+        final imagePathCombined = sharedImages.isNotEmpty
+            ? sharedImages.join('|')
+            : (payload?['imagePath'] as String?);
+        await _logEntry(
+          forcedType: 'single',
+          note: note.isNotEmpty ? note : null,
+          imagePath: imagePathCombined,
         );
+        if (mounted) {
+          final p = paletteFor(
+            _theme,
+            highContrast: _highContrast,
+            accentName: _accentColor,
+          );
+          showIosPillToast(
+            context: context,
+            p: p,
+            message: 'Shared moment logged'.localized(context),
+            icon: CupertinoIcons.share,
+          );
+        }
       case 'moment':
       case 'single':
         if (!_isDelayBlocked()) {
@@ -3848,8 +3886,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
     });
     try {
       final trackBeta = _prefs?.getBool('m-update-track-beta') ?? false;
+      final updateChannel =
+          _prefs?.getString('m-update-channel') ??
+          (trackBeta ? 'beta' : 'stable');
       final latest = await _updateService.fetchLatestVersion(
         trackBeta: trackBeta,
+        channel: updateChannel,
       );
 
       final elapsed = DateTime.now().difference(started);

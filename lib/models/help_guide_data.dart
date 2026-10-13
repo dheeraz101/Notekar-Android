@@ -703,9 +703,146 @@ const List<HelpGuideItem> allGuideItems = [
     isFaq: false,
     keywords: ['hashtags', 'tags', 'chips', 'custom tags', 'categories'],
   ),
+  HelpGuideItem(
+    icon: Icons.photo_library_rounded,
+    title: 'Multi-Photo Import (Up to 5 Photos)',
+    content:
+        'Attach up to 5 photos simultaneously to any note or moment. Supports camera captures and multi-file gallery selection with swipeable photo lightbox view, fast thumbnail grid, and delete controls.',
+    isFaq: false,
+    keywords: [
+      'photos',
+      'multi-photo',
+      'pictures',
+      'images',
+      'camera',
+      'gallery',
+      'up to 5',
+      'lightbox',
+      'import',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.graphic_eq_rounded,
+    title: 'Voice Audio Scrubber & Waveforms',
+    content:
+        'Voice memos feature an interactive Apple HIG audio scrubber with live waveform bars, elapsed and remaining time displays, and drag-to-seek audio playback.',
+    isFaq: false,
+    keywords: [
+      'voice',
+      'audio',
+      'scrubber',
+      'waveform',
+      'memo',
+      'seek',
+      'playback',
+      'voice player',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.local_fire_department_rounded,
+    title: 'Minimal Sobriety Home Widget',
+    content:
+        'Add an Apple HIG-inspired live-ticking sobriety counter to your home screen. Displays days clean alongside live hours, minutes, and seconds. Tap anywhere to open Sobriety settings.',
+    isFaq: false,
+    keywords: [
+      'widget',
+      'sobriety widget',
+      'minimal widget',
+      'live counter',
+      'streak',
+      'seconds',
+      'clean streak',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.camera_alt_rounded,
+    title: 'Instant Camera Logging Widget',
+    content:
+        'Log photos straight from your Android home screen in a single tap. Shows a preview of your most recent logged photo and launches the camera immediately for instant logging.',
+    isFaq: false,
+    keywords: [
+      'camera widget',
+      'instant camera',
+      'photo log',
+      'widget',
+      'capture',
+      'quick camera',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.science_rounded,
+    title: 'Experimental Release Channel (ER)',
+    content:
+        'Join the bleeding-edge Experiment channel under Settings > App Update Center. Experiment users receive ALL updates across the entire app—including Stable (SR), Priority (PR), Beta (BR), and Experimental (ER) builds—with a full-screen Apple HIG risk disclosure and one-tap backup export.',
+    isFaq: false,
+    keywords: [
+      'experiment',
+      'experimental',
+      'channel',
+      'ER',
+      'E1',
+      'updates',
+      'all updates',
+      'stable beta priority',
+      'bleeding edge',
+      'build choose',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.share_rounded,
+    title: 'Share Photos, Links & Text to NoteKar',
+    content:
+        'Share up to 5 photos, links, or text snippets from any Android app directly into NoteKar via the Android Share Sheet. Photos and text are automatically logged in Single mode with current timestamp and caption.',
+    isFaq: false,
+    keywords: [
+      'share',
+      'share sheet',
+      'import',
+      'share photos',
+      'share links',
+      'intent',
+      'receive share',
+    ],
+  ),
 ];
 
 const List<HelpGuideItem> allHelpFaqItems = [
+  HelpGuideItem(
+    title: 'How many photos can I attach to a note or moment?',
+    content:
+        'You can attach up to 5 photos per note or moment. Tap the camera icon in the note composer to take consecutive photos or pick multiple pictures from your gallery at once.',
+    isFaq: true,
+    keywords: ['photos', 'limit', '5 photos', 'multiple photos', 'attach'],
+  ),
+  HelpGuideItem(
+    title: 'What is the Experimental Release (ER) channel?',
+    content:
+        'The Experiment channel provides early access to cutting-edge features and receives ALL updates across NoteKar (including Stable, Priority, Beta, and Experimental builds). ER builds are versioned with an E suffix (such as 8.0.0E1) and feature high-priority guardrails including one-tap backup before switching.',
+    isFaq: true,
+    keywords: [
+      'experiment',
+      'ER',
+      'channel',
+      'beta',
+      'risk',
+      'backup',
+      'all updates',
+    ],
+  ),
+  HelpGuideItem(
+    title: 'How do I share photos or links from other apps into NoteKar?',
+    content:
+        'Open any app (like Photos, WhatsApp, or your Browser), select Share, and choose NoteKar. Up to 5 photos or any link/text will automatically log as a Single moment with timestamp and caption.',
+    isFaq: true,
+    keywords: [
+      'share sheet',
+      'share',
+      'photos',
+      'links',
+      'browser',
+      'auto-log',
+    ],
+  ),
   HelpGuideItem(
     title: 'How do Modes & Focus Categories work?',
     content:

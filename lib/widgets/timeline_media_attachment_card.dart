@@ -29,6 +29,73 @@ class TimelineMediaAttachmentCard extends StatefulWidget {
   final VoidCallback? onToggleCollapse;
   final bool compact;
 
+  static Widget buildCollapsedPill({
+    required Palette p,
+    List<String>? paths,
+    String? imagePath,
+    required VoidCallback? onToggleCollapse,
+    bool compact = false,
+  }) {
+    final list =
+        paths ??
+        (imagePath != null
+            ? imagePath
+                  .split('|')
+                  .map((s) => s.trim())
+                  .where((s) => s.isNotEmpty)
+                  .toList()
+            : <String>[]);
+    if (list.isEmpty) return const SizedBox.shrink();
+    final isMulti = list.length > 1;
+    return PressableScale(
+      onTap: () {
+        HapticFeedback.selectionClick();
+        onToggleCollapse?.call();
+      },
+      child: Container(
+        height: compact ? 28 : 32,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: BoxDecoration(
+          color: p.surface3.withValues(alpha: 0.65),
+          borderRadius: BorderRadius.circular(compact ? 8 : 10),
+          border: Border.all(
+            color: p.border.withValues(alpha: 0.5),
+            width: 0.8,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isMulti
+                  ? CupertinoIcons.photo_on_rectangle
+                  : CupertinoIcons.photo,
+              size: compact ? 13 : 14,
+              color: p.accent,
+            ),
+            if (isMulti) ...[
+              const SizedBox(width: 5),
+              Text(
+                '${list.length}',
+                style: TextStyle(
+                  color: p.text2,
+                  fontSize: compact ? 11 : 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+            const SizedBox(width: 6),
+            Icon(
+              CupertinoIcons.chevron_down,
+              size: compact ? 11 : 12,
+              color: p.text3,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   State<TimelineMediaAttachmentCard> createState() =>
       _TimelineMediaAttachmentCardState();
@@ -72,52 +139,11 @@ class _TimelineMediaAttachmentCardState
         padding: const EdgeInsets.only(top: 8.0, bottom: 2.0),
         child: Align(
           alignment: Alignment.centerLeft,
-          child: PressableScale(
-            onTap: () {
-              HapticFeedback.selectionClick();
-              onToggleCollapse?.call();
-            },
-            child: Container(
-              height: compact ? 28 : 32,
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              decoration: BoxDecoration(
-                color: p.surface3.withValues(alpha: 0.65),
-                borderRadius: BorderRadius.circular(compact ? 8 : 10),
-                border: Border.all(
-                  color: p.border.withValues(alpha: 0.5),
-                  width: 0.8,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    isMulti
-                        ? CupertinoIcons.photo_on_rectangle
-                        : CupertinoIcons.photo,
-                    size: compact ? 13 : 14,
-                    color: p.accent,
-                  ),
-                  if (isMulti) ...[
-                    const SizedBox(width: 5),
-                    Text(
-                      '${paths.length}',
-                      style: TextStyle(
-                        color: p.text2,
-                        fontSize: compact ? 11 : 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                  const SizedBox(width: 6),
-                  Icon(
-                    CupertinoIcons.chevron_down,
-                    size: compact ? 11 : 12,
-                    color: p.text3,
-                  ),
-                ],
-              ),
-            ),
+          child: TimelineMediaAttachmentCard.buildCollapsedPill(
+            p: p,
+            paths: paths,
+            onToggleCollapse: onToggleCollapse,
+            compact: compact,
           ),
         ),
       );

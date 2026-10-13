@@ -400,6 +400,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   SharedPreferences? _prefs;
 
   bool _betaTrack = false;
+  String _selectedUpdateChannel = 'stable';
   bool _autoDeleteUpdateCache = false;
   bool _autoDownloadUpdates = false;
   bool obfuscateInRecents = false;
@@ -419,6 +420,41 @@ class _SettingsDialogState extends State<SettingsDialog> {
   String _vtUrl =
       'https://www.virustotal.com/gui/file/a95a703eaf519bd0ddf1ab7839dab7a90a02150e7808882c3247cb35465a2bfe';
   String _currentBuildChannel = '';
+
+  void _handleBulletinNavigateAction(String target) {
+    if (target.startsWith('settings:')) {
+      final category = target.substring(9).trim();
+      _openCategory(category, parent: 'Preferences');
+      return;
+    }
+    switch (target) {
+      case 'sobriety':
+      case 'page:sobriety':
+        _openCategory('Sobriety Companion', parent: 'Focus & Targets');
+      case 'audit':
+      case 'life_audit':
+      case 'page:audit':
+        _openCategory('Life Audit', parent: 'Focus & Targets');
+      case 'backup':
+      case 'page:backup':
+        _openCategory('Data & Backup', parent: 'Data & Backup');
+      case 'history':
+      case 'page:history':
+        Navigator.of(context).pop();
+        widget.onTriggerUrlScheme?.call('notekar://history');
+      case 'note':
+      case 'plus_note':
+      case 'page:plus_note':
+        Navigator.of(context).pop();
+        widget.onTriggerUrlScheme?.call('notekar://note');
+      case 'camera':
+      case 'page:camera':
+        Navigator.of(context).pop();
+        widget.onTriggerUrlScheme?.call('notekar://camera');
+      default:
+        _openCategory(target, parent: 'Preferences');
+    }
+  }
 
   Future<void> _loadCriticalNotice() async {
     if (!remoteNotices) return;
@@ -455,6 +491,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
             p: p,
             onOpenLink: widget.onOpenLink,
             onLearnMoreBeta: () => _showBetaInfoPopup(p),
+            onNavigateAction: _handleBulletinNavigateAction,
           );
         },
         child: Container(
@@ -725,6 +762,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
     }
     setState(() {
       _betaTrack = _prefs?.getBool('m-update-track-beta') ?? false;
+      _selectedUpdateChannel =
+          _prefs?.getString('m-update-channel') ??
+          (_betaTrack ? 'beta' : 'stable');
       _autoDeleteUpdateCache =
           _prefs?.getBool('auto_delete_update_cache') ?? false;
       _autoDownloadUpdates =
@@ -1622,6 +1662,80 @@ class _SettingsDialogState extends State<SettingsDialog> {
     if (_prefs != null) {
       await _prefs!.setBool('m-update-track-beta', beta);
     }
+    await _runCheckUpdates();
+  }
+
+  Future<void> _saveChannelPreference(String channel) async {
+    final p = paletteFor(
+      theme,
+      highContrast: highContrast,
+      accentName: accentColor,
+    );
+
+    final isBetaOrExp = (channel == 'beta' || channel == 'experiment');
+    setState(() {
+      _selectedUpdateChannel = channel;
+      _betaTrack = isBetaOrExp;
+    });
+
+    if (_prefs != null) {
+      await _prefs!.setString('m-update-channel', channel);
+      await _prefs!.setBool('m-update-track-beta', isBetaOrExp);
+    }
+
+    if (!mounted) return;
+
+    final String switchMessage = switch (channel) {
+      'experiment' => 'Switching to experimental channel...'.localized(context),
+      'beta' => 'Switching to beta build...'.localized(context),
+      _ => 'Switching to stable build...'.localized(context),
+    };
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return PopScope(
+          canPop: false,
+          child: Dialog(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            child: Container(
+              width: 240,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: p.surface.withValues(alpha: 0.95),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: p.border.withValues(alpha: 0.2)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CupertinoActivityIndicator(radius: 16, color: p.accent),
+                  const SizedBox(height: 16),
+                  Text(
+                    switchMessage,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: p.text,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
+    }
+
     await _runCheckUpdates();
   }
 
@@ -3770,7 +3884,11 @@ $cleanStack
                                 child: BuildTrackSelectPage(
                                   p: p,
                                   betaTrack: _betaTrack,
+                                  currentChannel: _selectedUpdateChannel,
                                   onSaveTrackPreference: _saveTrackPreference,
+                                  onSaveChannelPreference:
+                                      _saveChannelPreference,
+                                  onExportBackup: widget.onExportBackup,
                                   onLearnMoreBeta: () => _showBetaInfoPopup(p),
                                 ),
                               ),
@@ -3934,6 +4052,8 @@ $cleanStack
                                   p: p,
                                   onOpenLink: widget.onOpenLink,
                                   onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                                  onNavigateAction:
+                                      _handleBulletinNavigateAction,
                                 ),
                               ),
                             if (show('Data & Backup') ||

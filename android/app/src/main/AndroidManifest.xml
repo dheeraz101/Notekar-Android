@@ -67,6 +67,20 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/plain" />
             </intent-filter>
+
+            <!-- Android Share Target (Single Image) -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
+
+            <!-- Android Share Target (Multiple Images up to 5) -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
         </activity>
 
         <activity-alias
@@ -246,6 +260,34 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/notekar_life_audit_widget_info" />
         </receiver>
+        <receiver
+            android:name=".MinimalSobrietyWidgetProvider"
+            android:label="@string/widget_sobriety_minimal_title"
+            android:icon="@mipmap/ic_launcher"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/notekar_sobriety_minimal_widget_info" />
+        </receiver>
+        <receiver
+            android:name=".InstantCameraWidgetProvider"
+            android:label="@string/widget_instant_camera_title"
+            android:icon="@mipmap/ic_launcher"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/notekar_instant_camera_widget_info" />
+        </receiver>
+        <activity
+            android:name=".InstantCameraCaptureActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <receiver
             android:name=".RemoteNoticeReceiver"
             android:exported="true">

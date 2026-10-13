@@ -26,4 +26,8 @@
     <string name="widget_sobriety_description">Track clean streak and recovery milestones from the home screen.</string>
     <string name="widget_life_audit_title">NoteKar Life Audit</string>
     <string name="widget_life_audit_description">Monitor daily waking focus ratio and intentional time from the home screen.</string>
+    <string name="widget_sobriety_minimal_title">NoteKar Minimal Sobriety</string>
+    <string name="widget_sobriety_minimal_description">Apple-inspired live counter showing days, hours, and seconds clean.</string>
+    <string name="widget_instant_camera_title">NoteKar Instant Camera</string>
+    <string name="widget_instant_camera_description">Log photo moments instantly with a single tap and view recent photo preview.</string>
 </resources>

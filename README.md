@@ -87,38 +87,79 @@
   $$\text{Unaccounted Void} = \text{Conscious Window} - \text{Logged Focus Sessions}$$
 - **6 Temporal Horizons**: Inspect your intentionality ratio across **Today**, **Weekly (7d)**, **Monthly (30d)**, **Half-Quarterly (45d)**, **Half-Yearly (180d)**, and **Planetary Yearly (365d)**.
 
-### 🎙️ 3. Multimodal Voice Memos & Photo Attachments
+### 🎙️ 3. Multimodal Media, Multi-Photo Import & Voice Waveforms
+- **Multi-Photo Import (Up to 5 Photos)**: Attach up to 5 photos simultaneously to any note or moment. Features high-speed camera captures, multi-file gallery selection, thumbnail preview grids, and a full-screen swipeable photo lightbox.
 - **Dynamic Amplitude Waveform Visualizer**: Real-time microphone amplitude metering bar animation while recording voice notes, confirming active voice input.
-- **Full-Width Voice Notes Player**: Interactive audio player pill spanning 100% card width with 1:1 finger waveform scrubbing, 20-bar completion lighting, and 1x / 1.5x / 2x speed cycling with zero paused-state playback leakage.
-- **Full-Width Photo Attachments**: High-resolution camera and gallery attachments rendered full-width with collapsible previews and persistent thumbnail caching.
+- **Full-Width Voice Notes Player & Scrubber**: Interactive audio player pill spanning 100% card width with 1:1 finger waveform scrubbing, elapsed/remaining time counters, 20-bar completion lighting, and 1x / 1.5x / 2x speed cycling with zero paused-state playback leakage.
+- **Android Share Sheet Ingestion**: Share up to 5 photos, links, or text snippets from any Android app directly into NoteKar. Instantly auto-logs in Single mode with current timestamp and caption.
 
-### 📜 4. Life Ledger Timeline & Rest Lifecycle
+### 📜 4. Life Ledger Timeline & Collapsible Media Cards
 - **Top-Aligned Continuous Rail Nodes**: Single-entry number circles mathematically aligned with card headers, ensuring pristine vertical continuity even on tall cards with media and long notes.
+- **Side-by-Side Dual Pill Row**: Photo and voice attachment pills collapse gracefully onto a unified single line, maximizing viewport efficiency.
+- **Markdown Text & Safe Link Departure**: Render rich markdown text in previews with clickable links protected by a native Cupertino departure confirmation warning.
 - **Connected Session Pairing**: Automatically connects chronological `IN` and `OUT` moments into fluid session cards with duration pills.
 - **Robust Rest & Recovery Lifecycle**: Strict active-day bounding ensures historical logs never persist as zombie live sessions while preserving instant 1-tap live termination.
 - **Undo Safety Bed**: Solid red swipe-to-delete backing with a 5-second Dynamic Island countdown undo pill.
 - **iOS-Style Calendar Sheet**: Fluid calendar sheet with solid iOS System Red selection rings, past-date jumps, and event dots.
 
-### 📊 5. Executive Intelligence Hub & Health Balance
+### 📱 5. Apple HIG Android Home Screen Widgets
+- **Minimal Sobriety Widget**: Clean Apple-inspired live counter showing days clean alongside live-ticking hours, minutes, and seconds via native Chronometer with zero background battery drain. Tap anywhere to open Sobriety settings.
+- **Instant Camera Logging Widget**: Home screen widget featuring a live preview thumbnail of your last logged photo and a prominent 1-tap camera button to capture and log photo moments in a fraction of a second.
+- **Quick Logging & Life Audit Widgets**: Full-width interactive widgets to log single moments, start/stop sessions, write quick notes, and monitor waking intentionality ratios.
+
+### 📢 6. Official Bulletins & Feature Showcase
+- **Interactive Feature Spotlight**: WhatsApp Status-style feature showcase feed informing users about new features and updates directly in-app without noisy push notifications.
+- **Seamless Deep-Link Actions**: Tapping a bulletin action directly opens the respective in-app destination (e.g. `page:sobriety`, `page:audit`, `page:plus_note`, `page:camera`, or `settings:<category>`).
+
+### 📊 7. Executive Intelligence Hub & Health Balance
 - **Cognitive Work-to-Rest Ratio**: Tracks focus hours against restorative intervals with Apple Health-style balance indicators (🟢 Balanced, 🟡 High Intensity, 🔴 Rest Deficit).
 - **Dynamic Burn-Down Velocity**: Compares actual completion rate against elapsed days with real-time status pills (🟢 +18% Ahead of Pace, 🟡 On Pace, 🔴 Deficit Rising).
 - **Flow State Quality Index**: Analyzes focus session distribution: Deep Focus ($\ge 45\text{m}$), Flow Blocks ($20\text{–}44\text{m}$), and Fragmented Bursts ($<20\text{m}$).
 - **Rest Gap Recovery Rate**: Measures conscious voids redeemed via Rest & Recovery vs. unmonitored loss.
 - **90-Day Streaks Heatmap & Circadian Bias**: Visual activity density grid and circadian hourly breakdown across Morning, Afternoon, Evening, and Night.
 
-### 🎯 6. Target & Goals Engine with Screen-Wide Confetti
+### 🎯 8. Target & Goals Engine with Screen-Wide Confetti
 - **Active Goal Selection**: Dedicated Target & Goals selector directly inside persistent notifications, home screen widgets, and target cards.
 - **Intentional Pacing & Live Deficit**: Real-time burn-down tracking displaying elapsed focus hours against remaining deficits (`14h 20m / 20h` • `5h 40m to go`).
 - **Screen-Wide Confetti & Audio Fanfare**: Full-screen confetti explosion and celebratory audio fanfare whenever a goal target is reached.
 
-### 🔎 7. Search Notes Full-Text & Multimodal Index
+### 🔎 9. Search Notes Full-Text & Multimodal Index
 - **Unified Multimodal Search**: High-performance full-text search indexing text notes, voice memos, photo attachments, and single/2-way moments.
 - **Direct Inline Playback & Tap-to-Edit**: Play voice memos, preview photo attachments, and tap the prominent `Edit` button for instant note refinement.
 
-### 🌱 8. Sobriety Companion & Mindfulness
+### 🌱 10. Sobriety Companion & iOS-Style Relapse Controls
 - **21 Neuroscience Milestones**: Track habits and clean streaks across 34 narrative themes (Science, Samurai, Cyberpunk, etc.).
+- **iOS-Style Relapse Mode Switches**: Intuitive Apple HIG switches to configure whether a relapse resets your clean streak or pauses continuity without resetting milestone history.
 - **Urge Surfing Breathing Guide**: Guided 4-7-8 breathing circle to conquer cravings and regulate the nervous system.
 - **Streak Shields**: Emergency protection mechanics preventing accidental streak resets.
+
+---
+
+## 📦 Release Channels & Versioning Architecture
+
+NoteKar employs a rigorous multi-tier release architecture catering to all user reliability needs:
+
+```
++-------------------------------------------------------------------------------+
+|                           NOTEKAR RELEASE TIERS                               |
++-------------------------------------------------------------------------------+
+| 1. Stable Release (SR)       | Production-ready, fully verified milestone.    |
+|    Format: x.y.z             | e.g. 8.0.0                                     |
++------------------------------+------------------------------------------------+
+| 2. Priority Release (PR)     | Rapid stabilization & critical engine patches. |
+|    Format: x.y.0             | e.g. 8.1.0                                     |
++------------------------------+------------------------------------------------+
+| 3. Beta Release (BR)         | Public feature previews for testers.           |
+|    Format: x.y.z             | e.g. 8.1.1                                     |
++------------------------------+------------------------------------------------+
+| 4. Experimental Release (ER) | Bleeding-edge features; high-risk early tests. |
+|    Format: x.y.zE[n]         | e.g. 8.1.1E1, 8.1.1E2 (resets to E1 on base)   |
++-------------------------------------------------------------------------------+
+```
+
+- **Comprehensive Update Coverage**: The Experiment channel receives **ALL** updates across the app (Stable, Priority, Beta, and Experimental). Whenever any release is published on any track, users on the Experiment channel receive it immediately.
+- **Version Numbering Logic**: Experimental releases append `E1`, `E2`, etc. to the latest release base (e.g. `8.0.0E1`, `8.0.0E2`). When a new Stable, Priority, or Beta release is published (e.g. `8.1.0`), experimental builds reset to `8.1.0E1`.
+- **Apple HIG Risk Disclosure Modal**: Switching to the Experiment channel displays an ultra-clear red warning modal with mandatory options: `Backup First` (exports local JSON backup), `Cancel`, and `I Agree`.
 
 ---
 

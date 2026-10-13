@@ -132,7 +132,11 @@ class UpdateService {
     return null;
   }
 
-  Future<AppUpdateInfo?> fetchLatestVersion({bool trackBeta = false}) async {
+  Future<AppUpdateInfo?> fetchLatestVersion({
+    bool trackBeta = false,
+    String? channel,
+  }) async {
+    final effectiveChannel = channel ?? (trackBeta ? 'beta' : 'stable');
     final client = _createHttpClient(timeout: const Duration(seconds: 10));
     try {
       final request = await client.getUrl(
@@ -187,13 +191,40 @@ class UpdateService {
       for (final item in data) {
         if (item is! Map) continue;
         final isPrerelease = item['prerelease'] as bool? ?? false;
-        if (trackBeta) {
-          targetRelease = item;
-          break;
+        final tagName =
+            ((item['tag_name'] as String?) ?? (item['name'] as String?) ?? '')
+                .toLowerCase();
+        final isExp =
+            tagName.contains(RegExp(r'e\d+')) || tagName.contains('experiment');
+
+        final bool isEligible;
+        if (effectiveChannel == 'experiment') {
+          // Experiment channel receives ALL updates across all tracks: Stable, Priority, Beta, and Experiment!
+          isEligible = true;
+        } else if (effectiveChannel == 'beta') {
+          // Beta accepts beta, priority, or stable releases, but skips unvetted experiment-only builds
+          isEligible = !isExp;
         } else {
-          if (!isPrerelease) {
+          // Stable / Priority: skips all prereleases and experimental builds
+          isEligible = !isPrerelease && !isExp && !tagName.contains('beta');
+        }
+
+        if (!isEligible) continue;
+
+        if (targetRelease == null) {
+          targetRelease = item;
+        } else {
+          // If multiple eligible releases exist in feed, select the highest version
+          final itemTag =
+              (item['tag_name'] as String?) ?? (item['name'] as String?) ?? '';
+          final targetTag =
+              (targetRelease['tag_name'] as String?) ??
+              (targetRelease['name'] as String?) ??
+              '';
+          final itemVer = itemTag.replaceFirst(RegExp(r'^[vV]'), '').trim();
+          final targetVer = targetTag.replaceFirst(RegExp(r'^[vV]'), '').trim();
+          if (isNewerVersion(itemVer, targetVer)) {
             targetRelease = item;
-            break;
           }
         }
       }
@@ -221,11 +252,15 @@ class UpdateService {
 
       bool isSecurityUpdate = false;
       bool isFeatureUpdate = false;
-      bool isBetaUpdate =
-          version.toLowerCase().contains('beta') ||
-          (tag?.toLowerCase().contains('beta') ?? false);
+      final isExperimentUpdate =
+          version.contains(RegExp(r'E\d+')) ||
+          (tag?.toLowerCase().contains('experiment') ?? false);
+      final isBetaUpdate =
+          !isExperimentUpdate &&
+          (version.toLowerCase().contains('beta') ||
+              (tag?.toLowerCase().contains('beta') ?? false));
 
-      if (!isBetaUpdate && versionParts.length >= 3) {
+      if (!isBetaUpdate && !isExperimentUpdate && versionParts.length >= 3) {
         final minor = versionParts[1];
         final patch = versionParts[2];
         if (minor == 0 && patch == 0) {
@@ -233,23 +268,26 @@ class UpdateService {
         } else if (minor > 0 && patch == 0) {
           isSecurityUpdate = true;
         } else if (patch > 0) {
-          isBetaUpdate = true;
+          isFeatureUpdate = true;
         }
       }
 
       final isSecurity =
           !isBetaUpdate &&
+          !isExperimentUpdate &&
           (isSecurityUpdate ||
               body.toLowerCase().contains('critical security') ||
               body.toLowerCase().contains('cve-'));
       final isImportant = isSecurity || isFeatureUpdate;
 
-      final type = isBetaUpdate
-          ? 'BR (Beta Release)'
-          : (isSecurity ? 'SR (Security Release)' : 'SB (Stable Build)');
+      final type = isExperimentUpdate
+          ? 'ER (Experimental Release)'
+          : (isBetaUpdate
+                ? 'BR (Beta Release)'
+                : (isSecurity ? 'SR (Security Release)' : 'SB (Stable Build)'));
 
       _logger.info(
-        'Latest version fetched (${trackBeta ? "Beta" : "Stable"}): $version ($type)',
+        'Latest version fetched (Channel: $effectiveChannel): $version ($type)',
       );
       return AppUpdateInfo(
         version: version,
