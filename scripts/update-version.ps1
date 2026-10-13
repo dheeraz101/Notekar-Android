@@ -12,6 +12,7 @@ param(
     [switch]$security,
 
     [Parameter(Mandatory = $false)]
+    [Alias('exp')]
     [switch]$experiment,
 
     [Parameter(Mandatory = $false)]
