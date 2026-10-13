@@ -12,7 +12,6 @@ import 'package:notekar/services/audio_service.dart';
 import 'package:notekar/services/media_storage_service.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/tag_service.dart';
-import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/widgets/hashtag_suggestion_overlay.dart';
 import 'package:notekar/widgets/photo_lightbox_dialog.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
@@ -51,6 +50,7 @@ class BigNoteDialog extends StatefulWidget {
 
 class _BigNoteDialogState extends State<BigNoteDialog> {
   late final TextEditingController _controller;
+  late final UndoHistoryController _undoController;
   final FocusNode _focusNode = FocusNode();
 
   List<String> _stagedImagePaths = [];
@@ -66,6 +66,7 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.initialNote);
+    _undoController = UndoHistoryController();
     if (widget.initialImagePath != null &&
         widget.initialImagePath!.trim().isNotEmpty) {
       _stagedImagePaths = widget.initialImagePath!
@@ -103,6 +104,7 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
     if (_isRecording) {
       AudioService.instance.cancelRecording();
     }
+    _undoController.dispose();
     _controller.dispose();
     _focusNode.dispose();
     super.dispose();
@@ -112,6 +114,13 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
     final text = _controller.text.trim();
     if (text.isEmpty) return 0;
     return text.split(RegExp(r'\s+')).length;
+  }
+
+  String get _readingTimeEstimate {
+    final words = _wordCount;
+    if (words <= 0) return '<1 min read';
+    final mins = (words / 200).ceil();
+    return mins <= 1 ? '<1 min read' : '$mins min read';
   }
 
   void _insertTag(String tag) {
@@ -227,6 +236,54 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
     final timeStr =
         '[${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}] ';
     _insertSnippet(timeStr);
+  }
+
+  void _wrapOrInsert(String prefix, String suffix) {
+    HapticFeedback.selectionClick();
+    final text = _controller.text;
+    final selection = _controller.selection;
+    if (selection.isValid && !selection.isCollapsed) {
+      final selectedText = text.substring(selection.start, selection.end);
+      final replaced = '$prefix$selectedText$suffix';
+      final newText = text.replaceRange(
+        selection.start,
+        selection.end,
+        replaced,
+      );
+      _controller.value = TextEditingValue(
+        text: newText,
+        selection: TextSelection(
+          baseOffset: selection.start + prefix.length,
+          extentOffset: selection.start + prefix.length + selectedText.length,
+        ),
+      );
+    } else {
+      final pos = selection.isValid && selection.start >= 0
+          ? selection.start
+          : text.length;
+      final newText = text.replaceRange(pos, pos, '$prefix$suffix');
+      _controller.value = TextEditingValue(
+        text: newText,
+        selection: TextSelection.collapsed(offset: pos + prefix.length),
+      );
+    }
+  }
+
+  void _insertLinePrefix(String linePrefix) {
+    HapticFeedback.selectionClick();
+    final text = _controller.text;
+    final selection = _controller.selection;
+    final pos = selection.isValid && selection.start >= 0
+        ? selection.start
+        : text.length;
+
+    final isLineStart = pos == 0 || (pos > 0 && text[pos - 1] == '\n');
+    final insertion = isLineStart ? linePrefix : '\n$linePrefix';
+    final newText = text.replaceRange(pos, pos, insertion);
+    _controller.value = TextEditingValue(
+      text: newText,
+      selection: TextSelection.collapsed(offset: pos + insertion.length),
+    );
   }
 
   Future<void> _pickPhoto(ImageSource source) async {
@@ -397,164 +454,468 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
   @override
   Widget build(BuildContext context) {
     final p = widget.p;
-    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    final media = MediaQuery.of(context);
+    final bottomInset = media.viewInsets.bottom;
+    final topPadding = media.padding.top;
+    final bottomPadding = media.padding.bottom;
 
-    return AnimatedPadding(
-      padding:
-          MediaQuery.viewInsetsOf(context) +
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      duration: const Duration(milliseconds: 100),
-      curve: Curves.decelerate,
-      child: Center(
-        child: Material(
-          type: MaterialType.transparency,
-          child: Glass(
-            p: p,
-            blur: widget.blur,
-            radius: 24,
-            padding: EdgeInsets.zero,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 620, maxHeight: 780),
-              child: Column(
-                children: [
-                  // Navigation Header
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: p.border.withValues(alpha: 0.5),
-                          width: 0.5,
+    return Material(
+      color: p.bg,
+      child: Stack(
+        children: [
+          Column(
+            children: [
+              // 1. Pinned Apple HIG Frosted Glass Header Bar
+              Container(
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  math.max(topPadding, 12.0),
+                  16,
+                  12,
+                ),
+                decoration: BoxDecoration(
+                  color: p.surface.withValues(alpha: widget.blur ? 0.85 : 0.98),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: p.border.withValues(alpha: 0.5),
+                      width: 0.5,
+                    ),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Cancel / Dismiss button
+                    PressableScale(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        Navigator.pop(context);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 4,
+                        ),
+                        child: Text(
+                          widget.allowEmpty ? 'Cancel' : 'Dismiss',
+                          style: TextStyle(
+                            color: p.text2,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                    // Center Document Title & Reading Time Badge
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        PressableScale(
-                          onTap: () {
-                            HapticFeedback.selectionClick();
-                            Navigator.pop(context);
+                        Icon(
+                          Icons.description_rounded,
+                          size: 16,
+                          color: p.accent,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          widget.title,
+                          style: TextStyle(
+                            color: p.text,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        ValueListenableBuilder<TextEditingValue>(
+                          valueListenable: _controller,
+                          builder: (context, _, _) {
+                            return Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: p.accent.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                _readingTimeEstimate,
+                                style: TextStyle(
+                                  color: p.accent,
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            );
                           },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 4,
-                              vertical: 4,
-                            ),
-                            child: Text(
-                              widget.allowEmpty ? 'Cancel' : 'Dismiss',
-                              style: TextStyle(
-                                color: p.text2,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.description_rounded,
-                              size: 16,
-                              color: p.accent,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              widget.title,
-                              style: TextStyle(
-                                color: p.text,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: -0.2,
-                              ),
-                            ),
-                          ],
-                        ),
-                        PressableScale(
-                          onTap: _save,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: p.accent,
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            child: Text(
-                              widget.saveLabel,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
                         ),
                       ],
                     ),
-                  ),
 
-                  // Metadata bar (Date, Word Count, Character Count)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 8,
-                    ),
-                    color: p.surface2.withValues(alpha: 0.4),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          datePretty(DateTime.now().millisecondsSinceEpoch),
-                          style: TextStyle(
-                            color: p.text3,
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w600,
+                    // Done / Save pill button
+                    PressableScale(
+                      onTap: _save,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 7,
+                        ),
+                        decoration: BoxDecoration(
+                          color: p.accent,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          widget.saveLabel,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                        ValueListenableBuilder<TextEditingValue>(
-                          valueListenable: _controller,
-                          builder: (context, val, _) {
-                            final charCount = val.text.length;
-                            final wordCount = _wordCount;
-                            return Row(
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // 2. Metadata / Telemetry Bar (Date, Word Count, Char Count)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 8,
+                ),
+                color: p.surface2.withValues(alpha: 0.5),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      datePretty(DateTime.now().millisecondsSinceEpoch),
+                      style: TextStyle(
+                        color: p.text3,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    ValueListenableBuilder<TextEditingValue>(
+                      valueListenable: _controller,
+                      builder: (context, val, _) {
+                        final charCount = val.text.length;
+                        final wordCount = _wordCount;
+                        return Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 7,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: p.surface3,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                '$wordCount words',
+                                style: TextStyle(
+                                  color: p.text2,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 7,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: p.surface3,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                '$charCount chars',
+                                style: TextStyle(
+                                  color: p.text2,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+
+              // 3. Expansive, Distraction-Free Full-Screen Writing Surface
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 14,
+                  ),
+                  child: TextField(
+                    controller: _controller,
+                    undoController: _undoController,
+                    focusNode: _focusNode,
+                    autofocus: true,
+                    maxLines: null,
+                    expands: true,
+                    textAlignVertical: TextAlignVertical.top,
+                    keyboardType: TextInputType.multiline,
+                    textInputAction: TextInputAction.newline,
+                    textCapitalization: TextCapitalization.sentences,
+                    autocorrect: true,
+                    enableSuggestions: true,
+                    scrollPhysics: const BouncingScrollPhysics(),
+                    style: TextStyle(
+                      color: p.text,
+                      fontSize: widget.largeText ? 17.5 : 16.0,
+                      height: 1.5,
+                      letterSpacing: 0.1,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Write in depth without limits...',
+                      hintStyle: TextStyle(
+                        color: p.text3.withValues(alpha: 0.7),
+                        fontSize: 16.0,
+                      ),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                ),
+              ),
+
+              // 4. Inline Hashtag Suggestions Overlay (above keyboard)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: HashtagSuggestionOverlay(controller: _controller, p: p),
+              ),
+
+              // 5. Live Voice Recording Bar (when active)
+              if (_isRecording)
+                Container(
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 4,
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: widget.p.red.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: widget.p.red.withValues(alpha: 0.4),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Recording ${_formatSeconds(_recordingSeconds)}',
+                        style: TextStyle(
+                          color: widget.p.red,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      AnimatedBuilder(
+                        animation: AudioService.instance,
+                        builder: (context, _) {
+                          final amp =
+                              AudioService.instance.currentRecordingAmplitude;
+                          const barCount = 7;
+                          final factors = [
+                            0.35,
+                            0.7,
+                            1.0,
+                            0.85,
+                            1.0,
+                            0.65,
+                            0.4,
+                          ];
+                          return Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: List.generate(barCount, (i) {
+                              final h = (4.0 + 16.0 * amp * factors[i]).clamp(
+                                4.0,
+                                18.0,
+                              );
+                              return Container(
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 1.5,
+                                ),
+                                width: 2.5,
+                                height: h,
+                                decoration: BoxDecoration(
+                                  color: widget.p.red,
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                              );
+                            }),
+                          );
+                        },
+                      ),
+                      const Spacer(),
+                      PressableScale(
+                        onTap: _cancelVoiceRecording,
+                        child: Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: Icon(
+                            CupertinoIcons.trash,
+                            size: 16,
+                            color: widget.p.text3,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      PressableScale(
+                        onTap: _stopVoiceRecording,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: widget.p.red,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                CupertinoIcons.checkmark,
+                                size: 12,
+                                color: Colors.white,
+                              ),
+                              SizedBox(width: 4),
+                              Text(
+                                'Done',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              // 6. Staged Image Preview Bar (Multi-photo strip)
+              if (_stagedImagePaths.isNotEmpty)
+                Container(
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 4,
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: widget.p.surface,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: widget.p.border.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            CupertinoIcons.photo_fill_on_rectangle_fill,
+                            size: 13,
+                            color: widget.p.accent,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            '${_stagedImagePaths.length}/5 Photos attached',
+                            style: TextStyle(
+                              color: widget.p.text,
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      SizedBox(
+                        height: 52,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: _stagedImagePaths.length,
+                          separatorBuilder: (_, _) => const SizedBox(width: 8),
+                          itemBuilder: (context, idx) {
+                            final imgPath = _stagedImagePaths[idx];
+                            return Stack(
                               children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 7,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: p.surface3,
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Text(
-                                    '$wordCount words',
-                                    style: TextStyle(
-                                      color: p.text2,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
+                                PressableScale(
+                                  onTap: () {
+                                    PhotoLightboxDialog.show(
+                                      context,
+                                      p: widget.p,
+                                      imagePaths: _stagedImagePaths,
+                                      initialIndex: idx,
+                                    );
+                                  },
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: SizedBox(
+                                      width: 52,
+                                      height: 52,
+                                      child: _buildStagedImageThumbnail(
+                                        imgPath,
+                                      ),
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: 6),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 7,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: p.surface3,
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Text(
-                                    '$charCount chars',
-                                    style: TextStyle(
-                                      color: p.text2,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
+                                Positioned(
+                                  top: 2,
+                                  right: 2,
+                                  child: PressableScale(
+                                    onTap: () {
+                                      HapticFeedback.selectionClick();
+                                      setState(() {
+                                        _stagedImagePaths.removeAt(idx);
+                                      });
+                                    },
+                                    child: Container(
+                                      width: 18,
+                                      height: 18,
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withValues(
+                                          alpha: 0.65,
+                                        ),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Center(
+                                        child: Icon(
+                                          CupertinoIcons.xmark,
+                                          size: 10,
+                                          color: Colors.white,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -562,176 +923,337 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
                             );
                           },
                         ),
-                      ],
-                    ),
-                  ),
-
-                  // Expansive Writing Canvas
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 12,
                       ),
-                      child: TextField(
-                        controller: _controller,
-                        focusNode: _focusNode,
-                        autofocus: true,
-                        maxLines: null,
-                        expands: true,
-                        textAlignVertical: TextAlignVertical.top,
-                        keyboardType: TextInputType.multiline,
-                        textInputAction: TextInputAction.newline,
-                        textCapitalization: TextCapitalization.sentences,
-                        autocorrect: true,
-                        enableSuggestions: true,
-                        style: TextStyle(
-                          color: p.text,
-                          fontSize: widget.largeText ? 17 : 15.5,
-                          height: 1.45,
-                          letterSpacing: 0.1,
+                    ],
+                  ),
+                ),
+
+              // 7. Staged Voice Preview Bar (Multi-voice notes)
+              if (_stagedVoicePaths.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  child: Column(
+                    children: List.generate(_stagedVoicePaths.length, (idx) {
+                      final dur = idx < _stagedVoiceDurations.length
+                          ? _stagedVoiceDurations[idx]
+                          : 0;
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
                         ),
-                        decoration: InputDecoration(
-                          hintText: 'Write in depth without limits...',
-                          hintStyle: TextStyle(
-                            color: p.text3.withValues(alpha: 0.7),
-                            fontSize: 15.5,
+                        decoration: BoxDecoration(
+                          color: widget.p.surface,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: widget.p.border.withValues(alpha: 0.6),
                           ),
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          contentPadding: EdgeInsets.zero,
                         ),
-                      ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              CupertinoIcons.mic_fill,
+                              size: 15,
+                              color: widget.p.accent,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Voice Note ${idx + 1} (${_formatMs(dur)})',
+                              style: TextStyle(
+                                color: widget.p.text,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const Spacer(),
+                            PressableScale(
+                              onTap: () {
+                                HapticFeedback.selectionClick();
+                                setState(() {
+                                  _stagedVoicePaths.removeAt(idx);
+                                  if (idx < _stagedVoiceDurations.length) {
+                                    _stagedVoiceDurations.removeAt(idx);
+                                  }
+                                });
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: widget.p.surface3,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  CupertinoIcons.xmark,
+                                  size: 12,
+                                  color: widget.p.text2,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+
+              // 8. Telegram-Style Accessory Toolbar (Pinned Above Virtual Keyboard)
+              Container(
+                padding: EdgeInsets.fromLTRB(
+                  12,
+                  8,
+                  12,
+                  math.max(8.0, bottomInset > 0 ? 8.0 : bottomPadding + 6.0),
+                ),
+                decoration: BoxDecoration(
+                  color: p.surface2,
+                  border: Border(
+                    top: BorderSide(
+                      color: p.border.withValues(alpha: 0.5),
+                      width: 0.5,
                     ),
                   ),
-
-                  // Inline Hashtag Autocomplete Suggestions Overlay
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    child: HashtagSuggestionOverlay(
-                      controller: _controller,
-                      p: p,
-                    ),
-                  ),
-
-                  // Live Voice Recording Bar
-                  if (_isRecording)
-                    Container(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 4,
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: widget.p.red.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: widget.p.red.withValues(alpha: 0.4),
-                        ),
-                      ),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // ROW 1: Telegram Rich Formatting & Undo/Redo Controls
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
                       child: Row(
                         children: [
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Recording ${_formatSeconds(_recordingSeconds)}',
-                            style: TextStyle(
-                              color: widget.p.red,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              fontFeatures: const [
-                                FontFeature.tabularFigures(),
+                          // Undo / Redo
+                          ListenableBuilder(
+                            listenable: _undoController,
+                            builder: (context, _) => Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                _buildFormatButton(
+                                  icon: CupertinoIcons.arrow_uturn_left,
+                                  label: 'Undo',
+                                  enabled: _undoController.value.canUndo,
+                                  onTap: () {
+                                    if (_undoController.value.canUndo) {
+                                      HapticFeedback.lightImpact();
+                                      _undoController.undo();
+                                    }
+                                  },
+                                ),
+                                const SizedBox(width: 4),
+                                _buildFormatButton(
+                                  icon: CupertinoIcons.arrow_uturn_right,
+                                  label: 'Redo',
+                                  enabled: _undoController.value.canRedo,
+                                  onTap: () {
+                                    if (_undoController.value.canRedo) {
+                                      HapticFeedback.lightImpact();
+                                      _undoController.redo();
+                                    }
+                                  },
+                                ),
                               ],
                             ),
                           ),
-                          const SizedBox(width: 10),
-                          // Dynamic Amplitude Waveform Bars
-                          AnimatedBuilder(
-                            animation: AudioService.instance,
-                            builder: (context, _) {
-                              final amp = AudioService
-                                  .instance
-                                  .currentRecordingAmplitude;
-                              const barCount = 7;
-                              final factors = [
-                                0.35,
-                                0.7,
-                                1.0,
-                                0.85,
-                                1.0,
-                                0.65,
-                                0.4,
-                              ];
-                              return Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: List.generate(barCount, (i) {
-                                  final h = (4.0 + 16.0 * amp * factors[i])
-                                      .clamp(4.0, 18.0);
-                                  return Container(
-                                    margin: const EdgeInsets.symmetric(
-                                      horizontal: 1.5,
+
+                          Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 6),
+                            width: 1,
+                            height: 18,
+                            color: p.border.withValues(alpha: 0.5),
+                          ),
+
+                          // Bold
+                          _buildFormatButton(
+                            label: 'B',
+                            isBold: true,
+                            onTap: () => _wrapOrInsert('**', '**'),
+                          ),
+                          const SizedBox(width: 4),
+
+                          // Italic
+                          _buildFormatButton(
+                            label: 'I',
+                            isItalic: true,
+                            onTap: () => _wrapOrInsert('*', '*'),
+                          ),
+                          const SizedBox(width: 4),
+
+                          // Monospace / Code
+                          _buildFormatButton(
+                            label: '` `',
+                            isMono: true,
+                            onTap: () => _wrapOrInsert('`', '`'),
+                          ),
+                          const SizedBox(width: 4),
+
+                          // Strikethrough
+                          _buildFormatButton(
+                            label: 'S',
+                            isStrike: true,
+                            onTap: () => _wrapOrInsert('~~', '~~'),
+                          ),
+                          const SizedBox(width: 4),
+
+                          // Quote
+                          _buildFormatButton(
+                            label: '" "',
+                            onTap: () => _insertLinePrefix('> '),
+                          ),
+                          const SizedBox(width: 4),
+
+                          // Checklist
+                          _buildQuickAction(
+                            icon: Icons.check_circle_outline_rounded,
+                            label: 'Checklist',
+                            onTap: () => _insertLinePrefix('- [ ] '),
+                          ),
+                          const SizedBox(width: 4),
+
+                          // Bullet List
+                          _buildQuickAction(
+                            icon: Icons.format_list_bulleted_rounded,
+                            label: 'Bullet',
+                            onTap: () => _insertLinePrefix('• '),
+                          ),
+                          const SizedBox(width: 4),
+
+                          // Timestamp
+                          _buildQuickAction(
+                            icon: Icons.schedule_rounded,
+                            label: 'Time',
+                            onTap: _insertTimestamp,
+                          ),
+                          const SizedBox(width: 6),
+
+                          // Clear
+                          ValueListenableBuilder<TextEditingValue>(
+                            valueListenable: _controller,
+                            builder: (context, val, _) {
+                              if (val.text.isEmpty) {
+                                return const SizedBox.shrink();
+                              }
+                              return PressableScale(
+                                onTap: () {
+                                  HapticFeedback.selectionClick();
+                                  _controller.clear();
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 4,
+                                  ),
+                                  child: Text(
+                                    'Clear',
+                                    style: TextStyle(
+                                      color: p.text3,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
                                     ),
-                                    width: 2.5,
-                                    height: h,
-                                    decoration: BoxDecoration(
-                                      color: widget.p.red,
-                                      borderRadius: BorderRadius.circular(999),
-                                    ),
-                                  );
-                                }),
+                                  ),
+                                ),
                               );
                             },
                           ),
-                          const Spacer(),
-                          PressableScale(
-                            onTap: _cancelVoiceRecording,
-                            child: Padding(
-                              padding: const EdgeInsets.all(4),
-                              child: Icon(
-                                CupertinoIcons.trash,
-                                size: 16,
-                                color: widget.p.text3,
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    // ROW 2: Media Quick Actions & Tags Carousel
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      child: Row(
+                        children: [
+                          _buildQuickAction(
+                            icon: CupertinoIcons.camera_fill,
+                            label: 'Camera',
+                            onTap: () => _pickPhoto(ImageSource.camera),
+                          ),
+                          const SizedBox(width: 6),
+                          _buildQuickAction(
+                            icon: CupertinoIcons.photo_fill_on_rectangle_fill,
+                            label: 'Photo',
+                            onTap: () => _pickPhoto(ImageSource.gallery),
+                          ),
+                          const SizedBox(width: 6),
+                          _buildQuickAction(
+                            icon: _isRecording
+                                ? CupertinoIcons.stop_fill
+                                : CupertinoIcons.mic_fill,
+                            label: _isRecording ? 'Stop' : 'Voice',
+                            onTap: _toggleVoiceRecording,
+                          ),
+                          Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 8),
+                            width: 1,
+                            height: 18,
+                            color: p.border.withValues(alpha: 0.5),
+                          ),
+
+                          // Tags
+                          for (final tag in _tags)
+                            Padding(
+                              padding: const EdgeInsets.only(right: 6),
+                              child: PressableScale(
+                                onTap: () => _insertTag(tag),
+                                onLongPress: () => _confirmDeleteTag(tag),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 5,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: p.surface,
+                                    borderRadius: BorderRadius.circular(999),
+                                    border: Border.all(
+                                      color: p.border.withValues(alpha: 0.7),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    tag,
+                                    style: TextStyle(
+                                      color: p.text,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
+
+                          // Add tag button
                           PressableScale(
-                            onTap: _stopVoiceRecording,
+                            onTap: _showAddTagDialog,
                             child: Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 10,
-                                vertical: 4,
+                                vertical: 5,
                               ),
                               decoration: BoxDecoration(
-                                color: widget.p.red,
-                                borderRadius: BorderRadius.circular(10),
+                                color: p.accent.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(999),
+                                border: Border.all(
+                                  color: p.accent.withValues(alpha: 0.3),
+                                ),
                               ),
-                              child: const Row(
+                              child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
-                                    CupertinoIcons.checkmark,
+                                    Icons.add_rounded,
                                     size: 12,
-                                    color: Colors.white,
+                                    color: p.accent,
                                   ),
-                                  SizedBox(width: 4),
+                                  const SizedBox(width: 4),
                                   Text(
-                                    'Done',
+                                    'Tag',
                                     style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
+                                      color: p.accent,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                 ],
@@ -741,369 +1263,51 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
                         ],
                       ),
                     ),
-
-                  // Staged Image Preview Bar (Multi-photo strip)
-                  if (_stagedImagePaths.isNotEmpty)
-                    Container(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 4,
-                      ),
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: widget.p.surface,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: widget.p.border.withValues(alpha: 0.6),
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                CupertinoIcons.photo_fill_on_rectangle_fill,
-                                size: 13,
-                                color: widget.p.accent,
-                              ),
-                              const SizedBox(width: 5),
-                              Text(
-                                '${_stagedImagePaths.length}/5 Photos attached',
-                                style: TextStyle(
-                                  color: widget.p.text,
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          SizedBox(
-                            height: 52,
-                            child: ListView.separated(
-                              scrollDirection: Axis.horizontal,
-                              physics: const BouncingScrollPhysics(),
-                              itemCount: _stagedImagePaths.length,
-                              separatorBuilder: (_, _) =>
-                                  const SizedBox(width: 8),
-                              itemBuilder: (context, idx) {
-                                final imgPath = _stagedImagePaths[idx];
-                                return Stack(
-                                  children: [
-                                    PressableScale(
-                                      onTap: () {
-                                        PhotoLightboxDialog.show(
-                                          context,
-                                          p: widget.p,
-                                          imagePaths: _stagedImagePaths,
-                                          initialIndex: idx,
-                                        );
-                                      },
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(10),
-                                        child: SizedBox(
-                                          width: 52,
-                                          height: 52,
-                                          child: _buildStagedImageThumbnail(
-                                            imgPath,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Positioned(
-                                      top: 2,
-                                      right: 2,
-                                      child: PressableScale(
-                                        onTap: () {
-                                          HapticFeedback.selectionClick();
-                                          setState(() {
-                                            _stagedImagePaths.removeAt(idx);
-                                          });
-                                        },
-                                        child: Container(
-                                          width: 18,
-                                          height: 18,
-                                          decoration: BoxDecoration(
-                                            color: Colors.black.withValues(
-                                              alpha: 0.65,
-                                            ),
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: const Center(
-                                            child: Icon(
-                                              CupertinoIcons.xmark,
-                                              size: 10,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                  // Staged Voice Preview Bar (Multi-voice notes)
-                  if (_stagedVoicePaths.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
-                      child: Column(
-                        children: List.generate(_stagedVoicePaths.length, (
-                          idx,
-                        ) {
-                          final dur = idx < _stagedVoiceDurations.length
-                              ? _stagedVoiceDurations[idx]
-                              : 0;
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 6),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: widget.p.surface,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: widget.p.border.withValues(alpha: 0.6),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  CupertinoIcons.mic_fill,
-                                  size: 15,
-                                  color: widget.p.accent,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Voice Note ${idx + 1} (${_formatMs(dur)})',
-                                  style: TextStyle(
-                                    color: widget.p.text,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const Spacer(),
-                                PressableScale(
-                                  onTap: () {
-                                    HapticFeedback.selectionClick();
-                                    setState(() {
-                                      _stagedVoicePaths.removeAt(idx);
-                                      if (idx < _stagedVoiceDurations.length) {
-                                        _stagedVoiceDurations.removeAt(idx);
-                                      }
-                                    });
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.all(4),
-                                    decoration: BoxDecoration(
-                                      color: widget.p.surface3,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      CupertinoIcons.xmark,
-                                      size: 12,
-                                      color: widget.p.text2,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }),
-                      ),
-                    ),
-
-                  // Apple Notes Accessory Toolbar (Tags + Quick Insert Actions)
-                  Container(
-                    padding: EdgeInsets.fromLTRB(
-                      14,
-                      8,
-                      14,
-                      math.max(8.0, bottomInset > 0 ? 8.0 : 12.0),
-                    ),
-                    decoration: BoxDecoration(
-                      color: p.surface2,
-                      border: Border(
-                        top: BorderSide(
-                          color: p.border.withValues(alpha: 0.5),
-                          width: 0.5,
-                        ),
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Horizontal scrollable tags with Add button
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          physics: const BouncingScrollPhysics(),
-                          child: Row(
-                            children: [
-                              for (final tag in _tags)
-                                Padding(
-                                  padding: const EdgeInsets.only(right: 6),
-                                  child: PressableScale(
-                                    onTap: () => _insertTag(tag),
-                                    onLongPress: () => _confirmDeleteTag(tag),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 5,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: p.surface,
-                                        borderRadius: BorderRadius.circular(
-                                          999,
-                                        ),
-                                        border: Border.all(
-                                          color: p.border.withValues(
-                                            alpha: 0.7,
-                                          ),
-                                        ),
-                                      ),
-                                      child: Text(
-                                        tag,
-                                        style: TextStyle(
-                                          color: p.text,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              // Add tag button
-                              PressableScale(
-                                onTap: _showAddTagDialog,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 5,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: p.accent.withValues(alpha: 0.12),
-                                    borderRadius: BorderRadius.circular(999),
-                                    border: Border.all(
-                                      color: p.accent.withValues(alpha: 0.3),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.add_rounded,
-                                        size: 12,
-                                        color: p.accent,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'Tag',
-                                        style: TextStyle(
-                                          color: p.accent,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 8),
-
-                        // Quick Markdown/Format Actions + Media Actions
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          physics: const BouncingScrollPhysics(),
-                          child: Row(
-                            children: [
-                              _buildQuickAction(
-                                icon: CupertinoIcons.camera_fill,
-                                label: 'Camera',
-                                onTap: () => _pickPhoto(ImageSource.camera),
-                              ),
-                              const SizedBox(width: 6),
-                              _buildQuickAction(
-                                icon:
-                                    CupertinoIcons.photo_fill_on_rectangle_fill,
-                                label: 'Photo',
-                                onTap: () => _pickPhoto(ImageSource.gallery),
-                              ),
-                              const SizedBox(width: 6),
-                              _buildQuickAction(
-                                icon: _isRecording
-                                    ? CupertinoIcons.stop_fill
-                                    : CupertinoIcons.mic_fill,
-                                label: _isRecording ? 'Stop' : 'Voice',
-                                onTap: _toggleVoiceRecording,
-                              ),
-                              const SizedBox(width: 6),
-                              _buildQuickAction(
-                                icon: Icons.schedule_rounded,
-                                label: 'Time',
-                                onTap: _insertTimestamp,
-                              ),
-                              const SizedBox(width: 6),
-                              _buildQuickAction(
-                                icon: Icons.format_list_bulleted_rounded,
-                                label: 'Bullet',
-                                onTap: () => _insertSnippet('\n• '),
-                              ),
-                              const SizedBox(width: 6),
-                              _buildQuickAction(
-                                icon: Icons.check_circle_outline_rounded,
-                                label: 'Checklist',
-                                onTap: () => _insertSnippet('\n[ ] '),
-                              ),
-                              const SizedBox(width: 8),
-                              ValueListenableBuilder<TextEditingValue>(
-                                valueListenable: _controller,
-                                builder: (context, val, _) {
-                                  if (val.text.isEmpty) {
-                                    return const SizedBox.shrink();
-                                  }
-                                  return PressableScale(
-                                    onTap: () {
-                                      HapticFeedback.selectionClick();
-                                      _controller.clear();
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                        vertical: 4,
-                                      ),
-                                      child: Text(
-                                        'Clear',
-                                        style: TextStyle(
-                                          color: p.text3,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
+            ],
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFormatButton({
+    String? label,
+    IconData? icon,
+    bool isBold = false,
+    bool isItalic = false,
+    bool isMono = false,
+    bool isStrike = false,
+    bool enabled = true,
+    required VoidCallback onTap,
+  }) {
+    return PressableScale(
+      enabled: enabled,
+      onTap: onTap,
+      child: Opacity(
+        opacity: enabled ? 1.0 : 0.4,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: widget.p.surface,
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: widget.p.border.withValues(alpha: 0.5)),
+          ),
+          child: icon != null
+              ? Icon(icon, size: 12, color: widget.p.text2)
+              : Text(
+                  label ?? '',
+                  style: TextStyle(
+                    color: widget.p.text2,
+                    fontSize: 12,
+                    fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
+                    fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
+                    fontFamily: isMono ? 'monospace' : null,
+                    decoration: isStrike ? TextDecoration.lineThrough : null,
+                  ),
+                ),
         ),
       ),
     );

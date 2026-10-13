@@ -7,7 +7,6 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/moment_repository.dart';
-import 'package:notekar/widgets/apple_hig_action_sheet.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -55,21 +54,35 @@ class _LoggingSettingsPageState extends State<LoggingSettingsPage> {
   static const _channel = MethodChannel('notekar/files');
 
   Palette get p => widget.p;
+
   String get defaultMode => widget.defaultMode;
+
   int get entriesCount => widget.entriesCount;
+
   int get notesCount => widget.notesCount;
+
   String get remindersStatus => widget.remindersStatus;
+
   bool get enableSobrietyMode => widget.enableSobrietyMode;
+
   bool get showPersistentNotification => widget.showPersistentNotification;
+
   String get notifLogAction => widget.notifLogAction;
+
   ValueChanged<bool>? get onNotifLogActionChanged =>
       widget.onNotifLogActionChanged;
+
   bool get showTrashBin => widget.showTrashBin;
+
   List<Moment> get trash => widget.trash;
+
   bool get rainbowCards => widget.rainbowCards;
+
   ValueChanged<bool>? get onRainbowCardsChanged => widget.onRainbowCardsChanged;
+
   ValueChanged<bool> get onShowPersistentNotificationChanged =>
       widget.onShowPersistentNotificationChanged;
+
   void Function(String category, {required String parent}) get onOpenCategory =>
       widget.onOpenCategory;
 
@@ -100,12 +113,121 @@ class _LoggingSettingsPageState extends State<LoggingSettingsPage> {
     }
   }
 
-  Future<void> _toggleConcurrencyMode() async {
+  Future<void> _showInplaceSelector({
+    required BuildContext anchorContext,
+    required String currentVal,
+    required List<({String key, String title, String? subtitle})> options,
+    required ValueChanged<String> onSelected,
+  }) async {
     HapticFeedback.lightImpact();
-    final newMode = _concurrencyMode == 'exclusive' ? 'parallel' : 'exclusive';
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('timer_concurrency_mode', newMode);
-    setState(() => _concurrencyMode = newMode);
+    final renderBox = anchorContext.findRenderObject() as RenderBox?;
+    final overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox?;
+    if (renderBox == null || overlay == null) return;
+
+    final translation = renderBox.getTransformTo(overlay).getTranslation();
+    final rowRect = Rect.fromLTWH(
+      translation.x,
+      translation.y,
+      renderBox.size.width,
+      renderBox.size.height,
+    );
+    final position = RelativeRect.fromRect(
+      Rect.fromPoints(
+        Offset(rowRect.right - 230, rowRect.bottom),
+        Offset(rowRect.right, rowRect.bottom),
+      ),
+      Offset.zero & overlay.size,
+    );
+
+    final selected = await showMenu<String>(
+      context: context,
+      position: position,
+      color: widget.p.surface2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: widget.p.border.withValues(alpha: 0.6),
+          width: 0.8,
+        ),
+      ),
+      elevation: 8,
+      items: [
+        for (final opt in options)
+          PopupMenuItem<String>(
+            value: opt.key,
+            height: opt.subtitle != null ? 50 : 42,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        opt.title.localized(context),
+                        style: TextStyle(
+                          color: opt.key == currentVal
+                              ? widget.p.accent
+                              : widget.p.text,
+                          fontSize: 13.5,
+                          fontWeight: opt.key == currentVal
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                        ),
+                      ),
+                      if (opt.subtitle != null) ...[
+                        const SizedBox(height: 1),
+                        Text(
+                          opt.subtitle!.localized(context),
+                          style: TextStyle(color: widget.p.text3, fontSize: 11),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (opt.key == currentVal) ...[
+                  const SizedBox(width: 8),
+                  Icon(
+                    CupertinoIcons.checkmark,
+                    size: 15,
+                    color: widget.p.accent,
+                  ),
+                ],
+              ],
+            ),
+          ),
+      ],
+    );
+
+    if (selected != null) {
+      HapticFeedback.selectionClick();
+      onSelected(selected);
+    }
+  }
+
+  Future<void> _selectConcurrencyMode(BuildContext anchorContext) async {
+    await _showInplaceSelector(
+      anchorContext: anchorContext,
+      currentVal: _concurrencyMode,
+      options: [
+        (
+          key: 'exclusive',
+          title: 'Auto-Pause (Exclusive)',
+          subtitle: 'Pause previous timer on mode switch',
+        ),
+        (
+          key: 'parallel',
+          title: 'Parallel Timers',
+          subtitle: 'Allow multiple simultaneous sessions',
+        ),
+      ],
+      onSelected: (newMode) async {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('timer_concurrency_mode', newMode);
+        if (mounted) setState(() => _concurrencyMode = newMode);
+      },
+    );
   }
 
   Future<void> _toggleFloatingBubble(bool val) async {
@@ -126,85 +248,51 @@ class _LoggingSettingsPageState extends State<LoggingSettingsPage> {
     setState(() => _floatingBubbleEnabled = val);
   }
 
-  Future<void> _showGesturePicker({required bool isSingleTap}) async {
-    HapticFeedback.lightImpact();
-    final prefs = await SharedPreferences.getInstance();
-    final p = widget.p;
-
-    final title = isSingleTap ? 'Single Tap Action' : 'Double Tap Action';
-    final subtitle = isSingleTap
-        ? 'Choose what happens when tapping the floating bubble'
-        : 'Choose what happens when double tapping the floating bubble';
-
-    final actions = isSingleTap
+  Future<void> _showGesturePicker(
+    BuildContext anchorContext, {
+    required bool isSingleTap,
+  }) async {
+    final currentVal = isSingleTap ? _singleTapAction : _doubleTapAction;
+    final options = isSingleTap
         ? [
-            AppleHigActionItem(
-              title: 'Quick Log Entry',
-              subtitle: 'Haptic instant logging without opening the app',
-              icon: CupertinoIcons.bolt_fill,
-              color: p.accent,
-              isSelected: _singleTapAction == 'quick_log',
-              onTap: () async {
-                await prefs.setString(
-                  'floating_single_tap_action',
-                  'quick_log',
-                );
-                if (mounted) setState(() => _singleTapAction = 'quick_log');
-              },
+            (
+              key: 'quick_log',
+              title: 'Quick Log',
+              subtitle: 'Haptic instant note entry',
             ),
-            AppleHigActionItem(
+            (
+              key: 'toggle_expand',
               title: 'Expand Controls',
-              subtitle: 'Reveal pause, resume, note, and stop actions',
-              icon: CupertinoIcons.arrow_up_left_arrow_down_right,
-              color: p.blue,
-              isSelected: _singleTapAction == 'toggle_expand',
-              onTap: () async {
-                await prefs.setString(
-                  'floating_single_tap_action',
-                  'toggle_expand',
-                );
-                if (mounted) setState(() => _singleTapAction = 'toggle_expand');
-              },
+              subtitle: 'Show actions toolbar',
             ),
           ]
         : [
-            AppleHigActionItem(
-              title: 'Modes & Activity Menu',
-              subtitle: 'Open the floating quick note and mode picker',
-              icon: CupertinoIcons.square_grid_2x2,
-              color: p.accent,
-              isSelected: _doubleTapAction == 'quick_menu',
-              onTap: () async {
-                await prefs.setString(
-                  'floating_double_tap_action',
-                  'quick_menu',
-                );
-                if (mounted) setState(() => _doubleTapAction = 'quick_menu');
-              },
+            (
+              key: 'quick_menu',
+              title: 'Modes Menu',
+              subtitle: 'Open quick mode selector',
             ),
-            AppleHigActionItem(
-              title: 'Expand / Collapse',
-              subtitle: 'Toggle the action toolbar visibility',
-              icon: CupertinoIcons.arrow_up_left_arrow_down_right,
-              color: p.blue,
-              isSelected: _doubleTapAction == 'toggle_expand',
-              onTap: () async {
-                await prefs.setString(
-                  'floating_double_tap_action',
-                  'toggle_expand',
-                );
-                if (mounted) setState(() => _doubleTapAction = 'toggle_expand');
-              },
+            (
+              key: 'toggle_expand',
+              title: 'Toggle Expand',
+              subtitle: 'Show or hide toolbar',
             ),
           ];
 
-    if (!mounted) return;
-    await AppleHigActionSheet.show<void>(
-      context,
-      p: p,
-      title: title.localized(context),
-      subtitle: subtitle.localized(context),
-      actions: actions,
+    await _showInplaceSelector(
+      anchorContext: anchorContext,
+      currentVal: currentVal,
+      options: options,
+      onSelected: (val) async {
+        final prefs = await SharedPreferences.getInstance();
+        if (isSingleTap) {
+          await prefs.setString('floating_single_tap_action', val);
+          if (mounted) setState(() => _singleTapAction = val);
+        } else {
+          await prefs.setString('floating_double_tap_action', val);
+          if (mounted) setState(() => _doubleTapAction = val);
+        }
+      },
     );
   }
 
@@ -436,25 +524,29 @@ class _LoggingSettingsPageState extends State<LoggingSettingsPage> {
               onChanged: _toggleFloatingBubble,
             ),
             if (_floatingBubbleEnabled) ...[
-              SettingsRow(
-                p: p,
-                icon: CupertinoIcons.hand_point_right,
-                title: 'Single Tap Action'.localized(context),
-                status: _singleTapAction == 'quick_log'
-                    ? 'Quick Log Note'.localized(context)
-                    : 'Expand Controls'.localized(context),
-                color: p.accent,
-                onTap: () => _showGesturePicker(isSingleTap: true),
+              Builder(
+                builder: (rowCtx) => SettingsRow(
+                  p: p,
+                  title: 'Single Tap'.localized(context),
+                  status: _singleTapAction == 'quick_log'
+                      ? 'Quick Log'.localized(context)
+                      : 'Expand'.localized(context),
+                  rowKind: 'none',
+                  color: p.accent,
+                  onTap: () => _showGesturePicker(rowCtx, isSingleTap: true),
+                ),
               ),
-              SettingsRow(
-                p: p,
-                icon: CupertinoIcons.bolt,
-                title: 'Double Tap Action'.localized(context),
-                status: _doubleTapAction == 'quick_menu'
-                    ? 'Modes & Tags Menu'.localized(context)
-                    : 'Toggle Expand'.localized(context),
-                color: p.accent,
-                onTap: () => _showGesturePicker(isSingleTap: false),
+              Builder(
+                builder: (rowCtx) => SettingsRow(
+                  p: p,
+                  title: 'Double Tap'.localized(context),
+                  status: _doubleTapAction == 'quick_menu'
+                      ? 'Modes Menu'.localized(context)
+                      : 'Expand'.localized(context),
+                  rowKind: 'none',
+                  color: p.accent,
+                  onTap: () => _showGesturePicker(rowCtx, isSingleTap: false),
+                ),
               ),
             ],
           ],
@@ -470,27 +562,28 @@ class _LoggingSettingsPageState extends State<LoggingSettingsPage> {
           p: p,
           title: 'Time-Awareness & Concurrency'.localized(context),
           children: [
-            SettingsRow(
-              p: p,
-              icon: CupertinoIcons.arrow_2_circlepath,
-              title: 'Timer Concurrency'.localized(context),
-              subtitle:
-                  'Auto-pause previous timer when starting a new mode to prevent overlapping hours.'
-                      .localized(context),
-              status: _concurrencyMode == 'exclusive'
-                  ? 'Auto-Pause (Exclusive)'
-                  : 'Parallel Timers',
-              color: p.accent,
-              onTap: _toggleConcurrencyMode,
+            Builder(
+              builder: (rowCtx) => SettingsRow(
+                p: p,
+                title: 'Timer Concurrency'.localized(context),
+                subtitle: 'Auto-pause previous timer on mode switch'.localized(
+                  context,
+                ),
+                status: _concurrencyMode == 'exclusive'
+                    ? 'Auto-Pause'
+                    : 'Parallel',
+                rowKind: 'none',
+                color: p.accent,
+                onTap: () => _selectConcurrencyMode(rowCtx),
+              ),
             ),
             SettingsRow(
               p: p,
-              icon: CupertinoIcons.moon_stars,
-              title: 'Daily Wrap-up (End All)'.localized(context),
-              subtitle:
-                  'Seal open sessions and review today’s conscious time breakdown and calendar sync.'
-                      .localized(context),
-              status: 'Wrap Up',
+              title: 'Daily Wrap-up'.localized(context),
+              subtitle: 'Seal open sessions and review today\'s conscious time'
+                  .localized(context),
+              status: 'Wrap Up'.localized(context),
+              rowKind: 'none',
               color: p.green,
               onTap: _openDailyWrapup,
             ),

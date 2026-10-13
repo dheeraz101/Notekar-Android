@@ -433,8 +433,6 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
             onAddCategory: widget.onAddCategory,
             onManageCategories: widget.onManageCategories,
             onLongPressCategory: widget.onLongPressCategory,
-            onOpenFilter: widget.onOpenFilter,
-            isFilterActive: widget.isFilterActive,
           ),
 
           if (widget.goals != null && widget.goals!.isNotEmpty) ...[

@@ -161,6 +161,8 @@ class SettingsRow extends StatelessWidget {
             color: p.text3,
             size: 16,
           );
+        case 'none':
+          trailingIndicator = null;
         default:
           trailingIndicator = Icon(
             CupertinoIcons.chevron_forward,

@@ -5,7 +5,6 @@ import 'package:flutter/cupertino.dart'
         CupertinoAlertDialog,
         CupertinoDialogAction,
         CupertinoIcons,
-        CupertinoSwitch,
         CupertinoTextField,
         CupertinoTheme,
         CupertinoThemeData;
@@ -411,40 +410,34 @@ class _ModesCategoriesSettingsPageState
           title: 'MODE BEHAVIOR'.localized(context),
           insetDividers: true,
           children: [
-            SettingsRow(
+            SettingsSwitchRow(
               p: widget.p,
               title: 'Adaptive Color'.localized(context),
               subtitle: 'Match theme to active mode'.localized(context),
-              trailing: CupertinoSwitch(
-                value: _adaptiveColor,
-                activeTrackColor: widget.p.accent,
-                onChanged: (val) async {
-                  HapticFeedback.selectionClick();
-                  setState(() => _adaptiveColor = val);
-                  final prefs = await SharedPreferences.getInstance();
-                  await prefs.setBool('m-adaptive-color', val);
-                  await prefs.setBool('adaptive_mode_color', val);
-                  widget.onAdaptiveColorChanged?.call(val);
-                },
-              ),
+              value: _adaptiveColor,
+              onChanged: (val) async {
+                HapticFeedback.selectionClick();
+                setState(() => _adaptiveColor = val);
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setBool('m-adaptive-color', val);
+                await prefs.setBool('adaptive_mode_color', val);
+                widget.onAdaptiveColorChanged?.call(val);
+              },
             ),
-            SettingsRow(
+            SettingsSwitchRow(
               p: widget.p,
               title: 'Default Mode on App Close'.localized(context),
               subtitle:
                   'Return to All mode on exit when no active session is running'
                       .localized(context),
-              trailing: CupertinoSwitch(
-                value: _resetModeOnClose,
-                activeTrackColor: widget.p.accent,
-                onChanged: (val) async {
-                  HapticFeedback.selectionClick();
-                  setState(() => _resetModeOnClose = val);
-                  final prefs = await SharedPreferences.getInstance();
-                  await prefs.setBool('m-reset-mode-on-close', val);
-                  widget.onResetModeOnCloseChanged?.call(val);
-                },
-              ),
+              value: _resetModeOnClose,
+              onChanged: (val) async {
+                HapticFeedback.selectionClick();
+                setState(() => _resetModeOnClose = val);
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setBool('m-reset-mode-on-close', val);
+                widget.onResetModeOnCloseChanged?.call(val);
+              },
             ),
           ],
         ),

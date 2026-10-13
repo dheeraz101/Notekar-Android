@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:notekar/dialogs/big_note_dialog.dart';
-import 'package:notekar/models/activity_tag.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/audio_service.dart';
@@ -73,12 +72,13 @@ class _NoteDialogState extends State<NoteDialog> {
   int _recordingSeconds = 0;
   Timer? _recordingTimer;
 
-  List<ActivityTag> _activityTags = const [];
+  late final UndoHistoryController _undoController;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.initialNote);
+    _undoController = UndoHistoryController();
     if (widget.initialImagePath != null &&
         widget.initialImagePath!.trim().isNotEmpty) {
       _stagedImagePaths = widget.initialImagePath!
@@ -99,7 +99,6 @@ class _NoteDialogState extends State<NoteDialog> {
       }
     }
     _loadSobrietyMode();
-    _loadTags();
 
     if (widget.initialNote.contains('#relapse')) {
       _relapseSelected = true;
@@ -122,6 +121,7 @@ class _NoteDialogState extends State<NoteDialog> {
     if (_isRecording) {
       AudioService.instance.cancelRecording();
     }
+    _undoController.dispose();
     _controller.dispose();
     _focusNode.dispose();
     super.dispose();
@@ -230,23 +230,25 @@ class _NoteDialogState extends State<NoteDialog> {
   }
 
   Future<void> _openBigNote() async {
-    final result = await showDialog<NoteResult>(
-      context: context,
-      builder: (ctx) => BigNoteDialog(
-        p: widget.p,
-        initialNote: _controller.text,
-        initialImagePath: _stagedImagePaths.isEmpty
-            ? null
-            : _stagedImagePaths.join('|'),
-        initialVoicePath: _stagedVoicePaths.isEmpty
-            ? null
-            : _stagedVoicePaths.join('|'),
-        initialVoiceDurationMs: _stagedVoiceDurations.isEmpty
-            ? null
-            : _stagedVoiceDurations.fold<int>(0, (int a, int b) => a + b),
-        title: 'Plus Note',
-        blur: widget.blur,
-        largeText: widget.largeText,
+    final result = await Navigator.of(context).push<NoteResult>(
+      CupertinoPageRoute(
+        fullscreenDialog: true,
+        builder: (ctx) => BigNoteDialog(
+          p: widget.p,
+          initialNote: _controller.text,
+          initialImagePath: _stagedImagePaths.isEmpty
+              ? null
+              : _stagedImagePaths.join('|'),
+          initialVoicePath: _stagedVoicePaths.isEmpty
+              ? null
+              : _stagedVoicePaths.join('|'),
+          initialVoiceDurationMs: _stagedVoiceDurations.isEmpty
+              ? null
+              : _stagedVoiceDurations.fold<int>(0, (int a, int b) => a + b),
+          title: 'Plus Note',
+          blur: widget.blur,
+          largeText: widget.largeText,
+        ),
       ),
     );
     if (result != null && mounted) {
@@ -260,82 +262,65 @@ class _NoteDialogState extends State<NoteDialog> {
     }
   }
 
-  Future<void> _loadTags() async {
-    final tagService = TagService.instance;
-    await tagService.load();
-    if (mounted) setState(() => _activityTags = tagService.activityTags);
+  int get _wordCount {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return 0;
+    return text.split(RegExp(r'\s+')).length;
   }
 
-  Future<void> _showAddTagDialog() async {
-    final textController = TextEditingController();
-    final created = await showCupertinoDialog<String>(
-      context: context,
-      builder: (ctx) => CupertinoAlertDialog(
-        title: const Text('New Tag'),
-        content: Padding(
-          padding: const EdgeInsets.only(top: 12.0),
-          child: CupertinoTextField(
-            controller: textController,
-            autofocus: true,
-            placeholder: 'tag (e.g. Walking, Gym)',
-            style: TextStyle(color: widget.p.text),
-          ),
-        ),
-        actions: [
-          CupertinoDialogAction(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            onPressed: () {
-              final raw = textController.text.trim();
-              if (raw.isEmpty) return;
-              Navigator.pop(ctx, raw);
-            },
-            child: const Text('Add'),
-          ),
-        ],
-      ),
-    );
+  String get _readingTimeEstimate {
+    final words = _wordCount;
+    if (words <= 0) return '<1 min read';
+    final mins = (words / 200).ceil();
+    return mins <= 1 ? '<1 min read' : '$mins min read';
+  }
 
-    if (created != null && created.isNotEmpty) {
-      final added = await TagService.instance.addCustomTag(created);
-      if (added && mounted) {
-        setState(() => _activityTags = TagService.instance.activityTags);
-      }
+  void _wrapOrInsert(String prefix, String suffix) {
+    HapticFeedback.selectionClick();
+    final text = _controller.text;
+    final selection = _controller.selection;
+    if (selection.isValid && !selection.isCollapsed) {
+      final selectedText = text.substring(selection.start, selection.end);
+      final replaced = '$prefix$selectedText$suffix';
+      final newText = text.replaceRange(
+        selection.start,
+        selection.end,
+        replaced,
+      );
+      _controller.value = TextEditingValue(
+        text: newText,
+        selection: TextSelection(
+          baseOffset: selection.start + prefix.length,
+          extentOffset: selection.start + prefix.length + selectedText.length,
+        ),
+      );
+    } else {
+      final pos = selection.isValid && selection.start >= 0
+          ? selection.start
+          : text.length;
+      final newText = text.replaceRange(pos, pos, '$prefix$suffix');
+      _controller.value = TextEditingValue(
+        text: newText,
+        selection: TextSelection.collapsed(offset: pos + prefix.length),
+      );
     }
   }
 
-  Future<void> _confirmDeleteTag(ActivityTag tag) async {
-    HapticFeedback.mediumImpact();
-    final confirmed = await showCupertinoDialog<bool>(
-      context: context,
-      builder: (ctx) => CupertinoAlertDialog(
-        title: Text('Remove ${tag.label}?'),
-        content: const Text(
-          'Do you want to remove this tag from your quick list?',
-        ),
-        actions: [
-          CupertinoDialogAction(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
-          ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Remove'),
-          ),
-        ],
-      ),
-    );
+  void _insertLinePrefix(String linePrefix) {
+    HapticFeedback.selectionClick();
+    final text = _controller.text;
+    final selection = _controller.selection;
+    final pos = selection.isValid && selection.start >= 0
+        ? selection.start
+        : text.length;
 
-    if (confirmed == true) {
-      await TagService.instance.removeActivityTag(tag.id);
-      if (mounted) {
-        setState(() => _activityTags = TagService.instance.activityTags);
-      }
-    }
+    final isLineStart = pos == 0 || (pos > 0 && text[pos - 1] == '\n');
+    final insertion = isLineStart ? linePrefix : '\n$linePrefix';
+    final newText = text.replaceRange(pos, pos, insertion);
+    _controller.value = TextEditingValue(
+      text: newText,
+      selection: TextSelection.collapsed(offset: pos + insertion.length),
+    );
   }
 
   Future<void> _loadSobrietyMode() async {
@@ -347,13 +332,43 @@ class _NoteDialogState extends State<NoteDialog> {
     });
   }
 
-  void _insertTag(String tag) {
-    final text = _controller.text;
-    final spacer = text.isEmpty || text.endsWith(' ') ? '' : ' ';
-    final newText = '$text$spacer$tag ';
-    _controller.text = newText;
-    _controller.selection = TextSelection.fromPosition(
-      TextPosition(offset: newText.length),
+  Widget _buildFormattingButton({
+    String? label,
+    IconData? icon,
+    bool isBold = false,
+    bool isItalic = false,
+    bool isMono = false,
+    bool isStrike = false,
+    bool enabled = true,
+    required VoidCallback onTap,
+  }) {
+    return PressableScale(
+      enabled: enabled,
+      onTap: onTap,
+      child: Opacity(
+        opacity: enabled ? 1.0 : 0.4,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
+          decoration: BoxDecoration(
+            color: widget.p.surface2,
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: widget.p.border.withValues(alpha: 0.5)),
+          ),
+          child: icon != null
+              ? Icon(icon, size: 11.5, color: widget.p.text2)
+              : Text(
+                  label ?? '',
+                  style: TextStyle(
+                    color: widget.p.text2,
+                    fontSize: 11.5,
+                    fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
+                    fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
+                    fontFamily: isMono ? 'monospace' : null,
+                    decoration: isStrike ? TextDecoration.lineThrough : null,
+                  ),
+                ),
+        ),
+      ),
     );
   }
 
@@ -437,69 +452,74 @@ class _NoteDialogState extends State<NoteDialog> {
                               final count = value.text.length;
                               final remaining = maxNoteLength - count;
                               final alert = remaining <= 20;
-                              return Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: alert
-                                      ? widget.p.red.withValues(alpha: 0.15)
-                                      : widget.p.surface3,
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: Text(
-                                  '$count/$maxNoteLength',
-                                  style: TextStyle(
-                                    color: alert
-                                        ? widget.p.red
-                                        : widget.p.text3,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w700,
-                                    fontFeatures: const [
-                                      FontFeature.tabularFigures(),
-                                    ],
+                              return Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: alert
+                                          ? widget.p.red.withValues(alpha: 0.15)
+                                          : widget.p.surface3,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      '$count/$maxNoteLength',
+                                      style: TextStyle(
+                                        color: alert
+                                            ? widget.p.red
+                                            : widget.p.text3,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                        fontFeatures: const [
+                                          FontFeature.tabularFigures(),
+                                        ],
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                  if (value.text.trim().isNotEmpty) ...[
+                                    const SizedBox(width: 4),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: widget.p.surface3,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        '$_wordCount words • $_readingTimeEstimate',
+                                        style: TextStyle(
+                                          color: widget.p.text3,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
                               );
                             },
                           ),
                           const Spacer(),
-                          // Plus Full Note Button
+                          // Telegram-style Extra Mode: Expand into Full-Screen Writing Canvas
                           PressableScale(
                             onTap: _openBigNote,
                             child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
+                              width: 28,
+                              height: 28,
                               decoration: BoxDecoration(
-                                color: widget.p.accent.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(999),
-                                border: Border.all(
-                                  color: widget.p.accent.withValues(
-                                    alpha: 0.25,
-                                  ),
-                                ),
+                                color: widget.p.surface3,
+                                shape: BoxShape.circle,
                               ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.add_box_rounded,
-                                    size: 13,
-                                    color: widget.p.accent,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'Plus',
-                                    style: TextStyle(
-                                      color: widget.p.accent,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ],
+                              child: Icon(
+                                CupertinoIcons.arrow_up_left_arrow_down_right,
+                                size: 13,
+                                color: widget.p.text2,
                               ),
                             ),
                           ),
@@ -546,159 +566,6 @@ class _NoteDialogState extends State<NoteDialog> {
                             ),
                           ),
                         ],
-                      ),
-                      const SizedBox(height: 10),
-
-                      // Quick Tags Carousel (WhatsApp style directly above text field)
-                      SizedBox(
-                        height: 28,
-                        child: ListView(
-                          scrollDirection: Axis.horizontal,
-                          physics: const BouncingScrollPhysics(),
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(right: 6),
-                              child: PressableScale(
-                                onTap: _showAddTagDialog,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: widget.p.accent.withValues(
-                                      alpha: 0.12,
-                                    ),
-                                    borderRadius: BorderRadius.circular(999),
-                                    border: Border.all(
-                                      color: widget.p.accent.withValues(
-                                        alpha: 0.3,
-                                      ),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.add_rounded,
-                                        size: 12,
-                                        color: widget.p.accent,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'Tag',
-                                        style: TextStyle(
-                                          color: widget.p.accent,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            for (final tag in _activityTags)
-                              Padding(
-                                padding: const EdgeInsets.only(right: 6),
-                                child: PressableScale(
-                                  onTap: () => _insertTag(tag.hashtag),
-                                  onLongPress: () => _confirmDeleteTag(tag),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 9,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: widget.p.surface2,
-                                      borderRadius: BorderRadius.circular(999),
-                                      border: Border.all(
-                                        color: widget.p.border.withValues(
-                                          alpha: 0.6,
-                                        ),
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          tag.icon,
-                                          size: 12,
-                                          color: widget.p.accent,
-                                        ),
-                                        const SizedBox(width: 4.5),
-                                        Text(
-                                          tag.label,
-                                          style: TextStyle(
-                                            color: widget.p.text2,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            if (_sobrietyMode)
-                              Padding(
-                                padding: const EdgeInsets.only(right: 6),
-                                child: PressableScale(
-                                  onTap: () {
-                                    setState(
-                                      () => _showSobrietyTray =
-                                          !_showSobrietyTray,
-                                    );
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 9,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: _relapseSelected
-                                          ? widget.p.orange.withValues(
-                                              alpha: 0.15,
-                                            )
-                                          : widget.p.surface3,
-                                      borderRadius: BorderRadius.circular(999),
-                                      border: Border.all(
-                                        color: _relapseSelected
-                                            ? widget.p.orange
-                                            : widget.p.border,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          CupertinoIcons
-                                              .exclamationmark_shield_fill,
-                                          size: 13,
-                                          color: _relapseSelected
-                                              ? widget.p.orange
-                                              : widget.p.text3,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          _relapseSelected
-                                              ? 'Relapse'
-                                              : 'Sobriety',
-                                          style: TextStyle(
-                                            color: _relapseSelected
-                                                ? widget.p.orange
-                                                : widget.p.text2,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
                       ),
 
                       // Optional Sobriety Controls Tray
@@ -1262,6 +1129,102 @@ class _NoteDialogState extends State<NoteDialog> {
                                 ),
                               ),
                             ),
+                            const SizedBox(width: 6),
+                            PressableScale(
+                              onTap: _openBigNote,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: widget.p.surface2,
+                                  borderRadius: BorderRadius.circular(999),
+                                  border: Border.all(
+                                    color: widget.p.border.withValues(
+                                      alpha: 0.6,
+                                    ),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      CupertinoIcons.doc_text_fill,
+                                      size: 12,
+                                      color: widget.p.accent,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'Note',
+                                      style: TextStyle(
+                                        color: widget.p.text2,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            if (_sobrietyMode) ...[
+                              const SizedBox(width: 6),
+                              PressableScale(
+                                onTap: () {
+                                  setState(
+                                    () =>
+                                        _showSobrietyTray = !_showSobrietyTray,
+                                  );
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: _relapseSelected
+                                        ? widget.p.orange.withValues(
+                                            alpha: 0.15,
+                                          )
+                                        : widget.p.surface2,
+                                    borderRadius: BorderRadius.circular(999),
+                                    border: Border.all(
+                                      color: _relapseSelected
+                                          ? widget.p.orange
+                                          : widget.p.border.withValues(
+                                              alpha: 0.6,
+                                            ),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        CupertinoIcons
+                                            .exclamationmark_shield_fill,
+                                        size: 12,
+                                        color: _relapseSelected
+                                            ? widget.p.orange
+                                            : widget.p.text3,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        _relapseSelected
+                                            ? 'Relapse'
+                                            : 'Sobriety',
+                                        style: TextStyle(
+                                          color: _relapseSelected
+                                              ? widget.p.orange
+                                              : widget.p.text2,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),
@@ -1270,6 +1233,110 @@ class _NoteDialogState extends State<NoteDialog> {
                       HashtagSuggestionOverlay(
                         controller: _controller,
                         p: widget.p,
+                      ),
+
+                      // Telegram-style Keyboard-Docked Rich Formatting Bar
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          child: Row(
+                            children: [
+                              // Undo / Redo
+                              ListenableBuilder(
+                                listenable: _undoController,
+                                builder: (context, _) => Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    _buildFormattingButton(
+                                      icon: CupertinoIcons.arrow_uturn_left,
+                                      enabled: _undoController.value.canUndo,
+                                      onTap: () {
+                                        if (_undoController.value.canUndo) {
+                                          HapticFeedback.lightImpact();
+                                          _undoController.undo();
+                                        }
+                                      },
+                                    ),
+                                    const SizedBox(width: 4),
+                                    _buildFormattingButton(
+                                      icon: CupertinoIcons.arrow_uturn_right,
+                                      enabled: _undoController.value.canRedo,
+                                      onTap: () {
+                                        if (_undoController.value.canRedo) {
+                                          HapticFeedback.lightImpact();
+                                          _undoController.redo();
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              Container(
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                ),
+                                width: 1,
+                                height: 16,
+                                color: widget.p.border.withValues(alpha: 0.5),
+                              ),
+
+                              // Bold
+                              _buildFormattingButton(
+                                label: 'B',
+                                isBold: true,
+                                onTap: () => _wrapOrInsert('**', '**'),
+                              ),
+                              const SizedBox(width: 4),
+
+                              // Italic
+                              _buildFormattingButton(
+                                label: 'I',
+                                isItalic: true,
+                                onTap: () => _wrapOrInsert('*', '*'),
+                              ),
+                              const SizedBox(width: 4),
+
+                              // Monospace / Code
+                              _buildFormattingButton(
+                                label: '` `',
+                                isMono: true,
+                                onTap: () => _wrapOrInsert('`', '`'),
+                              ),
+                              const SizedBox(width: 4),
+
+                              // Strikethrough
+                              _buildFormattingButton(
+                                label: 'S',
+                                isStrike: true,
+                                onTap: () => _wrapOrInsert('~~', '~~'),
+                              ),
+                              const SizedBox(width: 4),
+
+                              // Blockquote
+                              _buildFormattingButton(
+                                label: '" "',
+                                onTap: () => _insertLinePrefix('> '),
+                              ),
+                              const SizedBox(width: 4),
+
+                              // Checklist
+                              _buildFormattingButton(
+                                label: '[ ]',
+                                onTap: () => _insertLinePrefix('- [ ] '),
+                              ),
+                              const SizedBox(width: 4),
+
+                              // Bullet List
+                              _buildFormattingButton(
+                                label: '•',
+                                onTap: () => _insertLinePrefix('• '),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
 
                       // Input Bar Row: WhatsApp style (Input box on left + Circular action button on right)
@@ -1297,6 +1364,7 @@ class _NoteDialogState extends State<NoteDialog> {
                               ),
                               child: TextField(
                                 controller: _controller,
+                                undoController: _undoController,
                                 focusNode: _focusNode,
                                 maxLength:
                                     widget.initialNote.length > maxNoteLength
@@ -1494,8 +1562,14 @@ class _NoteDialogState extends State<NoteDialog> {
         .toSet()
         .toList();
 
-    // Record usage of these tags
+    // Record usage of these tags and auto-create any newly typed tags
     if (extractedTags.isNotEmpty) {
+      for (final t in extractedTags) {
+        final clean = '#$t';
+        if (TagService.instance.findActivityTag(clean) == null) {
+          unawaited(TagService.instance.addCustomTag(clean));
+        }
+      }
       TagService.instance.recordUsages(
         extractedTags.map((t) => '#$t').toList(),
       );

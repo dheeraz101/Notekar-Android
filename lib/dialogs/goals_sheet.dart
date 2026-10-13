@@ -118,7 +118,7 @@ class _GoalsSheetState extends State<GoalsSheet> {
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  Icons.add_rounded,
+                  CupertinoIcons.plus,
                   size: 18,
                   color: widget.p.accent,
                 ),
@@ -488,7 +488,7 @@ class GoalsContentViewState extends State<GoalsContentView>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.flag_circle_rounded,
+            CupertinoIcons.flag_circle_fill,
             size: 54,
             color: widget.p.text3.withValues(alpha: 0.35),
           ),
@@ -526,7 +526,11 @@ class GoalsContentViewState extends State<GoalsContentView>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.add_rounded, size: 16, color: Colors.white),
+                  const Icon(
+                    CupertinoIcons.plus,
+                    size: 16,
+                    color: Colors.white,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     'Create First Goal'.localized(context),
@@ -572,136 +576,148 @@ class GoalsContentViewState extends State<GoalsContentView>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Row: Category Badge, Timeframe / Due Date, and Prominent Action Buttons
+          // Header Row: Category Badge, Timeframe / Due Date, and Compact Apple HIG Action Buttons
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                decoration: BoxDecoration(
-                  color: accentCol.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+              Expanded(
+                child: Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    Icon(
-                      goal.category != null
-                          ? meta.icon
-                          : (goal.hasMilestones
-                                ? Icons.rocket_launch_rounded
-                                : Icons.flag_rounded),
-                      size: 12,
-                      color: accentCol,
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      goal.category ?? 'All Categories',
-                      style: TextStyle(
-                        color: accentCol,
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w700,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: accentCol.withValues(alpha: 0.14),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            goal.category != null
+                                ? meta.icon
+                                : (goal.hasMilestones
+                                      ? CupertinoIcons.rocket
+                                      : CupertinoIcons.flag_fill),
+                            size: 11,
+                            color: accentCol,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            goal.category ?? 'All Categories',
+                            style: TextStyle(
+                              color: accentCol,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: widget.p.surface3,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        goal.timeframe == GoalTimeframe.custom &&
+                                goal.targetDate != null
+                            ? 'Due ${_formatDateShort(DateTime.fromMillisecondsSinceEpoch(goal.targetDate!))}'
+                            : goal.timeframe.label.localized(context),
+                        style: TextStyle(
+                          color: widget.p.text2,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    if (progress.hasArchivedProgress &&
+                        goal.timeframe == GoalTimeframe.week) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: widget.p.surface3.withValues(alpha: 0.6),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: widget.p.border.withValues(alpha: 0.4),
+                            width: 0.7,
+                          ),
+                        ),
+                        child: Text(
+                          '+${progress.archivedFormatted} past',
+                          style: TextStyle(
+                            color: widget.p.text3,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w600,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
               const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: widget.p.surface3,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  goal.timeframe == GoalTimeframe.custom &&
-                          goal.targetDate != null
-                      ? 'Due ${_formatDateShort(DateTime.fromMillisecondsSinceEpoch(goal.targetDate!))}'
-                      : goal.timeframe.label.localized(context),
-                  style: TextStyle(
-                    color: widget.p.text2,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              if (progress.hasArchivedProgress &&
-                  goal.timeframe == GoalTimeframe.week) ...[
-                const SizedBox(width: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 7,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: widget.p.surface3.withValues(alpha: 0.6),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: widget.p.border.withValues(alpha: 0.4),
-                      width: 0.7,
-                    ),
-                  ),
-                  child: Text(
-                    '+${progress.archivedFormatted} past',
-                    style: TextStyle(
-                      color: widget.p.text3,
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w600,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
-                  ),
-                ),
-              ],
-              const Spacer(),
-              // Icon-only Edit Action Button (38x38)
-              Tooltip(
-                message: 'Edit Goal'.localized(context),
-                child: PressableScale(
-                  onTap: () => openCreateOrEditGoalDialog(goal),
-                  child: Container(
-                    width: 38,
-                    height: 38,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: widget.p.surface3,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: widget.p.border.withValues(alpha: 0.5),
-                        width: 0.8,
+              // Apple HIG Compact Action Buttons (32x32 rounded squircles)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  PressableScale(
+                    onTap: () => openCreateOrEditGoalDialog(goal),
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: widget.p.surface3,
+                        borderRadius: BorderRadius.circular(9),
+                        border: Border.all(
+                          color: widget.p.border.withValues(alpha: 0.5),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Icon(
+                        CupertinoIcons.pencil,
+                        size: 14,
+                        color: widget.p.text2,
                       ),
                     ),
-                    child: Icon(
-                      Icons.edit_rounded,
-                      size: 16,
-                      color: widget.p.text2,
-                    ),
                   ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              // Icon-only Delete Action Button (38x38 with red tint)
-              Tooltip(
-                message: 'Delete Goal'.localized(context),
-                child: PressableScale(
-                  onTap: () => _confirmDeleteGoal(goal),
-                  child: Container(
-                    width: 38,
-                    height: 38,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: widget.p.red.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: widget.p.red.withValues(alpha: 0.35),
-                        width: 0.8,
+                  const SizedBox(width: 6),
+                  PressableScale(
+                    onTap: () => _confirmDeleteGoal(goal),
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: widget.p.red.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(9),
+                        border: Border.all(
+                          color: widget.p.red.withValues(alpha: 0.3),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Icon(
+                        CupertinoIcons.trash,
+                        size: 14,
+                        color: widget.p.red,
                       ),
                     ),
-                    child: Icon(
-                      Icons.delete_rounded,
-                      size: 16,
-                      color: widget.p.red,
-                    ),
                   ),
-                ),
+                ],
               ),
             ],
           ),
@@ -716,9 +732,9 @@ class GoalsContentViewState extends State<GoalsContentView>
                   goal.title,
                   style: TextStyle(
                     color: widget.p.text,
-                    fontSize: 17,
+                    fontSize: 18.5,
                     fontWeight: FontWeight.w800,
-                    letterSpacing: -0.3,
+                    letterSpacing: -0.4,
                   ),
                 ),
               ),
@@ -958,8 +974,8 @@ class GoalsContentViewState extends State<GoalsContentView>
                     children: [
                       Icon(
                         progress.isCompleted
-                            ? Icons.verified_rounded
-                            : Icons.local_fire_department_rounded,
+                            ? CupertinoIcons.checkmark_seal_fill
+                            : CupertinoIcons.flame_fill,
                         size: 14,
                         color: progress.isCompleted
                             ? widget.p.green
@@ -1056,7 +1072,7 @@ class GoalsContentViewState extends State<GoalsContentView>
                       Row(
                         children: [
                           Icon(
-                            Icons.check_circle_outline_rounded,
+                            CupertinoIcons.checkmark_circle,
                             size: 13,
                             color: widget.p.accent,
                           ),
@@ -1079,7 +1095,7 @@ class GoalsContentViewState extends State<GoalsContentView>
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              Icons.add_rounded,
+                              CupertinoIcons.plus,
                               size: 12,
                               color: widget.p.accent,
                             ),
@@ -1133,8 +1149,8 @@ class GoalsContentViewState extends State<GoalsContentView>
                           children: [
                             Icon(
                               ms.isCompleted
-                                  ? Icons.check_circle_rounded
-                                  : Icons.radio_button_unchecked_rounded,
+                                  ? CupertinoIcons.checkmark_circle_fill
+                                  : CupertinoIcons.circle,
                               size: 16,
                               color: ms.isCompleted
                                   ? widget.p.green
@@ -1171,7 +1187,7 @@ class GoalsContentViewState extends State<GoalsContentView>
                                   right: 2,
                                 ),
                                 child: Icon(
-                                  Icons.close_rounded,
+                                  CupertinoIcons.xmark,
                                   size: 13,
                                   color: widget.p.text3.withValues(alpha: 0.6),
                                 ),
@@ -1209,7 +1225,7 @@ class GoalsContentViewState extends State<GoalsContentView>
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          Icons.add_task_rounded,
+                          CupertinoIcons.plus_circle,
                           size: 12,
                           color: widget.p.accent,
                         ),
@@ -1261,7 +1277,7 @@ class GoalsContentViewState extends State<GoalsContentView>
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                Icons.stop_rounded,
+                                CupertinoIcons.stop_fill,
                                 size: 14,
                                 color: widget.p.red,
                               ),
@@ -1307,7 +1323,7 @@ class GoalsContentViewState extends State<GoalsContentView>
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                Icons.play_arrow_rounded,
+                                CupertinoIcons.play_fill,
                                 size: 13,
                                 color: accentCol,
                               ),
@@ -1348,7 +1364,7 @@ class GoalsContentViewState extends State<GoalsContentView>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        Icons.add_circle_rounded,
+                        CupertinoIcons.plus_circle_fill,
                         size: 13,
                         color: widget.p.accent,
                       ),
@@ -1641,7 +1657,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                                 ),
                                 child: selectedColor == col
                                     ? const Icon(
-                                        Icons.check_rounded,
+                                        CupertinoIcons.checkmark,
                                         size: 14,
                                         color: Colors.white,
                                       )
@@ -1983,7 +1999,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                                 vertical: 7,
                               ),
                               child: Icon(
-                                Icons.remove_rounded,
+                                CupertinoIcons.minus,
                                 size: 14,
                                 color: _targetHours > 0
                                     ? widget.p.text
@@ -2007,7 +2023,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                                 vertical: 7,
                               ),
                               child: Icon(
-                                Icons.add_rounded,
+                                CupertinoIcons.plus,
                                 size: 14,
                                 color: widget.p.text,
                               ),
@@ -2088,50 +2104,74 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                 ),
               ),
               const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: GoalTimeframe.values.map((tf) {
-                  final isSelected = _timeframe == tf;
-                  return PressableScale(
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      setState(() {
-                        _timeframe = tf;
-                        if (tf == GoalTimeframe.custom && _targetDate == null) {
-                          _targetDate = DateTime.now()
-                              .add(const Duration(days: 14))
-                              .millisecondsSinceEpoch;
-                        }
-                      });
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected ? widget.p.accent : widget.p.surface2,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: isSelected
-                              ? widget.p.accent
-                              : widget.p.border.withValues(alpha: 0.5),
+              Container(
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  color: widget.p.surface3,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: widget.p.border.withValues(alpha: 0.5),
+                  ),
+                ),
+                child: Row(
+                  children: GoalTimeframe.values.map((tf) {
+                    final isSelected = _timeframe == tf;
+                    return Expanded(
+                      child: PressableScale(
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          setState(() {
+                            _timeframe = tf;
+                            if (tf == GoalTimeframe.custom &&
+                                _targetDate == null) {
+                              _targetDate = DateTime.now()
+                                  .add(const Duration(days: 14))
+                                  .millisecondsSinceEpoch;
+                            }
+                          });
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 160),
+                          padding: const EdgeInsets.symmetric(vertical: 7),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? (!widget.p.isDark
+                                      ? Colors.white
+                                      : (widget.p.name == 'amoled'
+                                            ? const Color(0xFF28282C)
+                                            : const Color(0xFF48484A)))
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(9),
+                            boxShadow: isSelected
+                                ? [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.12,
+                                      ),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 1.5),
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                          child: Text(
+                            tf.label.localized(context),
+                            style: TextStyle(
+                              color: isSelected
+                                  ? widget.p.text
+                                  : widget.p.text2,
+                              fontSize: 12,
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                            ),
+                          ),
                         ),
                       ),
-                      child: Text(
-                        tf.label.localized(context),
-                        style: TextStyle(
-                          color: isSelected ? Colors.white : widget.p.text,
-                          fontSize: 12,
-                          fontWeight: isSelected
-                              ? FontWeight.w700
-                              : FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
+                    );
+                  }).toList(),
+                ),
               ),
               if (_timeframe == GoalTimeframe.custom) ...[
                 const SizedBox(height: 10),
@@ -2172,7 +2212,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                         Row(
                           children: [
                             Icon(
-                              Icons.calendar_today_rounded,
+                              CupertinoIcons.calendar,
                               size: 16,
                               color: widget.p.accent,
                             ),
@@ -2205,7 +2245,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                             ),
                             const SizedBox(width: 5),
                             Icon(
-                              Icons.chevron_right_rounded,
+                              CupertinoIcons.chevron_forward,
                               size: 13,
                               color: widget.p.accent,
                             ),
@@ -2245,7 +2285,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                           Row(
                             children: [
                               Icon(
-                                Icons.today_rounded,
+                                CupertinoIcons.clock,
                                 size: 14,
                                 color: widget.p.accent,
                               ),
@@ -2314,7 +2354,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                                   vertical: 6,
                                 ),
                                 child: Icon(
-                                  Icons.remove_rounded,
+                                  CupertinoIcons.minus,
                                   size: 14,
                                   color: widget.p.text,
                                 ),
@@ -2344,7 +2384,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                                   vertical: 6,
                                 ),
                                 child: Icon(
-                                  Icons.add_rounded,
+                                  CupertinoIcons.plus,
                                   size: 14,
                                   color: widget.p.text,
                                 ),
@@ -2502,7 +2542,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            Icons.add_rounded,
+                            CupertinoIcons.plus,
                             size: 13,
                             color: widget.p.accent,
                           ),
@@ -2545,7 +2585,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            Icons.grid_view_rounded,
+                            CupertinoIcons.square_grid_2x2,
                             size: 13,
                             color: _category == null
                                 ? Colors.white
@@ -2716,7 +2756,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                               alignment: Alignment.center,
                               child: isSelected
                                   ? const Icon(
-                                      Icons.check_rounded,
+                                      CupertinoIcons.checkmark,
                                       color: Colors.white,
                                       size: 18,
                                     )
@@ -2869,8 +2909,8 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                               },
                               child: Icon(
                                 ms.isCompleted
-                                    ? Icons.check_circle_rounded
-                                    : Icons.radio_button_unchecked_rounded,
+                                    ? CupertinoIcons.checkmark_circle_fill
+                                    : CupertinoIcons.circle,
                                 size: 16,
                                 color: ms.isCompleted
                                     ? widget.p.green
@@ -2900,8 +2940,8 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                                 });
                               },
                               child: Icon(
-                                Icons.close_rounded,
-                                size: 14,
+                                CupertinoIcons.xmark,
+                                size: 13,
                                 color: widget.p.text3,
                               ),
                             ),

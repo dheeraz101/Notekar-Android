@@ -20,7 +20,7 @@ void main() {
     });
 
     testWidgets(
-      'NoteDialog displays custom hashtags from preferences and Expand button',
+      'NoteDialog displays Note action button and renders quick note',
       (tester) async {
         await tester.pumpWidget(
           MaterialApp(
@@ -31,11 +31,8 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(find.text('#focus'), findsOneWidget);
-        expect(find.text('#writing'), findsOneWidget);
-        expect(find.text('#journal'), findsOneWidget);
-        expect(find.text('Tag', skipOffstage: false), findsOneWidget);
-        expect(find.text('Plus'), findsOneWidget);
+        expect(find.text('Note'), findsOneWidget);
+        expect(find.text('Short quick note'), findsOneWidget);
       },
     );
 
@@ -80,7 +77,7 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(find.text('Plus'), findsOneWidget);
+        expect(find.text('Note'), findsOneWidget);
         expect(find.text(longNote), findsOneWidget);
       },
     );

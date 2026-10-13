@@ -1019,98 +1019,10 @@ class _LiveDeviceHealthGovernorCardState
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
-              Text(
-                'DYNAMIC HARDWARE SAFEGUARDS'.localized(context),
-                style: TextStyle(
-                  color: p.text3,
-                  fontSize: 9.5,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.6,
-                ),
-              ),
-              const SizedBox(height: 8),
-              _buildRefinementChip(
-                p,
-                CupertinoIcons.circle_grid_hex,
-                'Gaussian Glass Blur',
-                engine.supportsBlur
-                    ? 'Active (100% Depth)'
-                    : 'Bypassed (Zero-lag Solid Glass)',
-                engine.supportsBlur,
-              ),
-              const SizedBox(height: 6),
-              _buildRefinementChip(
-                p,
-                CupertinoIcons.sparkles,
-                'Particle Physics',
-                engine.enableParticleEffects
-                    ? 'Full Dynamic Physics'
-                    : 'Throttled (Battery Safeguard)',
-                engine.enableParticleEffects,
-              ),
-              const SizedBox(height: 6),
-              _buildRefinementChip(
-                p,
-                CupertinoIcons.arrow_2_squarepath,
-                'Mode Switch Transitions',
-                'Pre-cached State (0ms Jitter)',
-                true,
-              ),
-              const SizedBox(height: 6),
-              _buildRefinementChip(
-                p,
-                CupertinoIcons.play_circle,
-                'Audio Scrubber Cadence',
-                engine.isLowEnd
-                    ? '15 FPS Throttled (Thermally Safe)'
-                    : '60 FPS Smooth Fluidity',
-                !engine.isLowEnd,
-              ),
             ],
           ),
         );
       },
-    );
-  }
-
-  Widget _buildRefinementChip(
-    Palette p,
-    IconData icon,
-    String label,
-    String status,
-    bool isPro,
-  ) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-      decoration: BoxDecoration(
-        color: p.surface3.withValues(alpha: 0.55),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 14, color: p.accent),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              label,
-              style: TextStyle(
-                color: p.text,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          Text(
-            status,
-            style: TextStyle(
-              color: isPro ? p.green : p.orange,
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

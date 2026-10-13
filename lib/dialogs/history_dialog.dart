@@ -2226,12 +2226,12 @@ class _HistoryDialogState extends State<HistoryDialog> {
       context,
       p: widget.p,
       title: 'Timeline Options',
-      subtitle: 'Timeline views, audits & project settings',
+      subtitle: 'Views, life audit & options',
       actions: [
         if (widget.onOpenManualEntry != null)
           AppleHigActionItem(
             title: 'Add Manual Moment',
-            icon: Icons.add_circle_outline_rounded,
+            icon: CupertinoIcons.plus_circle_fill,
             color: widget.p.accent,
             onTap: () {
               setState(() => _inSheetView = 'manual');
@@ -2240,8 +2240,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
         AppleHigActionItem(
           title: _viewMode == 'list' ? 'Calendar View' : 'Timeline View',
           icon: _viewMode == 'list'
-              ? Icons.calendar_today_rounded
-              : Icons.format_list_bulleted_rounded,
+              ? CupertinoIcons.calendar
+              : CupertinoIcons.list_bullet,
           onTap: () {
             final nextMode = _viewMode == 'list' ? 'calendar' : 'list';
             setState(() => _viewMode = nextMode);
@@ -2254,31 +2254,16 @@ class _HistoryDialogState extends State<HistoryDialog> {
         ),
         AppleHigActionItem(
           title: 'Life Audit & Horizon',
-          icon: Icons.hourglass_bottom_rounded,
+          icon: CupertinoIcons.hourglass,
+          color: widget.p.accent,
           onTap: () {
             setState(() => _inSheetView = 'life_audit');
-          },
-        ),
-        AppleHigActionItem(
-          title: 'Targets & Projects',
-          icon: Icons.flag_rounded,
-          color: widget.p.accent,
-          onTap: () {
-            setState(() => _inSheetView = 'goals');
-          },
-        ),
-        AppleHigActionItem(
-          title: 'Targets & Projects Settings',
-          icon: Icons.tune_rounded,
-          color: widget.p.accent,
-          onTap: () {
-            setState(() => _inSheetView = 'goals_settings');
           },
         ),
         if (_viewMode == 'calendar')
           AppleHigActionItem(
             title: 'Filter Timeline',
-            icon: Icons.filter_list_rounded,
+            icon: CupertinoIcons.slider_horizontal_3,
             onTap: () {
               _openFilterSheet();
             },
@@ -2286,7 +2271,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
         if (widget.onClearAll != null && _entries.isNotEmpty)
           AppleHigActionItem(
             title: 'Delete All Moments',
-            icon: Icons.delete_rounded,
+            icon: CupertinoIcons.trash_fill,
             isDestructive: true,
             onTap: () {
               _confirmDeleteAll();
