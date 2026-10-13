@@ -1551,6 +1551,14 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
     return '${m}m';
   }
 
+  final GlobalKey _titleKey = GlobalKey();
+  final GlobalKey _descKey = GlobalKey();
+  final GlobalKey _timeKey = GlobalKey();
+
+  bool _titleHasError = false;
+  bool _descHasError = false;
+  bool _timeHasError = false;
+
   @override
   void initState() {
     super.initState();
@@ -1558,15 +1566,27 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
     _descController = TextEditingController(
       text: widget.goal?.description ?? '',
     );
+    _titleController.addListener(() {
+      if (_titleHasError && _titleController.text.trim().isNotEmpty) {
+        setState(() => _titleHasError = false);
+      }
+    });
+    _descController.addListener(() {
+      if (_descHasError && _descController.text.trim().isNotEmpty) {
+        setState(() => _descHasError = false);
+      }
+    });
     _milestones = List<GoalMilestone>.from(widget.goal?.milestones ?? []);
-    _targetHours = (widget.goal?.targetMinutes ?? 1200) ~/ 60;
+    _targetHours = widget.goal != null ? (widget.goal!.targetMinutes ~/ 60) : 0;
     _timeframe = widget.goal?.timeframe ?? GoalTimeframe.week;
     _targetDate = widget.goal?.targetDate;
     _category = widget.goal?.category;
     _colorHex = widget.goal?.colorHex;
     _dailyTargetMinutes =
         widget.goal?.dailyTargetMinutes ??
-        ((_timeframe == GoalTimeframe.month || _timeframe == GoalTimeframe.year)
+        ((_targetHours > 0 &&
+                (_timeframe == GoalTimeframe.month ||
+                    _timeframe == GoalTimeframe.year))
             ? _computeDefaultDailyMinutes(_targetHours, _timeframe)
             : null);
 
@@ -1718,11 +1738,42 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
 
   void _save() {
     final title = _titleController.text.trim();
-    if (title.isEmpty) return;
+    final desc = _descController.text.trim();
+    final hasTitle = title.isNotEmpty;
+    final hasDesc = desc.isNotEmpty;
+    final hasTime = _targetHours > 0;
+
+    if (!hasTitle || !hasDesc || !hasTime) {
+      HapticFeedback.heavyImpact();
+      setState(() {
+        _titleHasError = !hasTitle;
+        _descHasError = !hasDesc;
+        _timeHasError = !hasTime;
+      });
+
+      // Scroll to the first missing field
+      GlobalKey? scrollTarget;
+      if (!hasTitle) {
+        scrollTarget = _titleKey;
+      } else if (!hasDesc) {
+        scrollTarget = _descKey;
+      } else if (!hasTime) {
+        scrollTarget = _timeKey;
+      }
+
+      if (scrollTarget != null && scrollTarget.currentContext != null) {
+        Scrollable.ensureVisible(
+          scrollTarget.currentContext!,
+          duration: const Duration(milliseconds: 320),
+          curve: Curves.easeInOutCubic,
+          alignment: 0.1,
+        );
+      }
+      return;
+    }
 
     final id =
         widget.goal?.id ?? 'goal_${DateTime.now().millisecondsSinceEpoch}';
-    final desc = _descController.text.trim();
     final allMilestonesDone =
         _milestones.isNotEmpty && _milestones.every((m) => m.isCompleted);
     final isDone = allMilestonesDone || (widget.goal?.isCompleted ?? false);
@@ -1768,11 +1819,17 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
         children: [
           // 1. Title Input (Apple HIG Inset Grouped with Twitter Live Countdown)
           Container(
+            key: _titleKey,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
               color: widget.p.surface3,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: widget.p.border.withValues(alpha: 0.6)),
+              border: Border.all(
+                color: _titleHasError
+                    ? widget.p.red
+                    : widget.p.border.withValues(alpha: 0.6),
+                width: _titleHasError ? 1.5 : 1.0,
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1783,7 +1840,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                     Text(
                       'Goal Title'.localized(context).toUpperCase(),
                       style: TextStyle(
-                        color: widget.p.text3,
+                        color: _titleHasError ? widget.p.red : widget.p.text3,
                         fontSize: 10.5,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.5,
@@ -1886,28 +1943,43 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                     fontSize: 10.5,
                   ),
                 ),
+                if (_titleHasError) ...[
+                  const SizedBox(height: 5),
+                  Text(
+                    'Goal title is required'.localized(context),
+                    style: TextStyle(
+                      color: widget.p.red,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
           const SizedBox(height: 14),
 
-          // Optional Description / Scope (Apple HIG Inset Grouped)
+          // Description / Scope (Apple HIG Inset Grouped)
           Container(
+            key: _descKey,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               color: widget.p.surface3,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: widget.p.border.withValues(alpha: 0.6)),
+              border: Border.all(
+                color: _descHasError
+                    ? widget.p.red
+                    : widget.p.border.withValues(alpha: 0.6),
+                width: _descHasError ? 1.5 : 1.0,
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Description / Scope (Optional)'
-                      .localized(context)
-                      .toUpperCase(),
+                  'Description / Scope'.localized(context).toUpperCase(),
                   style: TextStyle(
-                    color: widget.p.text3,
+                    color: _descHasError ? widget.p.red : widget.p.text3,
                     fontSize: 10.5,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.5,
@@ -1931,6 +2003,17 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                     fontSize: 14,
                   ),
                 ),
+                if (_descHasError) ...[
+                  const SizedBox(height: 5),
+                  Text(
+                    'Goal description is required'.localized(context),
+                    style: TextStyle(
+                      color: widget.p.red,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -1938,11 +2021,17 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
 
           // 2. Target Hours Stepper & Apple Presets
           Container(
+            key: _timeKey,
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: widget.p.surface3,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: widget.p.border.withValues(alpha: 0.6)),
+              border: Border.all(
+                color: _timeHasError
+                    ? widget.p.red
+                    : widget.p.border.withValues(alpha: 0.6),
+                width: _timeHasError ? 1.5 : 1.0,
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1956,9 +2045,9 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                         Text(
                           _targetHours > 0
                               ? '$_targetHours hrs'.localized(context)
-                              : 'Checklist Only'.localized(context),
+                              : 'Select Time'.localized(context),
                           style: TextStyle(
-                            color: widget.p.text,
+                            color: _timeHasError ? widget.p.red : widget.p.text,
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
                             fontFeatures: const [FontFeature.tabularFigures()],
@@ -1967,7 +2056,9 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                         Text(
                           'Target Allocation'.localized(context),
                           style: TextStyle(
-                            color: widget.p.text3,
+                            color: _timeHasError
+                                ? widget.p.red
+                                : widget.p.text3,
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
                           ),
@@ -2015,7 +2106,10 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                           PressableScale(
                             onTap: () {
                               HapticFeedback.lightImpact();
-                              setState(() => _targetHours++);
+                              setState(() {
+                                _targetHours++;
+                                _timeHasError = false;
+                              });
                             },
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
@@ -2039,15 +2133,18 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
-                    children: [0, 2, 5, 10, 15, 20, 30, 40].map((hrs) {
+                    children: [2, 5, 10, 15, 20, 30, 40].map((hrs) {
                       final selected = _targetHours == hrs;
-                      final label = hrs == 0 ? 'Checklist' : '${hrs}h';
+                      final label = '${hrs}h';
                       return Padding(
                         padding: const EdgeInsets.only(right: 6),
                         child: PressableScale(
                           onTap: () {
                             HapticFeedback.selectionClick();
-                            setState(() => _targetHours = hrs);
+                            setState(() {
+                              _targetHours = hrs;
+                              _timeHasError = false;
+                            });
                           },
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 140),
@@ -2085,6 +2182,19 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                     }).toList(),
                   ),
                 ),
+                if (_timeHasError) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'Target time allocation is required (> 0 hrs)'.localized(
+                      context,
+                    ),
+                    style: TextStyle(
+                      color: widget.p.red,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
