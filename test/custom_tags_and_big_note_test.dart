@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/big_note_dialog.dart';
 import 'package:notekar/dialogs/note_dialog.dart';
+import 'package:notekar/dialogs/search_dialogs.dart';
+import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/markdown_text_editing_controller.dart';
 import 'package:notekar/utils/tag_service.dart';
@@ -21,22 +23,21 @@ void main() {
       TagService.instance.resetForTesting();
     });
 
-    testWidgets(
-      'NoteDialog displays Note action button and renders quick note',
-      (tester) async {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: NoteDialog(p: p, initialNote: 'Short quick note'),
-            ),
+    testWidgets('NoteDialog displays action buttons and renders quick note', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: NoteDialog(p: p, initialNote: 'Short quick note'),
           ),
-        );
-        await tester.pumpAndSettle();
+        ),
+      );
+      await tester.pumpAndSettle();
 
-        expect(find.text('Note'), findsOneWidget);
-        expect(find.text('Short quick note'), findsOneWidget);
-      },
-    );
+      expect(find.text('Camera'), findsOneWidget);
+      expect(find.text('Short quick note'), findsOneWidget);
+    });
 
     testWidgets(
       'BigNoteDialog renders word/char counters and allows long content',
@@ -53,7 +54,6 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(find.text('Plus Note'), findsOneWidget);
         expect(find.text('Done'), findsOneWidget);
         expect(find.text('14 words'), findsOneWidget);
         expect(find.text('${longNote.length} chars'), findsOneWidget);
@@ -79,7 +79,7 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(find.text('Note'), findsOneWidget);
+        expect(find.text('Camera'), findsOneWidget);
         expect(find.text(longNote), findsOneWidget);
       },
     );
@@ -168,6 +168,99 @@ void main() {
         expect(plain.contains('`'), isFalse);
         expect(plain.contains('~~'), isFalse);
         expect(plain, 'Completed Gym Workout with John and squats! canceled');
+      },
+    );
+
+    test(
+      'Moment and NoteResult support up to 5 multi-image paths seamlessly',
+      () {
+        final images = [
+          'images/img_1.jpg',
+          'images/img_2.jpg',
+          'images/img_3.jpg',
+        ];
+        final pipe = images.join('|');
+
+        final moment = Moment(
+          id: 1,
+          type: 'note',
+          date: '2026-10-13',
+          timestamp: 1776000000000,
+          note: 'Multi photo moment test #memories',
+          imagePath: pipe,
+        );
+
+        expect(moment.imagePaths.isNotEmpty, isTrue);
+        expect(moment.imagePaths.length, 3);
+        expect(moment.imagePaths, equals(images));
+
+        final noteResult = NoteResult(
+          'Testing result with 3 photos',
+          ['#memories'],
+          imagePath: pipe,
+          imagePaths: images,
+        );
+
+        expect(noteResult.imagePath, isNotNull);
+        expect(noteResult.effectiveImagePaths, equals(images));
+        expect(noteResult.imagePath, equals(pipe));
+      },
+    );
+
+    testWidgets(
+      'BigNoteDialog mounts with multi-image previews and reflects photo counter',
+      (tester) async {
+        final multiImages = 'images/1.jpg|images/2.jpg|images/3.jpg';
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: BigNoteDialog(
+                p: p,
+                initialNote: 'Note with multiple images',
+                initialImagePath: multiImages,
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('Photo (3)'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'NoteSearchContent collapses voice memos and photos by default',
+      (tester) async {
+        final sampleMoments = [
+          Moment(
+            id: 101,
+            type: 'single',
+            date: '2026-10-13',
+            timestamp: DateTime.now().millisecondsSinceEpoch,
+            note: 'Search test moment with media',
+            imagePath: 'img_test.jpg',
+            voicePath: 'voice_1.m4a|voice_2.m4a',
+          ),
+        ];
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: NoteSearchContent(
+                p: p,
+                entries: sampleMoments,
+                compactRows: false,
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Expect collapsed voice memo pill
+        expect(find.text('2 Voice Memos'), findsOneWidget);
+        // Expect search note text
+        expect(find.text('Search test moment with media'), findsOneWidget);
       },
     );
   });

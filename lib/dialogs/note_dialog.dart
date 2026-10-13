@@ -139,20 +139,66 @@ class _NoteDialogState extends State<NoteDialog> {
     HapticFeedback.selectionClick();
     try {
       final picker = ImagePicker();
-      final picked = await picker.pickImage(
-        source: source,
-        maxWidth: 1800,
-        maxHeight: 1800,
-        imageQuality: 85,
-      );
-      if (picked != null) {
-        final saved = await MediaStorageService.instance.saveImage(
-          xFile: picked,
+      if (source == ImageSource.gallery) {
+        final remaining = 5 - _stagedImagePaths.length;
+        final pickedList = await picker.pickMultiImage(
+          limit: remaining,
+          maxWidth: 1800,
+          maxHeight: 1800,
+          imageQuality: 85,
         );
-        if (mounted) {
+        if (pickedList.isNotEmpty) {
+          final toSave = pickedList.take(remaining).toList();
+          for (final picked in toSave) {
+            final saved = await MediaStorageService.instance.saveImage(
+              xFile: picked,
+            );
+            if (mounted) {
+              setState(() {
+                if (_stagedImagePaths.length < 5) {
+                  _stagedImagePaths.add(saved);
+                }
+              });
+            }
+          }
+        }
+      } else {
+        while (_stagedImagePaths.length < 5 && mounted) {
+          final picked = await picker.pickImage(
+            source: ImageSource.camera,
+            maxWidth: 1800,
+            maxHeight: 1800,
+            imageQuality: 85,
+          );
+          if (picked == null) break;
+          final saved = await MediaStorageService.instance.saveImage(
+            xFile: picked,
+          );
+          if (!mounted) break;
           setState(() {
             _stagedImagePaths.add(saved);
           });
+          if (_stagedImagePaths.length >= 5) break;
+
+          final shouldTakeAnother = await showCupertinoDialog<bool>(
+            context: context,
+            builder: (ctx) => CupertinoAlertDialog(
+              title: Text('${_stagedImagePaths.length}/5 Photos Added'),
+              content: const Text('Would you like to take another photo?'),
+              actions: [
+                CupertinoDialogAction(
+                  onPressed: () => Navigator.of(ctx).pop(false),
+                  child: const Text('Done'),
+                ),
+                CupertinoDialogAction(
+                  isDefaultAction: true,
+                  onPressed: () => Navigator.of(ctx).pop(true),
+                  child: const Text('Take Another'),
+                ),
+              ],
+            ),
+          );
+          if (shouldTakeAnother != true) break;
         }
       }
     } catch (e) {
@@ -827,180 +873,157 @@ class _NoteDialogState extends State<NoteDialog> {
                         ),
                       ],
 
-                      // Staged Image Preview Bar (Multi-photo strip)
+                      // Staged Image Preview Bar (Multi-photo strip - compact)
                       if (_stagedImagePaths.isNotEmpty) ...[
                         Container(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          padding: const EdgeInsets.all(8),
+                          margin: const EdgeInsets.only(bottom: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 5,
+                          ),
                           decoration: BoxDecoration(
                             color: widget.p.surface2,
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(10),
                             border: Border.all(
                               color: widget.p.border.withValues(alpha: 0.6),
                             ),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    CupertinoIcons.photo_fill_on_rectangle_fill,
-                                    size: 13,
-                                    color: widget.p.accent,
-                                  ),
-                                  const SizedBox(width: 5),
-                                  Text(
-                                    '${_stagedImagePaths.length}/5 Photos attached',
-                                    style: TextStyle(
-                                      color: widget.p.text,
-                                      fontSize: 11.5,
-                                      fontWeight: FontWeight.w700,
+                          child: SizedBox(
+                            height: 36,
+                            child: ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              physics: const BouncingScrollPhysics(),
+                              itemCount: _stagedImagePaths.length,
+                              separatorBuilder: (_, _) =>
+                                  const SizedBox(width: 6),
+                              itemBuilder: (context, idx) {
+                                final imgPath = _stagedImagePaths[idx];
+                                return Stack(
+                                  children: [
+                                    PressableScale(
+                                      onTap: () {
+                                        PhotoLightboxDialog.show(
+                                          context,
+                                          p: widget.p,
+                                          imagePaths: _stagedImagePaths,
+                                          initialIndex: idx,
+                                        );
+                                      },
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(7),
+                                        child: SizedBox(
+                                          width: 36,
+                                          height: 36,
+                                          child: _buildStagedImageThumbnail(
+                                            imgPath,
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 6),
-                              SizedBox(
-                                height: 52,
-                                child: ListView.separated(
-                                  scrollDirection: Axis.horizontal,
-                                  physics: const BouncingScrollPhysics(),
-                                  itemCount: _stagedImagePaths.length,
-                                  separatorBuilder: (_, _) =>
-                                      const SizedBox(width: 8),
-                                  itemBuilder: (context, idx) {
-                                    final imgPath = _stagedImagePaths[idx];
-                                    return Stack(
-                                      children: [
-                                        PressableScale(
-                                          onTap: () {
-                                            PhotoLightboxDialog.show(
-                                              context,
-                                              p: widget.p,
-                                              imagePaths: _stagedImagePaths,
-                                              initialIndex: idx,
-                                            );
-                                          },
-                                          child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(
-                                              10,
+                                    Positioned(
+                                      top: 1,
+                                      right: 1,
+                                      child: PressableScale(
+                                        onTap: () {
+                                          HapticFeedback.selectionClick();
+                                          setState(() {
+                                            _stagedImagePaths.removeAt(idx);
+                                          });
+                                        },
+                                        child: Container(
+                                          width: 15,
+                                          height: 15,
+                                          decoration: BoxDecoration(
+                                            color: Colors.black.withValues(
+                                              alpha: 0.7,
                                             ),
-                                            child: SizedBox(
-                                              width: 52,
-                                              height: 52,
-                                              child: _buildStagedImageThumbnail(
-                                                imgPath,
-                                              ),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Center(
+                                            child: Icon(
+                                              CupertinoIcons.xmark,
+                                              size: 8,
+                                              color: Colors.white,
                                             ),
                                           ),
                                         ),
-                                        Positioned(
-                                          top: 2,
-                                          right: 2,
-                                          child: PressableScale(
-                                            onTap: () {
-                                              HapticFeedback.selectionClick();
-                                              setState(() {
-                                                _stagedImagePaths.removeAt(idx);
-                                              });
-                                            },
-                                            child: Container(
-                                              width: 18,
-                                              height: 18,
-                                              decoration: BoxDecoration(
-                                                color: Colors.black.withValues(
-                                                  alpha: 0.65,
-                                                ),
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: const Center(
-                                                child: Icon(
-                                                  CupertinoIcons.xmark,
-                                                  size: 10,
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ],
 
-                      // Staged Voice Preview Bar (Multi-voice notes)
+                      // Staged Voice Preview Bar (Multi-voice notes - compact)
                       if (_stagedVoicePaths.isNotEmpty) ...[
-                        Column(
-                          children: List.generate(_stagedVoicePaths.length, (
-                            idx,
-                          ) {
-                            final dur = idx < _stagedVoiceDurations.length
-                                ? _stagedVoiceDurations[idx]
-                                : 0;
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 6),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: widget.p.surface2,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: widget.p.border.withValues(alpha: 0.6),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 6),
+                          child: Wrap(
+                            spacing: 6,
+                            runSpacing: 4,
+                            children: List.generate(_stagedVoicePaths.length, (
+                              idx,
+                            ) {
+                              final dur = idx < _stagedVoiceDurations.length
+                                  ? _stagedVoiceDurations[idx]
+                                  : 0;
+                              return Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
                                 ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    CupertinoIcons.mic_fill,
-                                    size: 15,
-                                    color: widget.p.accent,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Voice Note ${idx + 1} (${_formatMs(dur)})',
-                                    style: TextStyle(
-                                      color: widget.p.text,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
+                                decoration: BoxDecoration(
+                                  color: widget.p.surface2,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: widget.p.border.withValues(
+                                      alpha: 0.6,
                                     ),
                                   ),
-                                  const Spacer(),
-                                  PressableScale(
-                                    onTap: () {
-                                      HapticFeedback.selectionClick();
-                                      setState(() {
-                                        _stagedVoicePaths.removeAt(idx);
-                                        if (idx <
-                                            _stagedVoiceDurations.length) {
-                                          _stagedVoiceDurations.removeAt(idx);
-                                        }
-                                      });
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.all(4),
-                                      decoration: BoxDecoration(
-                                        color: widget.p.surface3,
-                                        shape: BoxShape.circle,
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      CupertinoIcons.mic_fill,
+                                      size: 11,
+                                      color: widget.p.accent,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'Voice ${idx + 1} (${_formatMs(dur)})',
+                                      style: TextStyle(
+                                        color: widget.p.text,
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.w600,
                                       ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    PressableScale(
+                                      onTap: () {
+                                        HapticFeedback.selectionClick();
+                                        setState(() {
+                                          _stagedVoicePaths.removeAt(idx);
+                                          if (idx <
+                                              _stagedVoiceDurations.length) {
+                                            _stagedVoiceDurations.removeAt(idx);
+                                          }
+                                        });
+                                      },
                                       child: Icon(
-                                        CupertinoIcons.xmark,
-                                        size: 12,
-                                        color: widget.p.text2,
+                                        CupertinoIcons.xmark_circle_fill,
+                                        size: 13,
+                                        color: widget.p.text3,
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }),
+                                  ],
+                                ),
+                              );
+                            }),
+                          ),
                         ),
                       ],
 
@@ -1133,44 +1156,7 @@ class _NoteDialogState extends State<NoteDialog> {
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 6),
-                            PressableScale(
-                              onTap: _openBigNote,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: widget.p.surface2,
-                                  borderRadius: BorderRadius.circular(999),
-                                  border: Border.all(
-                                    color: widget.p.border.withValues(
-                                      alpha: 0.6,
-                                    ),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      CupertinoIcons.doc_text_fill,
-                                      size: 12,
-                                      color: widget.p.accent,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      'Note',
-                                      style: TextStyle(
-                                        color: widget.p.text2,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
+
                             if (_sobrietyMode) ...[
                               const SizedBox(width: 6),
                               PressableScale(

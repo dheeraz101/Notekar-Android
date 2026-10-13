@@ -157,6 +157,16 @@ void main() {
         // Enter title (<= 9 chars)
         await tester.enterText(find.byType(CupertinoTextField).first, 'Memoir');
 
+        // Enter description
+        await tester.enterText(
+          find.byType(CupertinoTextField).at(1),
+          'Focus writing sessions',
+        );
+
+        // Tap plus icon on stepper to allocate 1 hour
+        await tester.tap(find.byIcon(CupertinoIcons.plus).first);
+        await tester.pumpAndSettle();
+
         // Tap Save
         await tester.ensureVisible(find.text('Save Goal'));
         await tester.tap(find.text('Save Goal'));
@@ -199,6 +209,14 @@ void main() {
           find.byType(CupertinoTextField).first,
           'Thesis Completion',
         );
+
+        await tester.enterText(
+          find.byType(CupertinoTextField).at(1),
+          'Thesis defense notes and preparations',
+        );
+
+        await tester.tap(find.byIcon(CupertinoIcons.plus).first);
+        await tester.pumpAndSettle();
 
         await tester.ensureVisible(find.text('Save Goal'));
         await tester.tap(find.text('Save Goal'));

@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:notekar/dialogs/app_date_picker_sheet.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/timeline_filter_sheet.dart';
 import 'package:notekar/models/moment.dart';
@@ -13,6 +15,8 @@ import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
+import 'package:notekar/widgets/timeline_media_attachment_card.dart';
+import 'package:notekar/widgets/timeline_voice_player_pill.dart';
 
 class NoteSearchDialog extends StatefulWidget {
   const NoteSearchDialog({
@@ -88,6 +92,12 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
   int _visibleCount = _pageSize;
   String _query = '';
   TimelineFilterCriteria _filterCriteria = const TimelineFilterCriteria();
+  String _filter = 'all';
+  String? _selectedDateKey;
+  final Set<int> _manuallyExpandedImageIds = {};
+  final Set<int> _manuallyCollapsedImageIds = {};
+  final Set<int> _manuallyExpandedVoiceIds = {};
+  final Set<int> _manuallyCollapsedVoiceIds = {};
   final List<Moment> _selectedMoments = [];
   late List<String> _knownTags;
 
@@ -115,17 +125,257 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
     super.dispose();
   }
 
+  bool _isImageCollapsed(int id) {
+    if (_manuallyExpandedImageIds.contains(id)) return false;
+    if (_manuallyCollapsedImageIds.contains(id)) return true;
+    return true;
+  }
+
+  void _toggleImageCollapse(int id) {
+    setState(() {
+      if (_isImageCollapsed(id)) {
+        _manuallyCollapsedImageIds.remove(id);
+        _manuallyExpandedImageIds.add(id);
+      } else {
+        _manuallyExpandedImageIds.remove(id);
+        _manuallyCollapsedImageIds.add(id);
+      }
+    });
+  }
+
+  bool _isVoiceCollapsed(int id) {
+    if (_manuallyExpandedVoiceIds.contains(id)) return false;
+    if (_manuallyCollapsedVoiceIds.contains(id)) return true;
+    return true;
+  }
+
+  void _toggleVoiceCollapse(int id) {
+    setState(() {
+      if (_isVoiceCollapsed(id)) {
+        _manuallyCollapsedVoiceIds.remove(id);
+        _manuallyExpandedVoiceIds.add(id);
+      } else {
+        _manuallyExpandedVoiceIds.remove(id);
+        _manuallyCollapsedVoiceIds.add(id);
+      }
+    });
+  }
+
   List<Moment> get _matches {
-    return SearchIndexService.instance.search(
+    var list = SearchIndexService.instance.search(
       allMoments: widget.entries,
       query: _query,
       mode: _filterCriteria.mode,
       category: _filterCriteria.category,
       hashtag: _filterCriteria.hashtag,
     );
+
+    if (_filter == 'today') {
+      final today = dateKey(DateTime.now());
+      list = list.where((m) => m.date == today).toList();
+    } else if (_filter == 'week') {
+      final today = dateKey(DateTime.now());
+      final weekAgo = DateTime.now().subtract(const Duration(days: 7));
+      list = list.where((m) {
+        return m.date == today ||
+            DateTime.fromMillisecondsSinceEpoch(m.timestamp).isAfter(weekAgo);
+      }).toList();
+    } else if (_filter == 'date') {
+      if (_selectedDateKey != null) {
+        list = list.where((m) => m.date == _selectedDateKey).toList();
+      }
+    } else if (_filter == 'sessions') {
+      list = list.where((m) => m.type == 'in' || m.type == 'out').toList();
+    } else if (_filter == 'single') {
+      list = list.where((m) => m.type == 'single').toList();
+    } else if (_filter == 'notes') {
+      list = list.where((m) => m.note.trim().isNotEmpty).toList();
+    } else if (_filter == 'media') {
+      list = list.where((m) {
+        final hasImg = m.imagePath != null && m.imagePath!.isNotEmpty;
+        final hasVoice = m.voicePaths.isNotEmpty;
+        return hasImg || hasVoice;
+      }).toList();
+    }
+    return list;
   }
 
   List<Moment> get _visibleRows => _matches.take(_visibleCount).toList();
+
+  void _openFilterSheet() {
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (ctx) => CupertinoTheme(
+        data: CupertinoThemeData(
+          brightness: widget.p.isDark ? Brightness.dark : Brightness.light,
+          primaryColor: widget.p.accent,
+        ),
+        child: CupertinoActionSheet(
+          title: Text(
+            'Filter Timeline'.localized(context),
+            style: TextStyle(
+              color: widget.p.text,
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+            ),
+          ),
+          message: Text(
+            'Select moments to display'.localized(context),
+            style: TextStyle(color: widget.p.text3, fontSize: 12),
+          ),
+          actions: [
+            for (final f in [
+              'all',
+              'today',
+              'week',
+              'sessions',
+              'single',
+              'notes',
+              'media',
+              'date',
+            ])
+              CupertinoActionSheetAction(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  if (f == 'date') {
+                    _openDateFilter();
+                  } else {
+                    setState(() {
+                      _filter = f;
+                      _selectedDateKey = null;
+                      _visibleCount = _pageSize;
+                    });
+                    if (widget.scrollController?.hasClients ?? false) {
+                      widget.scrollController!.jumpTo(0.0);
+                    }
+                  }
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (_filter == f) ...[
+                      Icon(
+                        Icons.check_rounded,
+                        size: 16,
+                        color: widget.p.accent,
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    Text(
+                      switch (f) {
+                        'all' => 'All Moments'.localized(context),
+                        'today' => 'Today'.localized(context),
+                        'week' => 'This Week'.localized(context),
+                        'sessions' => 'Sessions (In/Out)'.localized(context),
+                        'single' => 'Single Logs'.localized(context),
+                        'notes' => 'With Notes'.localized(context),
+                        'media' => 'Media (Voice/Images)'.localized(context),
+                        'date' => 'Pick Specific Date...'.localized(context),
+                        _ => f,
+                      },
+                      style: TextStyle(
+                        color: _filter == f ? widget.p.accent : widget.p.text,
+                        fontWeight: _filter == f
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(ctx);
+                _openAdvancedFilter();
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (_filter == 'advanced' || _filterCriteria.isActive) ...[
+                    Icon(Icons.check_rounded, size: 16, color: widget.p.accent),
+                    const SizedBox(width: 8),
+                  ],
+                  Icon(Icons.tune_rounded, size: 16, color: widget.p.accent),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Advanced'.localized(context),
+                    style: TextStyle(
+                      color: (_filter == 'advanced' || _filterCriteria.isActive)
+                          ? widget.p.accent
+                          : widget.p.text,
+                      fontWeight:
+                          (_filter == 'advanced' || _filterCriteria.isActive)
+                          ? FontWeight.w700
+                          : FontWeight.w500,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              'Cancel'.localized(context),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openDateFilter() async {
+    if (widget.entries.isEmpty) return;
+    final latest = _selectedDateKey == null
+        ? DateTime.fromMillisecondsSinceEpoch(widget.entries.first.timestamp)
+        : dateFromKey(_selectedDateKey!);
+    final now = DateTime.now();
+    final earliest = widget.entries.isNotEmpty
+        ? DateTime.fromMillisecondsSinceEpoch(widget.entries.last.timestamp)
+        : now.subtract(const Duration(days: 365));
+
+    final picked = await AppDatePickerSheet.show(
+      context,
+      p: widget.p,
+      title: 'Pick Specific Date'.localized(context),
+      initialDateTime: latest,
+      mode: CupertinoDatePickerMode.date,
+      minimumDate: DateTime(earliest.year, earliest.month, earliest.day),
+      maximumDate: DateTime(now.year, now.month, now.day, 23, 59, 59),
+    );
+    if (picked == null) return;
+    setState(() {
+      _selectedDateKey = dateKey(picked);
+      _filter = 'date';
+      _visibleCount = _pageSize;
+    });
+    if (widget.scrollController?.hasClients ?? false) {
+      widget.scrollController!.jumpTo(0.0);
+    }
+  }
+
+  Future<void> _openAdvancedFilter() async {
+    final cats = await CategoryService().getCategories();
+    if (!mounted) return;
+    final res = await TimelineFilterSheet.show(
+      context,
+      p: widget.p,
+      initial: _filterCriteria,
+      categories: cats,
+      hashtags: _knownTags,
+    );
+    if (res != null) {
+      setState(() {
+        _filterCriteria = res;
+        _filter = 'advanced';
+        _visibleCount = _pageSize;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -147,24 +397,8 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
             _query = '';
             _visibleCount = _pageSize;
           }),
-          isFilterActive: _filterCriteria.isActive,
-          onTapFilter: () async {
-            final cats = await CategoryService().getCategories();
-            if (!context.mounted) return;
-            final res = await TimelineFilterSheet.show(
-              context,
-              p: widget.p,
-              initial: _filterCriteria,
-              categories: cats,
-              hashtags: _knownTags,
-            );
-            if (res != null) {
-              setState(() {
-                _filterCriteria = res;
-                _visibleCount = _pageSize;
-              });
-            }
-          },
+          isFilterActive: _filter != 'all' || _filterCriteria.isActive,
+          onTapFilter: _openFilterSheet,
         ),
         if (_selectedMoments.isNotEmpty)
           Padding(
@@ -444,17 +678,159 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 12),
-                              IosEmojiText(
-                                entry.note,
-                                style: TextStyle(
-                                  color: widget.p.text,
-                                  fontSize: 16,
-                                  height: 1.45,
-                                  fontWeight: FontWeight.w500,
-                                  letterSpacing: -0.2,
+                              if (entry.note.isNotEmpty) ...[
+                                const SizedBox(height: 12),
+                                IosEmojiText(
+                                  entry.note,
+                                  style: TextStyle(
+                                    color: widget.p.text,
+                                    fontSize: 16,
+                                    height: 1.45,
+                                    fontWeight: FontWeight.w500,
+                                    letterSpacing: -0.2,
+                                  ),
                                 ),
-                              ),
+                              ],
+
+                              // Voice Memos (collapsed by default, tap to expand)
+                              if (entry.voicePaths.isNotEmpty) ...[
+                                if (_isVoiceCollapsed(entry.id))
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 10.0),
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: PressableScale(
+                                        onTap: () {
+                                          HapticFeedback.selectionClick();
+                                          _toggleVoiceCollapse(entry.id);
+                                        },
+                                        child: Container(
+                                          height: widget.compactRows ? 28 : 32,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: widget.p.surface3.withValues(
+                                              alpha: 0.65,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              widget.compactRows ? 8 : 10,
+                                            ),
+                                            border: Border.all(
+                                              color: widget.p.border.withValues(
+                                                alpha: 0.5,
+                                              ),
+                                              width: 0.8,
+                                            ),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                CupertinoIcons.mic_fill,
+                                                size: widget.compactRows
+                                                    ? 13
+                                                    : 14,
+                                                color: widget.p.accent,
+                                              ),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                '${entry.voicePaths.length} Voice Memo${entry.voicePaths.length > 1 ? "s" : ""}',
+                                                style: TextStyle(
+                                                  color: widget.p.text2,
+                                                  fontSize: widget.compactRows
+                                                      ? 11
+                                                      : 12,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Icon(
+                                                CupertinoIcons.chevron_down,
+                                                size: widget.compactRows
+                                                    ? 10
+                                                    : 11,
+                                                color: widget.p.text3,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                else
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          top: 10.0,
+                                          bottom: 4.0,
+                                        ),
+                                        child: PressableScale(
+                                          onTap: () {
+                                            HapticFeedback.selectionClick();
+                                            _toggleVoiceCollapse(entry.id);
+                                          },
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                CupertinoIcons.mic_fill,
+                                                size: 13,
+                                                color: widget.p.accent,
+                                              ),
+                                              const SizedBox(width: 5),
+                                              Text(
+                                                '${entry.voicePaths.length} Voice Memo${entry.voicePaths.length > 1 ? "s" : ""}',
+                                                style: TextStyle(
+                                                  color: widget.p.text2,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Icon(
+                                                CupertinoIcons.chevron_up,
+                                                size: 11,
+                                                color: widget.p.text3,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      for (final vp in entry.voicePaths) ...[
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            top: 4.0,
+                                          ),
+                                          child: TimelineVoicePlayerPill(
+                                            p: widget.p,
+                                            voicePath: vp,
+                                            durationMs:
+                                                entry.voiceDurationMs ?? 0,
+                                            compact: widget.compactRows,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                              ],
+
+                              // Photos (collapsed by default, tap to expand)
+                              if (entry.imagePath != null &&
+                                  entry.imagePath!.isNotEmpty) ...[
+                                const SizedBox(height: 8),
+                                TimelineMediaAttachmentCard(
+                                  p: widget.p,
+                                  imagePath: entry.imagePath!,
+                                  isCollapsed: _isImageCollapsed(entry.id),
+                                  onToggleCollapse: () =>
+                                      _toggleImageCollapse(entry.id),
+                                  compact: widget.compactRows,
+                                ),
+                              ],
                             ],
                           ),
                         ),

@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/note_preview_sheet.dart';
 import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/history_timeline_models.dart';
@@ -30,6 +32,8 @@ class TimelineSessionCard extends StatelessWidget {
     this.goals,
     this.isImageCollapsed = false,
     this.onToggleImageCollapse,
+    this.isVoiceCollapsed = false,
+    this.onToggleVoiceCollapse,
   });
 
   final Palette p;
@@ -46,6 +50,8 @@ class TimelineSessionCard extends StatelessWidget {
   final List<Goal>? goals;
   final bool isImageCollapsed;
   final VoidCallback? onToggleImageCollapse;
+  final bool isVoiceCollapsed;
+  final VoidCallback? onToggleVoiceCollapse;
 
   Goal? _findMatchingGoal() {
     final gList = goals;
@@ -574,15 +580,68 @@ class TimelineSessionCard extends StatelessWidget {
                 ],
 
                 // Dedicated Full-Width Voice Notes Player
-                for (final vp in noteMoment.voicePaths) ...[
-                  SizedBox(height: compact ? 5 : 7),
-                  TimelineVoicePlayerPill(
-                    p: p,
-                    voicePath: vp,
-                    durationMs: noteMoment.voiceDurationMs ?? 0,
-                    compact: compact,
-                  ),
-                ],
+                if (isVoiceCollapsed && noteMoment.voicePaths.isNotEmpty)
+                  Padding(
+                    padding: EdgeInsets.only(top: compact ? 5.0 : 7.0),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: PressableScale(
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          onToggleVoiceCollapse?.call();
+                        },
+                        child: Container(
+                          height: compact ? 28 : 32,
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          decoration: BoxDecoration(
+                            color: p.surface3.withValues(alpha: 0.65),
+                            borderRadius: BorderRadius.circular(
+                              compact ? 8 : 10,
+                            ),
+                            border: Border.all(
+                              color: p.border.withValues(alpha: 0.5),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                CupertinoIcons.mic_fill,
+                                size: compact ? 13 : 14,
+                                color: p.accent,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                '${noteMoment.voicePaths.length} Voice Memo${noteMoment.voicePaths.length > 1 ? "s" : ""}',
+                                style: TextStyle(
+                                  color: p.text2,
+                                  fontSize: compact ? 11 : 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Icon(
+                                CupertinoIcons.chevron_down,
+                                size: compact ? 10 : 11,
+                                color: p.text3,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  for (final vp in noteMoment.voicePaths) ...[
+                    SizedBox(height: compact ? 5 : 7),
+                    TimelineVoicePlayerPill(
+                      p: p,
+                      voicePath: vp,
+                      durationMs: noteMoment.voiceDurationMs ?? 0,
+                      compact: compact,
+                    ),
+                  ],
 
                 // Dedicated Full-Width Photo Attachment Card
                 if (noteMoment.imagePath != null) ...[

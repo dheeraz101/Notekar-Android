@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/note_preview_sheet.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
@@ -30,6 +31,8 @@ class TimelineSingleTile extends StatelessWidget {
     this.rainbowCards = false,
     this.isImageCollapsed = false,
     this.onToggleImageCollapse,
+    this.isVoiceCollapsed = false,
+    this.onToggleVoiceCollapse,
   });
 
   final Palette p;
@@ -46,6 +49,8 @@ class TimelineSingleTile extends StatelessWidget {
   final bool rainbowCards;
   final bool isImageCollapsed;
   final VoidCallback? onToggleImageCollapse;
+  final bool isVoiceCollapsed;
+  final VoidCallback? onToggleVoiceCollapse;
 
   @override
   Widget build(BuildContext context) {
@@ -399,15 +404,75 @@ class TimelineSingleTile extends StatelessWidget {
                               ],
 
                               // Voice Notes below text
-                              for (final vp in moment.voicePaths) ...[
-                                const SizedBox(height: 6),
-                                TimelineVoicePlayerPill(
-                                  p: p,
-                                  voicePath: vp,
-                                  durationMs: moment.voiceDurationMs ?? 0,
-                                  compact: compact,
-                                ),
-                              ],
+                              if (isVoiceCollapsed &&
+                                  moment.voicePaths.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 6.0),
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: PressableScale(
+                                      onTap: () {
+                                        HapticFeedback.selectionClick();
+                                        onToggleVoiceCollapse?.call();
+                                      },
+                                      child: Container(
+                                        height: compact ? 28 : 32,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: p.surface3.withValues(
+                                            alpha: 0.65,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            compact ? 8 : 10,
+                                          ),
+                                          border: Border.all(
+                                            color: p.border.withValues(
+                                              alpha: 0.5,
+                                            ),
+                                            width: 0.8,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              CupertinoIcons.mic_fill,
+                                              size: compact ? 13 : 14,
+                                              color: p.accent,
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              '${moment.voicePaths.length} Voice Memo${moment.voicePaths.length > 1 ? "s" : ""}',
+                                              style: TextStyle(
+                                                color: p.text2,
+                                                fontSize: compact ? 11 : 12,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Icon(
+                                              CupertinoIcons.chevron_down,
+                                              size: compact ? 10 : 11,
+                                              color: p.text3,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              else
+                                for (final vp in moment.voicePaths) ...[
+                                  const SizedBox(height: 6),
+                                  TimelineVoicePlayerPill(
+                                    p: p,
+                                    voicePath: vp,
+                                    durationMs: moment.voiceDurationMs ?? 0,
+                                    compact: compact,
+                                  ),
+                                ],
 
                               // Photo below voice note
                               if (moment.imagePath != null) ...[

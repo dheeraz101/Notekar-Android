@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
@@ -14,7 +13,6 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/markdown_text_editing_controller.dart';
 import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/hashtag_suggestion_overlay.dart';
-import 'package:notekar/widgets/photo_lightbox_dialog.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
 /// Dedicated Apple HIG Journal / Big Note canvas for expansive thoughts,
@@ -298,20 +296,66 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
     HapticFeedback.selectionClick();
     try {
       final picker = ImagePicker();
-      final picked = await picker.pickImage(
-        source: source,
-        maxWidth: 1800,
-        maxHeight: 1800,
-        imageQuality: 85,
-      );
-      if (picked != null) {
-        final saved = await MediaStorageService.instance.saveImage(
-          xFile: picked,
+      if (source == ImageSource.gallery) {
+        final remaining = 5 - _stagedImagePaths.length;
+        final pickedList = await picker.pickMultiImage(
+          limit: remaining,
+          maxWidth: 1800,
+          maxHeight: 1800,
+          imageQuality: 85,
         );
-        if (mounted) {
+        if (pickedList.isNotEmpty) {
+          final toSave = pickedList.take(remaining).toList();
+          for (final picked in toSave) {
+            final saved = await MediaStorageService.instance.saveImage(
+              xFile: picked,
+            );
+            if (mounted) {
+              setState(() {
+                if (_stagedImagePaths.length < 5) {
+                  _stagedImagePaths.add(saved);
+                }
+              });
+            }
+          }
+        }
+      } else {
+        while (_stagedImagePaths.length < 5 && mounted) {
+          final picked = await picker.pickImage(
+            source: ImageSource.camera,
+            maxWidth: 1800,
+            maxHeight: 1800,
+            imageQuality: 85,
+          );
+          if (picked == null) break;
+          final saved = await MediaStorageService.instance.saveImage(
+            xFile: picked,
+          );
+          if (!mounted) break;
           setState(() {
             _stagedImagePaths.add(saved);
           });
+          if (_stagedImagePaths.length >= 5) break;
+
+          final shouldTakeAnother = await showCupertinoDialog<bool>(
+            context: context,
+            builder: (ctx) => CupertinoAlertDialog(
+              title: Text('${_stagedImagePaths.length}/5 Photos Added'),
+              content: const Text('Would you like to take another photo?'),
+              actions: [
+                CupertinoDialogAction(
+                  onPressed: () => Navigator.of(ctx).pop(false),
+                  child: const Text('Done'),
+                ),
+                CupertinoDialogAction(
+                  isDefaultAction: true,
+                  onPressed: () => Navigator.of(ctx).pop(true),
+                  child: const Text('Take Another'),
+                ),
+              ],
+            ),
+          );
+          if (shouldTakeAnother != true) break;
         }
       }
     } catch (e) {
@@ -385,30 +429,6 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
     final m = s ~/ 60;
     final sec = s % 60;
     return '${m.toString().padLeft(1, '0')}:${sec.toString().padLeft(2, '0')}';
-  }
-
-  String _formatMs(int ms) {
-    final totalSec = ms ~/ 1000;
-    return _formatSeconds(totalSec);
-  }
-
-  Widget _buildStagedImageThumbnail(String imagePath) {
-    final file = MediaStorageService.instance.resolveFileSync(imagePath);
-    if (file.existsSync()) {
-      return Image.file(file, fit: BoxFit.cover);
-    }
-    return FutureBuilder<File>(
-      future: MediaStorageService.instance.resolveFile(imagePath),
-      builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.data!.existsSync()) {
-          return Image.file(snapshot.data!, fit: BoxFit.cover);
-        }
-        return Container(
-          color: widget.p.surface3,
-          child: Icon(CupertinoIcons.photo, size: 20, color: widget.p.text3),
-        );
-      },
-    );
   }
 
   void _save() {
@@ -510,46 +530,29 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
                   ),
                 ),
 
-                // Center Document Title & Reading Time Badge
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.description_rounded, size: 16, color: p.accent),
-                    const SizedBox(width: 6),
-                    Text(
-                      widget.title,
-                      style: TextStyle(
-                        color: p.text,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.2,
+                // Center Reading Time Badge
+                ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _controller,
+                  builder: (context, _, _) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
                       ),
-                    ),
-                    const SizedBox(width: 6),
-                    ValueListenableBuilder<TextEditingValue>(
-                      valueListenable: _controller,
-                      builder: (context, _, _) {
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: p.accent.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            _readingTimeEstimate,
-                            style: TextStyle(
-                              color: p.accent,
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
+                      decoration: BoxDecoration(
+                        color: p.accent.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        _readingTimeEstimate,
+                        style: TextStyle(
+                          color: p.accent,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    );
+                  },
                 ),
 
                 // Done / Save pill button
@@ -797,174 +800,6 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
               ),
             ),
 
-          // 6. Staged Image Preview Bar (Multi-photo strip)
-          if (_stagedImagePaths.isNotEmpty)
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: widget.p.surface,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: widget.p.border.withValues(alpha: 0.6),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        CupertinoIcons.photo_fill_on_rectangle_fill,
-                        size: 13,
-                        color: widget.p.accent,
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        '${_stagedImagePaths.length}/5 Photos attached',
-                        style: TextStyle(
-                          color: widget.p.text,
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  SizedBox(
-                    height: 52,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: _stagedImagePaths.length,
-                      separatorBuilder: (_, _) => const SizedBox(width: 8),
-                      itemBuilder: (context, idx) {
-                        final imgPath = _stagedImagePaths[idx];
-                        return Stack(
-                          children: [
-                            PressableScale(
-                              onTap: () {
-                                PhotoLightboxDialog.show(
-                                  context,
-                                  p: widget.p,
-                                  imagePaths: _stagedImagePaths,
-                                  initialIndex: idx,
-                                );
-                              },
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: SizedBox(
-                                  width: 52,
-                                  height: 52,
-                                  child: _buildStagedImageThumbnail(imgPath),
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              top: 2,
-                              right: 2,
-                              child: PressableScale(
-                                onTap: () {
-                                  HapticFeedback.selectionClick();
-                                  setState(() {
-                                    _stagedImagePaths.removeAt(idx);
-                                  });
-                                },
-                                child: Container(
-                                  width: 18,
-                                  height: 18,
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withValues(alpha: 0.65),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Center(
-                                    child: Icon(
-                                      CupertinoIcons.xmark,
-                                      size: 10,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-          // 7. Staged Voice Preview Bar (Multi-voice notes)
-          if (_stagedVoicePaths.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              child: Column(
-                children: List.generate(_stagedVoicePaths.length, (idx) {
-                  final dur = idx < _stagedVoiceDurations.length
-                      ? _stagedVoiceDurations[idx]
-                      : 0;
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 6),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: widget.p.surface,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: widget.p.border.withValues(alpha: 0.6),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          CupertinoIcons.mic_fill,
-                          size: 15,
-                          color: widget.p.accent,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Voice Note ${idx + 1} (${_formatMs(dur)})',
-                          style: TextStyle(
-                            color: widget.p.text,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const Spacer(),
-                        PressableScale(
-                          onTap: () {
-                            HapticFeedback.selectionClick();
-                            setState(() {
-                              _stagedVoicePaths.removeAt(idx);
-                              if (idx < _stagedVoiceDurations.length) {
-                                _stagedVoiceDurations.removeAt(idx);
-                              }
-                            });
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: widget.p.surface3,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              CupertinoIcons.xmark,
-                              size: 12,
-                              color: widget.p.text2,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }),
-              ),
-            ),
-
           // 8. Telegram-Style Accessory Toolbar (Pinned Above Virtual Keyboard)
           Container(
             padding: EdgeInsets.fromLTRB(
@@ -1143,7 +978,9 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
                       const SizedBox(width: 6),
                       _buildQuickAction(
                         icon: CupertinoIcons.photo_fill_on_rectangle_fill,
-                        label: 'Photo',
+                        label: _stagedImagePaths.isNotEmpty
+                            ? 'Photo (${_stagedImagePaths.length})'
+                            : 'Photo',
                         onTap: () => _pickPhoto(ImageSource.gallery),
                       ),
                       const SizedBox(width: 6),
@@ -1151,7 +988,11 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
                         icon: _isRecording
                             ? CupertinoIcons.stop_fill
                             : CupertinoIcons.mic_fill,
-                        label: _isRecording ? 'Stop' : 'Voice',
+                        label: _isRecording
+                            ? 'Stop'
+                            : (_stagedVoicePaths.isNotEmpty
+                                  ? 'Voice (${_stagedVoicePaths.length})'
+                                  : 'Voice'),
                         onTap: _toggleVoiceRecording,
                       ),
                       Container(

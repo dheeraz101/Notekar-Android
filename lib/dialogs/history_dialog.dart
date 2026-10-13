@@ -174,6 +174,10 @@ class _HistoryDialogState extends State<HistoryDialog> {
   final Set<int> _manuallyExpandedMomentIds = {};
   final Set<int> _manuallyCollapsedMomentIds = {};
 
+  bool _showVoiceAlways = true;
+  final Set<int> _manuallyExpandedVoiceMomentIds = {};
+  final Set<int> _manuallyCollapsedVoiceMomentIds = {};
+
   bool _isMomentImageCollapsed(int id) {
     if (_manuallyExpandedMomentIds.contains(id)) return false;
     if (_manuallyCollapsedMomentIds.contains(id)) return true;
@@ -189,6 +193,25 @@ class _HistoryDialogState extends State<HistoryDialog> {
       } else {
         _manuallyExpandedMomentIds.remove(id);
         _manuallyCollapsedMomentIds.add(id);
+      }
+    });
+  }
+
+  bool _isMomentVoiceCollapsed(int id) {
+    if (_manuallyExpandedVoiceMomentIds.contains(id)) return false;
+    if (_manuallyCollapsedVoiceMomentIds.contains(id)) return true;
+    return !_showVoiceAlways;
+  }
+
+  void _toggleMomentVoiceCollapse(int id) {
+    setState(() {
+      final currentlyCollapsed = _isMomentVoiceCollapsed(id);
+      if (currentlyCollapsed) {
+        _manuallyCollapsedVoiceMomentIds.remove(id);
+        _manuallyExpandedVoiceMomentIds.add(id);
+      } else {
+        _manuallyExpandedVoiceMomentIds.remove(id);
+        _manuallyCollapsedVoiceMomentIds.add(id);
       }
     });
   }
@@ -236,6 +259,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
       final savedRainbow = prefs.getBool('m-rainbow-cards') ?? false;
       final savedShowImagesAlways =
           prefs.getBool('history_show_images_always') ?? true;
+      final savedShowVoiceAlways =
+          prefs.getBool('history_show_voice_always') ?? true;
       final savedClaimedGaps =
           prefs.getStringList('history_claimed_gaps') ?? [];
       if (savedClaimedGaps.isNotEmpty) {
@@ -247,6 +272,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
         _showGapCards = savedGaps;
         _rainbowCards = savedRainbow;
         _showImagesAlways = savedShowImagesAlways;
+        _showVoiceAlways = savedShowVoiceAlways;
         _sleepHours = prefs.getDouble('time_audit_sleep_hours') ?? 10.0;
         _essentialsHours =
             prefs.getDouble('time_audit_essentials_hours') ?? 4.0;
@@ -1452,28 +1478,67 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                           ],
                                                         ),
                                                       ),
-                                                  ],
-                                                ),
-                                                if (sec.categorySummaryText !=
-                                                    null) ...[
-                                                  const SizedBox(height: 4),
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                          left: 18,
+                                                    PressableScale(
+                                                      onTap: () {
+                                                        HapticFeedback.lightImpact();
+                                                        setState(() {
+                                                          _activeInsightsSection =
+                                                              sec;
+                                                        });
+                                                      },
+                                                      child: Container(
+                                                        margin:
+                                                            const EdgeInsets.only(
+                                                              left: 6,
+                                                            ),
+                                                        padding:
+                                                            const EdgeInsets.symmetric(
+                                                              horizontal: 8,
+                                                              vertical: 3,
+                                                            ),
+                                                        decoration: BoxDecoration(
+                                                          color: widget.p.accent
+                                                              .withValues(
+                                                                alpha: 0.12,
+                                                              ),
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                8,
+                                                              ),
                                                         ),
-                                                    child: Text(
-                                                      sec.categorySummaryText!,
-                                                      style: TextStyle(
-                                                        color: widget.p.text3,
-                                                        fontSize: 10.5,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                        letterSpacing: 0.2,
+                                                        child: Row(
+                                                          mainAxisSize:
+                                                              MainAxisSize.min,
+                                                          children: [
+                                                            Text(
+                                                              'Insights',
+                                                              style: TextStyle(
+                                                                color: widget
+                                                                    .p
+                                                                    .accent,
+                                                                fontSize: 11,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w700,
+                                                              ),
+                                                            ),
+                                                            const SizedBox(
+                                                              width: 3,
+                                                            ),
+                                                            Icon(
+                                                              Icons
+                                                                  .chevron_right_rounded,
+                                                              size: 12,
+                                                              color: widget
+                                                                  .p
+                                                                  .accent,
+                                                            ),
+                                                          ],
+                                                        ),
                                                       ),
                                                     ),
-                                                  ),
-                                                ],
+                                                  ],
+                                                ),
                                               ],
                                             ),
                                           ),
@@ -1545,6 +1610,14 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                 ),
                                             onToggleImageCollapse: () =>
                                                 _toggleMomentImageCollapse(
+                                                  session.noteMoment.id,
+                                                ),
+                                            isVoiceCollapsed:
+                                                _isMomentVoiceCollapsed(
+                                                  session.noteMoment.id,
+                                                ),
+                                            onToggleVoiceCollapse: () =>
+                                                _toggleMomentVoiceCollapse(
                                                   session.noteMoment.id,
                                                 ),
                                             onEditNote: () =>
@@ -1622,6 +1695,14 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                               ),
                                           onToggleImageCollapse: () =>
                                               _toggleMomentImageCollapse(
+                                                moment.id,
+                                              ),
+                                          isVoiceCollapsed:
+                                              _isMomentVoiceCollapsed(
+                                                moment.id,
+                                              ),
+                                          onToggleVoiceCollapse: () =>
+                                              _toggleMomentVoiceCollapse(
                                                 moment.id,
                                               ),
                                           onEditNote: () =>
@@ -2276,6 +2357,83 @@ class _HistoryDialogState extends State<HistoryDialog> {
                   const SizedBox(width: 10),
                   Text(
                     'Life Audit & Horizon'.localized(context),
+                    style: TextStyle(
+                      color: widget.p.text,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(ctx);
+                final next = !_showImagesAlways;
+                setState(() {
+                  _showImagesAlways = next;
+                  _manuallyExpandedMomentIds.clear();
+                  _manuallyCollapsedMomentIds.clear();
+                });
+                unawaited(
+                  SharedPreferences.getInstance().then(
+                    (prefs) =>
+                        prefs.setBool('history_show_images_always', next),
+                  ),
+                );
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    _showImagesAlways
+                        ? CupertinoIcons.photo_fill_on_rectangle_fill
+                        : CupertinoIcons.photo,
+                    size: 20,
+                    color: widget.p.text,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    (_showImagesAlways ? 'Hide Photos' : 'Show Photos')
+                        .localized(context),
+                    style: TextStyle(
+                      color: widget.p.text,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(ctx);
+                final next = !_showVoiceAlways;
+                setState(() {
+                  _showVoiceAlways = next;
+                  _manuallyExpandedVoiceMomentIds.clear();
+                  _manuallyCollapsedVoiceMomentIds.clear();
+                });
+                unawaited(
+                  SharedPreferences.getInstance().then(
+                    (prefs) => prefs.setBool('history_show_voice_always', next),
+                  ),
+                );
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    _showVoiceAlways
+                        ? CupertinoIcons.mic_slash
+                        : CupertinoIcons.mic,
+                    size: 20,
+                    color: widget.p.text,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    (_showVoiceAlways ? 'Hide Voice Memos' : 'Show Voice Memos')
+                        .localized(context),
                     style: TextStyle(
                       color: widget.p.text,
                       fontSize: 16,
