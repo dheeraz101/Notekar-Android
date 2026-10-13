@@ -5,6 +5,7 @@ import 'package:notekar/dialogs/note_dialog.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/markdown_text_editing_controller.dart';
 import 'package:notekar/utils/tag_service.dart';
+import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -142,5 +143,32 @@ void main() {
         findsOneWidget,
       );
     });
+
+    testWidgets(
+      'IosEmojiText strips raw markdown tokens and renders preview formatting',
+      (tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Scaffold(
+              body: IosEmojiText(
+                'Completed **Gym Workout** with *John* and `squats`! ~~canceled~~',
+                accentColor: Colors.blue,
+              ),
+            ),
+          ),
+        );
+
+        final textFinder = find.byType(Text);
+        expect(textFinder, findsOneWidget);
+        final Text textWidget = tester.widget(textFinder);
+        final plain = textWidget.textSpan!.toPlainText();
+
+        expect(plain, contains('Gym Workout'));
+        expect(plain.contains('**'), isFalse);
+        expect(plain.contains('`'), isFalse);
+        expect(plain.contains('~~'), isFalse);
+        expect(plain, 'Completed Gym Workout with John and squats! canceled');
+      },
+    );
   });
 }
