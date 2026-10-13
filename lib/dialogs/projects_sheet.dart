@@ -7,6 +7,7 @@ import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/models/project.dart';
 import 'package:notekar/services/project_service.dart';
+import 'package:notekar/widgets/apple_hig_action_sheet.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
 /// Apple HIG Projects Sheet for NoteKar.
@@ -45,6 +46,7 @@ class ProjectsSheet extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      sheetAnimationStyle: kTelegramSpringSheetAnimation,
       builder: (_) => ProjectsSheet(
         p: p,
         moments: moments,

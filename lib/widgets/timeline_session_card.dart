@@ -632,16 +632,76 @@ class TimelineSessionCard extends StatelessWidget {
                       ),
                     ),
                   )
-                else
-                  for (final vp in noteMoment.voicePaths) ...[
-                    SizedBox(height: compact ? 5 : 7),
-                    TimelineVoicePlayerPill(
-                      p: p,
-                      voicePath: vp,
-                      durationMs: noteMoment.voiceDurationMs ?? 0,
-                      compact: compact,
-                    ),
-                  ],
+                else if (noteMoment.voicePaths.isNotEmpty)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (onToggleVoiceCollapse != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 6.0, bottom: 2.0),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: PressableScale(
+                              onTap: () {
+                                HapticFeedback.selectionClick();
+                                onToggleVoiceCollapse?.call();
+                              },
+                              child: Container(
+                                height: compact ? 26 : 28,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 9,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: p.surface3.withValues(alpha: 0.55),
+                                  borderRadius: BorderRadius.circular(
+                                    compact ? 8 : 9,
+                                  ),
+                                  border: Border.all(
+                                    color: p.border.withValues(alpha: 0.45),
+                                    width: 0.8,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      CupertinoIcons.mic_fill,
+                                      size: compact ? 12 : 13,
+                                      color: p.accent,
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      '${noteMoment.voicePaths.length} Voice Memo${noteMoment.voicePaths.length > 1 ? "s" : ""}',
+                                      style: TextStyle(
+                                        color: p.text2,
+                                        fontSize: compact ? 10.5 : 11.5,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Icon(
+                                      CupertinoIcons.chevron_up,
+                                      size: compact ? 10 : 11,
+                                      color: p.text3,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      for (final vp in noteMoment.voicePaths) ...[
+                        SizedBox(height: compact ? 4 : 6),
+                        TimelineVoicePlayerPill(
+                          p: p,
+                          voicePath: vp,
+                          durationMs: noteMoment.voiceDurationMs ?? 0,
+                          compact: compact,
+                          onToggleCollapse: onToggleVoiceCollapse,
+                        ),
+                      ],
+                    ],
+                  ),
 
                 // Dedicated Full-Width Photo Attachment Card
                 if (noteMoment.imagePath != null) ...[

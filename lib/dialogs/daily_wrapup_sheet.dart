@@ -7,6 +7,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/goals_service.dart';
 import 'package:notekar/services/universal_interval_ledger.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/widgets/apple_hig_action_sheet.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
 /// Apple HIG Daily Wrap-up & Time-Awareness Sheet.
@@ -41,6 +42,7 @@ class DailyWrapupSheet extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      sheetAnimationStyle: kTelegramSpringSheetAnimation,
       builder: (_) => DailyWrapupSheet(
         p: p,
         moments: moments,

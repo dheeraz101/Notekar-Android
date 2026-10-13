@@ -4,6 +4,7 @@ import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/tag_service.dart';
+import 'package:notekar/widgets/apple_hig_action_sheet.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
 
 /// Read-only note preview bottom sheet with full text viewing, copying, and edit action.
@@ -41,6 +42,7 @@ class NotePreviewSheet extends StatelessWidget {
       barrierColor: Colors.black.withValues(alpha: 0.42),
       isScrollControlled: true,
       useSafeArea: true,
+      sheetAnimationStyle: kTelegramSpringSheetAnimation,
       builder: (ctx) => NotePreviewSheet(
         p: p,
         note: note,

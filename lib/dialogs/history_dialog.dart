@@ -852,6 +852,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
                   onOpenGodModeSettings: _openGodModeSettings,
                   isMomentImageCollapsed: _isMomentImageCollapsed,
                   onToggleMomentImageCollapse: _toggleMomentImageCollapse,
+                  isMomentVoiceCollapsed: _isMomentVoiceCollapsed,
+                  onToggleMomentVoiceCollapse: _toggleMomentVoiceCollapse,
                   filterCriteria: _timelineFilterCriteria,
                   onFilterChanged: (newCriteria) {
                     setState(() {

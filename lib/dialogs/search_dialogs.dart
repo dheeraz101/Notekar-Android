@@ -811,6 +811,8 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
                                             durationMs:
                                                 entry.voiceDurationMs ?? 0,
                                             compact: widget.compactRows,
+                                            onToggleCollapse: () =>
+                                                _toggleVoiceCollapse(entry.id),
                                           ),
                                         ),
                                       ],

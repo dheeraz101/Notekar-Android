@@ -13,12 +13,14 @@ class TimelineVoicePlayerPill extends StatefulWidget {
     required this.voicePath,
     this.durationMs,
     this.compact = false,
+    this.onToggleCollapse,
   });
 
   final Palette p;
   final String voicePath;
   final int? durationMs;
   final bool compact;
+  final VoidCallback? onToggleCollapse;
 
   @override
   State<TimelineVoicePlayerPill> createState() =>
@@ -27,6 +29,7 @@ class TimelineVoicePlayerPill extends StatefulWidget {
 
 class _TimelineVoicePlayerPillState extends State<TimelineVoicePlayerPill> {
   final AudioService _audioService = AudioService.instance;
+  int _lastHapticScrubIndex = -1;
 
   @override
   void initState() {
@@ -152,6 +155,12 @@ class _TimelineVoicePlayerPillState extends State<TimelineVoicePlayerPill> {
                         0.0,
                         1.0,
                       );
+                      const barCount = 20;
+                      final currentBarIndex = (ratio * barCount).toInt();
+                      if (currentBarIndex != _lastHapticScrubIndex) {
+                        _lastHapticScrubIndex = currentBarIndex;
+                        HapticFeedback.selectionClick();
+                      }
                       final targetMs = (ratio * total.inMilliseconds).toInt();
                       _audioService.seek(Duration(milliseconds: targetMs));
                     }
@@ -161,10 +170,14 @@ class _TimelineVoicePlayerPillState extends State<TimelineVoicePlayerPill> {
                   return GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTapDown: (details) => seekTo(details.localPosition),
-                    onHorizontalDragStart: (details) =>
-                        seekTo(details.localPosition),
+                    onHorizontalDragStart: (details) {
+                      _lastHapticScrubIndex = -1;
+                      seekTo(details.localPosition);
+                    },
                     onHorizontalDragUpdate: (details) =>
                         seekTo(details.localPosition),
+                    onHorizontalDragEnd: (_) => _lastHapticScrubIndex = -1,
+                    onHorizontalDragCancel: () => _lastHapticScrubIndex = -1,
                     child: Container(
                       color: Colors.transparent,
                       padding: const EdgeInsets.symmetric(vertical: 6),
@@ -189,16 +202,27 @@ class _TimelineVoicePlayerPillState extends State<TimelineVoicePlayerPill> {
                             16.0,
                             22.0,
                           ];
-                          final h =
+                          final baseH =
                               heights[index % heights.length] *
                               (isCompact ? 0.72 : 0.88);
+                          final isPlayhead =
+                              _isThisPlaying &&
+                              (index == (progress * barCount).toInt() ||
+                                  (index == 0 && progress < 0.05));
+                          final effectiveH = isPlayhead
+                              ? (baseH * 1.18).clamp(6.0, 26.0)
+                              : baseH;
 
-                          return Container(
+                          return AnimatedContainer(
+                            duration: const Duration(milliseconds: 100),
+                            curve: Curves.easeOutCubic,
                             width: 2.6,
-                            height: h,
+                            height: effectiveH,
                             decoration: BoxDecoration(
                               color: isFilled
-                                  ? p.accent
+                                  ? (isPlayhead
+                                        ? p.accent
+                                        : p.accent.withValues(alpha: 0.88))
                                   : p.text3.withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(999),
                             ),
@@ -250,6 +274,35 @@ class _TimelineVoicePlayerPillState extends State<TimelineVoicePlayerPill> {
                 ),
               ),
             ),
+
+            // Collapse Button
+            if (widget.onToggleCollapse != null) ...[
+              const SizedBox(width: 6),
+              PressableScale(
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  widget.onToggleCollapse!();
+                },
+                child: Container(
+                  width: isCompact ? 24 : 26,
+                  height: isCompact ? 24 : 26,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: p.surface2,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: p.border.withValues(alpha: 0.5),
+                      width: 0.6,
+                    ),
+                  ),
+                  child: Icon(
+                    CupertinoIcons.chevron_up,
+                    size: isCompact ? 11 : 12,
+                    color: p.text2,
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

@@ -12,12 +12,12 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/widgets/apple_hig_action_sheet.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/timeline_gap_card.dart';
 import 'package:notekar/widgets/timeline_media_attachment_card.dart';
 import 'package:notekar/widgets/timeline_voice_player_pill.dart';
-import 'package:notekar/widgets/apple_hig_action_sheet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Apple HIG Calendar Day-Swipe Timeline View.
@@ -41,6 +41,8 @@ class HistoryCalendarView extends StatefulWidget {
     this.onOpenGodModeSettings,
     this.isMomentImageCollapsed,
     this.onToggleMomentImageCollapse,
+    this.isMomentVoiceCollapsed,
+    this.onToggleMomentVoiceCollapse,
     this.goals,
     this.endingSessionIds,
     this.filterCriteria,
@@ -67,6 +69,8 @@ class HistoryCalendarView extends StatefulWidget {
   final VoidCallback? onOpenGodModeSettings;
   final bool Function(int id)? isMomentImageCollapsed;
   final ValueChanged<int>? onToggleMomentImageCollapse;
+  final bool Function(int id)? isMomentVoiceCollapsed;
+  final ValueChanged<int>? onToggleMomentVoiceCollapse;
   final List<Goal>? goals;
   final Set<int>? endingSessionIds;
   final TimelineFilterCriteria? filterCriteria;
@@ -89,6 +93,10 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
   bool _showImagesAlways = true;
   final Set<int> _localManuallyExpandedMomentIds = {};
   final Set<int> _localManuallyCollapsedMomentIds = {};
+
+  bool _showVoiceAlways = true;
+  final Set<int> _localManuallyExpandedVoiceMomentIds = {};
+  final Set<int> _localManuallyCollapsedVoiceMomentIds = {};
 
   bool _isMomentImageCollapsed(int id) {
     if (widget.isMomentImageCollapsed != null) {
@@ -117,11 +125,39 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
     });
   }
 
+  bool _isMomentVoiceCollapsed(int id) {
+    if (widget.isMomentVoiceCollapsed != null) {
+      return widget.isMomentVoiceCollapsed!(id);
+    }
+    if (_localManuallyExpandedVoiceMomentIds.contains(id)) return false;
+    if (_localManuallyCollapsedVoiceMomentIds.contains(id)) return true;
+    return !_showVoiceAlways;
+  }
+
+  void _toggleMomentVoiceCollapse(int id) {
+    if (widget.onToggleMomentVoiceCollapse != null) {
+      widget.onToggleMomentVoiceCollapse!(id);
+      setState(() {});
+      return;
+    }
+    setState(() {
+      final currentlyCollapsed = _isMomentVoiceCollapsed(id);
+      if (currentlyCollapsed) {
+        _localManuallyCollapsedVoiceMomentIds.remove(id);
+        _localManuallyExpandedVoiceMomentIds.add(id);
+      } else {
+        _localManuallyExpandedVoiceMomentIds.remove(id);
+        _localManuallyCollapsedVoiceMomentIds.add(id);
+      }
+    });
+  }
+
   Future<void> _loadHistoryPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     if (mounted) {
       setState(() {
         _showImagesAlways = prefs.getBool('history_show_images_always') ?? true;
+        _showVoiceAlways = prefs.getBool('history_show_voice_always') ?? true;
       });
     }
   }
@@ -1223,14 +1259,135 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                         ),
                       ),
                     ],
-                    for (final vp in it.noteMoment.voicePaths) ...[
-                      const SizedBox(height: 5),
-                      TimelineVoicePlayerPill(
-                        p: widget.p,
-                        voicePath: vp,
-                        durationMs: it.noteMoment.voiceDurationMs ?? 0,
+                    if (_isMomentVoiceCollapsed(it.noteMoment.id) &&
+                        it.noteMoment.voicePaths.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 5.0),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: PressableScale(
+                            onTap: () {
+                              HapticFeedback.selectionClick();
+                              _toggleMomentVoiceCollapse(it.noteMoment.id);
+                            },
+                            child: Container(
+                              height: 28,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 9,
+                              ),
+                              decoration: BoxDecoration(
+                                color: widget.p.surface3.withValues(
+                                  alpha: 0.65,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: widget.p.border.withValues(alpha: 0.5),
+                                  width: 0.8,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    CupertinoIcons.mic_fill,
+                                    size: 12,
+                                    color: widget.p.accent,
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    '${it.noteMoment.voicePaths.length} Voice Memo${it.noteMoment.voicePaths.length > 1 ? "s" : ""}',
+                                    style: TextStyle(
+                                      color: widget.p.text2,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    CupertinoIcons.chevron_down,
+                                    size: 10,
+                                    color: widget.p.text3,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    else if (it.noteMoment.voicePaths.isNotEmpty)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              top: 5.0,
+                              bottom: 2.0,
+                            ),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: PressableScale(
+                                onTap: () {
+                                  HapticFeedback.selectionClick();
+                                  _toggleMomentVoiceCollapse(it.noteMoment.id);
+                                },
+                                child: Container(
+                                  height: 26,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: widget.p.surface3.withValues(
+                                      alpha: 0.55,
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: widget.p.border.withValues(
+                                        alpha: 0.45,
+                                      ),
+                                      width: 0.8,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        CupertinoIcons.mic_fill,
+                                        size: 12,
+                                        color: widget.p.accent,
+                                      ),
+                                      const SizedBox(width: 5),
+                                      Text(
+                                        '${it.noteMoment.voicePaths.length} Voice Memo${it.noteMoment.voicePaths.length > 1 ? "s" : ""}',
+                                        style: TextStyle(
+                                          color: widget.p.text2,
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Icon(
+                                        CupertinoIcons.chevron_up,
+                                        size: 10,
+                                        color: widget.p.text3,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          for (final vp in it.noteMoment.voicePaths) ...[
+                            const SizedBox(height: 5),
+                            TimelineVoicePlayerPill(
+                              p: widget.p,
+                              voicePath: vp,
+                              durationMs: it.noteMoment.voiceDurationMs ?? 0,
+                              onToggleCollapse: () =>
+                                  _toggleMomentVoiceCollapse(it.noteMoment.id),
+                            ),
+                          ],
+                        ],
                       ),
-                    ],
                     if (it.noteMoment.imagePath != null) ...[
                       const SizedBox(height: 6),
                       TimelineMediaAttachmentCard(
@@ -1467,14 +1624,135 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                         ],
                       ],
                     ),
-                    for (final vp in it.moment.voicePaths) ...[
-                      const SizedBox(height: 6),
-                      TimelineVoicePlayerPill(
-                        p: widget.p,
-                        voicePath: vp,
-                        durationMs: it.moment.voiceDurationMs ?? 0,
+                    if (_isMomentVoiceCollapsed(it.moment.id) &&
+                        it.moment.voicePaths.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 5.0),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: PressableScale(
+                            onTap: () {
+                              HapticFeedback.selectionClick();
+                              _toggleMomentVoiceCollapse(it.moment.id);
+                            },
+                            child: Container(
+                              height: 28,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 9,
+                              ),
+                              decoration: BoxDecoration(
+                                color: widget.p.surface3.withValues(
+                                  alpha: 0.65,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: widget.p.border.withValues(alpha: 0.5),
+                                  width: 0.8,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    CupertinoIcons.mic_fill,
+                                    size: 12,
+                                    color: widget.p.accent,
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    '${it.moment.voicePaths.length} Voice Memo${it.moment.voicePaths.length > 1 ? "s" : ""}',
+                                    style: TextStyle(
+                                      color: widget.p.text2,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    CupertinoIcons.chevron_down,
+                                    size: 10,
+                                    color: widget.p.text3,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    else if (it.moment.voicePaths.isNotEmpty)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              top: 5.0,
+                              bottom: 2.0,
+                            ),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: PressableScale(
+                                onTap: () {
+                                  HapticFeedback.selectionClick();
+                                  _toggleMomentVoiceCollapse(it.moment.id);
+                                },
+                                child: Container(
+                                  height: 26,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: widget.p.surface3.withValues(
+                                      alpha: 0.55,
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: widget.p.border.withValues(
+                                        alpha: 0.45,
+                                      ),
+                                      width: 0.8,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        CupertinoIcons.mic_fill,
+                                        size: 12,
+                                        color: widget.p.accent,
+                                      ),
+                                      const SizedBox(width: 5),
+                                      Text(
+                                        '${it.moment.voicePaths.length} Voice Memo${it.moment.voicePaths.length > 1 ? "s" : ""}',
+                                        style: TextStyle(
+                                          color: widget.p.text2,
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Icon(
+                                        CupertinoIcons.chevron_up,
+                                        size: 10,
+                                        color: widget.p.text3,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          for (final vp in it.moment.voicePaths) ...[
+                            const SizedBox(height: 5),
+                            TimelineVoicePlayerPill(
+                              p: widget.p,
+                              voicePath: vp,
+                              durationMs: it.moment.voiceDurationMs ?? 0,
+                              onToggleCollapse: () =>
+                                  _toggleMomentVoiceCollapse(it.moment.id),
+                            ),
+                          ],
+                        ],
                       ),
-                    ],
                     if (it.moment.imagePath != null) ...[
                       const SizedBox(height: 6),
                       TimelineMediaAttachmentCard(

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/big_note_dialog.dart';
@@ -8,6 +9,8 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/markdown_text_editing_controller.dart';
 import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
+import 'package:notekar/widgets/timeline_single_tile.dart';
+import 'package:notekar/widgets/timeline_voice_player_pill.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -263,5 +266,184 @@ void main() {
         expect(find.text('Search test moment with media'), findsOneWidget);
       },
     );
+
+    testWidgets(
+      'TimelineSingleTile supports bi-directional individual voice memo collapse',
+      (tester) async {
+        final momentWithVoice = Moment(
+          id: 501,
+          type: 'single',
+          date: '2026-10-13',
+          timestamp: DateTime.now().millisecondsSinceEpoch,
+          note: 'Moment with voice memo',
+          voicePath: 'test_voice.m4a',
+          voiceDurationMs: 12000,
+        );
+
+        bool isCollapsed = false;
+        int toggleCount = 0;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: StatefulBuilder(
+                builder: (context, setState) {
+                  return TimelineSingleTile(
+                    p: p,
+                    moment: momentWithVoice,
+                    onEditNote: () {},
+                    onDelete: () {},
+                    isVoiceCollapsed: isCollapsed,
+                    onToggleVoiceCollapse: () {
+                      setState(() {
+                        isCollapsed = !isCollapsed;
+                        toggleCount++;
+                      });
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // When expanded, the voice player pill and the collapse button (chevron_up) are visible
+        expect(find.byType(TimelineVoicePlayerPill), findsOneWidget);
+        expect(find.byIcon(CupertinoIcons.chevron_up), findsWidgets);
+
+        // Tap the collapse chevron header chip
+        await tester.tap(find.byIcon(CupertinoIcons.chevron_up).first);
+        await tester.pumpAndSettle();
+
+        expect(toggleCount, equals(1));
+        expect(isCollapsed, isTrue);
+
+        // Now collapsed: voice player pill is hidden, and collapsed chip with chevron_down is visible
+        expect(find.byType(TimelineVoicePlayerPill), findsNothing);
+        expect(find.text('1 Voice Memo'), findsOneWidget);
+        expect(find.byIcon(CupertinoIcons.chevron_down), findsOneWidget);
+
+        // Tap the collapsed chip to expand again
+        await tester.tap(find.text('1 Voice Memo'));
+        await tester.pumpAndSettle();
+
+        expect(toggleCount, equals(2));
+        expect(isCollapsed, isFalse);
+        expect(find.byType(TimelineVoicePlayerPill), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'TimelineVoicePlayerPill trailing collapse chevron triggers onToggleCollapse',
+      (tester) async {
+        bool collapsedToggled = false;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: TimelineVoicePlayerPill(
+                p: p,
+                voicePath: 'test_memo.m4a',
+                durationMs: 8000,
+                onToggleCollapse: () {
+                  collapsedToggled = true;
+                },
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byIcon(CupertinoIcons.chevron_up), findsOneWidget);
+        await tester.tap(find.byIcon(CupertinoIcons.chevron_up));
+        await tester.pumpAndSettle();
+
+        expect(collapsedToggled, isTrue);
+      },
+    );
+
+    testWidgets('Individual voice memo collapse toggles only target moment', (
+      tester,
+    ) async {
+      final momentA = Moment(
+        id: 601,
+        type: 'single',
+        date: '2026-10-13',
+        timestamp: DateTime.now().millisecondsSinceEpoch,
+        note: 'Moment A with voice',
+        voicePath: 'voice_a.m4a',
+      );
+      final momentB = Moment(
+        id: 602,
+        type: 'single',
+        date: '2026-10-13',
+        timestamp: DateTime.now().millisecondsSinceEpoch,
+        note: 'Moment B with voice',
+        voicePath: 'voice_b.m4a',
+      );
+
+      final collapsedSet = <int>{};
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) {
+                return Column(
+                  children: [
+                    TimelineSingleTile(
+                      p: p,
+                      moment: momentA,
+                      onEditNote: () {},
+                      onDelete: () {},
+                      isVoiceCollapsed: collapsedSet.contains(momentA.id),
+                      onToggleVoiceCollapse: () {
+                        setState(() {
+                          if (collapsedSet.contains(momentA.id)) {
+                            collapsedSet.remove(momentA.id);
+                          } else {
+                            collapsedSet.add(momentA.id);
+                          }
+                        });
+                      },
+                    ),
+                    TimelineSingleTile(
+                      p: p,
+                      moment: momentB,
+                      onEditNote: () {},
+                      onDelete: () {},
+                      isVoiceCollapsed: collapsedSet.contains(momentB.id),
+                      onToggleVoiceCollapse: () {
+                        setState(() {
+                          if (collapsedSet.contains(momentB.id)) {
+                            collapsedSet.remove(momentB.id);
+                          } else {
+                            collapsedSet.add(momentB.id);
+                          }
+                        });
+                      },
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Both start expanded
+      expect(find.byType(TimelineVoicePlayerPill), findsNWidgets(2));
+
+      // Collapse only Moment A via its chevron_up
+      await tester.tap(find.byIcon(CupertinoIcons.chevron_up).first);
+      await tester.pumpAndSettle();
+
+      // Moment A is collapsed, Moment B remains expanded
+      expect(collapsedSet.contains(momentA.id), isTrue);
+      expect(collapsedSet.contains(momentB.id), isFalse);
+      expect(find.byType(TimelineVoicePlayerPill), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.chevron_down), findsOneWidget);
+    });
   });
 }

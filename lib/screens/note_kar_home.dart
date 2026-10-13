@@ -58,6 +58,7 @@ import 'package:notekar/utils/streak_guardian_service.dart';
 import 'package:notekar/utils/tag_migration_service.dart';
 import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/utils/update_service.dart';
+import 'package:notekar/widgets/apple_hig_action_sheet.dart';
 import 'package:notekar/widgets/clock_face.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/dynamic_header_capsule.dart';
@@ -2492,6 +2493,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withValues(alpha: 0.42),
       isScrollControlled: true,
+      sheetAnimationStyle: kTelegramSpringSheetAnimation,
       builder: (ctx) => AppSheet(
         p: p,
         title: 'Select Mode'.localized(ctx),
@@ -2726,10 +2728,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       enableDrag: true,
       isScrollControlled: true,
       useSafeArea: true,
-      sheetAnimationStyle: const AnimationStyle(
-        duration: Duration(milliseconds: 180),
-        reverseDuration: Duration(milliseconds: 170),
-      ),
+      sheetAnimationStyle: kTelegramSpringSheetAnimation,
       builder: (sheetContext) => HistoryDialog(
         initialView: initialView,
         initialFilterCriteria:
@@ -2867,10 +2866,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       enableDrag: true,
       isScrollControlled: true,
       useSafeArea: true,
-      sheetAnimationStyle: const AnimationStyle(
-        duration: Duration(milliseconds: 180),
-        reverseDuration: Duration(milliseconds: 170),
-      ),
+      sheetAnimationStyle: kTelegramSpringSheetAnimation,
       builder: (ctx) => ManualEntryDialog(
         p: p,
         categories: _categories,
@@ -3051,6 +3047,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       enableDrag: true,
       isScrollControlled: true,
       useSafeArea: true,
+      sheetAnimationStyle: kTelegramSpringSheetAnimation,
       builder: (_) => RecentlyDeletedDialog(
         p: p,
         trashEntries: trashEntries,
@@ -3110,10 +3107,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       enableDrag: true,
       isScrollControlled: true,
       useSafeArea: true,
-      sheetAnimationStyle: const AnimationStyle(
-        duration: Duration(milliseconds: 180),
-        reverseDuration: Duration(milliseconds: 170),
-      ),
+      sheetAnimationStyle: kTelegramSpringSheetAnimation,
       builder: (_) => SettingsDialog(
         p: p,
         initialCategory: initialCategory,

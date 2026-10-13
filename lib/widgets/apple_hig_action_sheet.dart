@@ -25,6 +25,15 @@ class AppleHigActionItem {
   final VoidCallback onTap;
 }
 
+/// Telegram and Apple HIG spring damping animation curve for modal sheets.
+/// Eliminates rigid transition snaps in favor of natural momentum physics.
+const kTelegramSpringSheetAnimation = AnimationStyle(
+  curve: Curves.easeOutCubic,
+  duration: Duration(milliseconds: 280),
+  reverseCurve: Curves.easeInCubic,
+  reverseDuration: Duration(milliseconds: 240),
+);
+
 /// Authentic Apple HIG styled Action Sheet for NoteKar.
 ///
 /// Built on Flutter's official [CupertinoActionSheet] matching iOS Human Interface Guidelines:

@@ -10,6 +10,7 @@ import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/user_profile_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/widgets/apple_hig_action_sheet.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
 /// Apple HIG Personalization Setup & Profile Edit Sheet.
@@ -35,6 +36,7 @@ class PersonalizationSetupDialog extends StatefulWidget {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      sheetAnimationStyle: kTelegramSpringSheetAnimation,
       builder: (_) => PersonalizationSetupDialog(
         p: p,
         isFirstTime: isFirstTime,
