@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/shareable_milestone_sheet.dart';
 import 'package:notekar/models/moment.dart';
@@ -7,6 +8,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/models/sobriety_milestones.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
 class SobrietyCompanionSettingsPage extends StatelessWidget {
@@ -18,7 +20,7 @@ class SobrietyCompanionSettingsPage extends StatelessWidget {
     required this.sobrietyCustomStartMs,
     required this.sobrietyMilestoneTheme,
     required this.onEnableSobrietyModeChanged,
-    required this.onSobrietyResetTypeChanged,
+    this.onSobrietyResetTypeChanged,
     required this.onSobrietyCustomStartMsChanged,
     required this.onOpenCategory,
     required this.onSelectStartDate,
@@ -31,7 +33,7 @@ class SobrietyCompanionSettingsPage extends StatelessWidget {
   final String sobrietyMilestoneTheme;
 
   final ValueChanged<bool> onEnableSobrietyModeChanged;
-  final ValueChanged<String> onSobrietyResetTypeChanged;
+  final ValueChanged<String>? onSobrietyResetTypeChanged;
   final ValueChanged<int?> onSobrietyCustomStartMsChanged;
   final void Function(String category, {required String parent}) onOpenCategory;
   final Future<DateTime?> Function(BuildContext context, DateTime initial)
@@ -69,25 +71,32 @@ class SobrietyCompanionSettingsPage extends StatelessWidget {
           SettingsPageDescription(
             p: p,
             text:
-                'Your home screen will show a live streak card with milestone badges. The home widget will adapt to show RESET and DIARY buttons.'
+                'Your home screen displays an interactive streak card. Tag moments with "Mark as Relapse / Reset" in the note editor to log resets.'
                     .localized(context),
           ),
           const SizedBox(height: 12),
           SettingsGroup(
             p: p,
-            title: 'Streak Reset Logic'.localized(context),
+            title: 'Streak Reset'.localized(context),
             children: [
-              SettingsSwitchRow(
+              SettingsRow(
                 p: p,
                 icon: CupertinoIcons.arrow_counterclockwise,
-                title: 'Reset on Relapse Tag Only'.localized(context),
+                title: 'Reset Streak to Now'.localized(context),
                 subtitle:
-                    'Only moments tagged #relapse reset the streak. Turn off to reset on any new log.'
+                    'Start a fresh clean streak from this moment without altering existing logs.'
                         .localized(context),
                 color: p.orange,
-                value: sobrietyResetType == 'relapse',
-                onChanged: (value) {
-                  onSobrietyResetTypeChanged(value ? 'relapse' : 'any');
+                onTap: () {
+                  HapticFeedback.heavyImpact();
+                  final nowMs = DateTime.now().millisecondsSinceEpoch;
+                  onSobrietyCustomStartMsChanged(nowMs);
+                  showIosPillToast(
+                    context: context,
+                    p: p,
+                    message: 'Streak reset to 0h Clean'.localized(context),
+                    icon: CupertinoIcons.arrow_counterclockwise,
+                  );
                 },
               ),
             ],

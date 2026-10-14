@@ -40,6 +40,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/models/project.dart';
 import 'package:notekar/models/sobriety_milestones.dart';
 import 'package:notekar/screens/device_health_intro_screen.dart';
+import 'package:notekar/screens/end_of_support_screen.dart';
 import 'package:notekar/screens/executive_intelligence_hub_screen.dart';
 import 'package:notekar/screens/welcome_screen.dart';
 import 'package:notekar/services/digital_wellbeing_service.dart';
@@ -849,6 +850,28 @@ class _NoteKarHomeState extends State<NoteKarHome>
         }
       }
 
+      // Check End of Support (>= 365 days since build date)
+      final eosNoticeSeen = prefs.getBool('eos_notice_seen') ?? false;
+      if (!eosNoticeSeen) {
+        final buildDt = DateTime.tryParse(appBuildDate);
+        if (buildDt != null &&
+            DateTime.now().difference(buildDt).inDays >= 365) {
+          await prefs.setBool('eos_notice_seen', true);
+          if (mounted) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                final palette = paletteFor(
+                  _theme,
+                  accentName: _accentColor,
+                  highContrast: _highContrast,
+                );
+                EndOfSupportScreen.open(context, p: palette);
+              }
+            });
+          }
+        }
+      }
+
       if (!mounted) return;
 
       if (migrated.isNotEmpty) {
@@ -1211,8 +1234,18 @@ class _NoteKarHomeState extends State<NoteKarHome>
               _saveSetting('m-count-on-save', value);
             },
             onSobrietyMode: (value) {
-              setState(() => _enableSobrietyMode = value);
+              setState(() {
+                _enableSobrietyMode = value;
+                if (value) {
+                  _sobrietyCustomStart = null;
+                }
+              });
               _prefs?.setBool('enable_sobriety_mode', value);
+              if (value) {
+                final nowMs = DateTime.now().millisecondsSinceEpoch;
+                _prefs?.setInt('sobriety_enabled_at_ms', nowMs);
+                _prefs?.remove('sobriety_custom_start_ms');
+              }
             },
             onSobrietyMilestoneTheme: (value) {
               setState(() => _sobrietyMilestoneTheme = value);
@@ -3425,7 +3458,17 @@ class _NoteKarHomeState extends State<NoteKarHome>
           setState(() => _locale = value);
         },
         onSobrietyModeChanged: (value) {
-          setState(() => _enableSobrietyMode = value);
+          setState(() {
+            _enableSobrietyMode = value;
+            if (value) {
+              _sobrietyCustomStart = null;
+            }
+          });
+          if (value) {
+            final nowMs = DateTime.now().millisecondsSinceEpoch;
+            _prefs?.setInt('sobriety_enabled_at_ms', nowMs);
+            _prefs?.remove('sobriety_custom_start_ms');
+          }
         },
         onTriggerUrlScheme: _handleIncomingUrlScheme,
       ),
@@ -3441,7 +3484,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
             false;
         _enableNoteOnClick = _prefs?.getBool('enable_note_on_click') ?? false;
         _enableSobrietyMode = _prefs?.getBool('enable_sobriety_mode') ?? false;
-        _sobrietyResetType = _prefs?.getString('sobriety_reset_type') ?? 'any';
+        _sobrietyResetType =
+            _prefs?.getString('sobriety_reset_type') ?? 'relapse';
         final customStartMs = _prefs?.getInt('sobriety_custom_start_ms');
         _sobrietyCustomStart = customStartMs != null
             ? DateTime.fromMillisecondsSinceEpoch(customStartMs)
@@ -4382,22 +4426,14 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
   DateTime? _getLatestRelapseTime() {
     if (_entries.isEmpty) return null;
-    if (_sobrietyResetType == 'relapse') {
-      final relapseMoments = _entries.where(
-        (e) => e.note.contains('#relapse') && !e.note.contains('#shielded'),
-      );
-      if (relapseMoments.isEmpty) {
-        final minTimestamp = _entries.map((e) => e.timestamp).reduce(math.min);
-        return DateTime.fromMillisecondsSinceEpoch(minTimestamp);
-      }
-      final maxTimestamp = relapseMoments
-          .map((e) => e.timestamp)
-          .reduce(math.max);
-      return DateTime.fromMillisecondsSinceEpoch(maxTimestamp);
-    } else {
-      final maxTimestamp = _entries.map((e) => e.timestamp).reduce(math.max);
-      return DateTime.fromMillisecondsSinceEpoch(maxTimestamp);
-    }
+    final relapseMoments = _entries.where(
+      (e) => e.note.contains('#relapse') && !e.note.contains('#shielded'),
+    );
+    if (relapseMoments.isEmpty) return null;
+    final maxTimestamp = relapseMoments
+        .map((e) => e.timestamp)
+        .reduce(math.max);
+    return DateTime.fromMillisecondsSinceEpoch(maxTimestamp);
   }
 
   Future<void> _updateStreakShields() async {
@@ -4444,14 +4480,33 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   Duration _getSobrietyDuration() {
-    // Custom start date takes precedence over log-based calculation.
-    if (_sobrietyCustomStart != null) {
-      final diff = DateTime.now().difference(_sobrietyCustomStart!);
-      return diff.isNegative ? Duration.zero : diff;
+    final now = DateTime.now();
+    final latestRelapse = _getLatestRelapseTime();
+    final customStart = _sobrietyCustomStart;
+    final enabledAtMs = _prefs?.getInt('sobriety_enabled_at_ms');
+    final enabledAt = enabledAtMs != null
+        ? DateTime.fromMillisecondsSinceEpoch(enabledAtMs)
+        : null;
+
+    DateTime effectiveStart;
+    if (latestRelapse != null && customStart != null) {
+      effectiveStart = latestRelapse.isAfter(customStart)
+          ? latestRelapse
+          : customStart;
+    } else if (latestRelapse != null) {
+      effectiveStart = latestRelapse;
+    } else if (customStart != null) {
+      effectiveStart = customStart;
+    } else if (enabledAt != null) {
+      effectiveStart = enabledAt;
+    } else {
+      effectiveStart = now;
+      unawaited(
+        _prefs?.setInt('sobriety_enabled_at_ms', now.millisecondsSinceEpoch),
+      );
     }
-    final resetTime = _getLatestRelapseTime();
-    if (resetTime == null) return Duration.zero;
-    final diff = DateTime.now().difference(resetTime);
+
+    final diff = now.difference(effectiveStart);
     return diff.isNegative ? Duration.zero : diff;
   }
 

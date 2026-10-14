@@ -3,10 +3,14 @@ package app.notekar.notekar
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.view.View
 import android.widget.RemoteViews
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class SobrietyWidgetProvider : AppWidgetProvider() {
 
@@ -16,7 +20,22 @@ class SobrietyWidgetProvider : AppWidgetProvider() {
         val action = intent.action
         if (action == NoteKarWidgetProvider.ACTION_LOG_BG) {
             val logType = intent.getStringExtra(NoteKarWidgetProvider.EXTRA_LOG_TYPE) ?: return
-            NoteKarWidgetProvider.performBackgroundLog(context, logType)
+            val note = intent.getStringExtra("note") ?: ""
+            NoteKarWidgetProvider.performBackgroundLog(context, logType, note = note)
+
+            if (note.contains("#relapse")) {
+                val widgetPrefs = context.getSharedPreferences(
+                    NoteKarWidgetProvider.PREFS_NAME,
+                    Context.MODE_PRIVATE
+                )
+                val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
+                val timeStr = timeFormat.format(Date())
+                widgetPrefs.edit()
+                    .putString(NoteKarWidgetProvider.KEY_STREAK_DAYS, "0h Clean")
+                    .putString(NoteKarWidgetProvider.KEY_LAST_RELAPSE_TIME, timeStr)
+                    .apply()
+                updateAllWidgets(context)
+            }
         }
     }
 
@@ -63,11 +82,15 @@ class SobrietyWidgetProvider : AppWidgetProvider() {
         fun launchBackgroundLogIntent(
             context: Context,
             requestCode: Int,
-            logType: String
+            logType: String,
+            note: String = ""
         ): PendingIntent {
             val intent = Intent(context, SobrietyWidgetProvider::class.java).apply {
                 action = NoteKarWidgetProvider.ACTION_LOG_BG
                 putExtra(NoteKarWidgetProvider.EXTRA_LOG_TYPE, logType)
+                if (note.isNotEmpty()) {
+                    putExtra("note", note)
+                }
             }
             return PendingIntent.getBroadcast(
                 context,
@@ -172,11 +195,11 @@ class SobrietyWidgetProvider : AppWidgetProvider() {
 
                 views.setOnClickPendingIntent(
                     R.id.widget_single,
-                    launchIntent(
+                    launchBackgroundLogIntent(
                         context,
                         appWidgetId + 10,
-                        "app.notekar.notekar.ACTION_OPEN",
-                        "sobriety"
+                        "single",
+                        "#relapse"
                     )
                 )
 
@@ -188,6 +211,20 @@ class SobrietyWidgetProvider : AppWidgetProvider() {
                 manager.updateAppWidget(appWidgetId, views)
             } catch (e: Exception) {
                 android.util.Log.e("SobrietyWidget", "Failed to update Sobriety widget", e)
+            }
+        }
+
+        fun updateAllWidgets(context: Context) {
+            try {
+                val manager = AppWidgetManager.getInstance(context) ?: return
+                val ids = manager.getAppWidgetIds(
+                    ComponentName(context, SobrietyWidgetProvider::class.java)
+                )
+                ids.forEach { id ->
+                    updateWidget(context, manager, id)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("SobrietyWidget", "Failed to update all sobriety widgets", e)
             }
         }
     }

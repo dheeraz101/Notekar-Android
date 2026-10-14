@@ -499,6 +499,14 @@ class QuickNoteActivity : Activity() {
             val customTags = mutableListOf<String>()
             val seenTags = mutableSetOf<String>()
 
+            // 0. Sobriety mode relapse tag chip
+            val sobrietyEnabled =
+                widgetPrefs.getBoolean(NoteKarWidgetProvider.KEY_SOBRIETY_ENABLED, false) ||
+                flutterPrefs.getBoolean("flutter.enable_sobriety_mode", false)
+            if (sobrietyEnabled && seenTags.add("#relapse")) {
+                customTags.add("#relapse")
+            }
+
             // 1. Load from notekar_activity_tags_v2
             val activityJson = flutterPrefs.getString("flutter.notekar_activity_tags_v2", null)
             if (!activityJson.isNullOrEmpty() && activityJson.startsWith("[")) {

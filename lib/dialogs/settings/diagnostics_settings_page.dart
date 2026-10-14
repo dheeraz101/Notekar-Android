@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/screens/device_health_intro_screen.dart';
+import 'package:notekar/screens/end_of_support_screen.dart';
 import 'package:notekar/services/circuit_breaker_service.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_logger.dart';
@@ -64,6 +65,64 @@ class DiagnosticsSettingsPage extends StatefulWidget {
 
 class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
   int? _expandedNetworkLogIndex;
+  int _buildTapCount = 0;
+  DateTime? _lastBuildTapTime;
+
+  void _handleBuildTap(BuildContext context) {
+    final now = DateTime.now();
+    if (_lastBuildTapTime != null &&
+        now.difference(_lastBuildTapTime!).inSeconds > 4) {
+      _buildTapCount = 0;
+    }
+    _lastBuildTapTime = now;
+    _buildTapCount++;
+
+    if (_buildTapCount >= 4 && _buildTapCount <= 6) {
+      HapticFeedback.lightImpact();
+      showIosPillToast(
+        context: context,
+        p: widget.p,
+        message: '$_buildTapCount',
+        icon: CupertinoIcons.sparkles,
+      );
+    } else if (_buildTapCount >= 7) {
+      _buildTapCount = 0;
+      HapticFeedback.heavyImpact();
+      _showDeveloperQuestDialog(context);
+    }
+  }
+
+  Future<void> _showDeveloperQuestDialog(BuildContext context) async {
+    await showCupertinoDialog<void>(
+      context: context,
+      builder: (ctx) {
+        return CupertinoTheme(
+          data: CupertinoThemeData(
+            brightness: widget.p.isDark ? Brightness.dark : Brightness.light,
+          ),
+          child: CupertinoAlertDialog(
+            title: Text('Developer Quest'.localized(context)),
+            content: Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text(
+                'You have unlocked developers hidden Quest.'.localized(context),
+              ),
+            ),
+            actions: [
+              CupertinoDialogAction(
+                isDefaultAction: true,
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  EndOfSupportScreen.open(context, p: widget.p);
+                },
+                child: Text('Okay'.localized(context)),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,10 +157,13 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
               label: 'App Version',
               value: 'v${widget.appVersion}',
             ),
-            DiagnosticRow(
-              p: widget.p,
-              label: 'Build Number',
-              value: widget.appBuildNumber,
+            PressableScale(
+              onTap: () => _handleBuildTap(context),
+              child: DiagnosticRow(
+                p: widget.p,
+                label: 'Build Number',
+                value: widget.appBuildNumber,
+              ),
             ),
             DiagnosticRow(
               p: widget.p,
