@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -1098,8 +1097,8 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
   }
 }
 
-class ExperimentChannelWarningDialog extends StatelessWidget {
-  const ExperimentChannelWarningDialog({
+class ExperimentChannelWarningScreen extends StatelessWidget {
+  const ExperimentChannelWarningScreen({
     super.key,
     required this.p,
     this.onBackup,
@@ -1113,122 +1112,257 @@ class ExperimentChannelWarningDialog extends StatelessWidget {
     required Palette p,
     VoidCallback? onBackup,
   }) {
-    return showGeneralDialog<bool>(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: 'Dismiss Experiment Warning',
-      barrierColor: Colors.black.withValues(alpha: 0.65),
-      transitionDuration: const Duration(milliseconds: 240),
-      pageBuilder: (ctx, anim1, anim2) {
-        return ExperimentChannelWarningDialog(p: p, onBackup: onBackup);
-      },
-      transitionBuilder: (ctx, anim1, anim2, child) {
-        return ScaleTransition(
-          scale: CurvedAnimation(parent: anim1, curve: Curves.easeOutBack),
-          child: FadeTransition(opacity: anim1, child: child),
-        );
-      },
+    return Navigator.of(context).push<bool>(
+      CupertinoPageRoute<bool>(
+        fullscreenDialog: true,
+        builder: (ctx) =>
+            ExperimentChannelWarningScreen(p: p, onBackup: onBackup),
+      ),
+    );
+  }
+
+  Widget _buildWarningRow({
+    required BuildContext context,
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String description,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: p.surface2,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: p.border.withValues(alpha: 0.5), width: 0.8),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: iconColor, size: 20),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title.localized(context),
+                  style: TextStyle(
+                    color: p.text,
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  description.localized(context),
+                  style: TextStyle(color: p.text2, fontSize: 12.5, height: 1.4),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: math.min(MediaQuery.sizeOf(context).width * 0.90, 420),
-        margin: const EdgeInsets.symmetric(horizontal: 20),
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: p.surface,
-          borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: p.red.withValues(alpha: 0.5), width: 1.5),
-          boxShadow: [
-            BoxShadow(
-              color: p.red.withValues(alpha: 0.25),
-              blurRadius: 32,
-              offset: const Offset(0, 8),
-            ),
-          ],
+    return Scaffold(
+      backgroundColor: p.bg,
+      appBar: CupertinoNavigationBar(
+        backgroundColor: p.surface.withValues(alpha: 0.9),
+        border: Border(
+          bottom: BorderSide(
+            color: p.border.withValues(alpha: 0.3),
+            width: 0.5,
+          ),
         ),
-        child: Material(
-          color: Colors.transparent,
-          child: Column(
+        leading: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Red Alert Icon Pill
-              Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: p.red.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: p.red.withValues(alpha: 0.4),
-                    width: 1.2,
+              Icon(CupertinoIcons.xmark, size: 18, color: p.text2),
+              const SizedBox(width: 4),
+              Text(
+                'Cancel'.localized(context),
+                style: TextStyle(color: p.text2, fontSize: 15),
+              ),
+            ],
+          ),
+        ),
+        middle: Text(
+          'Warning'.localized(context),
+          style: TextStyle(
+            color: p.text,
+            fontWeight: FontWeight.w700,
+            fontSize: 16,
+          ),
+        ),
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+                child: Column(
+                  children: [
+                    // Apple HIG Alert Icon Squircle
+                    Container(
+                      width: 76,
+                      height: 76,
+                      decoration: BoxDecoration(
+                        color: p.red.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(22),
+                        border: Border.all(
+                          color: p.red.withValues(alpha: 0.35),
+                          width: 1.5,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: p.red.withValues(alpha: 0.2),
+                            blurRadius: 24,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        CupertinoIcons.exclamationmark_triangle_fill,
+                        size: 38,
+                        color: p.red,
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+
+                    // Badge Pill
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: p.red.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'HIGH INSTABILITY WARNING'.localized(context),
+                        style: TextStyle(
+                          color: p.red,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Headline
+                    Text(
+                      'Experiment Release Channel'.localized(context),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: p.text,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Subhead description
+                    Text(
+                      'The Experiment channel provides automated pre-releases compiled directly from active development branches. Please review the following details before switching.'
+                          .localized(context),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: p.text2,
+                        fontSize: 13.5,
+                        height: 1.45,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // HIG Grouped Cards
+                    _buildWarningRow(
+                      context: context,
+                      icon: CupertinoIcons.flame_fill,
+                      iconColor: p.orange,
+                      title: 'Bleeding-Edge Code',
+                      description:
+                          'Builds contain early, unreleased code that has not completed standard QA and staging verification.',
+                    ),
+                    _buildWarningRow(
+                      context: context,
+                      icon: CupertinoIcons.bolt_badge_a_fill,
+                      iconColor: p.red,
+                      title: 'Potential Crashes & Glitches',
+                      description:
+                          'You may encounter unexpected crashes, interface bugs, or battery performance variations during daily usage.',
+                    ),
+                    _buildWarningRow(
+                      context: context,
+                      icon: CupertinoIcons.arrow_2_circlepath_circle_fill,
+                      iconColor: p.accent,
+                      title: 'All Update Tracks Included',
+                      description:
+                          'Subscribers receive every build published to NoteKar: Stable, Priority, Beta, and Experimental builds immediately.',
+                    ),
+                    _buildWarningRow(
+                      context: context,
+                      icon: CupertinoIcons.archivebox_fill,
+                      iconColor: const Color(0xFF5856D6),
+                      title: 'Data Preservation',
+                      description:
+                          'While internal databases are protected with automatic recovery points, we strongly advise exporting a backup snapshot first.',
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Pinned Bottom Action Dock
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+              decoration: BoxDecoration(
+                color: p.surface.withValues(alpha: 0.95),
+                border: Border(
+                  top: BorderSide(
+                    color: p.border.withValues(alpha: 0.35),
+                    width: 0.5,
                   ),
                 ),
-                child: Icon(
-                  CupertinoIcons.exclamationmark_triangle_fill,
-                  size: 32,
-                  color: p.red,
-                ),
               ),
-              const SizedBox(height: 16),
-              // High Instability Badge
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: p.red.withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  'HIGH INSTABILITY WARNING'.localized(context),
-                  style: TextStyle(
-                    color: p.red,
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.8,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Experiment Release Track'.localized(context),
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: p.text,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.4,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'The Experiment track provides rapid builds compiled directly from active development branches and receives ALL updates across the app (Stable, Priority, Beta, and Experiment). These updates are inherently unstable, may contain critical bugs or crashes, and could risk local data corruption.'
-                    .localized(context),
-                textAlign: TextAlign.center,
-                style: TextStyle(color: p.text2, fontSize: 13, height: 1.45),
-              ),
-              const SizedBox(height: 20),
-              // 3 Action Buttons: Backup, Cancel, I Agree
-              Column(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // 1. Backup Button (Highlighted safe pathway)
+                  // Safe Backup Button
                   PressableScale(
                     onTap: () {
                       Navigator.of(context).pop(false);
                       onBackup?.call();
                     },
                     child: Container(
-                      height: 48,
+                      height: 50,
                       decoration: BoxDecoration(
                         color: p.surface2,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: p.border),
+                        borderRadius: BorderRadius.circular(15),
+                        border: Border.all(
+                          color: p.border.withValues(alpha: 0.6),
+                        ),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -1240,10 +1374,10 @@ class ExperimentChannelWarningDialog extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Backup First'.localized(context),
+                            'Backup Data First'.localized(context),
                             style: TextStyle(
                               color: p.text,
-                              fontSize: 14,
+                              fontSize: 14.5,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -1251,72 +1385,61 @@ class ExperimentChannelWarningDialog extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  // 2. I Agree (Destructive red) and Cancel Row
-                  Row(
-                    children: [
-                      Expanded(
-                        child: PressableScale(
-                          onTap: () => Navigator.of(context).pop(false),
-                          child: Container(
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: p.surface2,
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: p.border),
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              'Cancel'.localized(context),
-                              style: TextStyle(
-                                color: p.text2,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                  const SizedBox(height: 10),
+
+                  // Agree Button (Red, prominent)
+                  PressableScale(
+                    onTap: () => Navigator.of(context).pop(true),
+                    child: Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: p.red,
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: p.red.withValues(alpha: 0.35),
+                            blurRadius: 14,
+                            offset: const Offset(0, 4),
                           ),
+                        ],
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        'I Understand & Enable Channel'.localized(context),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: PressableScale(
-                          onTap: () => Navigator.of(context).pop(true),
-                          child: Container(
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: p.red,
-                              borderRadius: BorderRadius.circular(14),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: p.red.withValues(alpha: 0.35),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              'I Agree'.localized(context),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ),
-                        ),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+
+                  // Cancel Text Button
+                  CupertinoButton(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: Text(
+                      'Keep Current Track'.localized(context),
+                      style: TextStyle(
+                        color: p.text3,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
                       ),
-                    ],
+                    ),
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
+
+typedef ExperimentChannelWarningDialog = ExperimentChannelWarningScreen;
 
 class BuildTrackSelectPage extends StatelessWidget {
   const BuildTrackSelectPage({
@@ -1403,7 +1526,7 @@ class BuildTrackSelectPage extends StatelessWidget {
               p: p,
               title: 'Experiment Channel',
               subtitle:
-                  'Bleeding-edge experimental releases (ER). Receives all updates: Stable, Beta, Priority, and Experiment.'
+                  'Bleeding-edge pre-releases. Receives all channel updates.'
                       .localized(context),
               trailing: _activeChannel == 'experiment'
                   ? Icon(CupertinoIcons.checkmark, color: p.red, size: 18)
@@ -1418,7 +1541,7 @@ class BuildTrackSelectPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Stable track offers thoroughly tested releases. Beta track offers active pre-release compilation builds. Experiment channel provides bleeding-edge builds with potential instability.'
+                'Stable track provides thoroughly tested everyday releases. Beta track delivers early feature previews. Experiment channel delivers bleeding-edge builds intended for active testing and diagnostics.'
                     .localized(context),
                 style: TextStyle(
                   color: p.text3,
@@ -1461,13 +1584,13 @@ class BuildTrackSelectPage extends StatelessWidget {
               _buildNumberingRow(
                 context,
                 '6.',
-                'The Experiment channel features Experimental Releases (ER). Builds follow sequential experimental numbering (e.g., 8.0.0E1, 8.0.0E2) until the next priority, beta, or stable milestone is released.',
+                'Experiment releases (ER) carry sequential tags (e.g., 8.0.0E1, 8.0.0E2) ahead of beta or stable milestones.',
               ),
               const SizedBox(height: 8),
               _buildNumberingRow(
                 context,
                 '7.',
-                'Experiment channel subscribers receive ALL updates across NoteKar: whenever a Stable, Priority, Beta, or Experimental release is published, you will receive it immediately.',
+                'Subscribers receive every build instantly across all tracks—including Stable, Priority, Beta, and Experimental updates.',
               ),
             ],
           ),

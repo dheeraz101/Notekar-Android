@@ -383,7 +383,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
 
   Future<void> _openAdvancedFilter() async {
     final cats = await CategoryService().getCategories();
-    final tags = await TagService.instance.getAllTags();
+    final tags = TagService.instance.getUsedTags(widget.entries);
     if (!mounted) return;
     final res = await TimelineFilterSheet.show(
       context,
@@ -1200,37 +1200,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                 ),
                               ),
                             ),
-                            () {
-                              final todayK = dateKey(DateTime.now());
-                              final activeSec = _daySections
-                                  .where(
-                                    (s) =>
-                                        s.dateKey ==
-                                        (_selectedDateKey ?? todayK),
-                                  )
-                                  .firstOrNull;
-                              if (activeSec != null &&
-                                  activeSec.items.isNotEmpty &&
-                                  _viewMode != 'calendar') {
-                                return SliverToBoxAdapter(
-                                  child: Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                      0,
-                                      0,
-                                      0,
-                                      spacing12,
-                                    ),
-                                    child: _TodayInlineInsightCard(
-                                      p: widget.p,
-                                      section: activeSec,
-                                    ),
-                                  ),
-                                );
-                              }
-                              return const SliverToBoxAdapter(
-                                child: SizedBox.shrink(),
-                              );
-                            }(),
+                            const SliverToBoxAdapter(child: SizedBox.shrink()),
                             if (_isProcessingTimeline && _timelineRows.isEmpty)
                               const SliverFillRemaining(
                                 hasScrollBody: false,
@@ -1480,65 +1450,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                           ],
                                                         ),
                                                       ),
-                                                    PressableScale(
-                                                      onTap: () {
-                                                        HapticFeedback.lightImpact();
-                                                        setState(() {
-                                                          _activeInsightsSection =
-                                                              sec;
-                                                        });
-                                                      },
-                                                      child: Container(
-                                                        margin:
-                                                            const EdgeInsets.only(
-                                                              left: 6,
-                                                            ),
-                                                        padding:
-                                                            const EdgeInsets.symmetric(
-                                                              horizontal: 8,
-                                                              vertical: 3,
-                                                            ),
-                                                        decoration: BoxDecoration(
-                                                          color: widget.p.accent
-                                                              .withValues(
-                                                                alpha: 0.12,
-                                                              ),
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                8,
-                                                              ),
-                                                        ),
-                                                        child: Row(
-                                                          mainAxisSize:
-                                                              MainAxisSize.min,
-                                                          children: [
-                                                            Text(
-                                                              'Insights',
-                                                              style: TextStyle(
-                                                                color: widget
-                                                                    .p
-                                                                    .accent,
-                                                                fontSize: 11,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w700,
-                                                              ),
-                                                            ),
-                                                            const SizedBox(
-                                                              width: 3,
-                                                            ),
-                                                            Icon(
-                                                              Icons
-                                                                  .chevron_right_rounded,
-                                                              size: 12,
-                                                              color: widget
-                                                                  .p
-                                                                  .accent,
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ),
                                                   ],
                                                 ),
                                               ],
@@ -3484,6 +3395,7 @@ class _HistoryNoticePillState extends State<_HistoryNoticePill>
   }
 }
 
+// ignore: unused_element
 class _TodayInlineInsightCard extends StatelessWidget {
   const _TodayInlineInsightCard({required this.p, required this.section});
 

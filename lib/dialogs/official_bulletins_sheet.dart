@@ -325,14 +325,14 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: p.green.withValues(alpha: 0.08),
+            color: p.surface2,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: p.green.withValues(alpha: 0.25)),
+            border: Border.all(color: p.border.withValues(alpha: 0.5)),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.verified_user_rounded, color: p.green, size: 18),
+              Icon(CupertinoIcons.lock_shield_fill, color: p.blue, size: 20),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
@@ -341,7 +341,7 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
                     Text(
                       'ZERO-TRACKING GUARANTEE'.localized(context),
                       style: TextStyle(
-                        color: p.green,
+                        color: p.blue,
                         fontSize: 10.5,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 0.8,
@@ -386,12 +386,12 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
                   width: 52,
                   height: 52,
                   decoration: BoxDecoration(
-                    color: p.accent.withValues(alpha: 0.12),
+                    color: p.blue.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     CupertinoIcons.news_solid,
-                    color: p.accent,
+                    color: p.blue,
                     size: 26,
                   ),
                 ),
@@ -421,7 +421,7 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
               p: p,
               title: 'CRITICAL ADVISORIES'.localized(context),
               color: p.red,
-              icon: Icons.error_outline_rounded,
+              icon: CupertinoIcons.exclamationmark_triangle_fill,
             ),
             for (final n in critical)
               _NoticeCard(
@@ -433,13 +433,13 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
             const SizedBox(height: spacing16),
           ],
 
-          // Feature Spotlights / Showcase (WhatsApp Status style feature highlights)
+          // Feature Spotlights / Showcase
           if (features.isNotEmpty) ...[
             _NoticeSectionHeader(
               p: p,
               title: 'FEATURE SPOTLIGHT'.localized(context),
-              color: const Color(0xFF00C853),
-              icon: Icons.auto_awesome_rounded,
+              color: const Color(0xFF30B0C7),
+              icon: CupertinoIcons.sparkles,
             ),
             for (final n in features)
               _NoticeCard(
@@ -456,8 +456,8 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
             _NoticeSectionHeader(
               p: p,
               title: 'SECURITY ADVISORIES'.localized(context),
-              color: const Color(0xFF7C4DFF),
-              icon: Icons.security_rounded,
+              color: const Color(0xFF5856D6),
+              icon: CupertinoIcons.shield_fill,
             ),
             for (final n in security)
               _NoticeCard(
@@ -474,8 +474,8 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
             _NoticeSectionHeader(
               p: p,
               title: 'RELEASE BULLETINS'.localized(context),
-              color: p.accent,
-              icon: Icons.campaign_rounded,
+              color: p.blue,
+              icon: CupertinoIcons.bell_fill,
             ),
             for (final n in bulletins)
               _NoticeCard(
@@ -493,7 +493,7 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
               p: p,
               title: 'CURATED TIPS & BEST PRACTICES'.localized(context),
               color: p.orange,
-              icon: Icons.lightbulb_outline_rounded,
+              icon: CupertinoIcons.lightbulb_fill,
             ),
             for (final n in tips)
               _NoticeCard(
@@ -565,27 +565,21 @@ class _NoticeCard extends StatelessWidget {
     final isCritical = notice.isCritical;
     final isSecurity = notice.isSecurity;
     final isFeature = notice.isFeature;
-    final badgeColor = isCritical
+    final isTip = notice.isCuratedTip;
+
+    final Color badgeColor = isCritical
         ? p.red
         : (isSecurity
-              ? const Color(0xFF7C4DFF)
+              ? const Color(0xFF5856D6)
               : (isFeature
-                    ? const Color(0xFF00C853)
-                    : (notice.isReleaseBulletin ? p.accent : p.orange)));
-    final cardColor = isCritical
-        ? p.red.withValues(alpha: 0.06)
-        : (isSecurity
-              ? const Color(0xFF7C4DFF).withValues(alpha: 0.06)
-              : (isFeature
-                    ? const Color(0xFF00C853).withValues(alpha: 0.08)
-                    : p.surface2));
-    final borderColor = isCritical
+                    ? const Color(0xFF30B0C7)
+                    : (isTip ? p.orange : p.blue)));
+    final Color cardColor = isCritical
+        ? p.red.withValues(alpha: 0.05)
+        : p.surface2;
+    final Color borderColor = isCritical
         ? p.red.withValues(alpha: 0.35)
-        : (isSecurity
-              ? const Color(0xFF7C4DFF).withValues(alpha: 0.35)
-              : (isFeature
-                    ? const Color(0xFF00C853).withValues(alpha: 0.35)
-                    : p.border.withValues(alpha: 0.5)));
+        : p.border.withValues(alpha: 0.5);
 
     final hasAction =
         (notice.url != null && notice.url!.trim().isNotEmpty) ||

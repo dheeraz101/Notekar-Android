@@ -132,9 +132,14 @@ class SearchIndexService {
     for (final set in _tokenInvertedIndex.values) {
       set.remove(id);
     }
-    for (final set in _hashtagInvertedIndex.values) {
+    _hashtagInvertedIndex.removeWhere((key, set) {
       set.remove(id);
-    }
+      if (set.isEmpty) {
+        _knownTagsWithHash.remove('#$key');
+        return true;
+      }
+      return false;
+    });
     for (final set in _categoryInvertedIndex.values) {
       set.remove(id);
     }
@@ -145,13 +150,20 @@ class SearchIndexService {
   }
 
   /// Returns all known hashtags (e.g. ['#deepwork', '#gym']) in sorted order.
+  /// Only returns tags that currently have at least one active moment.
   List<String> getAllKnownTags() {
     if (_sortedKnownTagsCache != null) {
       return _sortedKnownTagsCache!;
     }
-    final sorted = _knownTagsWithHash.toList()..sort();
-    _sortedKnownTagsCache = sorted;
-    return sorted;
+    final activeTags = <String>[];
+    for (final entry in _hashtagInvertedIndex.entries) {
+      if (entry.value.isNotEmpty) {
+        activeTags.add('#${entry.key}');
+      }
+    }
+    activeTags.sort();
+    _sortedKnownTagsCache = activeTags;
+    return activeTags;
   }
 
   /// Fast $O(K)$ prefix autocomplete for tags.

@@ -880,6 +880,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
       unawaited(_evaluateStreakGuardian(entries));
       if (_mode == 'two-way' && (_sessionStart != null || _inout == 'out')) {
         _startGoalCelebrationWatcher();
+        if (_lastId == null) {
+          final inMoment = entries.where((e) => e.type == 'in').firstOrNull;
+          if (inMoment != null) {
+            _lastId = inMoment.id;
+          }
+        }
       }
 
       final wasCorrupted =
@@ -1901,6 +1907,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
   void _showUndo() {
     _undoTimer?.cancel();
+    // In live sessions, keep undo visible until user closes/ends the session
+    final isLiveSession =
+        _mode == 'two-way' && (_sessionStart != null || _inout == 'out');
+    if (isLiveSession) {
+      return;
+    }
     _undoTimer = Timer(const Duration(milliseconds: 4500), () {
       if (mounted) setState(() => _lastId = null);
     });
@@ -2031,6 +2043,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       if (_lastId == id) _lastId = null;
     });
     await _deleteStoredEntry(id);
+    unawaited(TagService.instance.pruneUnusedTags(_entries));
     unawaited(_updateAndroidWidget());
   }
 
@@ -2101,6 +2114,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     });
 
     await _saveEntry(updatedMoment);
+    unawaited(TagService.instance.pruneUnusedTags(_entries));
   }
 
   Future<void> _updateAndroidWidget() async {
@@ -2700,7 +2714,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   TimelineFilterCriteria _homeTimelineFilter = const TimelineFilterCriteria();
 
   Future<void> _openHomeTimelineFilter() async {
-    final tags = TagService.instance.getAllKnownTags(_entries);
+    final tags = TagService.instance.getUsedTags(_entries);
     if (!mounted) return;
     final res = await TimelineFilterSheet.show(
       context,
@@ -4845,6 +4859,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
                     message: message,
                     onAddNote: _openNoteForLastCapture,
                     noteLabel: noteLabel,
+                    persistent:
+                        _mode == 'two-way' &&
+                        (_sessionStart != null || _inout == 'out'),
                     onDismiss: () {
                       if (mounted) {
                         setState(() => _lastId = null);

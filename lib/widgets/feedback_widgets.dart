@@ -80,6 +80,7 @@ class UndoToast extends StatefulWidget {
     this.onAddNote,
     this.noteLabel,
     this.onDismiss,
+    this.persistent = false,
   });
 
   final Palette p;
@@ -89,6 +90,7 @@ class UndoToast extends StatefulWidget {
   final VoidCallback? onAddNote;
   final String? noteLabel;
   final VoidCallback? onDismiss;
+  final bool persistent;
 
   @override
   State<UndoToast> createState() => _UndoToastState();
@@ -103,24 +105,32 @@ class _UndoToastState extends State<UndoToast>
     super.initState();
     _controller =
         AnimationController(
-            vsync: this,
-            duration: const Duration(milliseconds: 4500),
-          )
-          ..addStatusListener((status) {
-            if (status == AnimationStatus.completed) {
-              widget.onDismiss?.call();
-            }
-          })
-          ..forward();
+          vsync: this,
+          duration: const Duration(milliseconds: 4500),
+        )..addStatusListener((status) {
+          if (status == AnimationStatus.completed) {
+            widget.onDismiss?.call();
+          }
+        });
+
+    if (!widget.persistent) {
+      _controller.forward();
+    }
   }
 
   @override
   void didUpdateWidget(covariant UndoToast oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.token != widget.token) {
-      _controller
-        ..reset()
-        ..forward();
+    if (oldWidget.token != widget.token ||
+        oldWidget.persistent != widget.persistent) {
+      if (widget.persistent) {
+        _controller.stop();
+        _controller.value = 0.0;
+      } else {
+        _controller
+          ..reset()
+          ..forward();
+      }
     }
   }
 

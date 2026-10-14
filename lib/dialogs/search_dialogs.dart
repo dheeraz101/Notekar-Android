@@ -104,7 +104,7 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
   @override
   void initState() {
     super.initState();
-    _knownTags = TagService.instance.getAllKnownTags(widget.entries);
+    _knownTags = TagService.instance.getUsedTags(widget.entries);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
@@ -114,7 +114,7 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
   void didUpdateWidget(covariant NoteSearchContent oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!identical(oldWidget.entries, widget.entries)) {
-      _knownTags = TagService.instance.getAllKnownTags(widget.entries);
+      _knownTags = TagService.instance.getUsedTags(widget.entries);
     }
   }
 

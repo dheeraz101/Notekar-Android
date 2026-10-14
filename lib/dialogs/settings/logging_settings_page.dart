@@ -223,7 +223,7 @@ class _LoggingSettingsPageState extends State<LoggingSettingsPage> {
 
   void _openDailyWrapup() {
     final moments = MomentRepository().getAllMoments();
-    DailyWrapupSheet.show(
+    DailyWrapupPage.open(
       context,
       p: widget.p,
       moments: moments,

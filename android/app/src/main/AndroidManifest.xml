@@ -61,11 +61,21 @@
                 <data android:scheme="notekar" />
             </intent-filter>
 
-            <!-- Android Share Target (Text only) -->
+        </activity>
+
+        <!-- Silent Share Target: logs shared text, links, or images without opening MainActivity UI -->
+        <activity
+            android:name=".ShareReceiverActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:launchMode="singleTask">
+            <!-- Android Share Target (Text only / URLs) -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="text/plain" />
+                <data android:mimeType="text/*" />
             </intent-filter>
 
             <!-- Android Share Target (Single Image) -->

@@ -216,7 +216,7 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
             // Do NOT mutate local preferences anymore to avoid state de-syncs.
             // Flutter will process the queue and update the widgets via MethodChannel.
             MainActivity.notifyBackgroundLogRecorded()
-            Toast.makeText(context, "Logged to queue...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "⚡ Logged to NoteKar", Toast.LENGTH_SHORT).show()
         }
 
         // Keep old signature but unused

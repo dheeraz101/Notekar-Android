@@ -203,6 +203,55 @@ class TagService {
     return tag.startsWith('#') ? tag.substring(1) : tag;
   }
 
+  /// Returns all hashtags actively present on at least one moment in [entries].
+  /// Never returns orphan or unused tags with 0 entries.
+  List<String> getUsedTags(List<Moment> entries) {
+    final used = <String>{};
+    for (final entry in entries) {
+      for (final tag in entry.effectiveTags) {
+        final clean = tag.trim().toLowerCase();
+        if (clean.isNotEmpty) {
+          used.add(clean.startsWith('#') ? clean : '#$clean');
+        }
+      }
+    }
+    final list = used.toList()..sort();
+    return list;
+  }
+
+  /// Prunes custom tags and recent tags that have 0 occurrences across active [entries].
+  Future<int> pruneUnusedTags(List<Moment> entries) async {
+    await load();
+    final used = getUsedTags(
+      entries,
+    ).map((t) => stripHash(t).toLowerCase()).toSet();
+
+    // 1. Prune _recentTags
+    final initialRecentCount = _recentTags.length;
+    _recentTags = _recentTags
+        .where((t) => used.contains(stripHash(t).toLowerCase()))
+        .toList();
+
+    // 2. Prune custom activity tags that are not used in any moment
+    final initialActivityCount = _activityTags.length;
+    _activityTags = _activityTags.where((t) {
+      if (!t.isCustom) return true; // Keep default 15 tags
+      final tagClean = stripHash(t.hashtag).toLowerCase();
+      final labelClean = stripHash(t.label).toLowerCase();
+      return used.contains(tagClean) || used.contains(labelClean);
+    }).toList();
+
+    int removed =
+        (initialRecentCount - _recentTags.length) +
+        (initialActivityCount - _activityTags.length);
+    if (removed > 0) {
+      await _saveActivityTags();
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_recentTagsKey, _recentTags);
+    }
+    return removed;
+  }
+
   /// Get all unique tags asynchronously on a background isolate for large entry sets.
   Future<List<String>> getAllKnownTagsAsync(List<Moment> entries) {
     if (entries.length < 50) {
@@ -235,10 +284,10 @@ class TagService {
   Future<List<String>> getAllTags([List<Moment>? entries]) async {
     await load();
     if (entries != null) {
-      return getAllKnownTags(entries);
+      return getUsedTags(entries);
     }
     final moments = MomentRepository().getAllMoments();
-    return getAllKnownTags(moments);
+    return getUsedTags(moments);
   }
 
   /// Suggest tags matching a prefix (for autocomplete). If prefix is empty or just #, returns recent and popular tags.
