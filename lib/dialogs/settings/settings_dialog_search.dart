@@ -1540,6 +1540,86 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         status: null,
       ),
       item(
+        title: 'Silent Share Intake',
+        subtitle: 'Background photo, link, and text intake without opening app',
+        category: 'Logging',
+        icon: CupertinoIcons.share,
+        keywords: [
+          'silent share',
+          'share intake',
+          'share',
+          'receive image',
+          'receive link',
+          'background share',
+          'intake',
+          'share sheet',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: null,
+      ),
+      item(
+        title: 'Daily Wrap-up & Day Sealing',
+        subtitle:
+            'Full summary view of day pacing, session counts, and day sealing',
+        category: 'Moments',
+        icon: CupertinoIcons.doc_text,
+        keywords: [
+          'wrap up',
+          'daily wrapup',
+          'seal day',
+          'day summary',
+          'insights',
+          'daily report',
+          'reflection',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: null,
+      ),
+      item(
+        title: 'End of Support Screen & Developer Quest',
+        subtitle: '365-day sovereign notice and hidden 7-tap developer quest',
+        category: 'Diagnostics',
+        icon: CupertinoIcons.shield_slash,
+        keywords: [
+          'end of support',
+          'eos',
+          'developer quest',
+          'quest',
+          'easter egg',
+          'hidden quest',
+          '365 days',
+          'diagnostics',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: null,
+      ),
+      item(
+        title: 'Interactive Note Preview Links',
+        subtitle:
+            'Clickable URLs with Cupertino departure security confirmation',
+        category: 'Privacy & Security',
+        icon: CupertinoIcons.link,
+        keywords: [
+          'links',
+          'safe link',
+          'departure warning',
+          'external links',
+          'url preview',
+          'note links',
+          'link confirmation',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: null,
+      ),
+      item(
         title: 'Minimal Sobriety Home Widget',
         subtitle: 'Apple-inspired live counter with days and live seconds',
         category: 'Focus & Targets',
@@ -2911,8 +2991,17 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
     if (result.title == 'Instant Camera Photo Widget' ||
         result.title == 'Multi-Photo Import (Up to 5)' ||
         result.title == 'Voice Audio Scrubber & Waveform' ||
-        result.title == 'Android Share Sheet Ingestion') {
+        result.title == 'Android Share Sheet Ingestion' ||
+        result.title == 'Silent Share Intake') {
       _openCategory('Logging');
+      return;
+    }
+    if (result.title == 'Daily Wrap-up & Day Sealing') {
+      _openCategory('Moments');
+      return;
+    }
+    if (result.title == 'Interactive Note Preview Links') {
+      _openCategory('Privacy & Security');
       return;
     }
     if (result.title == 'Media Moments Filter') {
@@ -2925,7 +3014,8 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
     }
     if (result.title == 'Diagnostics' ||
         result.title == 'Fault Isolation & Circuit Breakers' ||
-        result.title == 'Circuit Breakers') {
+        result.title == 'Circuit Breakers' ||
+        result.title == 'End of Support Screen & Developer Quest') {
       _openCategory('Diagnostics', parent: 'Developer Options');
       return;
     }

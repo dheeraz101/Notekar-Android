@@ -1412,6 +1412,109 @@ const List<HelpGuideItem> allHelpFaqItems = [
       'duplicate check',
     ],
   ),
+  HelpGuideItem(
+    icon: Icons.share_rounded,
+    title: 'Silent Share Intake & Instant Storage',
+    content:
+        'Share photos, web links, or text snippets from any Android app into NoteKar. Content is logged silently in the background with the exact timestamp and attached to a standalone moment without interrupting your current workflow or opening the app.',
+    isFaq: false,
+    keywords: [
+      'share',
+      'silent share',
+      'share intake',
+      'share receiver',
+      'background log',
+      'share image',
+      'share link',
+      'text snippet',
+      'import',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.summarize_rounded,
+    title: 'Dedicated Daily Wrap-up & Day Sealing',
+    content:
+        'Access the dedicated Daily Wrap-up page from history timeline sheets. Review total focus time, session distribution, and day pacing, then seal your day with tactile haptic confirmation and celebratory visual feedback.',
+    isFaq: false,
+    keywords: [
+      'wrap up',
+      'daily wrapup',
+      'seal day',
+      'summary',
+      'day report',
+      'reflection',
+      'milestone',
+      'insights',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.campaign_rounded,
+    title: 'Official Bulletins & Critical Notices',
+    content:
+        'Stay informed with direct, zero-telemetry announcements fetched from NoteKar\'s public GitHub repository. Features high-contrast monochrome Apple cards, security alerts, release bulletins, and 1-tap in-app shortcuts.',
+    isFaq: false,
+    keywords: [
+      'bulletins',
+      'official bulletins',
+      'notices',
+      'announcements',
+      'advisories',
+      'zero telemetry',
+      'github feed',
+      'monochrome',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.local_fire_department_rounded,
+    title: 'Sobriety Companion & Fast Relapse Reset',
+    content:
+        'Tap and hold the home screen sobriety capsule to open configuration settings. Log #relapse tags directly inside notes or tap the Android widget\'s Reset button to instantly synchronize your streak across the app, widget, and persistent notifications.',
+    isFaq: false,
+    keywords: [
+      'sobriety',
+      'clean streak',
+      'streak reset',
+      'relapse',
+      'shields',
+      'habit tracker',
+      'tap and hold',
+      'widget reset',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.verified_user_rounded,
+    title: 'End of Support Card & Diagnostics Quest',
+    content:
+        'NoteKar features an Apple HIG full-screen card displayed if an installation hasn\'t received updates for 365+ days, thanking you for using the sovereign tool with direct links to the GitHub repository. To preview this screen, unlock the hidden developer quest by tapping the build number 7 times in the Diagnostics page.',
+    isFaq: false,
+    keywords: [
+      'end of support',
+      'eos',
+      'developer quest',
+      'easter egg',
+      'hidden quest',
+      'diagnostics',
+      'build number',
+      'tap 7 times',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.link_rounded,
+    title: 'Interactive Note Preview Links & Safe Departure',
+    content:
+        'Web URLs and Markdown links in note preview popups are highlighted and clickable. Tapping any link opens NoteKar\'s Cupertino external link departure alert, displaying the destination domain and confirming your intent before opening your browser.',
+    isFaq: false,
+    keywords: [
+      'links',
+      'clickable links',
+      'note preview',
+      'url',
+      'external link',
+      'safe link',
+      'departure warning',
+      'markdown link',
+    ],
+  ),
 ];
 
 /// Combined catalog for unified search

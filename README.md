@@ -10,8 +10,8 @@
 
 ---
 
-[![Version](https://img.shields.io/badge/version-7.5.7-0070F3.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android/releases)
-[![Build](https://img.shields.io/badge/build-26BR1004-7000FF.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android/releases)
+[![Version](https://img.shields.io/badge/version-7.5.9-0070F3.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android/releases)
+[![Build](https://img.shields.io/badge/build-26BR1011a-7000FF.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android/releases)
 [![Android](https://img.shields.io/badge/Android-SDK%2021%2B-248A3D.svg?style=flat-square&logo=android&logoColor=white)](https://developer.android.com)
 [![Flutter](https://img.shields.io/badge/Flutter-%5E3.12.0-02569B.svg?style=flat-square&logo=flutter&logoColor=white)](https://flutter.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-EAB308.svg?style=flat-square)](LICENSE)
@@ -20,7 +20,7 @@
 
 <p align="center">
   <a href="https://github.com/dheeraz101/Notekar-Android/releases/latest">
-    <img src="https://img.shields.io/badge/📥_Download_Latest_APK-v7.5.7-248A3D?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" />
+    <img src="https://img.shields.io/badge/📥_Download_Latest_APK-v7.5.9-248A3D?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" />
   </a>
   &nbsp;&nbsp;
   <a href="https://notekarapp.vercel.app/">
@@ -91,23 +91,26 @@
 - **Multi-Photo Import (Up to 5 Photos)**: Attach up to 5 photos simultaneously to any note or moment. Features high-speed camera captures, multi-file gallery selection, thumbnail preview grids, and a full-screen swipeable photo lightbox.
 - **Dynamic Amplitude Waveform Visualizer**: Real-time microphone amplitude metering bar animation while recording voice notes, confirming active voice input.
 - **Full-Width Voice Notes Player & Scrubber**: Interactive audio player pill spanning 100% card width with 1:1 finger waveform scrubbing, elapsed/remaining time counters, 20-bar completion lighting, and 1x / 1.5x / 2x speed cycling with zero paused-state playback leakage.
-- **Android Share Sheet Ingestion**: Share up to 5 photos, links, or text snippets from any Android app directly into NoteKar. Instantly auto-logs in Single mode with current timestamp and caption.
+- **Silent Share Intake & Instant Storage**: Share up to 5 photos, web links, or text snippets from any Android app directly into NoteKar. Content is logged silently in the background with the exact timestamp and attached to a standalone moment without interrupting your current workflow or opening the app.
 
 ### 📜 4. Life Ledger Timeline & Collapsible Media Cards
 - **Top-Aligned Continuous Rail Nodes**: Single-entry number circles mathematically aligned with card headers, ensuring pristine vertical continuity even on tall cards with media and long notes.
+- **Dedicated Daily Wrap-up & Day Sealing**: Full-screen daily summary view accessible from history timeline sheets, featuring focus distribution, day pacing, tactile day sealing, and celebratory milestone animations.
+- **Interactive Note Preview Links & Safe Departure**: Render rich markdown text in previews with clickable links protected by a native Cupertino departure confirmation warning before opening external websites.
+- **Persistent Live Session Undo with Acoustic Click**: 2-way sessions provide a persistent undo action until dismissed, accompanied by tactile haptics and an audible acoustic click sound on tap.
 - **Side-by-Side Dual Pill Row**: Photo and voice attachment pills collapse gracefully onto a unified single line, maximizing viewport efficiency.
-- **Markdown Text & Safe Link Departure**: Render rich markdown text in previews with clickable links protected by a native Cupertino departure confirmation warning.
 - **Connected Session Pairing**: Automatically connects chronological `IN` and `OUT` moments into fluid session cards with duration pills.
 - **Robust Rest & Recovery Lifecycle**: Strict active-day bounding ensures historical logs never persist as zombie live sessions while preserving instant 1-tap live termination.
 - **Undo Safety Bed**: Solid red swipe-to-delete backing with a 5-second Dynamic Island countdown undo pill.
 - **iOS-Style Calendar Sheet**: Fluid calendar sheet with solid iOS System Red selection rings, past-date jumps, and event dots.
 
 ### 📱 5. Apple HIG Android Home Screen Widgets
-- **Minimal Sobriety Widget**: Clean Apple-inspired live counter showing days clean alongside live-ticking hours, minutes, and seconds via native Chronometer with zero background battery drain. Tap anywhere to open Sobriety settings.
+- **Minimal Sobriety Widget**: Clean Apple-inspired live counter showing days clean alongside live-ticking hours, minutes, and seconds via native Chronometer with zero background battery drain. Tap anywhere to open Sobriety settings, or tap Reset to instantly log a relapse.
 - **Instant Camera Logging Widget**: Home screen widget featuring a live preview thumbnail of your last logged photo and a prominent 1-tap camera button to capture and log photo moments in a fraction of a second.
 - **Quick Logging & Life Audit Widgets**: Full-width interactive widgets to log single moments, start/stop sessions, write quick notes, and monitor waking intentionality ratios.
 
 ### 📢 6. Official Bulletins & Feature Showcase
+- **Zero-Telemetry Official Bulletins**: Stay informed with announcements fetched from NoteKar's static GitHub feed. Completely tracker-free, styled with high-contrast Apple monochrome black & white cards and buttons.
 - **Interactive Feature Spotlight**: WhatsApp Status-style feature showcase feed informing users about new features and updates directly in-app without noisy push notifications.
 - **Seamless Deep-Link Actions**: Tapping a bulletin action directly opens the respective in-app destination (e.g. `page:sobriety`, `page:audit`, `page:plus_note`, `page:camera`, or `settings:<category>`).
 
@@ -127,11 +130,16 @@
 - **Unified Multimodal Search**: High-performance full-text search indexing text notes, voice memos, photo attachments, and single/2-way moments.
 - **Direct Inline Playback & Tap-to-Edit**: Play voice memos, preview photo attachments, and tap the prominent `Edit` button for instant note refinement.
 
-### 🌱 10. Sobriety Companion & iOS-Style Relapse Controls
+### 🌱 10. Sobriety Companion & Fast Relapse Reset
+- **Home Screen Glass Capsule**: Touch and hold the home screen sobriety capsule to open configuration settings.
 - **21 Neuroscience Milestones**: Track habits and clean streaks across 34 narrative themes (Science, Samurai, Cyberpunk, etc.).
-- **iOS-Style Relapse Mode Switches**: Intuitive Apple HIG switches to configure whether a relapse resets your clean streak or pauses continuity without resetting milestone history.
+- **Immediate Widget & Relapse Synchronization**: Log `#relapse` directly inside note tags or tap the widget's Reset button to instantly synchronize your clean streak across the app, home screen widget, and persistent notifications.
 - **Urge Surfing Breathing Guide**: Guided 4-7-8 breathing circle to conquer cravings and regulate the nervous system.
 - **Streak Shields**: Emergency protection mechanics preventing accidental streak resets.
+
+### ⌛ 11. End of Support Screen & Developer Quest Easter Egg
+- **365-Day Sovereign Life Cycle**: If an installation hasn't received updates for 365+ days, NoteKar presents a full-screen Apple HIG card thanking the user for using NoteKar and providing direct links to the open-source GitHub repository.
+- **Diagnostics Quest Easter Egg**: Tapping the build number 7 times on the Diagnostics page unlocks the secret developer quest and presents the End of Support preview screen.
 
 ---
 
@@ -157,9 +165,9 @@ NoteKar employs a rigorous multi-tier release architecture catering to all user 
 +-------------------------------------------------------------------------------+
 ```
 
-- **Comprehensive Update Coverage**: The Experiment channel receives **ALL** updates across the app (Stable, Priority, Beta, and Experimental). Whenever any release is published on any track, users on the Experiment channel receive it immediately.
-- **Version Numbering Logic**: Experimental releases append `E1`, `E2`, etc. to the latest release base (e.g. `8.0.0E1`, `8.0.0E2`). When a new Stable, Priority, or Beta release is published (e.g. `8.1.0`), experimental builds reset to `8.1.0E1`.
-- **Apple HIG Risk Disclosure Modal**: Switching to the Experiment channel displays an ultra-clear red warning modal with mandatory options: `Backup First` (exports local JSON backup), `Cancel`, and `I Agree`.
+- **User-Centric Previews**: The Experiment channel gives you immediate access to brand-new features and design improvements as they are built, weeks before public release.
+- **Comprehensive Update Coverage**: Subscribers receive every update instantly across all release tracks—from stable releases to instant preview builds.
+- **Apple HIG Risk Disclosure Screen**: Switching to the Experiment channel presents a full-screen Apple-inspired modal clearly explaining what to expect, with options to `Backup Data First`, `Cancel`, or `I Understand & Enable Channel`.
 
 ---
 

@@ -220,6 +220,10 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
     final bulletins = _notices.where((n) => n.isReleaseBulletin).toList();
     final tips = _notices.where((n) => n.isCuratedTip).toList();
 
+    final isLight = p.name == 'light' || p.bg.computeLuminance() > 0.5;
+    final bwBg = isLight ? Colors.black : Colors.white;
+    final bwFg = isLight ? Colors.white : Colors.black;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -280,7 +284,7 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: p.accent.withValues(alpha: 0.12),
+                    color: bwBg,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: _checking
@@ -290,23 +294,19 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
                           child: Center(
                             child: CupertinoActivityIndicator(
                               radius: 7,
-                              color: p.accent,
+                              color: bwFg,
                             ),
                           ),
                         )
                       : Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
-                              Icons.refresh_rounded,
-                              size: 14,
-                              color: p.accent,
-                            ),
+                            Icon(Icons.refresh_rounded, size: 14, color: bwFg),
                             const SizedBox(width: 6),
                             Text(
                               'Check Now'.localized(context),
                               style: TextStyle(
-                                color: p.accent,
+                                color: bwFg,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w800,
                               ),
@@ -563,17 +563,11 @@ class _NoticeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isCritical = notice.isCritical;
-    final isSecurity = notice.isSecurity;
-    final isFeature = notice.isFeature;
-    final isTip = notice.isCuratedTip;
 
-    final Color badgeColor = isCritical
-        ? p.red
-        : (isSecurity
-              ? const Color(0xFF5856D6)
-              : (isFeature
-                    ? const Color(0xFF30B0C7)
-                    : (isTip ? p.orange : p.blue)));
+    final isLight = p.name == 'light' || p.bg.computeLuminance() > 0.5;
+    final bwBg = isLight ? Colors.black : Colors.white;
+    final bwFg = isLight ? Colors.white : Colors.black;
+
     final Color cardColor = isCritical
         ? p.red.withValues(alpha: 0.05)
         : p.surface2;
@@ -676,15 +670,18 @@ class _NoticeCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 3.5,
+                ),
                 decoration: BoxDecoration(
-                  color: badgeColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(6),
+                  color: bwBg,
+                  borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
                   notice.badgeLabel,
                   style: TextStyle(
-                    color: badgeColor,
+                    color: bwFg,
                     fontSize: 9.5,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0.6,
@@ -727,10 +724,10 @@ class _NoticeCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,
-                    vertical: 7,
+                    vertical: 7.5,
                   ),
                   decoration: BoxDecoration(
-                    color: badgeColor,
+                    color: bwBg,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Row(
@@ -738,14 +735,14 @@ class _NoticeCard extends StatelessWidget {
                     children: [
                       Text(
                         notice.actionLabel(context),
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: bwFg,
                           fontSize: 12,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
-                      const SizedBox(width: 4),
-                      Icon(getActionIcon(), color: Colors.white, size: 13),
+                      const SizedBox(width: 5),
+                      Icon(getActionIcon(), color: bwFg, size: 13),
                     ],
                   ),
                 ),

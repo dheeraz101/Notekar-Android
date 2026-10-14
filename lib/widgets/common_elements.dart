@@ -970,13 +970,17 @@ class ExternalLinkConfirmSheet extends StatelessWidget {
                           size: 13,
                         ),
                         const SizedBox(width: 5),
-                        Text(
-                          domain.toUpperCase(),
-                          style: TextStyle(
-                            color: p.text3,
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.4,
+                        Expanded(
+                          child: Text(
+                            domain.toUpperCase(),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: p.text3,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.4,
+                            ),
                           ),
                         ),
                       ],

@@ -1284,7 +1284,7 @@ class ExperimentChannelWarningScreen extends StatelessWidget {
 
                     // Subhead description
                     Text(
-                      'The Experiment channel provides automated pre-releases compiled directly from active development branches. Please review the following details before switching.'
+                      'The Experiment channel lets you test brand-new features and designs before anyone else. Because these features are still in active development, you may experience occasional glitches.'
                           .localized(context),
                       textAlign: TextAlign.center,
                       style: TextStyle(
@@ -1298,35 +1298,35 @@ class ExperimentChannelWarningScreen extends StatelessWidget {
                     // HIG Grouped Cards
                     _buildWarningRow(
                       context: context,
-                      icon: CupertinoIcons.flame_fill,
+                      icon: CupertinoIcons.sparkles,
                       iconColor: p.orange,
-                      title: 'Bleeding-Edge Code',
+                      title: 'Early Feature Access',
                       description:
-                          'Builds contain early, unreleased code that has not completed standard QA and staging verification.',
+                          'Try upcoming tools and design enhancements weeks before they are released to the public.',
                     ),
                     _buildWarningRow(
                       context: context,
                       icon: CupertinoIcons.bolt_badge_a_fill,
                       iconColor: p.red,
-                      title: 'Potential Crashes & Glitches',
+                      title: 'Occasional Bugs & Glitches',
                       description:
-                          'You may encounter unexpected crashes, interface bugs, or battery performance variations during daily usage.',
+                          'Some features might feel unpolished, run slower, or occasionally crash while we are refining them.',
                     ),
                     _buildWarningRow(
                       context: context,
                       icon: CupertinoIcons.arrow_2_circlepath_circle_fill,
                       iconColor: p.accent,
-                      title: 'All Update Tracks Included',
+                      title: 'Instant Automatic Updates',
                       description:
-                          'Subscribers receive every build published to NoteKar: Stable, Priority, Beta, and Experimental builds immediately.',
+                          'You will automatically receive every new preview and stable update directly as soon as it is published.',
                     ),
                     _buildWarningRow(
                       context: context,
-                      icon: CupertinoIcons.archivebox_fill,
+                      icon: CupertinoIcons.shield_fill,
                       iconColor: const Color(0xFF5856D6),
-                      title: 'Data Preservation',
+                      title: 'Protect Your Notes',
                       description:
-                          'While internal databases are protected with automatic recovery points, we strongly advise exporting a backup snapshot first.',
+                          'Your notes are kept safe locally, but we always recommend exporting a quick backup before trying preview channels.',
                     ),
                   ],
                 ),
@@ -1525,9 +1525,8 @@ class BuildTrackSelectPage extends StatelessWidget {
             SettingsRow(
               p: p,
               title: 'Experiment Channel',
-              subtitle:
-                  'Bleeding-edge pre-releases. Receives all channel updates.'
-                      .localized(context),
+              subtitle: 'Preview new features first. May be unstable.'
+                  .localized(context),
               trailing: _activeChannel == 'experiment'
                   ? Icon(CupertinoIcons.checkmark, color: p.red, size: 18)
                   : const SizedBox.shrink(),
@@ -1541,7 +1540,7 @@ class BuildTrackSelectPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Stable track provides thoroughly tested everyday releases. Beta track delivers early feature previews. Experiment channel delivers bleeding-edge builds intended for active testing and diagnostics.'
+                'Stable track offers maximum everyday reliability. Beta track lets you preview upcoming features before release. Experiment channel gives you immediate access to brand-new features as they are built.'
                     .localized(context),
                 style: TextStyle(
                   color: p.text3,
@@ -1584,13 +1583,13 @@ class BuildTrackSelectPage extends StatelessWidget {
               _buildNumberingRow(
                 context,
                 '6.',
-                'Experiment releases (ER) carry sequential tags (e.g., 8.0.0E1, 8.0.0E2) ahead of beta or stable milestones.',
+                'Experiment builds let you test cutting-edge features and new design updates first.',
               ),
               const SizedBox(height: 8),
               _buildNumberingRow(
                 context,
                 '7.',
-                'Subscribers receive every build instantly across all tracks—including Stable, Priority, Beta, and Experimental updates.',
+                'You will automatically receive all updates across every release channel as soon as they become available.',
               ),
             ],
           ),

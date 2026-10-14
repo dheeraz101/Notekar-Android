@@ -192,6 +192,8 @@ class _UndoToastState extends State<UndoToast>
                         const SizedBox(width: 10),
                         PressableScale(
                           onTap: () {
+                            AppSound.click();
+                            AppHaptics.tap();
                             widget.onUndo();
                           },
                           child: Text(

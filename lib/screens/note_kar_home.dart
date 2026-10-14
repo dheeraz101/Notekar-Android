@@ -1956,6 +1956,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
     if (id == null) return;
     final entry = _entries.where((item) => item.id == id).firstOrNull;
     if (entry == null) return;
+    AppSound.click();
+    NotekarHaptics.light(_hapticStyle);
     setState(() {
       _entries = _entries.where((item) => item.id != id).toList();
       _lastId = null;
