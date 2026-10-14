@@ -125,7 +125,7 @@ void main() {
     );
 
     testWidgets(
-      'HistoryDialog embeds Today inline insight card in scrollable view',
+      'HistoryDialog keeps scrollable view clean without redundant inline insights card',
       (tester) async {
         final now = DateTime.now();
         final todayDate = dateKey(now);
@@ -162,11 +162,8 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // Verify inline insight card header is present in scroll view
-        expect(find.text("TODAY'S INSIGHTS"), findsOneWidget);
-        expect(find.text('Tracked'), findsOneWidget);
-        expect(find.text('Longest Flow'), findsOneWidget);
-        expect(find.text('Peak Hour'), findsOneWidget);
+        // Verify redundant inline insight card header is removed from history sheet
+        expect(find.text("TODAY'S INSIGHTS"), findsNothing);
       },
     );
   });
