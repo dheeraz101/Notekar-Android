@@ -234,6 +234,78 @@ void main() {
         await tester.pumpAndSettle();
       },
     );
+
+    testWidgets(
+      'renders formatted markdown text and strips raw syntax like ***, **, *, ~~',
+      (tester) async {
+        const markdownNote = '''
+# Project Brief
+***
+Welcome to ***Very Important Update***.
+Please review **bold goals** and *italic details*.
+Run `git status` before committing.
+Do not forget ~~deprecated steps~~.
+- [ ] First task
+- [x] Completed task
+- Normal bullet point
+''';
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: NotePreviewSheet(
+                p: darkPalette,
+                title: 'Formatted Note Preview',
+                note: markdownNote,
+              ),
+            ),
+          ),
+        );
+
+        // Header without '#'
+        expect(find.textContaining('Project Brief'), findsOneWidget);
+        expect(find.textContaining('# Project Brief'), findsNothing);
+
+        // Divider is rendered as a Divider widget, not raw '***'
+        expect(find.byType(Divider), findsOneWidget);
+        expect(find.text('***'), findsNothing);
+
+        // Bold italic without '***'
+        expect(find.textContaining('Very Important Update'), findsOneWidget);
+        expect(
+          find.textContaining('***Very Important Update***'),
+          findsNothing,
+        );
+
+        // Bold without '**'
+        expect(find.textContaining('bold goals'), findsOneWidget);
+        expect(find.textContaining('**bold goals**'), findsNothing);
+
+        // Italic without '*'
+        expect(find.textContaining('italic details'), findsOneWidget);
+        expect(find.textContaining('*italic details*'), findsNothing);
+
+        // Inline code without backticks
+        expect(find.textContaining('git status'), findsOneWidget);
+        expect(find.textContaining('`git status`'), findsNothing);
+
+        // Strikethrough without '~~'
+        expect(find.textContaining('deprecated steps'), findsOneWidget);
+        expect(find.textContaining('~~deprecated steps~~'), findsNothing);
+
+        // Checkboxes
+        expect(
+          find.byIcon(Icons.check_box_outline_blank_rounded),
+          findsOneWidget,
+        );
+        expect(find.byIcon(Icons.check_box_rounded), findsOneWidget);
+        expect(find.textContaining('First task'), findsOneWidget);
+        expect(find.textContaining('Completed task'), findsOneWidget);
+
+        // Bullet point
+        expect(find.textContaining('Normal bullet point'), findsOneWidget);
+      },
+    );
   });
 
   group('Help Guide Catalog Tests', () {

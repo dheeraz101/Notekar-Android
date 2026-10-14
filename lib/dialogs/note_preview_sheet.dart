@@ -7,7 +7,6 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/apple_hig_action_sheet.dart';
 import 'package:notekar/widgets/common_elements.dart';
-import 'package:notekar/widgets/ios_emoji_text.dart';
 
 /// Read-only note preview bottom sheet with full text viewing, interactive links,
 /// safe external departure confirmation dialog, copying, and edit action.
@@ -80,36 +79,86 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
     _recognizers.clear();
   }
 
-  List<InlineSpan> _buildSpans(String text, TextStyle baseStyle) {
-    _clearRecognizers();
-    if (text.isEmpty) return const [];
+  static final RegExp _inlineTokenRegex = RegExp(
+    r'(\[([^\]]+)\]\((https?://[^\s)]+|www\.[^\s)]+)\))|' // 1: [label](url), 2: label, 3: url
+    r'(https?://[^\s]+|www\.[^\s]+)|' // 4: raw url
+    r'(\*\*\*(?:[^\s*](?:[^*\n]*?[^\s*])?)\*\*\*)|' // 5: ***bold italic***
+    r'(\*\*(?:[^\s*](?:[^*\n]*?[^\s*])?)\*\*)|' // 6: **bold**
+    r'(\*(?:[^\s*](?:[^*\n]*?[^\s*])?)\*)|' // 7: *italic*
+    r'(`(?:[^`\n]+?)`)|' // 8: `code`
+    r'(~~(?:[^\s~](?:[^~\n]*?[^\s~])?)~~)|' // 9: ~~strike~~
+    r'(#[a-zA-Z0-9_\u0900-\u097F\u0080-\uFFFF]+)', // 10: #hashtag
+    caseSensitive: false,
+  );
 
-    final urlRegExp = RegExp(
-      r'(\[([^\]]+)\]\((https?://[^\s)]+|www\.[^\s)]+)\)|https?://[^\s]+|www\.[^\s]+)',
-      caseSensitive: false,
+  static String _cleanNoteBody(String note) {
+    if (note.isEmpty) return '';
+    // Strip standalone hashtags (e.g. #focus), but preserve Markdown headers like '# Heading'
+    final withoutTags = note.replaceAll(
+      RegExp(r'(?:^|\s)#[a-zA-Z0-9_\u0900-\u097F\u0080-\uFFFF]+'),
+      '',
     );
+    final lines = withoutTags.split('\n').map((l) => l.trimRight()).toList();
+    while (lines.isNotEmpty && lines.first.trim().isEmpty) {
+      lines.removeAt(0);
+    }
+    while (lines.isNotEmpty && lines.last.trim().isEmpty) {
+      lines.removeLast();
+    }
+    return lines.join('\n');
+  }
+
+  List<InlineSpan> _buildInlineSpans(
+    String line,
+    TextStyle baseStyle,
+    Palette p,
+  ) {
+    if (line.isEmpty) return const [];
 
     final List<InlineSpan> spans = [];
     int lastIndex = 0;
 
-    for (final match in urlRegExp.allMatches(text)) {
+    for (final match in _inlineTokenRegex.allMatches(line)) {
       if (match.start > lastIndex) {
-        final plain = text.substring(lastIndex, match.start);
+        final plain = line.substring(lastIndex, match.start);
         spans.add(TextSpan(text: plain, style: baseStyle));
       }
 
       final matchedText = match.group(0)!;
-      String displayLabel;
-      String targetUrl;
-      String trailing = '';
 
-      if (matchedText.startsWith('[') &&
+      if (match.group(1) != null &&
           match.group(2) != null &&
           match.group(3) != null) {
-        displayLabel = match.group(2)!;
-        targetUrl = match.group(3)!;
-      } else {
+        // [label](url)
+        var displayLabel = match.group(2)!;
+        var targetUrl = match.group(3)!;
+        if (targetUrl.toLowerCase().startsWith('www.')) {
+          targetUrl = 'https://$targetUrl';
+        }
+
+        final recognizer = TapGestureRecognizer()
+          ..onTap = () {
+            AppHaptics.tap();
+            openExternalLinkSafely(context, p: widget.p, url: targetUrl);
+          };
+        _recognizers.add(recognizer);
+
+        spans.add(
+          TextSpan(
+            text: displayLabel,
+            style: baseStyle.copyWith(
+              color: p.accent,
+              fontWeight: FontWeight.w700,
+              decoration: TextDecoration.underline,
+              decorationColor: p.accent,
+            ),
+            recognizer: recognizer,
+          ),
+        );
+      } else if (match.group(4) != null) {
+        // Raw URL
         String urlCandidate = matchedText;
+        String trailing = '';
         while (urlCandidate.isNotEmpty &&
             (urlCandidate.endsWith('.') ||
                 urlCandidate.endsWith(',') ||
@@ -118,46 +167,416 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
           trailing = urlCandidate[urlCandidate.length - 1] + trailing;
           urlCandidate = urlCandidate.substring(0, urlCandidate.length - 1);
         }
-        displayLabel = urlCandidate;
-        targetUrl = urlCandidate;
-      }
 
-      if (targetUrl.toLowerCase().startsWith('www.')) {
-        targetUrl = 'https://$targetUrl';
-      }
+        String targetUrl = urlCandidate;
+        if (targetUrl.toLowerCase().startsWith('www.')) {
+          targetUrl = 'https://$targetUrl';
+        }
 
-      final recognizer = TapGestureRecognizer()
-        ..onTap = () {
-          AppHaptics.tap();
-          openExternalLinkSafely(context, p: widget.p, url: targetUrl);
-        };
-      _recognizers.add(recognizer);
+        final recognizer = TapGestureRecognizer()
+          ..onTap = () {
+            AppHaptics.tap();
+            openExternalLinkSafely(context, p: widget.p, url: targetUrl);
+          };
+        _recognizers.add(recognizer);
 
-      spans.add(
-        TextSpan(
-          text: displayLabel,
-          style: baseStyle.copyWith(
-            color: widget.p.accent,
-            fontWeight: FontWeight.w700,
-            decoration: TextDecoration.underline,
-            decorationColor: widget.p.accent,
+        spans.add(
+          TextSpan(
+            text: urlCandidate,
+            style: baseStyle.copyWith(
+              color: p.accent,
+              fontWeight: FontWeight.w700,
+              decoration: TextDecoration.underline,
+              decorationColor: p.accent,
+            ),
+            recognizer: recognizer,
           ),
-          recognizer: recognizer,
-        ),
-      );
+        );
 
-      if (trailing.isNotEmpty) {
-        spans.add(TextSpan(text: trailing, style: baseStyle));
+        if (trailing.isNotEmpty) {
+          spans.add(TextSpan(text: trailing, style: baseStyle));
+        }
+      } else if (match.group(5) != null) {
+        // ***bold italic*** -> bold & italic without ***
+        final inner = matchedText.substring(3, matchedText.length - 3);
+        spans.add(
+          TextSpan(
+            text: inner,
+            style: baseStyle.copyWith(
+              fontWeight: FontWeight.w800,
+              fontStyle: FontStyle.italic,
+              color: p.text,
+            ),
+          ),
+        );
+      } else if (match.group(6) != null) {
+        // **bold** -> bold without **
+        final inner = matchedText.substring(2, matchedText.length - 2);
+        spans.add(
+          TextSpan(
+            text: inner,
+            style: baseStyle.copyWith(
+              fontWeight: FontWeight.w700,
+              color: p.text,
+            ),
+          ),
+        );
+      } else if (match.group(7) != null) {
+        // *italic* -> italic without *
+        final inner = matchedText.substring(1, matchedText.length - 1);
+        spans.add(
+          TextSpan(
+            text: inner,
+            style: baseStyle.copyWith(fontStyle: FontStyle.italic),
+          ),
+        );
+      } else if (match.group(8) != null) {
+        // `code` -> monospace without backticks
+        final inner = matchedText.substring(1, matchedText.length - 1);
+        spans.add(
+          TextSpan(
+            text: inner,
+            style: baseStyle.copyWith(
+              fontFamily: 'monospace',
+              letterSpacing: -0.2,
+              color: p.accent,
+              backgroundColor: p.surface3.withValues(alpha: 0.8),
+            ),
+          ),
+        );
+      } else if (match.group(9) != null) {
+        // ~~strike~~ -> strikethrough without ~~
+        final inner = matchedText.substring(2, matchedText.length - 2);
+        spans.add(
+          TextSpan(
+            text: inner,
+            style: baseStyle.copyWith(
+              decoration: TextDecoration.lineThrough,
+              color: p.text3,
+            ),
+          ),
+        );
+      } else if (match.group(10) != null) {
+        // #hashtag
+        spans.add(
+          TextSpan(
+            text: matchedText,
+            style: baseStyle.copyWith(
+              color: p.accent,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        );
+      } else {
+        spans.add(TextSpan(text: matchedText, style: baseStyle));
       }
 
       lastIndex = match.end;
     }
 
-    if (lastIndex < text.length) {
-      spans.add(TextSpan(text: text.substring(lastIndex), style: baseStyle));
+    if (lastIndex < line.length) {
+      spans.add(TextSpan(text: line.substring(lastIndex), style: baseStyle));
     }
 
     return spans;
+  }
+
+  Widget _buildFormattedContent(String text, TextStyle baseStyle, Palette p) {
+    _clearRecognizers();
+    if (text.isEmpty) {
+      return Text(
+        'No text in note.',
+        style: baseStyle.copyWith(color: p.text3, fontStyle: FontStyle.italic),
+      );
+    }
+
+    final lines = text.split('\n');
+    final List<Widget> children = [];
+
+    final headingStyle1 = baseStyle.copyWith(
+      fontSize: 18,
+      fontWeight: FontWeight.w800,
+      color: p.text,
+      height: 1.35,
+    );
+    final headingStyle2 = baseStyle.copyWith(
+      fontSize: 16,
+      fontWeight: FontWeight.w700,
+      color: p.text,
+      height: 1.35,
+    );
+    final headingStyle3 = baseStyle.copyWith(
+      fontSize: 14.5,
+      fontWeight: FontWeight.w700,
+      color: p.text,
+      height: 1.35,
+    );
+    final checkedStyle = baseStyle.copyWith(
+      decoration: TextDecoration.lineThrough,
+      color: p.text3,
+    );
+    final quoteStyle = baseStyle.copyWith(
+      color: p.text2,
+      fontStyle: FontStyle.italic,
+    );
+
+    for (int i = 0; i < lines.length; i++) {
+      final line = lines[i];
+      final trimmed = line.trim();
+
+      // Empty line / paragraph separator
+      if (trimmed.isEmpty) {
+        children.add(const SizedBox(height: 6));
+        continue;
+      }
+
+      // Horizontal Divider: *** or --- or * * * or ___
+      if (trimmed == '***' ||
+          trimmed == '---' ||
+          trimmed == '* * *' ||
+          trimmed == '___') {
+        children.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Divider(
+              color: p.border.withValues(alpha: 0.5),
+              height: 1,
+              thickness: 1,
+            ),
+          ),
+        );
+        continue;
+      }
+
+      // Headings: #, ##, ###
+      if (line.startsWith('# ')) {
+        children.add(
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+            child: Text.rich(
+              TextSpan(
+                children: _buildInlineSpans(
+                  line.substring(2),
+                  headingStyle1,
+                  p,
+                ),
+              ),
+            ),
+          ),
+        );
+        continue;
+      }
+      if (line.startsWith('## ')) {
+        children.add(
+          Padding(
+            padding: const EdgeInsets.only(top: 6.0, bottom: 3.0),
+            child: Text.rich(
+              TextSpan(
+                children: _buildInlineSpans(
+                  line.substring(3),
+                  headingStyle2,
+                  p,
+                ),
+              ),
+            ),
+          ),
+        );
+        continue;
+      }
+      if (line.startsWith('### ')) {
+        children.add(
+          Padding(
+            padding: const EdgeInsets.only(top: 4.0, bottom: 2.0),
+            child: Text.rich(
+              TextSpan(
+                children: _buildInlineSpans(
+                  line.substring(4),
+                  headingStyle3,
+                  p,
+                ),
+              ),
+            ),
+          ),
+        );
+        continue;
+      }
+
+      // Checklists: - [x] or - [ ] or * [x] or * [ ]
+      if (line.startsWith('- [x] ') ||
+          line.startsWith('- [X] ') ||
+          line.startsWith('* [x] ') ||
+          line.startsWith('* [X] ')) {
+        final content = line.substring(6);
+        children.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2.5),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 2.5, right: 8.0),
+                  child: Icon(
+                    Icons.check_box_rounded,
+                    size: 16,
+                    color: p.accent,
+                  ),
+                ),
+                Expanded(
+                  child: Text.rich(
+                    TextSpan(
+                      children: _buildInlineSpans(content, checkedStyle, p),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+        continue;
+      }
+      if (line.startsWith('- [ ] ') || line.startsWith('* [ ] ')) {
+        final content = line.substring(6);
+        children.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2.5),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 2.5, right: 8.0),
+                  child: Icon(
+                    Icons.check_box_outline_blank_rounded,
+                    size: 16,
+                    color: p.text3,
+                  ),
+                ),
+                Expanded(
+                  child: Text.rich(
+                    TextSpan(
+                      children: _buildInlineSpans(content, baseStyle, p),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+        continue;
+      }
+
+      // Bullet lists: - , * , •
+      if (line.startsWith('- ') ||
+          line.startsWith('* ') ||
+          line.startsWith('• ')) {
+        final content = line.substring(2);
+        children.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 7.0, right: 8.0),
+                  child: Container(
+                    width: 5,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: p.accent,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Text.rich(
+                    TextSpan(
+                      children: _buildInlineSpans(content, baseStyle, p),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+        continue;
+      }
+
+      // Numbered lists: e.g. 1. , 2.
+      final numMatch = RegExp(r'^(\d+\.)\s+').firstMatch(line);
+      if (numMatch != null) {
+        final prefix = numMatch.group(0)!;
+        final numLabel = numMatch.group(1)!;
+        final content = line.substring(prefix.length);
+        children.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 6.0),
+                  child: Text(
+                    numLabel,
+                    style: baseStyle.copyWith(
+                      color: p.accent,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Text.rich(
+                    TextSpan(
+                      children: _buildInlineSpans(content, baseStyle, p),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+        continue;
+      }
+
+      // Blockquotes: >
+      if (line.startsWith('> ')) {
+        final content = line.substring(2);
+        children.add(
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 3.0),
+            padding: const EdgeInsets.only(left: 10.0, top: 2.0, bottom: 2.0),
+            decoration: BoxDecoration(
+              border: Border(
+                left: BorderSide(
+                  color: p.accent.withValues(alpha: 0.6),
+                  width: 3,
+                ),
+              ),
+            ),
+            child: Text.rich(
+              TextSpan(children: _buildInlineSpans(content, quoteStyle, p)),
+            ),
+          ),
+        );
+        continue;
+      }
+
+      // Standard text line
+      children.add(
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 1.5),
+          child: Text.rich(
+            TextSpan(children: _buildInlineSpans(line, baseStyle, p)),
+          ),
+        ),
+      );
+    }
+
+    return SelectionArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: children,
+      ),
+    );
   }
 
   @override
@@ -170,7 +589,7 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
         .where((t) => t.toLowerCase().replaceAll('#', '').trim() != catLower)
         .toSet()
         .toList();
-    final cleanBody = NoteTagExtractor.cleanBodyText(cleanNote);
+    final cleanBody = _cleanNoteBody(cleanNote);
     final displayText = cleanBody.isNotEmpty
         ? cleanBody
         : (cleanNote.isEmpty ? 'No text in note.' : cleanNote);
@@ -181,11 +600,6 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
       height: 1.45,
       fontWeight: FontWeight.w500,
     );
-
-    final hasUrls = RegExp(
-      r'https?://|www\.|\[.*?\]\(.*?\)',
-      caseSensitive: false,
-    ).hasMatch(displayText);
 
     return AppSheet(
       p: p,
@@ -282,7 +696,7 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
             const SizedBox(height: spacing12),
           ],
 
-          // Note text card with interactive link detection & safe departure dialog
+          // Note text card with rich markdown formatting, interactive link detection & safe departure dialog
           Container(
             width: double.infinity,
             constraints: const BoxConstraints(maxHeight: 340),
@@ -294,13 +708,7 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
             ),
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
-              child: SelectionArea(
-                child: hasUrls
-                    ? Text.rich(
-                        TextSpan(children: _buildSpans(displayText, baseStyle)),
-                      )
-                    : IosEmojiText(displayText, style: baseStyle),
-              ),
+              child: _buildFormattedContent(displayText, baseStyle, p),
             ),
           ),
 
