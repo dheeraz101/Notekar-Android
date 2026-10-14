@@ -1,0 +1,7 @@
+What's New in NoteKar v7.5.10:
+• Telegram Writing Suite: Live markdown editing, keyboard-docked formatting toolbar & word count telemetry
+• Silent Share Intake: Log shared links, text & photos silently in background with timestamps
+• Sobriety Companion: Glass streak pill, reliable instant reset & widget sync
+• Formatted Note Previews: Clean markdown rendering without raw tokens like ***
+• Targets & Goals: Unified project engine with milestones
+• Single Undo Sound & persistent session pill

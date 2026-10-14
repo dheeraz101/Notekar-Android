@@ -6,6 +6,50 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [7.5.10] - 2026-10-14 (versionCode 26BR1014) [BR]
+
+> *Telegram Writing Suite, Headless Silent Share Intake, Sobriety Evolution & Apple HIG Precision.*
+
+### What's New
+
+- **Telegram-Style Writing Suite & Live Markdown Engine**:
+    - **Keyboard-Docked Accessory Bar**: Rich formatting toolbar docked directly above the virtual keyboard with selection-aware token wrapping (Bold `**`, Italic `*`, Monospace `` ` ``, Strikethrough `~~`, Quote `>`, Checklist `- [ ]`, Bullet `•`).
+    - **Live Writing Telemetry**: Real-time word count, character count, and calculated reading time estimates (<1 min, 2 min read) updating dynamically as you write.
+    - **Tactile Undo & Redo Controls**: Single-tap undo and redo controls in the note composer powered by `UndoHistoryController`.
+    - **Smart Hashtag Auto-Complete**: Inline `#` hashtag suggestions overlay with on-the-fly `TagService` sync across note dialogs and quick actions.
+    - **Formatted Note Previews**: Note preview sheet now renders full Markdown formatting (headings, dividers, bold/italic, checklists, bullets, inline code) while completely stripping raw markup tokens like `***` and preserving multi-line paragraph layout.
+
+- **Headless Silent Share Intake & Sandboxed Media**:
+    - **Headless Share Receiver**: Added `ShareReceiverActivity` for background intake of images, web links, and plain text without launching or interrupting the main app window.
+    - **Internal Storage Sandboxing**: Shared images are ingested and persisted directly into private internal storage (`notekar_media/images/`) with automatic timestamp logging.
+    - **Departure Security Alerts**: External web links in note previews route through a native Apple HIG departure confirmation modal (`ExternalLinkConfirmSheet`) before launching the browser.
+
+- **Sobriety Companion Overhaul & 365-Day Safeguard**:
+    - **Apple HIG Home Streak Pill**: Redesigned `HomeSobrietyStreakCard` with a glass capsule surface, dynamic progress fill gradient, flame status emblem, active shield badges, and milestone countdown.
+    - **Direct Settings Navigation**: Tap or long-press the home sobriety pill to navigate directly to Sobriety Companion settings with tactile haptic feedback.
+    - **Reliable Streak Reset Engine**: Unshielded `#relapse` moments now reliably reset the sobriety streak immediately, with a corresponding instant-reset action on home widgets and quick note chips.
+    - **365-Day End-of-Support Card**: Added an Apple HIG reassurance screen that triggers if the app build is over 365 days old, affirming 100% offline sovereignty and offering developer support links.
+    - **Diagnostics Easter Egg**: Tapping the build number 7 times in Diagnostics unlocks a Developer Quest dialog leading to the End of Support view.
+
+- **Unified Targets & Goals Engine (Griply Integration)**:
+    - **Initiatives & Projects Unified**: Merged standalone project initiatives into the Targets & Goals engine with unified milestone tracking, Apple HIG gesture sheets, and daily reflections.
+    - **Pacing & Validation**: Added horizontal scrollable timeframe pills, dynamic daily pacing allocations, and auto-scrolling form validation that highlights missing fields with Apple HIG red outlines.
+    - **Session Handover**: Robust goal attribution on live sessions with mid-session target completion alerts.
+
+- **Sensory Chronometer Craft & UI Polish**:
+    - **Acoustic Undo Feedback**: Fixed duplicate audio clicks by delegating `UndoToast` directly to `_undoLast()`, ensuring exactly one crisp acoustic sound and haptic pulse on undo.
+    - **Persistent Live Session Undo**: Kept the Undo button visible throughout 2-way sessions until explicitly closed or completed.
+    - **Official Bulletins Apple Monochrome Theme**: Styled bulletin card headers and action buttons in high-contrast Apple monochrome black & white.
+    - **Dedicated Daily Wrap-Up**: Converted the daily wrap-up sheet into a full-screen `DailyWrapupPage` with permanent day-sealing persistence.
+    - **Streamlined History Sheet**: Removed the redundant Today's Insights card from the history sheet for a cleaner, distraction-free chronological timeline.
+
+### Bug Fixes & Improvements
+
+- **Instant Camera Widget**: Pointed widget preview to valid drawable resource.
+- **Project Startup Deadlock**: Eliminated recursive auto-migration deadlock and offloaded engine initialization from the UI thread.
+- **Collapsible Media**: Added independent collapse states for voice notes and photos in timeline and search views.
+- **Cupertino Action Sheet**: Restored authentic iOS `CupertinoActionSheet` styling with detached frosted cards and standalone cancel buttons.
+
 ## [7.5.9] - 2026-10-11 (versionCode 26BR1011a) [BR]
 
 > *Emergency Hotfix: Data Recovery Bridge, Update Lifecycle Controls & Widget Integrity.*

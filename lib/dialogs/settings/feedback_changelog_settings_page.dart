@@ -23,88 +23,95 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.5.9',
-    date: 'October 11, 2026',
-    edition: 'Emergency Hotfix: Data Recovery & Update Lifecycle',
-    badgeColor: Color(0xFFFF3B30),
+    version: '7.5.10',
+    date: 'October 14, 2026',
+    edition: 'Telegram Writing Suite, Silent Intake & Sobriety Evolution',
+    badgeColor: Color(0xFF007AFF),
     innovations: [
       (
-        title: 'Emergency Hive-to-Isar Data Recovery',
-        category: 'DATA RECOVERY & SAFETY',
-        headline: 'Automated Database Bridge. Zero Data Loss.',
+        title: 'Telegram-Style Writing Suite',
+        category: 'COMPOSER & MARKDOWN',
+        headline: 'Keyboard-Docked Bar. Live Writing Telemetry.',
         desc:
-            'Introduced a fail-safe data migration bridge in MomentRepository.initialize() that automatically scans for legacy Hive boxes, secure encryption keys, trash storage, and rolling backups, safely importing all records into Isar on upgrade.',
-        icon: CupertinoIcons.arrow_2_circlepath_circle_fill,
-        badgeColor: Color(0xFFFF3B30),
+            'Docked formatting accessory bar above the virtual keyboard with selection-aware markdown tokens, tactile Undo/Redo, word count telemetry, and smart inline hashtag autocomplete.',
+        icon: CupertinoIcons.pencil_ellipsis_rectangle,
+        badgeColor: Color(0xFF007AFF),
         specs:
-            'Legacy Box Recovery · AES Key Handshake · Auto-Rolling Snapshot Bridge · Transaction Safety',
+            'Docked Accessory Bar · Selection-Aware Tokens · Undo/Redo History · Live Telemetry · Hashtag Overlay',
       ),
       (
-        title: 'Update Ready Notifications & Reminders',
-        category: 'UPDATES & NOTICES',
-        headline: 'Apple HIG Update Alerts. 24-Hour Remind Later.',
+        title: 'Headless Silent Share Intake',
+        category: 'SHARE INGESTION & MEDIA',
+        headline: 'Background Ingestion. Zero Window Interruption.',
         desc:
-            'Interactive native Cupertino dialog prompts users when updates are downloaded and verified, featuring immediate one-tap routing to Update Center and a 24-hour reminder suppression delay.',
-        icon: CupertinoIcons.bell_circle_fill,
-        badgeColor: Color(0xFF0A84FF),
-        specs:
-            'Update Ready Alert · 24-Hour Reminder Delay · Settings Dialog Direct Routing · Delete Update Action',
-      ),
-      (
-        title: 'Auto-Download & Package Management',
-        category: 'UPDATE LIFECYCLE',
-        headline: 'Background Downloader. Direct Package Deletion.',
-        desc:
-            'Background update downloader automatically downloads and verifies SHA-256 integrity when updates are detected. Users can also manually delete downloaded packages or have obsolete builds automatically purged on new releases.',
-        icon: CupertinoIcons.cloud_download_fill,
+            'New headless ShareReceiverActivity ingests shared links, plain text, and multi-photo media silently in the background with immediate timestamp logging without interrupting your active workflow.',
+        icon: CupertinoIcons.share_up,
         badgeColor: Color(0xFF34C759),
         specs:
-            'Background Auto-Download · SHA-256 Verification · Delete Downloaded Update · Obsolete APK Purge',
+            'Headless Share Activity · Background Moment Logging · Sandboxed Image Storage · Zero App Interruption',
       ),
       (
-        title: 'Widget & Notification Modes Restored',
-        category: 'WIDGETS & SYSTEM IPC',
-        headline: 'Dynamic Mode Parsing. All Mode Support.',
+        title: 'Sobriety Companion Overhaul',
+        category: 'SOBRIETY & ACCOUNTABILITY',
+        headline: 'Apple HIG Glass Pill. Instant Relapse Engine.',
         desc:
-            'Resolved a ClassCastException when reading SharedPreferences string lists from Kotlin, ensuring QuickNoteActivity and app widgets load all user modes dynamically with "All" mode at index 0.',
-        icon: CupertinoIcons.square_grid_2x2_fill,
-        badgeColor: Color(0xFFAF52DE),
-        specs:
-            'StringSet Deserialization · QuickNoteActivity Modes · Widget Intent Parity · "All" Mode Default',
-      ),
-      (
-        title: 'Reset to Default Mode on App Close',
-        category: 'MODE BEHAVIOR',
-        headline: 'Smart App Reopen. Active Session Protection.',
-        desc:
-            'Added an opt-in toggle in Modes Settings that automatically resets the active category to "All" whenever the app is closed and reopened, strictly guarded so active recording sessions are never interrupted.',
-        icon: CupertinoIcons.arrow_counterclockwise_circle_fill,
+            'Redesigned streak card with glass capsule aesthetics, progress fill gradient, flame status emblem, direct settings tap/hold navigation, instant #relapse reset engine, and home widget sync.',
+        icon: CupertinoIcons.flame_fill,
         badgeColor: Color(0xFFFF9500),
         specs:
-            'App Lifecycle Listener · Active Session Guard · Automatic Mode Reset · Mode Behavior Settings',
+            'Glass Capsule UI · Instant Relapse Reset · Widget Action Sync · 365-Day End-of-Support Safeguard',
       ),
       (
-        title: 'Settings Trash Bin Relocation & Title Alignment',
-        category: 'SETTINGS ORGANIZATION',
-        headline: 'Permanent Logging Placement. Centered Headers.',
+        title: 'Formatted Markdown Note Previews',
+        category: 'NOTE RENDERING & SECURITY',
+        headline: 'Clean Typography. Departure Confirmation Alert.',
         desc:
-            'Relocated Trash Bin directly into the Logging Controls card below Backup & Export with permanent visibility and count indicators, fixed Settings search routing, and aligned dialog header titles cleanly at the top.',
-        icon: CupertinoIcons.trash_circle_fill,
+            'Note preview sheet now parses full Markdown formatting (headings, dividers, bold/italic, checklists, bullets, monospace) while hiding raw tokens like *** and guarding web links with Apple HIG departure dialogs.',
+        icon: CupertinoIcons.doc_richtext,
+        badgeColor: Color(0xFFAF52DE),
+        specs:
+            'Token-Free Markdown · Divider Rendering · Checklists & Bullets · External Link Security Dialog',
+      ),
+      (
+        title: 'Unified Targets & Goals Engine',
+        category: 'GOALS & INITIATIVES',
+        headline: 'Griply Integration. Milestone-Driven Pacing.',
+        desc:
+            'Integrated project initiatives and milestones into a unified Targets & Goals ecosystem featuring scrollable timeframe pills, dynamic daily pacing, session attribution, and auto-scrolling field validation.',
+        icon: CupertinoIcons.flag_fill,
+        badgeColor: Color(0xFFFF2D55),
+        specs:
+            'Unified Projects Engine · Milestone Progress · Pacing Allocation · Auto-Scroll Validation',
+      ),
+      (
+        title: 'Sensory Chronometer Craft & UI Polish',
+        category: 'APPLE HIG POLISH',
+        headline: 'Acoustic Feedback. Full-Screen Daily Wrap-Up.',
+        desc:
+            'Single crisp acoustic sound on live session undo, persistent live session undo pill, black & white official bulletins feed, dedicated full-screen daily wrap-up page, and streamlined history sheet.',
+        icon: CupertinoIcons.sparkles,
         badgeColor: Color(0xFF5856D6),
         specs:
-            'Logging Controls Placement · Permanent Empty State · Direct Search Route · Fixed Title Header',
+            'Single Undo Sound · Persistent Session Pill · Monochrome Bulletins · Dedicated Wrap-Up Page',
       ),
     ],
     items: [
-      '• Emergency hotfix restoring legacy user data from Hive to Isar, adding background update lifecycle controls, and resolving critical widget mode bugs.',
-      '! Critical Data Recovery: Automated migration bridge restores .hive boxes, encryption keys, and auto-rolling snapshot backups into Isar',
-      '+ Update Notifications: Apple HIG update ready dialog with direct Update Center navigation and 24-hour Remind Later delay',
-      '+ Update Package Controls: Auto-download background toggle, manual deletion of downloaded packages, and auto-purge of obsolete APKs',
-      '+ Widget Mode Integrity: Fixed QuickNoteActivity and app widgets to load all dynamic categories correctly from StringSet/JSON',
-      '+ Mode Behavior: Added setting to reset to default All mode on app close strictly when no session is active',
-      '+ Settings Organization: Placed Trash Bin permanently in Logging Controls card below Backup & Export with item count / empty indicator',
-      '+ Dialog Polish: Fixed RecentlyDeletedDialog title header alignment and ensured seamless Settings search navigation',
-      '* All unit and widget tests passing with 0 lint warnings and 100% offline privacy preservation',
+      '• Telegram Writing Suite, Headless Silent Share Intake, Sobriety Evolution, and Apple HIG Sensory Craft.',
+      '+ Telegram Writing Suite: Keyboard-docked formatting toolbar (bold, italic, code, strike, quotes, checklists, bullets) with Undo/Redo',
+      '+ Live Writing Telemetry: Real-time word count, character count, and reading time estimates (<1 min, 2 min read) as you type',
+      '+ Headless Share Intake: Background ShareReceiverActivity ingests text, URLs, and photos silently with instant timestamp capture',
+      '+ Sandboxed Media: Shared photos persisted directly to sandboxed internal storage with automatic timeline linking',
+      '+ Sobriety Companion: Redesigned Apple HIG glass pill, instant #relapse reset engine, and home widget reset action',
+      '+ End of Support Safeguard: 365-day offline sovereignty reassurance card and hidden 7-tap Developer Quest easter egg',
+      '+ Formatted Note Previews: Clean markdown rendering without raw syntax tokens (***, **, *, ~~), preserving paragraph linebreaks',
+      '+ Departure Security Alerts: Native Apple HIG confirmation sheet guards all external web links before opening browser',
+      '+ Targets & Goals Unification: Merged project initiatives with milestone progress, timeframe pills, and session attribution',
+      '+ Acoustic Feedback: Eliminated duplicate click sounds on live session undo with tactile haptic pulse',
+      '+ Persistent Session Undo: Undo button remains accessible throughout active 2-way sessions until finalized',
+      '+ Official Bulletins: High-contrast Apple monochrome black & white theme on bulletin badges and action buttons',
+      '+ Dedicated Daily Wrap-up: Converted wrap-up into a dedicated full-screen page with day-sealing persistence',
+      '+ History Sheet Clean-up: Removed redundant Today\'s Insights card for a streamlined chronological timeline',
+      '* All 313 unit and widget tests passing with 0 lint warnings and 100% offline privacy preservation',
     ],
   );
 
