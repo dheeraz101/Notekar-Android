@@ -16,6 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class MomentRepository {
   static final MomentRepository _instance = MomentRepository._internal();
   factory MomentRepository() => _instance;
+  static MomentRepository get instance => _instance;
   MomentRepository._internal();
 
   static const String _nextIdKey = 'notekar.nextId';

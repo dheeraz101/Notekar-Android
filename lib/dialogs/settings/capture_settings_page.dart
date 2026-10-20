@@ -17,16 +17,24 @@ class CaptureSettingsPage extends StatelessWidget {
     required this.onDefaultModeChanged,
     required this.onTapDelayChanged,
     required this.onEnableNoteOnClickChanged,
+    this.logAfterUnlock = false,
+    this.unlockActionStyle = 'notification',
+    this.onLogAfterUnlockChanged,
+    this.onUnlockActionStyleChanged,
   });
 
   final Palette p;
   final String defaultMode;
   final int tapDelay;
   final bool enableNoteOnClick;
+  final bool logAfterUnlock;
+  final String unlockActionStyle;
 
   final ValueChanged<String> onDefaultModeChanged;
   final ValueChanged<int> onTapDelayChanged;
   final ValueChanged<bool> onEnableNoteOnClickChanged;
+  final ValueChanged<bool>? onLogAfterUnlockChanged;
+  final ValueChanged<String>? onUnlockActionStyleChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -202,6 +210,52 @@ class CaptureSettingsPage extends StatelessWidget {
           p: p,
           text:
               'When enabled, tap opens the note composer for both single moments and two-way sessions.'
+                  .localized(context),
+        ),
+
+        SettingsGroup(
+          p: p,
+          title: 'Triggered Quick Logging',
+          children: [
+            SettingsSwitchRow(
+              p: p,
+              title: 'Log after unlock',
+              subtitle:
+                  'Prompt to quickly capture a note, habit checkpoint, or session when unlocking your phone.',
+              color: p.accent,
+              value: logAfterUnlock,
+              onChanged: onLogAfterUnlockChanged ?? (_) {},
+            ),
+            if (logAfterUnlock) ...[
+              SettingsRow(
+                p: p,
+                title: 'Notification Alert'.localized(context),
+                subtitle:
+                    'Interactive heads-up alert with Note & Checkpoint actions.'
+                        .localized(context),
+                trailing: unlockActionStyle == 'notification'
+                    ? Icon(CupertinoIcons.checkmark, color: p.accent, size: 18)
+                    : const SizedBox.shrink(),
+                onTap: () => onUnlockActionStyleChanged?.call('notification'),
+              ),
+              SettingsRow(
+                p: p,
+                title: 'Floating Note Overlay'.localized(context),
+                subtitle:
+                    'Directly opens the lightweight floating quick note dialog.'
+                        .localized(context),
+                trailing: unlockActionStyle == 'quick_note'
+                    ? Icon(CupertinoIcons.checkmark, color: p.accent, size: 18)
+                    : const SizedBox.shrink(),
+                onTap: () => onUnlockActionStyleChanged?.call('quick_note'),
+              ),
+            ],
+          ],
+        ),
+        SettingsPageDescription(
+          p: p,
+          text:
+              'Seamlessly captures state changes throughout the day without having to remember to open the app manually.'
                   .localized(context),
         ),
         const SizedBox(height: spacing48),

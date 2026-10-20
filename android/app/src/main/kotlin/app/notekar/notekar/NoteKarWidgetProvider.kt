@@ -219,7 +219,6 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
             Toast.makeText(context, "⚡ Logged to NoteKar", Toast.LENGTH_SHORT).show()
         }
 
-        // Keep old signature but unused
         fun oldPerformBackgroundLog(context: Context, type: String, note: String = "") {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val todayCount = prefs.getInt(KEY_TODAY_COUNT, 0)
@@ -325,21 +324,6 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
         }
 
         fun togglePauseResume(context: Context) {
-            val now = System.currentTimeMillis()
-            val bgPrefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-            val currentPendingCount = bgPrefs.getInt("flutter.pending_count", 0)
-
-            bgPrefs.edit()
-                .putString("flutter.log_$currentPendingCount", "$now|toggle_pause|")
-                .putInt("flutter.pending_count", currentPendingCount + 1)
-                .commit()
-
-            MainActivity.notifyBackgroundLogRecorded()
-            Toast.makeText(context, "Pause/Resume queued...", Toast.LENGTH_SHORT).show()
-        }
-
-        // Keep old signature but unused
-        fun oldTogglePauseResume(context: Context) {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val isPaused = prefs.getBoolean(KEY_IS_PAUSED, false)
             val now = System.currentTimeMillis()

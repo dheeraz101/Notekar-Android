@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:notekar/utils/app_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,6 +15,7 @@ enum CircuitState {
 /// and crash loops from degrading the core logging and tracking experience.
 class CircuitBreakerService {
   CircuitBreakerService._();
+
   static final CircuitBreakerService instance = CircuitBreakerService._();
 
   SharedPreferences? _prefs;
@@ -27,6 +29,7 @@ class CircuitBreakerService {
   }
 
   String _failureKey(String serviceId) => 'cb_failures_$serviceId';
+
   String _stateKey(String serviceId) => 'cb_state_$serviceId';
 
   /// Returns whether the circuit is currently OPEN (tripped / disabled).

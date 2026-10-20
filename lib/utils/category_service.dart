@@ -110,6 +110,7 @@ class CategoryService {
   static final CategoryService _instance = CategoryService._internal();
 
   factory CategoryService() => _instance;
+  static CategoryService get instance => _instance;
 
   CategoryService._internal();
 

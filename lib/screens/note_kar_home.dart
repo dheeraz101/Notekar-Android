@@ -33,16 +33,19 @@ import 'package:notekar/dialogs/timeline_filter_sheet.dart';
 import 'package:notekar/dialogs/urge_surfing_dialog.dart';
 import 'package:notekar/main.dart';
 import 'package:notekar/models/backup_models.dart';
+import 'package:notekar/models/checkpoint.dart';
 import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/models/project.dart';
 import 'package:notekar/models/sobriety_milestones.dart';
+import 'package:notekar/screens/checkpoints_dashboard_screen.dart';
 import 'package:notekar/screens/device_health_intro_screen.dart';
 import 'package:notekar/screens/end_of_support_screen.dart';
 import 'package:notekar/screens/executive_intelligence_hub_screen.dart';
 import 'package:notekar/screens/welcome_screen.dart';
+import 'package:notekar/services/checkpoint_service.dart';
 import 'package:notekar/services/digital_wellbeing_service.dart';
 import 'package:notekar/services/goals_service.dart';
 import 'package:notekar/services/project_service.dart';
@@ -61,6 +64,7 @@ import 'package:notekar/utils/tag_migration_service.dart';
 import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/utils/update_service.dart';
 import 'package:notekar/widgets/apple_hig_action_sheet.dart';
+import 'package:notekar/widgets/checkpoints_quick_bar.dart';
 import 'package:notekar/widgets/clock_face.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/dynamic_header_capsule.dart';
@@ -2281,6 +2285,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
             final timestamp =
                 int.tryParse(parts[0]) ?? DateTime.now().millisecondsSinceEpoch;
             final type = parts[1]; // 'in', 'out', or 'single'
+            if (type == 'toggle_pause') continue;
             final note = parts.length > 2 ? parts.sublist(2).join('|') : '';
 
             final entry = Moment(
@@ -2339,6 +2344,20 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
     // Reload the full list from storage to refresh states
     final updatedEntries = _repository.getAllMoments();
+    final savedPaused =
+        prefs.getBool('m-paused') ?? prefs.getBool('is_paused') ?? _isPaused;
+    final savedPausedAt =
+        prefs.getInt('m-paused-at') ?? prefs.getInt('paused_at');
+    final savedSessionStart = prefs.getInt('m-ses');
+    if (savedPaused != _isPaused ||
+        savedPausedAt != _pausedAt ||
+        (savedSessionStart != null && savedSessionStart != _sessionStart)) {
+      _isPaused = savedPaused;
+      _pausedAt = savedPausedAt;
+      if (savedSessionStart != null && savedSessionStart > 0) {
+        _sessionStart = savedSessionStart;
+      }
+    }
     if (mounted) {
       setState(() {
         _entries = updatedEntries;
@@ -2772,6 +2791,38 @@ class _NoteKarHomeState extends State<NoteKarHome>
         await _openHistory(initialFilter: res);
       }
     }
+  }
+
+  Future<void> _handleLogCheckpoint(CheckpointPreset preset) async {
+    HapticFeedback.mediumImpact();
+    final moment = await CheckpointService.instance.logCheckpoint(
+      preset: preset,
+    );
+    setState(() {
+      _entries.insert(0, moment);
+      _entries.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    });
+    AppSound.click();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${preset.emoji} ${preset.label} logged!'.localized(context),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  void _openCheckpointsDashboard({String? initialPresetId}) {
+    CheckpointsDashboardScreen.show(
+      context,
+      p: p,
+      moments: _entries,
+      onLogCheckpoint: _handleLogCheckpoint,
+      initialPresetId: initialPresetId,
+    );
   }
 
   Future<void> _openHistory({
@@ -3608,6 +3659,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
     final pageParam = (payload?['page'] as String?)?.trim().toLowerCase();
 
     switch (action.trim().toLowerCase()) {
+      case 'checkpoint':
+      case 'checkpoints':
+        _openCheckpointsDashboard();
       case 'history':
         await _openHistory();
       case 'settings':
@@ -4870,6 +4924,15 @@ class _NoteKarHomeState extends State<NoteKarHome>
                   onOpenFilter: _openHomeTimelineFilter,
                   isFilterActive: _homeTimelineFilter.isActive,
                 ),
+                if (!_headerExpanded) ...[
+                  const SizedBox(height: 6),
+                  CheckpointsQuickBar(
+                    p: palette,
+                    moments: _entries,
+                    onLogCheckpoint: _handleLogCheckpoint,
+                    onOpenDashboard: () => _openCheckpointsDashboard(),
+                  ),
+                ],
               ],
             ),
           ),

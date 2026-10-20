@@ -10,6 +10,7 @@ import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/day_detail_sheet.dart';
 import 'package:notekar/dialogs/goals_sheet.dart';
 import 'package:notekar/dialogs/manual_entry_dialog.dart';
+import 'package:notekar/dialogs/merge_entries_sheet.dart';
 import 'package:notekar/dialogs/note_dialog.dart';
 import 'package:notekar/dialogs/personalization_setup_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
@@ -19,10 +20,13 @@ import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/screens/checkpoints_dashboard_screen.dart';
+import 'package:notekar/services/checkpoint_service.dart';
 import 'package:notekar/services/goals_service.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/history_calendar_view.dart';
@@ -855,6 +859,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
                   isMomentVoiceCollapsed: _isMomentVoiceCollapsed,
                   onToggleMomentVoiceCollapse: _toggleMomentVoiceCollapse,
                   filterCriteria: _timelineFilterCriteria,
+                  onEntriesMerged: () =>
+                      setState(() => _rebuildMemoizedLists()),
                   onFilterChanged: (newCriteria) {
                     setState(() {
                       _timelineFilterCriteria = newCriteria;
@@ -1101,66 +1107,236 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                     ),
                                                 child: Row(
                                                   children: [
-                                                    Expanded(
-                                                      child: PressableScale(
-                                                        onTap: () => setState(
-                                                          () =>
-                                                              _selected.clear(),
-                                                        ),
-                                                        child: Container(
-                                                          padding:
-                                                              const EdgeInsets.symmetric(
-                                                                vertical: 7,
-                                                                horizontal: 14,
-                                                              ),
-                                                          decoration: BoxDecoration(
-                                                            color: widget
-                                                                .p
-                                                                .accent
-                                                                .withValues(
-                                                                  alpha: 0.12,
+                                                    if (_selected.length <
+                                                        2) ...[
+                                                      Expanded(
+                                                        child: PressableScale(
+                                                          onTap: () => setState(
+                                                            () => _selected
+                                                                .clear(),
+                                                          ),
+                                                          child: Container(
+                                                            padding:
+                                                                const EdgeInsets.symmetric(
+                                                                  vertical: 7,
+                                                                  horizontal:
+                                                                      14,
                                                                 ),
-                                                            borderRadius:
-                                                                BorderRadius.circular(
-                                                                  999,
-                                                                ),
-                                                            border: Border.all(
+                                                            decoration: BoxDecoration(
                                                               color: widget
                                                                   .p
                                                                   .accent
                                                                   .withValues(
-                                                                    alpha: 0.20,
+                                                                    alpha: 0.12,
                                                                   ),
+                                                              borderRadius:
+                                                                  BorderRadius.circular(
+                                                                    999,
+                                                                  ),
+                                                              border: Border.all(
+                                                                color: widget
+                                                                    .p
+                                                                    .accent
+                                                                    .withValues(
+                                                                      alpha:
+                                                                          0.20,
+                                                                    ),
+                                                              ),
                                                             ),
-                                                          ),
-                                                          child: Text(
-                                                            'Selected ${_selected.length} of 2 for duration'
-                                                                .localized(
-                                                                  context,
-                                                                ),
-                                                            textAlign: TextAlign
-                                                                .center,
-                                                            style: TextStyle(
-                                                              color: widget
-                                                                  .p
-                                                                  .accent,
-                                                              fontSize: 12,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w800,
+                                                            child: Text(
+                                                              '1 selected (tap another to pair)'
+                                                                  .localized(
+                                                                    context,
+                                                                  ),
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .center,
+                                                              style: TextStyle(
+                                                                color: widget
+                                                                    .p
+                                                                    .accent,
+                                                                fontSize: 12,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w800,
+                                                              ),
                                                             ),
                                                           ),
                                                         ),
                                                       ),
-                                                    ),
-                                                    const SizedBox(width: 8),
+                                                    ] else ...[
+                                                      Expanded(
+                                                        child: PressableScale(
+                                                          onTap: () {
+                                                            final a =
+                                                                _selected[0];
+                                                            final b =
+                                                                _selected[1];
+                                                            setState(
+                                                              () => _selected
+                                                                  .clear(),
+                                                            );
+                                                            widget.onDuration(
+                                                              a,
+                                                              b,
+                                                            );
+                                                          },
+                                                          child: Container(
+                                                            padding:
+                                                                const EdgeInsets.symmetric(
+                                                                  vertical: 7,
+                                                                  horizontal:
+                                                                      10,
+                                                                ),
+                                                            decoration: BoxDecoration(
+                                                              color: widget
+                                                                  .p
+                                                                  .accent
+                                                                  .withValues(
+                                                                    alpha: 0.14,
+                                                                  ),
+                                                              borderRadius:
+                                                                  BorderRadius.circular(
+                                                                    999,
+                                                                  ),
+                                                              border: Border.all(
+                                                                color: widget
+                                                                    .p
+                                                                    .accent
+                                                                    .withValues(
+                                                                      alpha:
+                                                                          0.24,
+                                                                    ),
+                                                              ),
+                                                            ),
+                                                            child: Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .center,
+                                                              children: [
+                                                                Icon(
+                                                                  Icons
+                                                                      .timer_outlined,
+                                                                  size: 13,
+                                                                  color: widget
+                                                                      .p
+                                                                      .accent,
+                                                                ),
+                                                                const SizedBox(
+                                                                  width: 4,
+                                                                ),
+                                                                Flexible(
+                                                                  child: Text(
+                                                                    'Duration'
+                                                                        .localized(
+                                                                          context,
+                                                                        ),
+                                                                    maxLines: 1,
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
+                                                                    style: TextStyle(
+                                                                      color: widget
+                                                                          .p
+                                                                          .accent,
+                                                                      fontSize:
+                                                                          11.5,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w800,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      const SizedBox(width: 6),
+                                                      Expanded(
+                                                        child: PressableScale(
+                                                          onTap:
+                                                              _mergeSelectedEntries,
+                                                          child: Container(
+                                                            padding:
+                                                                const EdgeInsets.symmetric(
+                                                                  vertical: 7,
+                                                                  horizontal:
+                                                                      10,
+                                                                ),
+                                                            decoration: BoxDecoration(
+                                                              color: widget
+                                                                  .p
+                                                                  .green
+                                                                  .withValues(
+                                                                    alpha: 0.16,
+                                                                  ),
+                                                              borderRadius:
+                                                                  BorderRadius.circular(
+                                                                    999,
+                                                                  ),
+                                                              border: Border.all(
+                                                                color: widget
+                                                                    .p
+                                                                    .green
+                                                                    .withValues(
+                                                                      alpha:
+                                                                          0.30,
+                                                                    ),
+                                                              ),
+                                                            ),
+                                                            child: Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .center,
+                                                              children: [
+                                                                Icon(
+                                                                  Icons
+                                                                      .merge_type_rounded,
+                                                                  size: 13,
+                                                                  color: widget
+                                                                      .p
+                                                                      .green,
+                                                                ),
+                                                                const SizedBox(
+                                                                  width: 4,
+                                                                ),
+                                                                Flexible(
+                                                                  child: Text(
+                                                                    'Merge Session'
+                                                                        .localized(
+                                                                          context,
+                                                                        ),
+                                                                    maxLines: 1,
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
+                                                                    style: TextStyle(
+                                                                      color: widget
+                                                                          .p
+                                                                          .green,
+                                                                      fontSize:
+                                                                          11.5,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w800,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                    const SizedBox(width: 6),
                                                     PressableScale(
                                                       onTap: () => setState(
                                                         () => _selected.clear(),
                                                       ),
                                                       child: Container(
-                                                        width: 32,
-                                                        height: 32,
+                                                        width: 30,
+                                                        height: 30,
                                                         alignment:
                                                             Alignment.center,
                                                         decoration:
@@ -1185,7 +1361,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                             ),
                                                         child: Icon(
                                                           Icons.close_rounded,
-                                                          size: 16,
+                                                          size: 15,
                                                           color:
                                                               widget.p.accent,
                                                         ),
@@ -2223,6 +2399,44 @@ class _HistoryDialogState extends State<HistoryDialog> {
             CupertinoActionSheetAction(
               onPressed: () {
                 Navigator.pop(ctx);
+                CheckpointsDashboardScreen.show(
+                  context,
+                  p: widget.p,
+                  moments: _entries,
+                  onLogCheckpoint: (preset) async {
+                    final m = await CheckpointService.instance.logCheckpoint(
+                      preset: preset,
+                    );
+                    setState(() {
+                      _entries.insert(0, m);
+                      _rebuildMemoizedLists();
+                    });
+                  },
+                );
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    CupertinoIcons.flag_fill,
+                    size: 20,
+                    color: widget.p.accent,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Habit Checkpoints'.localized(context),
+                    style: TextStyle(
+                      color: widget.p.accent,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(ctx);
                 final nextMode = _viewMode == 'list' ? 'calendar' : 'list';
                 setState(() => _viewMode = nextMode);
                 unawaited(
@@ -2800,16 +3014,81 @@ class _HistoryDialogState extends State<HistoryDialog> {
       if (selected) {
         _selected.removeWhere((item) => item.id == entry.id);
       } else {
-        if (_selected.length == 2) {
+        if (_selected.length >= 2) {
           _selected.removeAt(0);
         }
         _selected.add(entry);
       }
     });
-    if (_selected.length == 2) {
-      widget.onDuration(_selected[0], _selected[1]);
-      setState(() => _selected.clear());
-    }
+  }
+
+  Future<void> _mergeSelectedEntries() async {
+    if (_selected.length != 2) return;
+    final a = _selected[0];
+    final b = _selected[1];
+
+    await MergeEntriesSheet.show(
+      context,
+      p: widget.p,
+      momentA: a,
+      momentB: b,
+      onConfirmMerge:
+          ({
+            required Moment startMoment,
+            required Moment endMoment,
+            required String? category,
+            required String? combinedNote,
+            required bool unifyNotes,
+          }) async {
+            await MomentRepository.instance.saveMoments([
+              startMoment,
+              endMoment,
+            ]);
+
+            setState(() {
+              final idxStart = _entries.indexWhere(
+                (m) => m.id == startMoment.id,
+              );
+              if (idxStart != -1) _entries[idxStart] = startMoment;
+              final idxEnd = _entries.indexWhere((m) => m.id == endMoment.id);
+              if (idxEnd != -1) _entries[idxEnd] = endMoment;
+              _selected.clear();
+              _rebuildMemoizedLists();
+            });
+
+            if (widget.onUpdateMomentNote != null) {
+              await widget.onUpdateMomentNote!(
+                startMoment.id,
+                startMoment.note,
+                startMoment.tags,
+                startMoment.imagePath,
+                startMoment.voicePath,
+                startMoment.voiceDurationMs,
+                false,
+              );
+              await widget.onUpdateMomentNote!(
+                endMoment.id,
+                endMoment.note,
+                endMoment.tags,
+                endMoment.imagePath,
+                endMoment.voicePath,
+                endMoment.voiceDurationMs,
+                false,
+              );
+            }
+
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Entries merged into a session!'.localized(context),
+                  ),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            }
+          },
+    );
   }
 
   Future<void> _showMomentDetails(Moment entry) async {
@@ -2928,6 +3207,10 @@ class _HistoryDialogState extends State<HistoryDialog> {
           Navigator.pop(context);
           _removeEntry(entry, skipConfirm: true);
         },
+        onSelectForPairing: () {
+          Navigator.pop(context);
+          _handleSelection(entry, false);
+        },
       ),
     );
   }
@@ -2942,6 +3225,7 @@ class MomentActionsDialog extends StatefulWidget {
     required this.onAddOrEditNote,
     required this.onDeleteMoment,
     this.onDeleteNote,
+    this.onSelectForPairing,
     this.minimal = false,
   });
 
@@ -2951,6 +3235,7 @@ class MomentActionsDialog extends StatefulWidget {
   final VoidCallback onAddOrEditNote;
   final VoidCallback? onDeleteNote;
   final VoidCallback onDeleteMoment;
+  final VoidCallback? onSelectForPairing;
   final bool minimal;
 
   @override
@@ -3032,6 +3317,15 @@ class _MomentActionsDialogState extends State<MomentActionsDialog> {
                     color: p.accent,
                     onTap: widget.onAddOrEditNote,
                   ),
+                  if (widget.onSelectForPairing != null) ...[
+                    const SizedBox(width: 20),
+                    _MinimalActionButton(
+                      p: p,
+                      icon: Icons.merge_type_rounded,
+                      color: p.accent,
+                      onTap: widget.onSelectForPairing!,
+                    ),
+                  ],
                   if (widget.onDeleteNote != null) ...[
                     const SizedBox(width: 20),
                     _MinimalActionButton(
@@ -3133,6 +3427,17 @@ class _MomentActionsDialogState extends State<MomentActionsDialog> {
                 ],
               ],
             ),
+            if (widget.onSelectForPairing != null) ...[
+              const SizedBox(height: 10),
+              MomentOptionPill(
+                p: p,
+                icon: Icons.merge_type_rounded,
+                label: 'Select to Merge / Compare',
+                color: p.accent,
+                fullWidth: true,
+                onTap: widget.onSelectForPairing!,
+              ),
+            ],
             const SizedBox(height: 10),
             MomentOptionPill(
               p: p,

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/day_detail_sheet.dart';
+import 'package:notekar/dialogs/merge_entries_sheet.dart';
 import 'package:notekar/dialogs/note_preview_sheet.dart';
 import 'package:notekar/dialogs/search_dialogs.dart';
 import 'package:notekar/dialogs/timeline_filter_sheet.dart';
@@ -12,6 +13,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/widgets/apple_hig_action_sheet.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
@@ -47,6 +49,7 @@ class HistoryCalendarView extends StatefulWidget {
     this.endingSessionIds,
     this.filterCriteria,
     this.onFilterChanged,
+    this.onEntriesMerged,
   });
 
   final Palette p;
@@ -75,6 +78,7 @@ class HistoryCalendarView extends StatefulWidget {
   final Set<int>? endingSessionIds;
   final TimelineFilterCriteria? filterCriteria;
   final ValueChanged<TimelineFilterCriteria>? onFilterChanged;
+  final VoidCallback? onEntriesMerged;
 
   @override
   State<HistoryCalendarView> createState() => _HistoryCalendarViewState();
@@ -90,6 +94,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
   final List<Moment> _selectedMoments = [];
   final Set<String> _localClaimedGaps = {};
   final Set<int> _endingSessionIds = {};
+  final Set<int> _expandedNoteIds = {};
   bool _showImagesAlways = true;
   final Set<int> _localManuallyExpandedMomentIds = {};
   final Set<int> _localManuallyCollapsedMomentIds = {};
@@ -191,16 +196,56 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
     if (_selectedMoments.any((m) => m.id == moment.id)) {
       setState(() => _selectedMoments.removeWhere((m) => m.id == moment.id));
     } else {
-      _selectedMoments.add(moment);
-      if (_selectedMoments.length >= 2) {
-        final a = _selectedMoments[0];
-        final b = _selectedMoments[1];
-        setState(() => _selectedMoments.clear());
-        showTimeDifferenceDialog(context, p: widget.p, a: a, b: b);
-      } else {
-        setState(() {});
-      }
+      setState(() {
+        if (_selectedMoments.length >= 2) {
+          _selectedMoments.removeAt(0);
+        }
+        _selectedMoments.add(moment);
+      });
     }
+  }
+
+  Future<void> _mergeSelectedCalendarEntries() async {
+    if (_selectedMoments.length != 2) return;
+    final a = _selectedMoments[0];
+    final b = _selectedMoments[1];
+
+    await MergeEntriesSheet.show(
+      context,
+      p: widget.p,
+      momentA: a,
+      momentB: b,
+      onConfirmMerge:
+          ({
+            required Moment startMoment,
+            required Moment endMoment,
+            required String? category,
+            required String? combinedNote,
+            required bool unifyNotes,
+          }) async {
+            await MomentRepository.instance.saveMoments([
+              startMoment,
+              endMoment,
+            ]);
+
+            setState(() {
+              _selectedMoments.clear();
+            });
+
+            widget.onEntriesMerged?.call();
+
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Entries merged into a session!'.localized(context),
+                  ),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            }
+          },
+    );
   }
 
   void _showMomentContextMenu(Moment moment) {
@@ -229,6 +274,16 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
               widget.onEditNote!(moment);
             },
           ),
+        AppleHigActionItem(
+          title: _selectedMoments.any((m) => m.id == moment.id)
+              ? 'Deselect Moment'
+              : 'Select for Merge / Duration',
+          icon: Icons.merge_type_rounded,
+          color: widget.p.accent,
+          onTap: () {
+            _handleCardTap(moment);
+          },
+        ),
         if (widget.onDelete != null)
           AppleHigActionItem(
             title: 'Delete Moment',
@@ -730,40 +785,135 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
             padding: const EdgeInsets.symmetric(vertical: 6),
             child: Row(
               children: [
-                Expanded(
-                  child: PressableScale(
-                    onTap: () => setState(() => _selectedMoments.clear()),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 7,
-                        horizontal: 14,
-                      ),
-                      decoration: BoxDecoration(
-                        color: widget.p.accent.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                          color: widget.p.accent.withValues(alpha: 0.20),
+                if (_selectedMoments.length < 2) ...[
+                  Expanded(
+                    child: PressableScale(
+                      onTap: () => setState(() => _selectedMoments.clear()),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 7,
+                          horizontal: 14,
                         ),
-                      ),
-                      child: Text(
-                        'Selected ${_selectedMoments.length} of 2 for duration'
-                            .localized(context),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: widget.p.accent,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
+                        decoration: BoxDecoration(
+                          color: widget.p.accent.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: widget.p.accent.withValues(alpha: 0.20),
+                          ),
+                        ),
+                        child: Text(
+                          '1 selected (tap another to pair)'.localized(context),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: widget.p.accent,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
+                ] else ...[
+                  Expanded(
+                    child: PressableScale(
+                      onTap: () {
+                        final a = _selectedMoments[0];
+                        final b = _selectedMoments[1];
+                        setState(() => _selectedMoments.clear());
+                        showTimeDifferenceDialog(
+                          context,
+                          p: widget.p,
+                          a: a,
+                          b: b,
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 7,
+                          horizontal: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: widget.p.accent.withValues(alpha: 0.14),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: widget.p.accent.withValues(alpha: 0.24),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.timer_outlined,
+                              size: 13,
+                              color: widget.p.accent,
+                            ),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                'Duration'.localized(context),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: widget.p.accent,
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: PressableScale(
+                      onTap: _mergeSelectedCalendarEntries,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 7,
+                          horizontal: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: widget.p.green.withValues(alpha: 0.16),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: widget.p.green.withValues(alpha: 0.30),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.merge_type_rounded,
+                              size: 13,
+                              color: widget.p.green,
+                            ),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                'Merge Session'.localized(context),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: widget.p.green,
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+                const SizedBox(width: 6),
                 PressableScale(
                   onTap: () => setState(() => _selectedMoments.clear()),
                   child: Container(
-                    width: 32,
-                    height: 32,
+                    width: 30,
+                    height: 30,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: widget.p.accent.withValues(alpha: 0.14),
@@ -774,7 +924,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                     ),
                     child: Icon(
                       Icons.close_rounded,
-                      size: 16,
+                      size: 15,
                       color: widget.p.accent,
                     ),
                   ),
@@ -977,6 +1127,28 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
         ),
       );
     }
+
+    final dayNoteTimelineItems = filteredItems
+        .where((item) => item.note.trim().isNotEmpty)
+        .toList();
+    final dayPreviewItems = dayNoteTimelineItems.map((item) {
+      final moment = (item is TimelineSessionItem)
+          ? item.noteMoment
+          : (item is TimelineSingleItem ? item.moment : null);
+      return NotePreviewItem(
+        note: item.note,
+        title:
+            item.category ??
+            (item is TimelineSessionItem
+                ? 'Session Note'.localized(context)
+                : 'Moment Note'.localized(context)),
+        category: item.category,
+        dateStr: datePretty(item.primaryTimestamp),
+        onEdit: (widget.onEditNote != null && moment != null)
+            ? () => widget.onEditNote!(moment)
+            : null,
+      );
+    }).toList();
 
     return ListView.builder(
       key: const PageStorageKey<String>('history_calendar_list_view'),
@@ -1222,6 +1394,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                       PressableScale(
                         onTap: () {
                           HapticFeedback.selectionClick();
+                          final noteIdx = dayNoteTimelineItems.indexOf(it);
                           NotePreviewSheet.show(
                             context,
                             p: widget.p,
@@ -1231,6 +1404,8 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                                 'Session Note'.localized(context),
                             category: it.category,
                             dateStr: datePretty(it.startTimestamp),
+                            items: dayPreviewItems,
+                            initialIndex: noteIdx >= 0 ? noteIdx : 0,
                             onEdit: widget.onEditNote != null
                                 ? () => widget.onEditNote!(it.noteMoment)
                                 : null,
@@ -1248,8 +1423,14 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                           ),
                           child: IosEmojiText(
                             it.note,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                            maxLines:
+                                _expandedNoteIds.contains(it.noteMoment.id)
+                                ? null
+                                : 2,
+                            overflow:
+                                _expandedNoteIds.contains(it.noteMoment.id)
+                                ? TextOverflow.visible
+                                : TextOverflow.ellipsis,
                             style: TextStyle(
                               color: widget.p.text,
                               fontSize: 12,
@@ -1258,6 +1439,48 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                           ),
                         ),
                       ),
+                      if (it.note.contains('\n') || it.note.length > 40)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2.0),
+                          child: GestureDetector(
+                            onTap: () {
+                              HapticFeedback.selectionClick();
+                              setState(() {
+                                if (_expandedNoteIds.contains(
+                                  it.noteMoment.id,
+                                )) {
+                                  _expandedNoteIds.remove(it.noteMoment.id);
+                                } else {
+                                  _expandedNoteIds.add(it.noteMoment.id);
+                                }
+                              });
+                            },
+                            behavior: HitTestBehavior.opaque,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  _expandedNoteIds.contains(it.noteMoment.id)
+                                      ? Icons.keyboard_arrow_up_rounded
+                                      : Icons.keyboard_arrow_down_rounded,
+                                  size: 14,
+                                  color: widget.p.accent,
+                                ),
+                                const SizedBox(width: 3),
+                                Text(
+                                  _expandedNoteIds.contains(it.noteMoment.id)
+                                      ? 'Collapse'
+                                      : 'Expand note',
+                                  style: TextStyle(
+                                    color: widget.p.accent,
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                     ],
                     // Combined collapsed voice & photo pills on same line
                     if (_isMomentVoiceCollapsed(it.noteMoment.id) &&
@@ -1526,6 +1749,8 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                                       PressableScale(
                                         onTap: () {
                                           HapticFeedback.selectionClick();
+                                          final noteIdx = dayNoteTimelineItems
+                                              .indexOf(it);
                                           NotePreviewSheet.show(
                                             context,
                                             p: widget.p,
@@ -1539,6 +1764,10 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                                             dateStr: datePretty(
                                               it.primaryTimestamp,
                                             ),
+                                            items: dayPreviewItems,
+                                            initialIndex: noteIdx >= 0
+                                                ? noteIdx
+                                                : 0,
                                             onEdit: widget.onEditNote != null
                                                 ? () => widget.onEditNote!(
                                                     it.moment,
@@ -1548,14 +1777,80 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                                         },
                                         child: IosEmojiText(
                                           it.note,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
+                                          maxLines:
+                                              _expandedNoteIds.contains(
+                                                it.moment.id,
+                                              )
+                                              ? null
+                                              : 1,
+                                          overflow:
+                                              _expandedNoteIds.contains(
+                                                it.moment.id,
+                                              )
+                                              ? TextOverflow.visible
+                                              : TextOverflow.ellipsis,
                                           style: TextStyle(
                                             color: widget.p.text2,
                                             fontSize: 11.5,
+                                            height: 1.35,
                                           ),
                                         ),
                                       ),
+                                      if (it.note.contains('\n') ||
+                                          it.note.length > 36)
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            top: 2.0,
+                                          ),
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              HapticFeedback.selectionClick();
+                                              setState(() {
+                                                if (_expandedNoteIds.contains(
+                                                  it.moment.id,
+                                                )) {
+                                                  _expandedNoteIds.remove(
+                                                    it.moment.id,
+                                                  );
+                                                } else {
+                                                  _expandedNoteIds.add(
+                                                    it.moment.id,
+                                                  );
+                                                }
+                                              });
+                                            },
+                                            behavior: HitTestBehavior.opaque,
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  _expandedNoteIds.contains(
+                                                        it.moment.id,
+                                                      )
+                                                      ? Icons
+                                                            .keyboard_arrow_up_rounded
+                                                      : Icons
+                                                            .keyboard_arrow_down_rounded,
+                                                  size: 14,
+                                                  color: widget.p.accent,
+                                                ),
+                                                const SizedBox(width: 3),
+                                                Text(
+                                                  _expandedNoteIds.contains(
+                                                        it.moment.id,
+                                                      )
+                                                      ? 'Collapse'
+                                                      : 'Expand note',
+                                                  style: TextStyle(
+                                                    color: widget.p.accent,
+                                                    fontSize: 10.5,
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
                                     ],
                                   ],
                                 ),

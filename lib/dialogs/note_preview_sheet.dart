@@ -8,8 +8,25 @@ import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/apple_hig_action_sheet.dart';
 import 'package:notekar/widgets/common_elements.dart';
 
+/// Item representing a note for linear navigation in [NotePreviewSheet].
+class NotePreviewItem {
+  const NotePreviewItem({
+    required this.note,
+    this.title = 'Note Preview',
+    this.category,
+    this.dateStr,
+    this.onEdit,
+  });
+
+  final String note;
+  final String title;
+  final String? category;
+  final String? dateStr;
+  final VoidCallback? onEdit;
+}
+
 /// Read-only note preview bottom sheet with full text viewing, interactive links,
-/// safe external departure confirmation dialog, copying, and edit action.
+/// safe external departure confirmation dialog, copying, previous/next note stepping, and edit action.
 class NotePreviewSheet extends StatefulWidget {
   const NotePreviewSheet({
     super.key,
@@ -19,6 +36,9 @@ class NotePreviewSheet extends StatefulWidget {
     this.category,
     this.onEdit,
     this.dateStr,
+    this.items,
+    this.initialIndex = 0,
+    this.onIndexChanged,
   });
 
   final Palette p;
@@ -27,6 +47,9 @@ class NotePreviewSheet extends StatefulWidget {
   final String? category;
   final VoidCallback? onEdit;
   final String? dateStr;
+  final List<NotePreviewItem>? items;
+  final int initialIndex;
+  final ValueChanged<int>? onIndexChanged;
 
   static Future<void> show(
     BuildContext context, {
@@ -36,6 +59,9 @@ class NotePreviewSheet extends StatefulWidget {
     String? category,
     VoidCallback? onEdit,
     String? dateStr,
+    List<NotePreviewItem>? items,
+    int initialIndex = 0,
+    ValueChanged<int>? onIndexChanged,
   }) {
     HapticFeedback.selectionClick();
     return showModalBottomSheet<void>(
@@ -52,6 +78,9 @@ class NotePreviewSheet extends StatefulWidget {
         category: category,
         onEdit: onEdit,
         dateStr: dateStr,
+        items: items,
+        initialIndex: initialIndex,
+        onIndexChanged: onIndexChanged,
       ),
     );
   }
@@ -62,6 +91,38 @@ class NotePreviewSheet extends StatefulWidget {
 
 class _NotePreviewSheetState extends State<NotePreviewSheet> {
   final List<TapGestureRecognizer> _recognizers = [];
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+    if (widget.items != null && widget.items!.isNotEmpty) {
+      _currentIndex = _currentIndex.clamp(0, widget.items!.length - 1);
+    }
+  }
+
+  void _prevNote() {
+    if (widget.items != null && _currentIndex > 0) {
+      HapticFeedback.selectionClick();
+      setState(() {
+        _clearRecognizers();
+        _currentIndex--;
+      });
+      widget.onIndexChanged?.call(_currentIndex);
+    }
+  }
+
+  void _nextNote() {
+    if (widget.items != null && _currentIndex < widget.items!.length - 1) {
+      HapticFeedback.selectionClick();
+      setState(() {
+        _clearRecognizers();
+        _currentIndex++;
+      });
+      widget.onIndexChanged?.call(_currentIndex);
+    }
+  }
 
   @override
   void dispose() {
@@ -582,9 +643,19 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
   @override
   Widget build(BuildContext context) {
     final p = widget.p;
-    final cleanNote = widget.note.trim();
+    final currentItem = (widget.items != null && widget.items!.isNotEmpty)
+        ? widget.items![_currentIndex]
+        : NotePreviewItem(
+            note: widget.note,
+            title: widget.title,
+            category: widget.category,
+            dateStr: widget.dateStr,
+            onEdit: widget.onEdit,
+          );
+
+    final cleanNote = currentItem.note.trim();
     final rawTags = NoteTagExtractor.extractHashtags(cleanNote);
-    final catLower = (widget.category ?? '').toLowerCase().trim();
+    final catLower = (currentItem.category ?? '').toLowerCase().trim();
     final tags = rawTags
         .where((t) => t.toLowerCase().replaceAll('#', '').trim() != catLower)
         .toSet()
@@ -601,20 +672,108 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
       fontWeight: FontWeight.w500,
     );
 
+    final bool hasMultiple = widget.items != null && widget.items!.length > 1;
+
     return AppSheet(
       p: p,
-      title: widget.title,
+      title: currentItem.title,
+      trailingAction: hasMultiple
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GestureDetector(
+                  onTap: _currentIndex > 0 ? _prevNote : null,
+                  behavior: HitTestBehavior.opaque,
+                  child: Opacity(
+                    opacity: _currentIndex > 0 ? 1.0 : 0.35,
+                    child: Container(
+                      width: 30,
+                      height: 30,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: p.surface3,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: p.border.withValues(alpha: 0.5),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.chevron_left_rounded,
+                        size: 20,
+                        color: p.text,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3.5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: p.surface3,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: p.border.withValues(alpha: 0.5),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Text(
+                    '${_currentIndex + 1} of ${widget.items!.length}',
+                    style: TextStyle(
+                      color: p.text2,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                GestureDetector(
+                  onTap: _currentIndex < widget.items!.length - 1
+                      ? _nextNote
+                      : null,
+                  behavior: HitTestBehavior.opaque,
+                  child: Opacity(
+                    opacity: _currentIndex < widget.items!.length - 1
+                        ? 1.0
+                        : 0.35,
+                    child: Container(
+                      width: 30,
+                      height: 30,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: p.surface3,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: p.border.withValues(alpha: 0.5),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.chevron_right_rounded,
+                        size: 20,
+                        color: p.text,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : null,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (widget.category != null ||
-              widget.dateStr != null ||
+          if (currentItem.category != null ||
+              currentItem.dateStr != null ||
               tags.isNotEmpty) ...[
             Row(
               children: [
-                if (widget.category != null &&
-                    widget.category!.trim().isNotEmpty) ...[
+                if (currentItem.category != null &&
+                    currentItem.category!.trim().isNotEmpty) ...[
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
@@ -629,7 +788,7 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
                       ),
                     ),
                     child: Text(
-                      widget.category!,
+                      currentItem.category!,
                       style: TextStyle(
                         color: p.accent,
                         fontSize: 11.5,
@@ -639,9 +798,9 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
                   ),
                   const SizedBox(width: 8),
                 ],
-                if (widget.dateStr != null)
+                if (currentItem.dateStr != null)
                   Text(
-                    widget.dateStr!,
+                    currentItem.dateStr!,
                     style: TextStyle(
                       color: p.text3,
                       fontSize: 12,
@@ -696,19 +855,30 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
             const SizedBox(height: spacing12),
           ],
 
-          // Note text card with rich markdown formatting, interactive link detection & safe departure dialog
-          Container(
-            width: double.infinity,
-            constraints: const BoxConstraints(maxHeight: 340),
-            padding: const EdgeInsets.all(spacing16),
-            decoration: BoxDecoration(
-              color: p.surface2,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: p.border.withValues(alpha: 0.6)),
-            ),
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: _buildFormattedContent(displayText, baseStyle, p),
+          // Note text card with rich markdown formatting, interactive links, safe departure dialog & horizontal swipe
+          GestureDetector(
+            onHorizontalDragEnd: (details) {
+              if (details.primaryVelocity != null) {
+                if (details.primaryVelocity! < -150) {
+                  _nextNote();
+                } else if (details.primaryVelocity! > 150) {
+                  _prevNote();
+                }
+              }
+            },
+            child: Container(
+              width: double.infinity,
+              constraints: const BoxConstraints(maxHeight: 340),
+              padding: const EdgeInsets.all(spacing16),
+              decoration: BoxDecoration(
+                color: p.surface2,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: p.border.withValues(alpha: 0.6)),
+              ),
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: _buildFormattedContent(displayText, baseStyle, p),
+              ),
             ),
           ),
 
@@ -736,7 +906,7 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
                   label: const Text('Copy Note'),
                 ),
               ),
-              if (widget.onEdit != null) ...[
+              if (currentItem.onEdit != null) ...[
                 const SizedBox(width: 12),
                 Expanded(
                   child: FilledButton.icon(
@@ -750,7 +920,7 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
                     ),
                     onPressed: () {
                       Navigator.pop(context);
-                      widget.onEdit!();
+                      currentItem.onEdit!();
                     },
                     icon: const Icon(Icons.edit_rounded, size: 16),
                     label: const Text(

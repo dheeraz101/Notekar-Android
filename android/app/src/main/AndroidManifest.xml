@@ -328,6 +328,13 @@
                 <action android:name="app.notekar.notekar.ACTION_DAILY_MAINTENANCE" />
             </intent-filter>
         </receiver>
+        <receiver
+            android:name=".UnlockReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.USER_PRESENT" />
+            </intent-filter>
+        </receiver>
 
         <provider
             android:name="androidx.core.content.FileProvider"

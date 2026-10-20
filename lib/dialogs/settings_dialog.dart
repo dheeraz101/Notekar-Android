@@ -407,6 +407,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
   bool showPersistentNotification = false;
   String notifLogAction = 'popup';
   bool enableNoteOnClick = false;
+  bool logAfterUnlock = false;
+  String unlockActionStyle = 'notification';
   bool enableSobrietyMode = false;
   String sobrietyResetType = 'any';
   int? sobrietyCustomStartMs;
@@ -774,6 +776,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
           _prefs?.getBool('show_persistent_notification') ?? false;
       notifLogAction = _prefs?.getString('notif_log_action') ?? 'popup';
       enableNoteOnClick = _prefs?.getBool('enable_note_on_click') ?? false;
+      logAfterUnlock = _prefs?.getBool('m-log-after-unlock') ?? false;
+      unlockActionStyle =
+          _prefs?.getString('m-unlock-action') ?? 'notification';
       enableSobrietyMode = _prefs?.getBool('enable_sobriety_mode') ?? false;
       sobrietyResetType = _prefs?.getString('sobriety_reset_type') ?? 'any';
       sobrietyCustomStartMs = _prefs?.getInt('sobriety_custom_start_ms');
@@ -3065,6 +3070,8 @@ $cleanStack
                                   defaultMode: defaultMode,
                                   tapDelay: tapDelay,
                                   enableNoteOnClick: enableNoteOnClick,
+                                  logAfterUnlock: logAfterUnlock,
+                                  unlockActionStyle: unlockActionStyle,
                                   onDefaultModeChanged: (value) {
                                     setState(() => defaultMode = value);
                                     widget.onDefaultMode(value);
@@ -3081,6 +3088,24 @@ $cleanStack
                                       );
                                     }
                                     setState(() => enableNoteOnClick = value);
+                                  },
+                                  onLogAfterUnlockChanged: (value) async {
+                                    if (_prefs != null) {
+                                      await _prefs!.setBool(
+                                        'm-log-after-unlock',
+                                        value,
+                                      );
+                                    }
+                                    setState(() => logAfterUnlock = value);
+                                  },
+                                  onUnlockActionStyleChanged: (value) async {
+                                    if (_prefs != null) {
+                                      await _prefs!.setString(
+                                        'm-unlock-action',
+                                        value,
+                                      );
+                                    }
+                                    setState(() => unlockActionStyle = value);
                                   },
                                 ),
                               ),

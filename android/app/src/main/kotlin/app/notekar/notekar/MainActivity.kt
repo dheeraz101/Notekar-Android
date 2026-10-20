@@ -1108,6 +1108,10 @@ class MainActivity : FlutterActivity() {
     private fun payloadFromIntent(intent: Intent?): Map<String, Any?>? {
         if (intent == null) return null
 
+        if (intent.getStringExtra("action") == "checkpoint" || intent.getStringExtra("route") == "checkpoint") {
+            return mapOf("action" to "checkpoint")
+        }
+
         // 1. Check for Share Sheet image streams (ACTION_SEND or ACTION_SEND_MULTIPLE)
         if (intent.action == Intent.ACTION_SEND && intent.type?.startsWith("image/") == true) {
             val imageUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -1244,6 +1248,10 @@ class MainActivity : FlutterActivity() {
                 "history" -> mapOf(
                     "action" to "open",
                     "page" to "history"
+                )
+
+                "checkpoint", "checkpoints" -> mapOf(
+                    "action" to "checkpoint"
                 )
 
                 "settings" -> mapOf(
