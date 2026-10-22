@@ -12,6 +12,7 @@ import 'package:notekar/dialogs/goals_sheet.dart';
 import 'package:notekar/dialogs/manual_entry_dialog.dart';
 import 'package:notekar/dialogs/merge_entries_sheet.dart';
 import 'package:notekar/dialogs/note_dialog.dart';
+import 'package:notekar/dialogs/note_preview_sheet.dart';
 import 'package:notekar/dialogs/personalization_setup_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/settings/life_audit_page.dart';
@@ -33,6 +34,7 @@ import 'package:notekar/widgets/history_calendar_view.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/milestone_celebration_dialog.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
+import 'package:notekar/widgets/timeline_consolidated_card.dart';
 import 'package:notekar/widgets/timeline_gap_card.dart';
 import 'package:notekar/widgets/timeline_session_card.dart';
 import 'package:notekar/widgets/timeline_single_tile.dart';
@@ -131,11 +133,19 @@ class _SectionHeaderRow extends _TimelineRowItem {
 }
 
 class _TimelineElementRow extends _TimelineRowItem {
-  _TimelineElementRow(this.item, {this.isFirst = false, this.isLast = false});
+  _TimelineElementRow(
+    this.item, {
+    this.isFirst = false,
+    this.isLast = false,
+    this.dayPreviewItems,
+    this.previewIndex,
+  });
 
   final TimelineItem item;
   final bool isFirst;
   final bool isLast;
+  final List<NotePreviewItem>? dayPreviewItems;
+  final int? previewIndex;
 }
 
 class _HistoryDialogState extends State<HistoryDialog> {
@@ -161,6 +171,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
   String _viewMode = 'list';
   bool _showGapCards = false;
   bool _rainbowCards = false;
+  bool _consolidateCategories = false;
   TimelineDaySection? _activeInsightsSection;
   String? _inSheetView; // null, 'manual', 'goals', 'create_goal', 'life_audit'
   Goal? _editingGoal;
@@ -275,6 +286,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
         _viewMode = savedViewMode;
         _showGapCards = savedGaps;
         _rainbowCards = savedRainbow;
+        _consolidateCategories =
+            prefs.getBool('history_consolidate_categories') ?? false;
         _showImagesAlways = savedShowImagesAlways;
         _showVoiceAlways = savedShowVoiceAlways;
         _sleepHours = prefs.getDouble('time_audit_sleep_hours') ?? 10.0;
@@ -292,6 +305,46 @@ class _HistoryDialogState extends State<HistoryDialog> {
 
   bool _isProcessingTimeline = false;
 
+  List<TimelineItem> _consolidateItemsByCategory(List<TimelineItem> items) {
+    if (items.length <= 1) return items;
+    final result = <TimelineItem>[];
+    final categoryGroups = <String, List<TimelineItem>>{};
+    final order = <String>[];
+
+    for (final it in items) {
+      String? cat;
+      if (it is TimelineSessionItem) {
+        cat = it.category;
+      } else if (it is TimelineSingleItem) {
+        cat = it.moment.category;
+      }
+
+      if (cat != null && cat.trim().isNotEmpty) {
+        final c = cat.trim();
+        if (!categoryGroups.containsKey(c)) {
+          categoryGroups[c] = [];
+          order.add(c);
+        }
+        categoryGroups[c]!.add(it);
+      } else {
+        final anonKey = '__unassigned_${it.hashCode}';
+        order.add(anonKey);
+        categoryGroups[anonKey] = [it];
+      }
+    }
+
+    for (final key in order) {
+      final group = categoryGroups[key];
+      if (group == null || group.isEmpty) continue;
+      if (key.startsWith('__unassigned_') || group.length == 1) {
+        result.addAll(group);
+      } else {
+        result.add(TimelineConsolidatedItem(category: key, items: group));
+      }
+    }
+    return result;
+  }
+
   void _populateTimelineRows(TimelineIsolateResult result) {
     final sections = result.sections;
     _singleNumberMap = result.singleNumberMap;
@@ -301,12 +354,48 @@ class _HistoryDialogState extends State<HistoryDialog> {
     for (final sec in _daySections) {
       if (sec.items.isEmpty) continue;
       allRows.add(_SectionHeaderRow(sec));
-      for (int i = 0; i < sec.items.length; i++) {
+
+      final effectiveItems = _consolidateCategories
+          ? _consolidateItemsByCategory(sec.items)
+          : sec.items;
+
+      final dayNoteItems = sec.items.where((it) {
+        if (it is TimelineSessionItem) return it.note.isNotEmpty;
+        if (it is TimelineSingleItem) return it.moment.note.isNotEmpty;
+        return false;
+      }).toList();
+
+      final dayPreviewItems = dayNoteItems.map((it) {
+        if (it is TimelineSessionItem) {
+          return NotePreviewItem(
+            note: it.note,
+            title: it.category ?? 'Session Note',
+            category: it.category,
+            dateStr: datePretty(it.startTimestamp),
+            onEdit: () => _openDirectNoteEditor(it.noteMoment),
+          );
+        } else {
+          final s = it as TimelineSingleItem;
+          return NotePreviewItem(
+            note: s.moment.note,
+            title: s.moment.category ?? 'Moment Note',
+            category: s.moment.category,
+            dateStr: datePretty(s.moment.timestamp),
+            onEdit: () => _openDirectNoteEditor(s.moment),
+          );
+        }
+      }).toList();
+
+      for (int i = 0; i < effectiveItems.length; i++) {
+        final it = effectiveItems[i];
+        final noteIdx = dayNoteItems.indexOf(it);
         allRows.add(
           _TimelineElementRow(
-            sec.items[i],
+            it,
             isFirst: i == 0,
-            isLast: i == sec.items.length - 1,
+            isLast: i == effectiveItems.length - 1,
+            dayPreviewItems: dayPreviewItems,
+            previewIndex: noteIdx >= 0 ? noteIdx : null,
           ),
         );
       }
@@ -329,6 +418,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
       criteriaHashtag: _timelineFilterCriteria.hashtag,
       criteriaGoalId: _timelineFilterCriteria.goalId,
       criteriaMode: _timelineFilterCriteria.mode,
+      consolidateCards:
+          _filter == 'consolidate' || _timelineFilterCriteria.consolidateCards,
     );
 
     // Fast synchronous path for smaller datasets (<200 moments) avoids isolate spawning overhead,
@@ -426,6 +517,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
       'out' => Icons.logout_rounded,
       'single' => Icons.radio_button_checked_rounded,
       'notes' => Icons.speaker_notes_off_rounded,
+      'checkpoints' => Icons.flag_rounded,
       'media' => Icons.perm_media_rounded,
       'advanced' => Icons.tune_rounded,
       _ => Icons.history_toggle_off_rounded,
@@ -442,6 +534,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
       'out' => 'No OUT Moments',
       'single' => 'No Single Logs',
       'notes' => 'No Notes Found',
+      'checkpoints' => 'No Checkpoints',
       'media' => 'No Media Moments',
       'advanced' => 'No Filter Matches',
       _ => 'No History',
@@ -461,6 +554,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
       'single' => 'Single logs are standalone timestamps for one-shot events.',
       'notes' =>
         'Moments with text notes will be listed here for quick review.',
+      'checkpoints' =>
+        'Log routine daily habits like Waking Up, Meals, and Bedtime with 1-tap Checkpoints.',
       'media' =>
         'Moments with voice notes or attached images will appear here.',
       _ => 'Start capturing moments by tapping the clock on the home screen.',
@@ -948,6 +1043,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                     'sessions',
                                                     'single',
                                                     'notes',
+                                                    'checkpoints',
+                                                    'consolidate',
                                                     'media',
                                                     'date',
                                                   ])
@@ -990,6 +1087,16 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                                       .localized(
                                                                         context,
                                                                       ),
+                                                                'checkpoints' =>
+                                                                  'Checkpoints'
+                                                                      .localized(
+                                                                        context,
+                                                                      ),
+                                                                'consolidate' =>
+                                                                  'Grouped'
+                                                                      .localized(
+                                                                        context,
+                                                                      ),
                                                                 'media' =>
                                                                   'Media'
                                                                       .localized(
@@ -1000,7 +1107,13 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                         icon: f == 'date'
                                                             ? Icons
                                                                   .calendar_today_rounded
-                                                            : null,
+                                                            : (f == 'checkpoints'
+                                                                  ? Icons
+                                                                        .flag_rounded
+                                                                  : (f == 'consolidate'
+                                                                        ? Icons
+                                                                              .folder_copy_rounded
+                                                                        : null)),
                                                         active: _filter == f,
                                                         onTap: f == 'date'
                                                             ? () =>
@@ -1392,21 +1505,165 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                   icon: _emptyIcon,
                                   title: _emptyTitle,
                                   message: _emptyMessage,
-                                  actionLabel: _filter == 'all'
-                                      ? 'Start Logging'
-                                      : 'Show All',
-                                  onAction: _filter == 'all'
-                                      ? () => Navigator.pop(context)
-                                      : () {
-                                          setState(() {
-                                            _filter = 'all';
-                                            _visibleCount = _pageSize;
-                                            _rebuildMemoizedLists();
-                                          });
-                                        },
+                                  actionLabel: _filter == 'checkpoints'
+                                      ? 'Checkpoints Dashboard'
+                                      : (_filter == 'all'
+                                            ? 'Start Logging'
+                                            : 'Show All'),
+                                  onAction: _filter == 'checkpoints'
+                                      ? () => CheckpointsDashboardScreen.show(
+                                          context,
+                                          p: widget.p,
+                                          moments: _entries,
+                                          onLogCheckpoint: (preset) async {
+                                            final m = await CheckpointService
+                                                .instance
+                                                .logCheckpoint(preset: preset);
+                                            setState(() {
+                                              _entries.insert(0, m);
+                                              _rebuildMemoizedLists();
+                                            });
+                                          },
+                                        )
+                                      : (_filter == 'all'
+                                            ? () => Navigator.pop(context)
+                                            : () {
+                                                setState(() {
+                                                  _filter = 'all';
+                                                  _visibleCount = _pageSize;
+                                                  _rebuildMemoizedLists();
+                                                });
+                                              }),
                                 ),
                               )
-                            else
+                            else ...[
+                              if (_filter == 'checkpoints')
+                                SliverToBoxAdapter(
+                                  child: Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      spacing16,
+                                      0,
+                                      spacing16,
+                                      spacing12,
+                                    ),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 14,
+                                        vertical: 10,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: widget.p.surface2,
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(
+                                          color: widget.p.accent.withValues(
+                                            alpha: 0.35,
+                                          ),
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 36,
+                                            height: 36,
+                                            decoration: BoxDecoration(
+                                              color: widget.p.accent.withValues(
+                                                alpha: 0.15,
+                                              ),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(
+                                              Icons.flag_rounded,
+                                              color: widget.p.accent,
+                                              size: 18,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  'Habit Consistency Dashboard'
+                                                      .localized(context),
+                                                  style: TextStyle(
+                                                    color: widget.p.text,
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  'Variance stats, completion matrix & streaks.'
+                                                      .localized(context),
+                                                  style: TextStyle(
+                                                    color: widget.p.text3,
+                                                    fontSize: 11,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          PressableScale(
+                                            onTap: () {
+                                              CheckpointsDashboardScreen.show(
+                                                context,
+                                                p: widget.p,
+                                                moments: _entries,
+                                                onLogCheckpoint: (preset) async {
+                                                  final m =
+                                                      await CheckpointService
+                                                          .instance
+                                                          .logCheckpoint(
+                                                            preset: preset,
+                                                          );
+                                                  setState(() {
+                                                    _entries.insert(0, m);
+                                                    _rebuildMemoizedLists();
+                                                  });
+                                                },
+                                              );
+                                            },
+                                            child: Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 10,
+                                                    vertical: 6,
+                                                  ),
+                                              decoration: BoxDecoration(
+                                                color: widget.p.accent,
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Text(
+                                                    'Open'.localized(context),
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 11.5,
+                                                      fontWeight:
+                                                          FontWeight.w700,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 3),
+                                                  const Icon(
+                                                    Icons
+                                                        .arrow_forward_ios_rounded,
+                                                    size: 10,
+                                                    color: Colors.white,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               SliverPadding(
                                 padding: const EdgeInsets.fromLTRB(
                                   0,
@@ -1670,6 +1927,26 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                           ),
                                         );
                                       }
+                                      if (elem.item
+                                          is TimelineConsolidatedItem) {
+                                        return Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 0.0,
+                                          ),
+                                          child: TimelineConsolidatedCard(
+                                            p: widget.p,
+                                            consolidatedItem:
+                                                elem.item
+                                                    as TimelineConsolidatedItem,
+                                            rainbowCards: _rainbowCards,
+                                            compact: _compactRows,
+                                            onEditNote: (m) =>
+                                                _openDirectNoteEditor(m),
+                                            onDeleteMoment: (m) =>
+                                                _removeEntry(m),
+                                          ),
+                                        );
+                                      }
                                       if (elem.item is TimelineSessionItem) {
                                         final session =
                                             elem.item as TimelineSessionItem;
@@ -1693,6 +1970,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                   session.inMoment.id,
                                                 ),
                                             goals: _goals,
+                                            previewItems: elem.dayPreviewItems,
+                                            initialPreviewIndex:
+                                                elem.previewIndex,
                                             isImageCollapsed:
                                                 _isMomentImageCollapsed(
                                                   session.noteMoment.id,
@@ -1778,6 +2058,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                           rainbowCards: _rainbowCards,
                                           isFirst: elem.isFirst,
                                           isLast: elem.isLast,
+                                          previewItems: elem.dayPreviewItems,
+                                          initialPreviewIndex:
+                                              elem.previewIndex,
                                           isImageCollapsed:
                                               _isMomentImageCollapsed(
                                                 moment.id,
@@ -1826,6 +2109,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                   ),
                                 ),
                               ),
+                            ],
                           ],
                         ),
                       ),
@@ -2458,6 +2742,46 @@ class _HistoryDialogState extends State<HistoryDialog> {
                   const SizedBox(width: 10),
                   Text(
                     (_viewMode == 'list' ? 'Calendar View' : 'Timeline View')
+                        .localized(context),
+                    style: TextStyle(
+                      color: widget.p.text,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(ctx);
+                final next = !_consolidateCategories;
+                setState(() {
+                  _consolidateCategories = next;
+                  _rebuildMemoizedLists();
+                });
+                unawaited(
+                  SharedPreferences.getInstance().then(
+                    (prefs) =>
+                        prefs.setBool('history_consolidate_categories', next),
+                  ),
+                );
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    _consolidateCategories
+                        ? CupertinoIcons.rectangle_grid_1x2_fill
+                        : CupertinoIcons.rectangle_stack,
+                    size: 20,
+                    color: widget.p.text,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    (_consolidateCategories
+                            ? 'Separate Category Cards'
+                            : 'Consolidate by Category')
                         .localized(context),
                     style: TextStyle(
                       color: widget.p.text,

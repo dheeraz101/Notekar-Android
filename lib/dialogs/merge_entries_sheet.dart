@@ -139,11 +139,27 @@ class _MergeEntriesSheetState extends State<MergeEntriesSheet> {
     HapticFeedback.mediumImpact();
 
     try {
-      await widget.onConfirmMerge(
-        startMoment: _startMoment,
-        endMoment: _endMoment,
+      final combinedNote = _noteController.text.trim();
+      final updatedStart = _startMoment.copyWith(
+        type: 'in',
         category: _selectedCategory,
-        combinedNote: _noteController.text.trim(),
+        note: _unifyNotes
+            ? combinedNote
+            : (_startMoment.note.trim().isNotEmpty
+                  ? _startMoment.note
+                  : combinedNote),
+      );
+      final updatedEnd = _endMoment.copyWith(
+        type: 'out',
+        category: _selectedCategory,
+        note: _unifyNotes ? '' : _endMoment.note,
+      );
+
+      await widget.onConfirmMerge(
+        startMoment: updatedStart,
+        endMoment: updatedEnd,
+        category: _selectedCategory,
+        combinedNote: combinedNote,
         unifyNotes: _unifyNotes,
       );
       if (mounted) {

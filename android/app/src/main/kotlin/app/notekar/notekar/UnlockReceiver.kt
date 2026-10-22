@@ -96,6 +96,18 @@ class UnlockReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        // Action 3: Two-Way Session Start
+        val sessionIntent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra("route", "session")
+        }
+        val sessionPendingIntent = PendingIntent.getActivity(
+            context,
+            UNLOCK_NOTIF_ID + 3,
+            sessionIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle("NoteKar • Quick Log")
@@ -106,6 +118,7 @@ class UnlockReceiver : BroadcastReceiver() {
             .setContentIntent(contentPendingIntent)
             .addAction(0, "✎ Note", notePendingIntent)
             .addAction(0, "📍 Checkpoint", checkpointPendingIntent)
+            .addAction(0, "⏱ Session", sessionPendingIntent)
             .build()
 
         manager.notify(UNLOCK_NOTIF_ID, notification)

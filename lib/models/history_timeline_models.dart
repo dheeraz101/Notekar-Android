@@ -173,6 +173,78 @@ class TimelineSingleItem extends TimelineItem {
   String? get goalId => moment.effectiveGoalId;
 }
 
+/// Item representing a group of timeline moments sharing a category/tag into a single summary card.
+class TimelineConsolidatedItem extends TimelineItem {
+  TimelineConsolidatedItem({required this.category, required this.items});
+
+  @override
+  final String category;
+  final List<TimelineItem> items;
+
+  @override
+  int get primaryTimestamp =>
+      items.isNotEmpty ? items.first.primaryTimestamp : 0;
+
+  @override
+  String get note {
+    for (final it in items) {
+      if (it.note.isNotEmpty) return it.note;
+    }
+    return '';
+  }
+
+  int get count => items.length;
+
+  Duration get totalTrackedDuration {
+    Duration total = Duration.zero;
+    for (final it in items) {
+      if (it is TimelineSessionItem) {
+        total += it.duration;
+      }
+    }
+    return total;
+  }
+
+  Duration get totalDuration => totalTrackedDuration;
+
+  int get startTimestamp {
+    if (items.isEmpty) return 0;
+    int minTs = items.first.primaryTimestamp;
+    for (final it in items) {
+      if (it.primaryTimestamp < minTs) minTs = it.primaryTimestamp;
+    }
+    return minTs;
+  }
+
+  int get endTimestamp {
+    if (items.isEmpty) return 0;
+    int maxTs = items.first.primaryTimestamp;
+    for (final it in items) {
+      final ts = switch (it) {
+        TimelineSessionItem s => s.endTimestamp ?? s.startTimestamp,
+        TimelineSingleItem s => s.moment.timestamp,
+        TimelineGapItem g => g.endTimestamp,
+        TimelineConsolidatedItem c => c.endTimestamp,
+      };
+      if (ts > maxTs) maxTs = ts;
+    }
+    return maxTs;
+  }
+
+  String get dateKey {
+    if (items.isEmpty) {
+      return DateTime.now().toIso8601String().substring(0, 10);
+    }
+    final first = items.first;
+    if (first is TimelineSessionItem) return first.inMoment.date;
+    if (first is TimelineSingleItem) return first.moment.date;
+    final dt = DateTime.fromMillisecondsSinceEpoch(first.primaryTimestamp);
+    final m = dt.month.toString().padLeft(2, '0');
+    final d = dt.day.toString().padLeft(2, '0');
+    return '${dt.year}-$m-$d';
+  }
+}
+
 /// Represents an untracked gap between sessions or moments.
 class TimelineGapItem extends TimelineItem {
   TimelineGapItem({required this.startTimestamp, required this.endTimestamp});
@@ -221,10 +293,11 @@ class TimelineDaySection {
     final Map<String, int> msMap = {};
     for (final it in items) {
       final cat = it.category ?? 'General';
-      final itemMs = switch (it) {
+      final int itemMs = switch (it) {
         TimelineSessionItem s => s.duration.inMilliseconds,
         TimelineSingleItem _ => 0,
         TimelineGapItem _ => 0,
+        TimelineConsolidatedItem c => c.totalDuration.inMilliseconds,
       };
       if (itemMs > 0) {
         msMap[cat] = (msMap[cat] ?? 0) + itemMs;
@@ -454,6 +527,7 @@ List<TimelineDaySection> buildTimelineDaySections(
       TimelineGapItem g => dateKey(
         DateTime.fromMillisecondsSinceEpoch(g.startTimestamp),
       ),
+      TimelineConsolidatedItem c => c.dateKey,
     };
     groupedByDate.putIfAbsent(dKey, () => []).add(item);
   }
@@ -486,11 +560,13 @@ List<TimelineDaySection> buildTimelineDaySections(
                   ),
             TimelineSingleItem s => s.moment.timestamp,
             TimelineGapItem g => g.endTimestamp,
+            TimelineConsolidatedItem c => c.endTimestamp,
           };
           final nextStart = switch (next) {
             TimelineSessionItem s => s.startTimestamp,
             TimelineSingleItem s => s.moment.timestamp,
             TimelineGapItem g => g.startTimestamp,
+            TimelineConsolidatedItem c => c.startTimestamp,
           };
           final gapMs = nextStart - currentEnd;
           if (gapMs >= 15 * 60 * 1000) {
@@ -604,6 +680,7 @@ class TimelineIsolatePayload {
   final String? criteriaHashtag;
   final String? criteriaGoalId;
   final String? criteriaMode;
+  final bool consolidateCards;
 
   TimelineIsolatePayload({
     required this.entries,
@@ -616,6 +693,7 @@ class TimelineIsolatePayload {
     this.criteriaHashtag,
     this.criteriaGoalId,
     this.criteriaMode,
+    this.consolidateCards = false,
   });
 }
 
@@ -708,6 +786,27 @@ TimelineIsolateResult buildTimelineDataInIsolate(
                   ((it.inMoment.note.isNotEmpty) ||
                       (it.outMoment?.note.isNotEmpty ?? false))) {
                 return true;
+              }
+              return false;
+            }).toList(),
+          ),
+        )
+        .where((s) => s.items.isNotEmpty)
+        .toList();
+  } else if (payload.filter == 'checkpoints') {
+    sections = sections
+        .map(
+          (s) => TimelineDaySection(
+            dateKey: s.dateKey,
+            date: s.date,
+            displayTitle: s.displayTitle,
+            totalTrackedDuration: s.totalTrackedDuration,
+            totalLogs: s.totalLogs,
+            items: s.items.where((it) {
+              if (it is TimelineSingleItem) {
+                final m = it.moment;
+                return m.tags.contains('checkpoint') ||
+                    m.tags.any((t) => t.startsWith('checkpoint:'));
               }
               return false;
             }).toList(),
@@ -826,6 +925,50 @@ TimelineIsolateResult buildTimelineDataInIsolate(
         )
         .where((s) => s.items.isNotEmpty)
         .toList();
+  }
+
+  if (payload.consolidateCards || payload.filter == 'consolidate') {
+    sections = sections.map((s) {
+      final Map<String, List<TimelineItem>> byCategory = {};
+      final List<TimelineItem> unclustered = [];
+
+      for (final it in s.items) {
+        if (it is TimelineGapItem) {
+          unclustered.add(it);
+          continue;
+        }
+        final cat = it.category?.trim();
+        if (cat != null && cat.isNotEmpty) {
+          byCategory.putIfAbsent(cat, () => []).add(it);
+        } else {
+          unclustered.add(it);
+        }
+      }
+
+      final List<TimelineItem> consolidatedList = [];
+      for (final entry in byCategory.entries) {
+        if (entry.value.length > 1) {
+          consolidatedList.add(
+            TimelineConsolidatedItem(category: entry.key, items: entry.value),
+          );
+        } else {
+          consolidatedList.addAll(entry.value);
+        }
+      }
+      consolidatedList.addAll(unclustered);
+      consolidatedList.sort(
+        (a, b) => b.primaryTimestamp.compareTo(a.primaryTimestamp),
+      );
+
+      return TimelineDaySection(
+        dateKey: s.dateKey,
+        date: s.date,
+        displayTitle: s.displayTitle,
+        totalTrackedDuration: s.totalTrackedDuration,
+        totalLogs: s.totalLogs,
+        items: consolidatedList,
+      );
+    }).toList();
   }
 
   return TimelineIsolateResult(sections, map);

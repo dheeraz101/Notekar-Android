@@ -59,10 +59,11 @@ class SundayDispatchSheet extends StatelessWidget {
     for (final sec in sections) {
       for (final it in sec.items) {
         final dt = DateTime.fromMillisecondsSinceEpoch(it.primaryTimestamp);
-        final dur = switch (it) {
+        final int dur = switch (it) {
           TimelineSessionItem s => s.duration.inMilliseconds,
           TimelineSingleItem _ => 15 * 60 * 1000,
           TimelineGapItem g => g.duration.inMilliseconds,
+          TimelineConsolidatedItem c => c.totalDuration.inMilliseconds,
         };
 
         final cat = switch (it) {
@@ -71,6 +72,7 @@ class SundayDispatchSheet extends StatelessWidget {
           TimelineSingleItem s =>
             CategoryService.extractCategory(s.moment) ?? 'General',
           TimelineGapItem _ => 'Rest',
+          TimelineConsolidatedItem c => c.category,
         };
 
         if (cat.toLowerCase() == 'rest' || cat.toLowerCase() == 'sleep') {

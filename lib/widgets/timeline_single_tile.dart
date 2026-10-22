@@ -33,6 +33,8 @@ class TimelineSingleTile extends StatelessWidget {
     this.onToggleImageCollapse,
     this.isVoiceCollapsed = false,
     this.onToggleVoiceCollapse,
+    this.previewItems,
+    this.initialPreviewIndex,
   });
 
   final Palette p;
@@ -51,6 +53,8 @@ class TimelineSingleTile extends StatelessWidget {
   final VoidCallback? onToggleImageCollapse;
   final bool isVoiceCollapsed;
   final VoidCallback? onToggleVoiceCollapse;
+  final List<NotePreviewItem>? previewItems;
+  final int? initialPreviewIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -291,8 +295,11 @@ class TimelineSingleTile extends StatelessWidget {
                                       context,
                                       p: p,
                                       note: moment.note,
-                                      title: 'Moment Note',
+                                      title: moment.category ?? 'Moment Note',
                                       category: moment.category,
+                                      dateStr: datePretty(moment.timestamp),
+                                      items: previewItems,
+                                      initialIndex: initialPreviewIndex ?? 0,
                                       onEdit: onEditNote,
                                     );
                                   },

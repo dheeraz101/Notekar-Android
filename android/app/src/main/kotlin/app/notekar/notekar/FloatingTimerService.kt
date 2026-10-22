@@ -348,12 +348,24 @@ class FloatingTimerService : Service() {
 
     fun refreshView() {
         val prefs = getSharedPreferences(NoteKarWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
-        val mode = prefs.getString(NoteKarWidgetProvider.KEY_MODE, "two-way") ?: "two-way"
-        val nextAction = prefs.getString(NoteKarWidgetProvider.KEY_NEXT_ACTION, "in") ?: "in"
-        val lastTimestamp = prefs.getLong(NoteKarWidgetProvider.KEY_LAST_TIMESTAMP, 0L)
-        val activeCategory = prefs.getString(NoteKarWidgetProvider.KEY_ACTIVE_CATEGORY, "Work") ?: "Work"
-        val isPaused = prefs.getBoolean(NoteKarWidgetProvider.KEY_IS_PAUSED, false)
-        val pausedAt = prefs.getLong(NoteKarWidgetProvider.KEY_PAUSED_AT, 0L)
+        val flutterPrefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+        val mode = prefs.getString(NoteKarWidgetProvider.KEY_MODE, null)
+            ?: flutterPrefs.getString("flutter.m-mode", "two-way") ?: "two-way"
+        val nextAction = prefs.getString(NoteKarWidgetProvider.KEY_NEXT_ACTION, null)
+            ?: flutterPrefs.getString("flutter.m-inout", "in") ?: "in"
+        var lastTimestamp = prefs.getLong(NoteKarWidgetProvider.KEY_LAST_TIMESTAMP, 0L)
+        if (lastTimestamp <= 0L) {
+            lastTimestamp = flutterPrefs.getLong("flutter.m-ses", 0L)
+        }
+        val activeCategory = prefs.getString(NoteKarWidgetProvider.KEY_ACTIVE_CATEGORY, null)
+            ?: flutterPrefs.getString("flutter.active_category", "Work") ?: "Work"
+        val isPaused = prefs.getBoolean(NoteKarWidgetProvider.KEY_IS_PAUSED, false) ||
+                flutterPrefs.getBoolean("flutter.m-paused", false) ||
+                flutterPrefs.getBoolean("flutter.is_paused", false)
+        var pausedAt = prefs.getLong(NoteKarWidgetProvider.KEY_PAUSED_AT, 0L)
+        if (pausedAt <= 0L) {
+            pausedAt = flutterPrefs.getLong("flutter.m-paused-at", flutterPrefs.getLong("flutter.paused_at", 0L))
+        }
 
         val isCurrentlyIn = mode == "two-way" && nextAction == "out"
         if (!isCurrentlyIn || lastTimestamp <= 0L) {
@@ -379,10 +391,12 @@ class FloatingTimerService : Service() {
             }
         }
 
-        val elapsed = if (isPaused && pausedAt > 0L) {
+        val elapsed = if (isPaused && pausedAt > 0L && pausedAt >= lastTimestamp) {
             pausedAt - lastTimestamp
+        } else if (lastTimestamp > 0L) {
+            Math.max(0L, System.currentTimeMillis() - lastTimestamp)
         } else {
-            System.currentTimeMillis() - lastTimestamp
+            0L
         }
         val base = SystemClock.elapsedRealtime() - elapsed
         chronometer?.base = base

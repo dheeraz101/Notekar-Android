@@ -17,6 +17,7 @@ import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/widgets/apple_hig_action_sheet.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
+import 'package:notekar/widgets/timeline_consolidated_card.dart';
 import 'package:notekar/widgets/timeline_gap_card.dart';
 import 'package:notekar/widgets/timeline_media_attachment_card.dart';
 import 'package:notekar/widgets/timeline_voice_player_pill.dart';
@@ -1391,58 +1392,70 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                     ),
                     if (it.note.isNotEmpty) ...[
                       const SizedBox(height: 6),
-                      PressableScale(
-                        onTap: () {
-                          HapticFeedback.selectionClick();
-                          final noteIdx = dayNoteTimelineItems.indexOf(it);
-                          NotePreviewSheet.show(
-                            context,
-                            p: widget.p,
-                            note: it.note,
-                            title:
-                                it.category ??
-                                'Session Note'.localized(context),
-                            category: it.category,
-                            dateStr: datePretty(it.startTimestamp),
-                            items: dayPreviewItems,
-                            initialIndex: noteIdx >= 0 ? noteIdx : 0,
-                            onEdit: widget.onEditNote != null
-                                ? () => widget.onEditNote!(it.noteMoment)
-                                : null,
-                          );
-                        },
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: widget.p.surface3.withValues(alpha: 0.5),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: IosEmojiText(
-                            it.note,
-                            maxLines:
-                                _expandedNoteIds.contains(it.noteMoment.id)
-                                ? null
-                                : 2,
-                            overflow:
-                                _expandedNoteIds.contains(it.noteMoment.id)
-                                ? TextOverflow.visible
-                                : TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: widget.p.text,
-                              fontSize: 12,
-                              height: 1.3,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: PressableScale(
+                              onTap: () {
+                                HapticFeedback.selectionClick();
+                                final noteIdx = dayNoteTimelineItems.indexOf(
+                                  it,
+                                );
+                                NotePreviewSheet.show(
+                                  context,
+                                  p: widget.p,
+                                  note: it.note,
+                                  title:
+                                      it.category ??
+                                      'Session Note'.localized(context),
+                                  category: it.category,
+                                  dateStr: datePretty(it.startTimestamp),
+                                  items: dayPreviewItems,
+                                  initialIndex: noteIdx >= 0 ? noteIdx : 0,
+                                  onEdit: widget.onEditNote != null
+                                      ? () => widget.onEditNote!(it.noteMoment)
+                                      : null,
+                                );
+                              },
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: widget.p.surface3.withValues(
+                                    alpha: 0.5,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: IosEmojiText(
+                                  it.note,
+                                  maxLines:
+                                      _expandedNoteIds.contains(
+                                        it.noteMoment.id,
+                                      )
+                                      ? null
+                                      : 2,
+                                  overflow:
+                                      _expandedNoteIds.contains(
+                                        it.noteMoment.id,
+                                      )
+                                      ? TextOverflow.visible
+                                      : TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: widget.p.text,
+                                    fontSize: 12,
+                                    height: 1.3,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                      if (it.note.contains('\n') || it.note.length > 40)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 2.0),
-                          child: GestureDetector(
+                          const SizedBox(width: 4),
+                          GestureDetector(
+                            behavior: HitTestBehavior.opaque,
                             onTap: () {
                               HapticFeedback.selectionClick();
                               setState(() {
@@ -1455,32 +1468,22 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                                 }
                               });
                             },
-                            behavior: HitTestBehavior.opaque,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  _expandedNoteIds.contains(it.noteMoment.id)
-                                      ? Icons.keyboard_arrow_up_rounded
-                                      : Icons.keyboard_arrow_down_rounded,
-                                  size: 14,
-                                  color: widget.p.accent,
-                                ),
-                                const SizedBox(width: 3),
-                                Text(
-                                  _expandedNoteIds.contains(it.noteMoment.id)
-                                      ? 'Collapse'
-                                      : 'Expand note',
-                                  style: TextStyle(
-                                    color: widget.p.accent,
-                                    fontSize: 10.5,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                                vertical: 6,
+                              ),
+                              child: Icon(
+                                _expandedNoteIds.contains(it.noteMoment.id)
+                                    ? Icons.keyboard_arrow_up_rounded
+                                    : Icons.keyboard_arrow_down_rounded,
+                                size: 19,
+                                color: widget.p.text3,
+                              ),
                             ),
                           ),
-                        ),
+                        ],
+                      ),
                     ],
                     // Combined collapsed voice & photo pills on same line
                     if (_isMomentVoiceCollapsed(it.noteMoment.id) &&
@@ -1619,6 +1622,14 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                 ),
               ),
             ),
+          );
+        } else if (it is TimelineConsolidatedItem) {
+          return TimelineConsolidatedCard(
+            p: widget.p,
+            consolidatedItem: it,
+            rainbowCards: widget.rainbowCards,
+            onEditNote: (m) => widget.onEditNote?.call(m),
+            onDeleteMoment: (m) => widget.onDelete?.call(m),
           );
         } else if (it is TimelineSingleItem) {
           final isGodMode =
@@ -1796,61 +1807,6 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                                           ),
                                         ),
                                       ),
-                                      if (it.note.contains('\n') ||
-                                          it.note.length > 36)
-                                        Padding(
-                                          padding: const EdgeInsets.only(
-                                            top: 2.0,
-                                          ),
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              HapticFeedback.selectionClick();
-                                              setState(() {
-                                                if (_expandedNoteIds.contains(
-                                                  it.moment.id,
-                                                )) {
-                                                  _expandedNoteIds.remove(
-                                                    it.moment.id,
-                                                  );
-                                                } else {
-                                                  _expandedNoteIds.add(
-                                                    it.moment.id,
-                                                  );
-                                                }
-                                              });
-                                            },
-                                            behavior: HitTestBehavior.opaque,
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Icon(
-                                                  _expandedNoteIds.contains(
-                                                        it.moment.id,
-                                                      )
-                                                      ? Icons
-                                                            .keyboard_arrow_up_rounded
-                                                      : Icons
-                                                            .keyboard_arrow_down_rounded,
-                                                  size: 14,
-                                                  color: widget.p.accent,
-                                                ),
-                                                const SizedBox(width: 3),
-                                                Text(
-                                                  _expandedNoteIds.contains(
-                                                        it.moment.id,
-                                                      )
-                                                      ? 'Collapse'
-                                                      : 'Expand note',
-                                                  style: TextStyle(
-                                                    color: widget.p.accent,
-                                                    fontSize: 10.5,
-                                                    fontWeight: FontWeight.w700,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
                                     ],
                                   ],
                                 ),
@@ -1902,13 +1858,51 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                               ),
                             );
                           }(),
-                          Text(
-                            it.type.toUpperCase(),
-                            style: TextStyle(
-                              color: widget.p.text3,
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w700,
-                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                it.type.toUpperCase(),
+                                style: TextStyle(
+                                  color: widget.p.text3,
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              if (it.note.isNotEmpty) ...[
+                                const SizedBox(height: 3),
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    HapticFeedback.selectionClick();
+                                    setState(() {
+                                      if (_expandedNoteIds.contains(
+                                        it.moment.id,
+                                      )) {
+                                        _expandedNoteIds.remove(it.moment.id);
+                                      } else {
+                                        _expandedNoteIds.add(it.moment.id);
+                                      }
+                                    });
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: 1,
+                                      left: 6,
+                                      bottom: 2,
+                                    ),
+                                    child: Icon(
+                                      _expandedNoteIds.contains(it.moment.id)
+                                          ? Icons.keyboard_arrow_up_rounded
+                                          : Icons.keyboard_arrow_down_rounded,
+                                      size: 19,
+                                      color: widget.p.text2,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                         ],
                       ],

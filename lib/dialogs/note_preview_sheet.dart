@@ -932,6 +932,107 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
               ],
             ],
           ),
+
+          // Daily Review Linear Navigation Bar (< [ N of Total ] >)
+          if (hasMultiple) ...[
+            const SizedBox(height: spacing12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: _currentIndex > 0 ? _prevNote : null,
+                    borderRadius: BorderRadius.circular(14),
+                    child: Container(
+                      width: 46,
+                      height: 38,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: _currentIndex > 0
+                            ? p.surface3
+                            : p.surface2.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: p.border.withValues(
+                            alpha: _currentIndex > 0 ? 0.75 : 0.25,
+                          ),
+                          width: 1,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        size: 16,
+                        color: _currentIndex > 0
+                            ? p.text
+                            : p.text3.withValues(alpha: 0.35),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: p.surface2,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: p.border.withValues(alpha: 0.55),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Text(
+                    '${_currentIndex + 1} of ${widget.items!.length}',
+                    style: TextStyle(
+                      color: p.text2,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: _currentIndex < widget.items!.length - 1
+                        ? _nextNote
+                        : null,
+                    borderRadius: BorderRadius.circular(14),
+                    child: Container(
+                      width: 46,
+                      height: 38,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: _currentIndex < widget.items!.length - 1
+                            ? p.surface3
+                            : p.surface2.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: p.border.withValues(
+                            alpha: _currentIndex < widget.items!.length - 1
+                                ? 0.75
+                                : 0.25,
+                          ),
+                          width: 1,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 16,
+                        color: _currentIndex < widget.items!.length - 1
+                            ? p.text
+                            : p.text3.withValues(alpha: 0.35),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

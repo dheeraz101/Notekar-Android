@@ -14,27 +14,35 @@ class TimelineFilterCriteria {
     this.category,
     this.hashtag,
     this.goalId,
+    this.consolidateCards = false,
   });
 
   final String mode; // 'all' | 'single' | 'two-way' | 'media'
   final String? category;
   final String? hashtag;
   final String? goalId;
+  final bool consolidateCards;
 
   bool get isActive =>
-      mode != 'all' || category != null || hashtag != null || goalId != null;
+      mode != 'all' ||
+      category != null ||
+      hashtag != null ||
+      goalId != null ||
+      consolidateCards;
 
   TimelineFilterCriteria copyWith({
     String? mode,
     String? Function()? category,
     String? Function()? hashtag,
     String? Function()? goalId,
+    bool? consolidateCards,
   }) {
     return TimelineFilterCriteria(
       mode: mode ?? this.mode,
       category: category != null ? category() : this.category,
       hashtag: hashtag != null ? hashtag() : this.hashtag,
       goalId: goalId != null ? goalId() : this.goalId,
+      consolidateCards: consolidateCards ?? this.consolidateCards,
     );
   }
 }
@@ -96,6 +104,7 @@ class _TimelineFilterSheetState extends State<TimelineFilterSheet> {
   String? _category;
   String? _hashtag;
   String? _goalId;
+  late bool _consolidateCards;
 
   @override
   void initState() {
@@ -104,6 +113,7 @@ class _TimelineFilterSheetState extends State<TimelineFilterSheet> {
     _category = widget.initial.category;
     _hashtag = widget.initial.hashtag;
     _goalId = widget.initial.goalId;
+    _consolidateCards = widget.initial.consolidateCards;
   }
 
   void _reset() {
@@ -113,6 +123,7 @@ class _TimelineFilterSheetState extends State<TimelineFilterSheet> {
       _category = null;
       _hashtag = null;
       _goalId = null;
+      _consolidateCards = false;
     });
   }
 
@@ -124,6 +135,7 @@ class _TimelineFilterSheetState extends State<TimelineFilterSheet> {
         category: _category,
         hashtag: _hashtag,
         goalId: _goalId,
+        consolidateCards: _consolidateCards,
       ),
     );
   }
@@ -377,7 +389,53 @@ class _TimelineFilterSheetState extends State<TimelineFilterSheet> {
             const SizedBox(height: 24),
           ],
 
-          // Section 4: Action Footer (Reset, Cancel, Apply)
+          // Section 4: Consolidate Cards Switch
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: p.surface2,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: p.border.withValues(alpha: 0.6)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.view_agenda_rounded, size: 20, color: p.accent),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Consolidate Summary Cards'.localized(context),
+                        style: TextStyle(
+                          color: p.text,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Group multiple entries under shared categories to reduce clutter.'
+                            .localized(context),
+                        style: TextStyle(color: p.text3, fontSize: 11),
+                      ),
+                    ],
+                  ),
+                ),
+                CupertinoSwitch(
+                  value: _consolidateCards,
+                  activeTrackColor: p.accent,
+                  onChanged: (val) {
+                    HapticFeedback.selectionClick();
+                    setState(() => _consolidateCards = val);
+                  },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Section 5: Action Footer (Reset, Cancel, Apply)
           Row(
             children: [
               TextButton(

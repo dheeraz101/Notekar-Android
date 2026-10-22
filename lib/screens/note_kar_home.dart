@@ -1960,7 +1960,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
     if (id == null) return;
     final entry = _entries.where((item) => item.id == id).firstOrNull;
     if (entry == null) return;
-    AppSound.click();
+    if (_acousticFeedback) {
+      AppSound.click();
+    }
     NotekarHaptics.light(_hapticStyle);
     setState(() {
       _entries = _entries.where((item) => item.id != id).toList();
@@ -2207,7 +2209,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
         'mode': _mode,
         'nextAction': _mode == 'two-way' ? _inout : 'single',
         'lastType': latest?.type ?? '',
-        'lastTimestamp': latest?.timestamp ?? 0,
+        'lastTimestamp': (_mode == 'two-way' && _sessionStart != null)
+            ? _sessionStart!
+            : (latest?.timestamp ?? 0),
         'hasMoments': latest != null,
         'historyList': historyList,
         'sobrietyEnabled': _enableSobrietyMode,
@@ -3735,6 +3739,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
             ),
           );
         }
+      case 'session':
+      case 'session_start':
       case 'in':
         if (!_isDelayBlocked()) {
           setState(() {

@@ -15,13 +15,16 @@ object NotificationConsistencyManager {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationManager = context.getSystemService(NotificationManager::class.java)
 
-            // Channel 1 (High): Ongoing Session (Un-dismissible while active)
+            // Channel 1 (Low): Ongoing Session (Silent & persistent while active)
             val highChannel = NotificationChannel(
                 CHANNEL_HIGH_ONGOING,
                 "Ongoing Session",
-                NotificationManager.IMPORTANCE_HIGH
+                NotificationManager.IMPORTANCE_LOW
             ).apply {
                 description = "Active session tracking"
+                setShowBadge(false)
+                enableVibration(false)
+                setSound(null, null)
             }
 
             // Channel 2 (Default): Reminders & Backups

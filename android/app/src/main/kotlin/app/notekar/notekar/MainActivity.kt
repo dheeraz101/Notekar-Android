@@ -1816,6 +1816,8 @@ class MainActivity : FlutterActivity() {
                 .setContentIntent(mainPending)
                 .setOngoing(true)
                 .setOnlyAlertOnce(true)
+                .setSilent(true)
+                .setSound(null)
                 .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
                 .setPublicVersion(
                     NotificationCompat.Builder(context, PERSISTENT_CHANNEL_ID)

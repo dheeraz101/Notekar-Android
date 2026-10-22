@@ -34,6 +34,8 @@ class TimelineSessionCard extends StatelessWidget {
     this.onToggleImageCollapse,
     this.isVoiceCollapsed = false,
     this.onToggleVoiceCollapse,
+    this.previewItems,
+    this.initialPreviewIndex,
   });
 
   final Palette p;
@@ -52,6 +54,8 @@ class TimelineSessionCard extends StatelessWidget {
   final VoidCallback? onToggleImageCollapse;
   final bool isVoiceCollapsed;
   final VoidCallback? onToggleVoiceCollapse;
+  final List<NotePreviewItem>? previewItems;
+  final int? initialPreviewIndex;
 
   Goal? _findMatchingGoal() {
     final gList = goals;
@@ -375,8 +379,11 @@ class TimelineSessionCard extends StatelessWidget {
                           context,
                           p: p,
                           note: session.note,
-                          title: 'Session Note',
+                          title: session.category ?? 'Session Note',
                           category: session.category,
+                          dateStr: datePretty(session.startTimestamp),
+                          items: previewItems,
+                          initialIndex: initialPreviewIndex ?? 0,
                           onEdit: onEditNote,
                         );
                       } else {

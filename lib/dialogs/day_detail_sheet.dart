@@ -351,10 +351,53 @@ class DayDetailContent extends StatelessWidget {
           ),
           const SizedBox(height: 8),
 
-          for (final it in dayItems) ...[
-            _buildTimelineItemRow(context, it),
-            const SizedBox(height: 6),
-          ],
+          () {
+            final dayNoteItems = dayItems.where((it) {
+              if (it is TimelineSessionItem) return it.note.isNotEmpty;
+              if (it is TimelineSingleItem) return it.moment.note.isNotEmpty;
+              return false;
+            }).toList();
+
+            final dayPreviewItems = dayNoteItems.map((it) {
+              if (it is TimelineSessionItem) {
+                return NotePreviewItem(
+                  note: it.note,
+                  title: it.category ?? 'Session Note',
+                  category: it.category,
+                  dateStr: datePretty(it.startTimestamp),
+                  onEdit: onEditNote != null
+                      ? () => onEditNote!(it.noteMoment)
+                      : null,
+                );
+              } else {
+                final s = it as TimelineSingleItem;
+                return NotePreviewItem(
+                  note: s.moment.note,
+                  title: s.moment.category ?? 'Moment Note',
+                  category: s.moment.category,
+                  dateStr: datePretty(s.moment.timestamp),
+                  onEdit: onEditNote != null
+                      ? () => onEditNote!(s.moment)
+                      : null,
+                );
+              }
+            }).toList();
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final it in dayItems) ...[
+                  _buildTimelineItemRow(
+                    context,
+                    it,
+                    dayPreviewItems,
+                    dayNoteItems.indexOf(it),
+                  ),
+                  const SizedBox(height: 6),
+                ],
+              ],
+            );
+          }(),
         ],
       ),
     );
@@ -494,7 +537,12 @@ class DayDetailContent extends StatelessWidget {
     );
   }
 
-  Widget _buildTimelineItemRow(BuildContext context, TimelineItem item) {
+  Widget _buildTimelineItemRow(
+    BuildContext context,
+    TimelineItem item,
+    List<NotePreviewItem> dayPreviewItems,
+    int noteIdx,
+  ) {
     if (item is TimelineSessionItem) {
       final timeRange =
           '${timeOnly(item.startTimestamp)} → ${item.endTimestamp != null ? timeOnly(item.endTimestamp!) : "Live"}';
@@ -539,6 +587,9 @@ class DayDetailContent extends StatelessWidget {
                           note: item.note,
                           title: '${timeOnly(item.startTimestamp)} - $endStr',
                           category: item.category,
+                          dateStr: datePretty(item.startTimestamp),
+                          items: dayPreviewItems,
+                          initialIndex: noteIdx >= 0 ? noteIdx : 0,
                           onEdit: onEditNote != null
                               ? () => onEditNote!(item.noteMoment)
                               : null,
@@ -607,8 +658,11 @@ class DayDetailContent extends StatelessWidget {
                           context,
                           p: p,
                           note: item.note,
-                          title: timeOnly(item.primaryTimestamp),
+                          title: item.category ?? 'Moment Note',
                           category: item.category,
+                          dateStr: datePretty(item.primaryTimestamp),
+                          items: dayPreviewItems,
+                          initialIndex: noteIdx >= 0 ? noteIdx : 0,
                           onEdit: onEditNote != null
                               ? () => onEditNote!(item.moment)
                               : null,

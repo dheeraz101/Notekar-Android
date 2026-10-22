@@ -325,19 +325,28 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
 
         fun togglePauseResume(context: Context) {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            val isPaused = prefs.getBoolean(KEY_IS_PAUSED, false)
-            val now = System.currentTimeMillis()
             val flutterPrefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+            val isPaused = prefs.getBoolean(KEY_IS_PAUSED, false) ||
+                    flutterPrefs.getBoolean("flutter.m-paused", false) ||
+                    flutterPrefs.getBoolean("flutter.is_paused", false)
+            val now = System.currentTimeMillis()
 
             if (isPaused) {
-                val pausedAt = prefs.getLong(KEY_PAUSED_AT, now)
+                var pausedAt = prefs.getLong(KEY_PAUSED_AT, 0L)
+                if (pausedAt <= 0L) {
+                    pausedAt = flutterPrefs.getLong("flutter.m-paused-at", flutterPrefs.getLong("flutter.paused_at", now))
+                }
                 val pauseDuration = if (pausedAt > 0L) (now - pausedAt) else 0L
-                val lastTimestamp = prefs.getLong(KEY_LAST_TIMESTAMP, now) + pauseDuration
+                var lastTimestamp = prefs.getLong(KEY_LAST_TIMESTAMP, 0L)
+                if (lastTimestamp <= 0L) {
+                    lastTimestamp = flutterPrefs.getLong("flutter.m-ses", now)
+                }
+                lastTimestamp += pauseDuration
                 prefs.edit()
                     .putBoolean(KEY_IS_PAUSED, false)
                     .putLong(KEY_PAUSED_AT, 0L)
                     .putLong(KEY_LAST_TIMESTAMP, lastTimestamp)
-                    .apply()
+                    .commit()
 
                 flutterPrefs.edit()
                     .putBoolean("flutter.is_paused", false)
@@ -352,7 +361,7 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
                 prefs.edit()
                     .putBoolean(KEY_IS_PAUSED, true)
                     .putLong(KEY_PAUSED_AT, now)
-                    .apply()
+                    .commit()
 
                 flutterPrefs.edit()
                     .putBoolean("flutter.is_paused", true)

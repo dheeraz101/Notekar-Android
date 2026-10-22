@@ -380,15 +380,17 @@ class CategoryService {
               (s.outMoment != null ? extractCategory(s.outMoment!) : null),
         TimelineSingleItem s => extractCategory(s.moment),
         TimelineGapItem _ => null,
+        TimelineConsolidatedItem c => c.category,
       };
 
       if (cat == null && item is TimelineGapItem) continue;
 
       final categoryLabel = cat ?? 'General';
-      final itemMs = switch (item) {
+      final int itemMs = switch (item) {
         TimelineSessionItem s => s.duration.inMilliseconds,
         TimelineSingleItem _ => 0,
         TimelineGapItem _ => 0,
+        TimelineConsolidatedItem c => c.totalDuration.inMilliseconds,
       };
 
       if (itemMs > 0) {

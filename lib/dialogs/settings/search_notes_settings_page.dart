@@ -341,6 +341,15 @@ class SearchNotesSettingsPage {
                     }
                     if (q.isNotEmpty) onSaveRecentSearch(q);
                     HapticFeedback.selectionClick();
+                    final previewItems = notes.map((n) {
+                      return NotePreviewItem(
+                        note: n.note,
+                        title: n.category ?? 'Note',
+                        category: n.category,
+                        dateStr: datePretty(n.timestamp),
+                        onEdit: onEditNote != null ? () => onEditNote(n) : null,
+                      );
+                    }).toList();
                     NotePreviewSheet.show(
                       context,
                       p: p,
@@ -348,6 +357,8 @@ class SearchNotesSettingsPage {
                       title: entry.category ?? 'Note',
                       category: entry.category,
                       dateStr: datePretty(startTs ?? entry.timestamp),
+                      items: previewItems,
+                      initialIndex: index,
                       onEdit: onEditNote != null
                           ? () => onEditNote(entry)
                           : null,

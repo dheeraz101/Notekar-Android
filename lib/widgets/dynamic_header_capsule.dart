@@ -323,10 +323,11 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
       for (final it in section.items) {
         final dt = DateTime.fromMillisecondsSinceEpoch(it.primaryTimestamp);
         final hour = dt.hour;
-        final dur = switch (it) {
+        final int dur = switch (it) {
           TimelineSessionItem s => s.duration.inMilliseconds,
           TimelineSingleItem _ => 15 * 60 * 1000,
           TimelineGapItem _ => 0,
+          TimelineConsolidatedItem c => c.totalDuration.inMilliseconds,
         };
         if (hour >= 6 && hour < 12) {
           morningMs += dur;
