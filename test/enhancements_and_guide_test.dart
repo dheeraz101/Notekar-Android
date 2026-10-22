@@ -306,6 +306,149 @@ Do not forget ~~deprecated steps~~.
         expect(find.textContaining('Normal bullet point'), findsOneWidget);
       },
     );
+
+    testWidgets(
+      'allows cycling forward and backward through notes using navigation buttons',
+      (tester) async {
+        int? editedNoteIndex;
+        final items = [
+          NotePreviewItem(
+            note: 'First note about morning workout',
+            title: 'Morning Workout',
+            category: 'Health',
+            dateStr: '10:00 AM',
+            onEdit: () => editedNoteIndex = 0,
+          ),
+          NotePreviewItem(
+            note: 'Second note about code review #project',
+            title: 'Code Review',
+            category: 'Work',
+            dateStr: '02:30 PM',
+            onEdit: () => editedNoteIndex = 1,
+          ),
+          NotePreviewItem(
+            note: 'Third note about evening reading',
+            title: 'Reading Session',
+            category: 'Leisure',
+            dateStr: '08:15 PM',
+            onEdit: () => editedNoteIndex = 2,
+          ),
+        ];
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: NotePreviewSheet(
+                p: darkPalette,
+                title: items[0].title,
+                note: items[0].note,
+                category: items[0].category,
+                dateStr: items[0].dateStr,
+                items: items,
+                initialIndex: 0,
+              ),
+            ),
+          ),
+        );
+
+        // Verify Note 1 is displayed
+        expect(find.text('Morning Workout'), findsOneWidget);
+        expect(
+          find.textContaining('First note about morning workout'),
+          findsOneWidget,
+        );
+        expect(find.text('1 of 3'), findsOneWidget);
+
+        // Tap Next Note (>) on bottom bar
+        await tester.tap(find.byIcon(Icons.arrow_forward_ios_rounded));
+        await tester.pumpAndSettle();
+
+        // Verify Note 2 is displayed
+        expect(find.text('Code Review'), findsOneWidget);
+        expect(
+          find.textContaining('Second note about code review'),
+          findsOneWidget,
+        );
+        expect(find.text('2 of 3'), findsOneWidget);
+
+        // Tap Next Note (>) to reach Note 3
+        await tester.tap(find.byIcon(Icons.arrow_forward_ios_rounded));
+        await tester.pumpAndSettle();
+
+        // Verify Note 3 is displayed
+        expect(find.text('Reading Session'), findsOneWidget);
+        expect(
+          find.textContaining('Third note about evening reading'),
+          findsOneWidget,
+        );
+        expect(find.text('3 of 3'), findsOneWidget);
+
+        // Tap Next Note again on boundary (should stay on 3 of 3)
+        await tester.tap(find.byIcon(Icons.arrow_forward_ios_rounded));
+        await tester.pumpAndSettle();
+        expect(find.text('3 of 3'), findsOneWidget);
+
+        // Tap Previous Note (<) to go back to Note 2
+        await tester.tap(find.byIcon(Icons.arrow_back_ios_new_rounded));
+        await tester.pumpAndSettle();
+        expect(find.text('Code Review'), findsOneWidget);
+        expect(find.text('2 of 3'), findsOneWidget);
+
+        // Test Edit button edits Note 2
+        await tester.tap(find.text('Edit Note'));
+        await tester.pumpAndSettle();
+        expect(editedNoteIndex, equals(1));
+      },
+    );
+
+    testWidgets(
+      'supports horizontal swipe gestures to navigate between notes',
+      (tester) async {
+        final items = [
+          const NotePreviewItem(note: 'Note A content', title: 'Note A'),
+          const NotePreviewItem(note: 'Note B content', title: 'Note B'),
+        ];
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: NotePreviewSheet(
+                p: darkPalette,
+                title: items[0].title,
+                note: items[0].note,
+                items: items,
+                initialIndex: 0,
+              ),
+            ),
+          ),
+        );
+
+        expect(find.text('Note A'), findsOneWidget);
+        expect(find.textContaining('Note A content'), findsOneWidget);
+
+        // Swipe left on note card to advance to Note B
+        await tester.fling(
+          find.textContaining('Note A content'),
+          const Offset(-300, 0),
+          1000,
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('Note B'), findsOneWidget);
+        expect(find.textContaining('Note B content'), findsOneWidget);
+
+        // Swipe right on note card to return to Note A
+        await tester.fling(
+          find.textContaining('Note B content'),
+          const Offset(300, 0),
+          1000,
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('Note A'), findsOneWidget);
+        expect(find.textContaining('Note A content'), findsOneWidget);
+      },
+    );
   });
 
   group('Help Guide Catalog Tests', () {

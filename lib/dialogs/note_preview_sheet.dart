@@ -92,6 +92,7 @@ class NotePreviewSheet extends StatefulWidget {
 class _NotePreviewSheetState extends State<NotePreviewSheet> {
   final List<TapGestureRecognizer> _recognizers = [];
   late int _currentIndex;
+  double _dragDelta = 0;
 
   @override
   void initState() {
@@ -631,12 +632,10 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
       );
     }
 
-    return SelectionArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: children,
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: children,
     );
   }
 
@@ -677,196 +676,114 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
     return AppSheet(
       p: p,
       title: currentItem.title,
-      trailingAction: hasMultiple
-          ? Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                GestureDetector(
-                  onTap: _currentIndex > 0 ? _prevNote : null,
-                  behavior: HitTestBehavior.opaque,
-                  child: Opacity(
-                    opacity: _currentIndex > 0 ? 1.0 : 0.35,
-                    child: Container(
-                      width: 30,
-                      height: 30,
-                      alignment: Alignment.center,
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onHorizontalDragStart: (_) => _dragDelta = 0,
+        onHorizontalDragUpdate: (details) =>
+            _dragDelta += details.primaryDelta ?? 0,
+        onHorizontalDragEnd: (details) {
+          final velocity = details.primaryVelocity ?? 0.0;
+          if (_dragDelta < -40 || velocity < -150) {
+            _nextNote();
+          } else if (_dragDelta > 40 || velocity > 150) {
+            _prevNote();
+          }
+          _dragDelta = 0;
+        },
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (currentItem.category != null ||
+                currentItem.dateStr != null ||
+                tags.isNotEmpty) ...[
+              Row(
+                children: [
+                  if (currentItem.category != null &&
+                      currentItem.category!.trim().isNotEmpty) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
-                        color: p.surface3,
-                        shape: BoxShape.circle,
+                        color: p.accent.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: p.border.withValues(alpha: 0.5),
+                          color: p.accent.withValues(alpha: 0.3),
                           width: 0.8,
                         ),
                       ),
-                      child: Icon(
-                        Icons.chevron_left_rounded,
-                        size: 20,
-                        color: p.text,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3.5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: p.surface3,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: p.border.withValues(alpha: 0.5),
-                      width: 0.8,
-                    ),
-                  ),
-                  child: Text(
-                    '${_currentIndex + 1} of ${widget.items!.length}',
-                    style: TextStyle(
-                      color: p.text2,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 6),
-                GestureDetector(
-                  onTap: _currentIndex < widget.items!.length - 1
-                      ? _nextNote
-                      : null,
-                  behavior: HitTestBehavior.opaque,
-                  child: Opacity(
-                    opacity: _currentIndex < widget.items!.length - 1
-                        ? 1.0
-                        : 0.35,
-                    child: Container(
-                      width: 30,
-                      height: 30,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: p.surface3,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: p.border.withValues(alpha: 0.5),
-                          width: 0.8,
-                        ),
-                      ),
-                      child: Icon(
-                        Icons.chevron_right_rounded,
-                        size: 20,
-                        color: p.text,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            )
-          : null,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (currentItem.category != null ||
-              currentItem.dateStr != null ||
-              tags.isNotEmpty) ...[
-            Row(
-              children: [
-                if (currentItem.category != null &&
-                    currentItem.category!.trim().isNotEmpty) ...[
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: p.accent.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: p.accent.withValues(alpha: 0.3),
-                        width: 0.8,
-                      ),
-                    ),
-                    child: Text(
-                      currentItem.category!,
-                      style: TextStyle(
-                        color: p.accent,
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                ],
-                if (currentItem.dateStr != null)
-                  Text(
-                    currentItem.dateStr!,
-                    style: TextStyle(
-                      color: p.text3,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-              ],
-            ),
-            if (tags.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: tags.map((t) {
-                  final actTag = TagService.instance.findActivityTag(t);
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3.5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: p.surface3,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: p.border.withValues(alpha: 0.6),
-                        width: 0.8,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          actTag?.icon ?? Icons.label_rounded,
-                          size: 11,
+                      child: Text(
+                        currentItem.category!,
+                        style: TextStyle(
                           color: p.accent,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          actTag?.label ?? TagService.stripHash(t),
-                          style: TextStyle(
-                            color: p.text2,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  );
-                }).toList(),
+                    const SizedBox(width: 8),
+                  ],
+                  if (currentItem.dateStr != null)
+                    Text(
+                      currentItem.dateStr!,
+                      style: TextStyle(
+                        color: p.text3,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                ],
               ),
+              if (tags.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: tags.map((t) {
+                    final actTag = TagService.instance.findActivityTag(t);
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3.5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: p.surface3,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: p.border.withValues(alpha: 0.6),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            actTag?.icon ?? Icons.label_rounded,
+                            size: 11,
+                            color: p.accent,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            actTag?.label ?? TagService.stripHash(t),
+                            style: TextStyle(
+                              color: p.text2,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+              const SizedBox(height: spacing12),
             ],
-            const SizedBox(height: spacing12),
-          ],
 
-          // Note text card with rich markdown formatting, interactive links, safe departure dialog & horizontal swipe
-          GestureDetector(
-            onHorizontalDragEnd: (details) {
-              if (details.primaryVelocity != null) {
-                if (details.primaryVelocity! < -150) {
-                  _nextNote();
-                } else if (details.primaryVelocity! > 150) {
-                  _prevNote();
-                }
-              }
-            },
-            child: Container(
+            // Note text card with rich markdown formatting, interactive links, safe departure dialog & horizontal swipe
+            Container(
               width: double.infinity,
               constraints: const BoxConstraints(maxHeight: 340),
               padding: const EdgeInsets.all(spacing16),
@@ -880,160 +797,160 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
                 child: _buildFormattedContent(displayText, baseStyle, p),
               ),
             ),
-          ),
 
-          const SizedBox(height: spacing16),
+            const SizedBox(height: spacing16),
 
-          // Actions
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: p.text2,
-                    side: BorderSide(color: p.border),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: () {
-                    Clipboard.setData(ClipboardData(text: cleanNote));
-                    HapticFeedback.lightImpact();
-                    Navigator.pop(context);
-                  },
-                  icon: const Icon(Icons.content_paste_rounded, size: 16),
-                  label: const Text('Copy Note'),
-                ),
-              ),
-              if (currentItem.onEdit != null) ...[
-                const SizedBox(width: 12),
+            // Actions
+            Row(
+              children: [
                 Expanded(
-                  child: FilledButton.icon(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: p.accent,
-                      foregroundColor: Colors.white,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: p.text2,
+                      side: BorderSide(color: p.border),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                     onPressed: () {
+                      Clipboard.setData(ClipboardData(text: cleanNote));
+                      HapticFeedback.lightImpact();
                       Navigator.pop(context);
-                      currentItem.onEdit!();
                     },
-                    icon: const Icon(Icons.edit_rounded, size: 16),
-                    label: const Text(
-                      'Edit Note',
-                      style: TextStyle(fontWeight: FontWeight.w800),
-                    ),
+                    icon: const Icon(Icons.content_paste_rounded, size: 16),
+                    label: const Text('Copy Note'),
                   ),
                 ),
-              ],
-            ],
-          ),
-
-          // Daily Review Linear Navigation Bar (< [ N of Total ] >)
-          if (hasMultiple) ...[
-            const SizedBox(height: spacing12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: _currentIndex > 0 ? _prevNote : null,
-                    borderRadius: BorderRadius.circular(14),
-                    child: Container(
-                      width: 46,
-                      height: 38,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: _currentIndex > 0
-                            ? p.surface3
-                            : p.surface2.withValues(alpha: 0.4),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: p.border.withValues(
-                            alpha: _currentIndex > 0 ? 0.75 : 0.25,
-                          ),
-                          width: 1,
+                if (currentItem.onEdit != null) ...[
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: p.accent,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: Icon(
-                        Icons.arrow_back_ios_new_rounded,
-                        size: 16,
-                        color: _currentIndex > 0
-                            ? p.text
-                            : p.text3.withValues(alpha: 0.35),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        currentItem.onEdit!();
+                      },
+                      icon: const Icon(Icons.edit_rounded, size: 16),
+                      label: const Text(
+                        'Edit Note',
+                        style: TextStyle(fontWeight: FontWeight.w800),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: p.surface2,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: p.border.withValues(alpha: 0.55),
-                      width: 0.8,
-                    ),
-                  ),
-                  child: Text(
-                    '${_currentIndex + 1} of ${widget.items!.length}',
-                    style: TextStyle(
-                      color: p.text2,
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w700,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: _currentIndex < widget.items!.length - 1
-                        ? _nextNote
-                        : null,
-                    borderRadius: BorderRadius.circular(14),
-                    child: Container(
-                      width: 46,
-                      height: 38,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: _currentIndex < widget.items!.length - 1
-                            ? p.surface3
-                            : p.surface2.withValues(alpha: 0.4),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: p.border.withValues(
-                            alpha: _currentIndex < widget.items!.length - 1
-                                ? 0.75
-                                : 0.25,
-                          ),
-                          width: 1,
-                        ),
-                      ),
-                      child: Icon(
-                        Icons.arrow_forward_ios_rounded,
-                        size: 16,
-                        color: _currentIndex < widget.items!.length - 1
-                            ? p.text
-                            : p.text3.withValues(alpha: 0.35),
-                      ),
-                    ),
-                  ),
-                ),
+                ],
               ],
             ),
+
+            // Daily Review Linear Navigation Bar (< [ N of Total ] >)
+            if (hasMultiple) ...[
+              const SizedBox(height: spacing12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: _currentIndex > 0 ? _prevNote : null,
+                      borderRadius: BorderRadius.circular(14),
+                      child: Container(
+                        width: 46,
+                        height: 38,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: _currentIndex > 0
+                              ? p.surface3
+                              : p.surface2.withValues(alpha: 0.4),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: p.border.withValues(
+                              alpha: _currentIndex > 0 ? 0.75 : 0.25,
+                            ),
+                            width: 1,
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          size: 16,
+                          color: _currentIndex > 0
+                              ? p.text
+                              : p.text3.withValues(alpha: 0.35),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: p.surface2,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: p.border.withValues(alpha: 0.55),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Text(
+                      '${_currentIndex + 1} of ${widget.items!.length}',
+                      style: TextStyle(
+                        color: p.text2,
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: _currentIndex < widget.items!.length - 1
+                          ? _nextNote
+                          : null,
+                      borderRadius: BorderRadius.circular(14),
+                      child: Container(
+                        width: 46,
+                        height: 38,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: _currentIndex < widget.items!.length - 1
+                              ? p.surface3
+                              : p.surface2.withValues(alpha: 0.4),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: p.border.withValues(
+                              alpha: _currentIndex < widget.items!.length - 1
+                                  ? 0.75
+                                  : 0.25,
+                            ),
+                            width: 1,
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 16,
+                          color: _currentIndex < widget.items!.length - 1
+                              ? p.text
+                              : p.text3.withValues(alpha: 0.35),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
