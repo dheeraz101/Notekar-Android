@@ -21,6 +21,10 @@ class CaptureSettingsPage extends StatelessWidget {
     this.unlockActionStyle = 'notification',
     this.onLogAfterUnlockChanged,
     this.onUnlockActionStyleChanged,
+    this.showCheckpointsOnHome = true,
+    this.hideCheckpointsFromTimeline = false,
+    this.onShowCheckpointsOnHomeChanged,
+    this.onHideCheckpointsFromTimelineChanged,
   });
 
   final Palette p;
@@ -29,12 +33,16 @@ class CaptureSettingsPage extends StatelessWidget {
   final bool enableNoteOnClick;
   final bool logAfterUnlock;
   final String unlockActionStyle;
+  final bool showCheckpointsOnHome;
+  final bool hideCheckpointsFromTimeline;
 
   final ValueChanged<String> onDefaultModeChanged;
   final ValueChanged<int> onTapDelayChanged;
   final ValueChanged<bool> onEnableNoteOnClickChanged;
   final ValueChanged<bool>? onLogAfterUnlockChanged;
   final ValueChanged<String>? onUnlockActionStyleChanged;
+  final ValueChanged<bool>? onShowCheckpointsOnHomeChanged;
+  final ValueChanged<bool>? onHideCheckpointsFromTimelineChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -256,6 +264,36 @@ class CaptureSettingsPage extends StatelessWidget {
           p: p,
           text:
               'Seamlessly captures state changes throughout the day without having to remember to open the app manually.'
+                  .localized(context),
+        ),
+        SettingsGroup(
+          p: p,
+          title: 'Routine Habit Checkpoints',
+          children: [
+            SettingsSwitchRow(
+              p: p,
+              title: 'Show Habits on Home Canvas',
+              subtitle:
+                  'Display the quick habit logging bar on the home screen.',
+              color: p.accent,
+              value: showCheckpointsOnHome,
+              onChanged: onShowCheckpointsOnHomeChanged ?? (_) {},
+            ),
+            SettingsSwitchRow(
+              p: p,
+              title: 'Hide Habits from Main Timeline',
+              subtitle:
+                  'Keep the main Life Ledger focused on deep work and focus sessions by filtering routine habits.',
+              color: p.accent,
+              value: hideCheckpointsFromTimeline,
+              onChanged: onHideCheckpointsFromTimelineChanged ?? (_) {},
+            ),
+          ],
+        ),
+        SettingsPageDescription(
+          p: p,
+          text:
+              'Checkpoints are always accessible from the dedicated Checkpoints filter and Dashboard.'
                   .localized(context),
         ),
         const SizedBox(height: spacing48),

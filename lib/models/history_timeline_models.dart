@@ -681,6 +681,7 @@ class TimelineIsolatePayload {
   final String? criteriaGoalId;
   final String? criteriaMode;
   final bool consolidateCards;
+  final bool hideCheckpoints;
 
   TimelineIsolatePayload({
     required this.entries,
@@ -694,6 +695,7 @@ class TimelineIsolatePayload {
     this.criteriaGoalId,
     this.criteriaMode,
     this.consolidateCards = false,
+    this.hideCheckpoints = false,
   });
 }
 
@@ -808,7 +810,44 @@ TimelineIsolateResult buildTimelineDataInIsolate(
                 return m.tags.contains('checkpoint') ||
                     m.tags.any((t) => t.startsWith('checkpoint:'));
               }
+              if (it is TimelineSessionItem) {
+                return it.inMoment.tags.contains('checkpoint') ||
+                    it.inMoment.tags.any((t) => t.startsWith('checkpoint:')) ||
+                    (it.outMoment != null &&
+                        (it.outMoment!.tags.contains('checkpoint') ||
+                            it.outMoment!.tags.any(
+                              (t) => t.startsWith('checkpoint:'),
+                            )));
+              }
               return false;
+            }).toList(),
+          ),
+        )
+        .where((s) => s.items.isNotEmpty)
+        .toList();
+  }
+
+  // Decluttering: filter out routine habit checkpoints when hideCheckpoints is enabled
+  if (payload.hideCheckpoints && payload.filter != 'checkpoints') {
+    sections = sections
+        .map(
+          (s) => TimelineDaySection(
+            dateKey: s.dateKey,
+            date: s.date,
+            displayTitle: s.displayTitle,
+            totalTrackedDuration: s.totalTrackedDuration,
+            totalLogs: s.totalLogs,
+            items: s.items.where((it) {
+              if (it is TimelineSingleItem) {
+                final m = it.moment;
+                return !m.tags.contains('checkpoint') &&
+                    !m.tags.any((t) => t.startsWith('checkpoint:'));
+              }
+              if (it is TimelineSessionItem) {
+                return !it.inMoment.tags.contains('checkpoint') &&
+                    !it.inMoment.tags.any((t) => t.startsWith('checkpoint:'));
+              }
+              return true;
             }).toList(),
           ),
         )

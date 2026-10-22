@@ -19,6 +19,7 @@ import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/backup_dialogs.dart';
 import 'package:notekar/dialogs/changelog_dialog.dart';
+import 'package:notekar/dialogs/checkpoint_session_sheet.dart';
 import 'package:notekar/dialogs/history_dialog.dart';
 import 'package:notekar/dialogs/manual_entry_dialog.dart';
 import 'package:notekar/dialogs/note_dialog.dart';
@@ -177,6 +178,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   String _sobrietyMilestoneTheme = 'science';
   bool _showHistoryText = true;
   bool _headerExpanded = false;
+  bool _showCheckpointsOnHome = true;
   String _toolbarAppearance = 'standard';
   int _streakShields = 0;
   bool _showLastSavedHint = true;
@@ -778,6 +780,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _showHistoryText = prefs.getBool('m-show-history-text') ?? true;
       _toolbarAppearance = prefs.getString('toolbar_appearance') ?? 'standard';
       _showLastSavedHint = prefs.getBool('m-show-last-saved-hint') ?? true;
+      _showCheckpointsOnHome =
+          prefs.getBool('notekar.show_checkpoints_on_home') ?? true;
       _privacyLockDelayMinutes = prefs.getInt('m-privacy-lock-delay') ?? 0;
       _updateStatus = prefs.getString('m-update-status') ?? _updateStatus;
       _lastUpdateCheckedAt = prefs.getInt('m-last-update-check');
@@ -2798,11 +2802,117 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   Future<void> _handleLogCheckpoint(CheckpointPreset preset) async {
+    HapticFeedback.selectionClick();
+    await CheckpointSessionSheet.show(
+      context,
+      p: _p,
+      preset: preset,
+      onLogSession: ({required start, required end, note}) =>
+          _handleLogCheckpointSession(
+            preset: preset,
+            start: start,
+            end: end,
+            note: note,
+          ),
+      onStartLive: ({required start, note}) =>
+          _handleStartLiveCheckpointSession(
+            preset: preset,
+            start: start,
+            note: note,
+          ),
+      onLogSingle: ({required timestamp, note}) => _handleLogSingleCheckpoint(
+        preset: preset,
+        timestamp: timestamp,
+        note: note,
+      ),
+    );
+  }
+
+  Future<void> _handleLogCheckpointSession({
+    required CheckpointPreset preset,
+    required DateTime start,
+    required DateTime end,
+    String? note,
+  }) async {
+    HapticFeedback.mediumImpact();
+    final moments = await CheckpointService.instance.logCheckpointSession(
+      preset: preset,
+      startTimestamp: start,
+      endTimestamp: end,
+      note: note,
+    );
+    setState(() {
+      for (final m in moments) {
+        _entries.removeWhere((e) => e.id == m.id);
+        _entries.insert(0, m);
+      }
+      _entries.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    });
+    AppSound.click();
+    if (mounted) {
+      final diff = end.difference(start);
+      final durStr = durationLabel(diff, extended: false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${preset.emoji} ${preset.label} session logged ($durStr)!'
+                .localized(context),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  Future<void> _handleStartLiveCheckpointSession({
+    required CheckpointPreset preset,
+    required DateTime start,
+    String? note,
+  }) async {
+    HapticFeedback.mediumImpact();
+    final inMoment = await CheckpointService.instance
+        .startLiveCheckpointSession(
+          preset: preset,
+          startTimestamp: start,
+          note: note,
+        );
+    setState(() {
+      _entries.removeWhere((e) => e.id == inMoment.id);
+      _entries.insert(0, inMoment);
+      _entries.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      _sessionStart = inMoment.timestamp;
+      _mode = 'two-way';
+      _inout = 'out';
+      _activeCategory = preset.category;
+    });
+    AppSound.click();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${preset.emoji} ${preset.label} session started!'.localized(
+              context,
+            ),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  Future<void> _handleLogSingleCheckpoint({
+    required CheckpointPreset preset,
+    required DateTime timestamp,
+    String? note,
+  }) async {
     HapticFeedback.mediumImpact();
     final moment = await CheckpointService.instance.logCheckpoint(
       preset: preset,
+      timestamp: timestamp,
+      note: note,
     );
     setState(() {
+      _entries.removeWhere((e) => e.id == moment.id);
       _entries.insert(0, moment);
       _entries.sort((a, b) => b.timestamp.compareTo(a.timestamp));
     });
@@ -3549,6 +3659,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
             : null;
         _sobrietyMilestoneTheme =
             _prefs?.getString('sobriety_milestone_theme') ?? 'science';
+        _showCheckpointsOnHome =
+            _prefs?.getBool('notekar.show_checkpoints_on_home') ?? true;
       });
       _applySystemUiStyle();
       unawaited(_updateAndroidWidget());
@@ -4930,8 +5042,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
                   onOpenFilter: _openHomeTimelineFilter,
                   isFilterActive: _homeTimelineFilter.isActive,
                 ),
-                if (!_headerExpanded) ...[
-                  const SizedBox(height: 6),
+                if (!_headerExpanded && _showCheckpointsOnHome) ...[
+                  const SizedBox(height: 4),
                   CheckpointsQuickBar(
                     p: palette,
                     moments: _entries,

@@ -18,6 +18,7 @@ import 'package:notekar/dialogs/settings/app_icons_settings_page.dart';
 import 'package:notekar/dialogs/settings/app_lock_settings_page.dart';
 import 'package:notekar/dialogs/settings/app_philosophy_settings_page.dart';
 import 'package:notekar/dialogs/settings/capture_settings_page.dart';
+import 'package:notekar/services/checkpoint_service.dart';
 import 'package:notekar/dialogs/settings/commits_settings_page.dart';
 import 'package:notekar/dialogs/settings/data_backup_settings_page.dart';
 import 'package:notekar/dialogs/settings/diagnostics_settings_page.dart';
@@ -409,6 +410,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
   bool enableNoteOnClick = false;
   bool logAfterUnlock = false;
   String unlockActionStyle = 'notification';
+  bool showCheckpointsOnHome = true;
+  bool hideCheckpointsFromTimeline = false;
   bool enableSobrietyMode = false;
   String sobrietyResetType = 'any';
   int? sobrietyCustomStartMs;
@@ -779,6 +782,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
       logAfterUnlock = _prefs?.getBool('m-log-after-unlock') ?? false;
       unlockActionStyle =
           _prefs?.getString('m-unlock-action') ?? 'notification';
+      showCheckpointsOnHome =
+          _prefs?.getBool('notekar.show_checkpoints_on_home') ?? true;
+      hideCheckpointsFromTimeline = CheckpointService.instance.hideFromTimeline;
       enableSobrietyMode = _prefs?.getBool('enable_sobriety_mode') ?? false;
       sobrietyResetType = _prefs?.getString('sobriety_reset_type') ?? 'any';
       sobrietyCustomStartMs = _prefs?.getInt('sobriety_custom_start_ms');
@@ -3107,6 +3113,30 @@ $cleanStack
                                     }
                                     setState(() => unlockActionStyle = value);
                                   },
+                                  showCheckpointsOnHome: showCheckpointsOnHome,
+                                  hideCheckpointsFromTimeline:
+                                      hideCheckpointsFromTimeline,
+                                  onShowCheckpointsOnHomeChanged:
+                                      (value) async {
+                                        if (_prefs != null) {
+                                          await _prefs!.setBool(
+                                            'notekar.show_checkpoints_on_home',
+                                            value,
+                                          );
+                                        }
+                                        setState(
+                                          () => showCheckpointsOnHome = value,
+                                        );
+                                      },
+                                  onHideCheckpointsFromTimelineChanged:
+                                      (value) async {
+                                        await CheckpointService.instance
+                                            .setHideFromTimeline(value);
+                                        setState(
+                                          () => hideCheckpointsFromTimeline =
+                                              value,
+                                        );
+                                      },
                                 ),
                               ),
                             if (show('Reminders'))

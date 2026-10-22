@@ -150,24 +150,92 @@ class CheckpointService {
     await savePresets(_defaultPresets);
   }
 
-  /// Creates and saves a new checkpoint moment for the given preset.
+  /// Creates and saves a new checkpoint moment for the given preset (as single moment).
   Future<Moment> logCheckpoint({
     required CheckpointPreset preset,
     DateTime? timestamp,
+    String? note,
   }) async {
     final now = timestamp ?? DateTime.now();
     final nextId = MomentRepository.instance.getNextId();
+    final bodyNote = note?.trim().isNotEmpty == true
+        ? '${preset.emoji} ${preset.label} • ${note!.trim()}'
+        : '${preset.emoji} ${preset.label}';
     final moment = Moment(
       id: nextId,
       timestamp: now.millisecondsSinceEpoch,
       type: 'single',
       date: dateKey(now),
-      note: '${preset.emoji} ${preset.label}',
+      note: bodyNote,
       category: preset.category,
       tags: ['checkpoint', 'checkpoint:${preset.id}'],
     );
     await MomentRepository.instance.saveMoment(moment);
     return moment;
+  }
+
+  /// Creates and saves a paired Two-Way Session (IN and OUT moments) for a checkpoint.
+  /// When displayed in the Life Ledger, this renders as a single connected 2-Way session card.
+  Future<List<Moment>> logCheckpointSession({
+    required CheckpointPreset preset,
+    required DateTime startTimestamp,
+    required DateTime endTimestamp,
+    String? note,
+  }) async {
+    final startId = MomentRepository.instance.getNextId();
+    final bodyNote = note?.trim().isNotEmpty == true
+        ? '${preset.emoji} ${preset.label} • ${note!.trim()}'
+        : '${preset.emoji} ${preset.label}';
+
+    final inMoment = Moment(
+      id: startId,
+      timestamp: startTimestamp.millisecondsSinceEpoch,
+      type: 'in',
+      date: dateKey(startTimestamp),
+      note: bodyNote,
+      category: preset.category,
+      tags: ['checkpoint', 'checkpoint:${preset.id}'],
+    );
+    await MomentRepository.instance.saveMoment(inMoment);
+
+    final endId = MomentRepository.instance.getNextId();
+    final outMoment = Moment(
+      id: endId,
+      timestamp: endTimestamp.millisecondsSinceEpoch,
+      type: 'out',
+      date: dateKey(endTimestamp),
+      note: '',
+      category: preset.category,
+      tags: ['checkpoint', 'checkpoint:${preset.id}'],
+    );
+    await MomentRepository.instance.saveMoment(outMoment);
+
+    return [inMoment, outMoment];
+  }
+
+  /// Starts an ongoing Two-Way session (IN moment) for a checkpoint.
+  Future<Moment> startLiveCheckpointSession({
+    required CheckpointPreset preset,
+    DateTime? startTimestamp,
+    String? note,
+  }) async {
+    final start = startTimestamp ?? DateTime.now();
+    final startId = MomentRepository.instance.getNextId();
+    final bodyNote = note?.trim().isNotEmpty == true
+        ? '${preset.emoji} ${preset.label} • ${note!.trim()}'
+        : '${preset.emoji} ${preset.label}';
+
+    final inMoment = Moment(
+      id: startId,
+      timestamp: start.millisecondsSinceEpoch,
+      type: 'in',
+      date: dateKey(start),
+      note: bodyNote,
+      category: preset.category,
+      tags: ['checkpoint', 'checkpoint:${preset.id}'],
+    );
+    await MomentRepository.instance.saveMoment(inMoment);
+    return inMoment;
   }
 
   /// Identifies if a moment is logged as a checkpoint.
@@ -196,6 +264,7 @@ class CheckpointService {
     final today = dateKey(DateTime.now());
     return moments.any((m) {
       if (m.date != today) return false;
+      if (m.type == 'out') return false; // Avoid double-counting completion
       final cid = getCheckpointIdForMoment(m);
       return cid == presetId;
     });
@@ -204,7 +273,9 @@ class CheckpointService {
   /// Returns moments for a specific preset, sorted chronologically ascending.
   List<Moment> getMomentsForPreset(String presetId, List<Moment> moments) {
     final list = moments
-        .where((m) => getCheckpointIdForMoment(m) == presetId)
+        .where(
+          (m) => m.type != 'out' && getCheckpointIdForMoment(m) == presetId,
+        )
         .toList();
     list.sort((a, b) => a.timestamp.compareTo(b.timestamp));
     return list;

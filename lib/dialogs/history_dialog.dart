@@ -420,6 +420,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
       criteriaMode: _timelineFilterCriteria.mode,
       consolidateCards:
           _filter == 'consolidate' || _timelineFilterCriteria.consolidateCards,
+      hideCheckpoints: CheckpointService.instance.hideFromTimeline,
     );
 
     // Fast synchronous path for smaller datasets (<200 moments) avoids isolate spawning overhead,
