@@ -29,6 +29,9 @@ class ReminderReceiver : BroadcastReceiver() {
 
         if (action == ACTION_DAILY_MAINTENANCE) {
             scheduleDailyMaintenance(context)
+            try {
+                UnlockReceiver.updateUnlockReceiver(context)
+            } catch (_: Exception) {}
             val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
             prefs.edit().putLong("flutter.notekar.last_midnight_maintenance_ms", System.currentTimeMillis()).apply()
             return
@@ -237,6 +240,9 @@ class ReminderReceiver : BroadcastReceiver() {
 
         fun rescheduleAll(context: Context) {
             scheduleDailyMaintenance(context)
+            try {
+                UnlockReceiver.updateUnlockReceiver(context)
+            } catch (_: Exception) {}
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val keys = prefs.all.keys
             for (key in keys) {

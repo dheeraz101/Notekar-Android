@@ -493,44 +493,60 @@ class _ActivityTagsSettingsPageState extends State<ActivityTagsSettingsPage> {
                         ),
                       ),
 
-                      // Glyph icon badge
-                      Container(
-                        width: 34,
-                        height: 34,
-                        decoration: BoxDecoration(
-                          color: widget.p.surface3,
-                          borderRadius: BorderRadius.circular(9),
-                        ),
-                        child: Icon(tag.icon, size: 17, color: widget.p.accent),
-                      ),
-                      const SizedBox(width: 12),
-
-                      // Label & slug
+                      // Glyph icon badge & label (tap-to-edit)
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              tag.label,
-                              style: TextStyle(
-                                color: widget.p.text,
-                                fontSize: 14.5,
-                                fontWeight: FontWeight.w700,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            NotekarHaptics.selection('standard');
+                            _promptAddOrEditTag(tag);
+                          },
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 34,
+                                height: 34,
+                                decoration: BoxDecoration(
+                                  color: widget.p.surface3,
+                                  borderRadius: BorderRadius.circular(9),
+                                ),
+                                child: Icon(
+                                  tag.icon,
+                                  size: 17,
+                                  color: widget.p.accent,
+                                ),
                               ),
-                            ),
-                            Text(
-                              tag.hashtag,
-                              style: TextStyle(
-                                color: widget.p.text3,
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w500,
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      tag.label,
+                                      style: TextStyle(
+                                        color: widget.p.text,
+                                        fontSize: 14.5,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    Text(
+                                      tag.hashtag,
+                                      style: TextStyle(
+                                        color: widget.p.text3,
+                                        fontSize: 11.5,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
+                      const SizedBox(width: 8),
 
-                      // Edit button
+                      // Edit button (Apple HIG pencil)
                       PressableScale(
                         onTap: () => _promptAddOrEditTag(tag),
                         child: Container(
@@ -538,13 +554,17 @@ class _ActivityTagsSettingsPageState extends State<ActivityTagsSettingsPage> {
                           height: 32,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
-                            color: widget.p.surface3,
+                            color: widget.p.accent.withValues(alpha: 0.14),
                             borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: widget.p.accent.withValues(alpha: 0.22),
+                              width: 0.5,
+                            ),
                           ),
                           child: Icon(
-                            CupertinoIcons.square_pencil,
-                            size: 14,
-                            color: widget.p.text2,
+                            CupertinoIcons.pencil,
+                            size: 15,
+                            color: widget.p.accent,
                           ),
                         ),
                       ),

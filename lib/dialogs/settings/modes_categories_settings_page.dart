@@ -391,6 +391,9 @@ class _ModesCategoriesSettingsPageState
         SettingsGroup(
           p: widget.p,
           title: 'ACTIVE & CUSTOM MODES'.localized(context),
+          footer:
+              'Tap any mode to inspect its timeline breakdown and customize its Apple HIG accent color and glyph.'
+                  .localized(context),
           insetDividers: true,
           children: [
             for (final category in _categories) ...[
@@ -408,6 +411,9 @@ class _ModesCategoriesSettingsPageState
         SettingsGroup(
           p: widget.p,
           title: 'MODE BEHAVIOR'.localized(context),
+          footer:
+              'Adaptive color changes the app accent dynamically based on the currently active mode. Reverting to All mode ensures a neutral workspace upon reopening.'
+                  .localized(context),
           insetDividers: true,
           children: [
             SettingsSwitchRow(

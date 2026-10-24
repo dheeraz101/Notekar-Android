@@ -43,6 +43,11 @@ void main() {
       () async {
         final service = UpdateService();
 
+        // Verify version comparison between 7.5.10 and 7.5.10E1
+        expect(service.isUpdateAvailable('7.5.10E1', '7.5.10'), isTrue);
+        expect(service.isUpdateAvailable('7.5.10-E1', '7.5.10'), isTrue);
+        expect(service.isUpdateAvailable('7.5.10', '7.5.10E1'), isFalse);
+
         // Empty directory initially
         expect(await service.getTotalCacheSizeMb(), 0.0);
 
@@ -95,6 +100,65 @@ void main() {
         expect(await keepFile.exists(), isTrue);
 
         expect(await service.getTotalCacheSizeMb(), 0.0);
+      },
+    );
+
+    test(
+      'getCandidateApkFilenames returns correct prioritization for prerelease and clean versions',
+      () {
+        final service = UpdateService();
+
+        final candidatesArm = service.getCandidateApkFilenames(
+          '7.5.10-E1',
+          'arm64-v8a',
+        );
+        expect(candidatesArm, [
+          'notekar-7.5.10-E1-arm64-v8a.apk',
+          'notekar-7.5.10-arm64-v8a.apk',
+          'notekar-7.5.10-E1-universal.apk',
+          'notekar-7.5.10-universal.apk',
+        ]);
+
+        final candidatesUni = service.getCandidateApkFilenames(
+          '7.5.10-E1',
+          'universal',
+        );
+        expect(candidatesUni, [
+          'notekar-7.5.10-E1-universal.apk',
+          'notekar-7.5.10-universal.apk',
+        ]);
+
+        final candidatesClean = service.getCandidateApkFilenames(
+          '7.5.10',
+          'arm64-v8a',
+        );
+        expect(candidatesClean, [
+          'notekar-7.5.10-arm64-v8a.apk',
+          'notekar-7.5.10-universal.apk',
+        ]);
+      },
+    );
+
+    test(
+      'getCachedApkPath finds cached APK across both full and clean version names',
+      () async {
+        final service = UpdateService();
+
+        // Case 1: File is cached under clean name
+        final cleanApk = File('${tempDir.path}/notekar-7.5.10-universal.apk');
+        await cleanApk.writeAsBytes([1, 2, 3]);
+
+        final foundPathClean = await service.getCachedApkPath('7.5.10-E1');
+        expect(foundPathClean, cleanApk.path);
+
+        await cleanApk.delete();
+
+        // Case 2: File is cached under prerelease full name
+        final fullApk = File('${tempDir.path}/notekar-7.5.10-E1-universal.apk');
+        await fullApk.writeAsBytes([1, 2, 3]);
+
+        final foundPathFull = await service.getCachedApkPath('7.5.10-E1');
+        expect(foundPathFull, fullApk.path);
       },
     );
   });

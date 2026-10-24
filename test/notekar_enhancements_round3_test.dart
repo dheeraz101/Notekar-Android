@@ -187,8 +187,9 @@ void main() {
         await tester.pump(const Duration(milliseconds: 600));
 
         expect(find.text('SWIPE OR TAP TO APPLY ACCENT'), findsOneWidget);
-        expect(find.text('FLUID MENISCUS RESERVOIR'), findsOneWidget);
+        expect(find.text('FLUID MENISCUS RESERVOIR'), findsNothing);
         expect(find.byType(ListView), findsWidgets);
+        expect(find.byType(CustomPaint), findsWidgets);
       },
     );
   });
@@ -219,8 +220,9 @@ void main() {
 
         await tester.pump(const Duration(milliseconds: 600));
 
-        expect(find.text('SWIPE OR TAP TO SWITCH ICON'), findsOneWidget);
-        expect(find.byType(SingleChildScrollView), findsWidgets);
+        expect(find.text('Active Launcher Icon'), findsOneWidget);
+        expect(find.text('Camera'), findsOneWidget);
+        expect(find.byType(ListView), findsWidgets);
       },
     );
   });

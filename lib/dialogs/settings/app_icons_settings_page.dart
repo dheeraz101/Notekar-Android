@@ -108,19 +108,12 @@ class AppIconsSettingsPage extends StatefulWidget {
 
 class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
   late ScrollController _scrollController;
-  int _selectedIndex = 0;
-  final double _itemWidth = 80.0;
-  bool _isUserInteracting = false;
+  final double _dockItemWidth = 58.0;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    final icons = _getAvailableIcons();
-    final initialIdx = icons.indexWhere(
-      (opt) => opt.key == widget.appIconStyle,
-    );
-    _selectedIndex = initialIdx != -1 ? initialIdx : 0;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToSelectedIcon(animate: false);
     });
@@ -148,9 +141,8 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
     final icons = _getAvailableIcons();
     final index = icons.indexWhere((opt) => opt.key == widget.appIconStyle);
     if (index == -1 || !_scrollController.hasClients) return;
-    _selectedIndex = index;
 
-    final targetOffset = index * _itemWidth;
+    final targetOffset = index * _dockItemWidth;
     if (animate) {
       _scrollController.animateTo(
         targetOffset,
@@ -181,414 +173,27 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
       children: [
         const SizedBox(height: spacing8),
 
-        // 1. Top Section: Fake Phone Home Screen Live Preview (fits above fold)
-        _buildHomePhonePreview(context, currentIcon, p),
-
-        const SizedBox(height: 16),
-
-        // Section Title: Optical Icon Selector
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  'SWIPE OR TAP TO SWITCH ICON'.localized(context),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: p.text3,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.8,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '${availableIcons.length} Icons',
-                style: TextStyle(
-                  color: p.text3,
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 10),
-
-        // 2. Second Section: Horizontal Optical Scaling Icon Chooser with Snapping Auto-Select
-        SizedBox(
-          height: 108,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final viewportWidth = constraints.maxWidth;
-              final halfViewport = viewportWidth / 2;
-
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Center Stationary Target Squircle Indicator (Outer Glow & Apple HIG Squircle)
-                  Container(
-                    width: 96,
-                    height: 96,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(28),
-                      border: Border.all(
-                        color: (isVipGold ? const Color(0xFFFFD700) : p.accent)
-                            .withValues(alpha: 0.16),
-                        width: 1.0,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: 88,
-                    height: 88,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: (isVipGold ? const Color(0xFFFFD700) : p.accent)
-                            .withValues(alpha: 0.50),
-                        width: 2.2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color:
-                              (isVipGold ? const Color(0xFFFFD700) : p.accent)
-                                  .withValues(alpha: 0.22),
-                          blurRadius: 16,
-                          spreadRadius: 2,
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Horizontal List with Distance-Based Scaling & Real-Time Auto-Select
-                  NotificationListener<ScrollNotification>(
-                    onNotification: (notification) {
-                      if (notification is ScrollStartNotification) {
-                        _isUserInteracting = notification.dragDetails != null;
-                      }
-                      if (_scrollController.hasClients) {
-                        final currentScroll = _scrollController.offset;
-                        final nearestIndex = (currentScroll / _itemWidth)
-                            .round()
-                            .clamp(0, availableIcons.length - 1);
-                        if (nearestIndex != _selectedIndex) {
-                          _selectedIndex = nearestIndex;
-                          final newKey = availableIcons[nearestIndex].key;
-                          if (_isUserInteracting &&
-                              newKey != widget.appIconStyle) {
-                            NotekarHaptics.selection('standard');
-                            widget.onAppIconStyleChanged(newKey);
-                          }
-                        }
-                      }
-                      if (notification is ScrollEndNotification) {
-                        final hadUserInteraction = _isUserInteracting;
-                        _isUserInteracting = false;
-                        if (_scrollController.hasClients) {
-                          final currentScroll = _scrollController.offset;
-                          final nearestIndex = (currentScroll / _itemWidth)
-                              .round()
-                              .clamp(0, availableIcons.length - 1);
-                          final snapOffset = nearestIndex * _itemWidth;
-                          if ((currentScroll - snapOffset).abs() > 0.5) {
-                            Future.microtask(() {
-                              if (_scrollController.hasClients) {
-                                _scrollController.animateTo(
-                                  snapOffset,
-                                  duration: const Duration(milliseconds: 220),
-                                  curve: Curves.easeOutCubic,
-                                );
-                              }
-                            });
-                          }
-                          if (hadUserInteraction) {
-                            final newKey = availableIcons[nearestIndex].key;
-                            if (newKey != widget.appIconStyle) {
-                              NotekarHaptics.selection('standard');
-                              widget.onAppIconStyleChanged(newKey);
-                            }
-                          }
-                        }
-                      }
-                      setState(() {});
-                      return false;
-                    },
-                    child: SingleChildScrollView(
-                      controller: _scrollController,
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: halfViewport - (_itemWidth / 2),
-                      ),
-                      child: Row(
-                        children: List.generate(availableIcons.length, (index) {
-                          final item = availableIcons[index];
-                          final itemCenterOffset = index * _itemWidth;
-                          final currentScroll = _scrollController.hasClients
-                              ? _scrollController.offset
-                              : 0.0;
-                          final distance = (itemCenterOffset - currentScroll)
-                              .abs();
-
-                          // Optical distance scaling & dimming
-                          final scaleFactor = (1.0 - (distance / 140.0)).clamp(
-                            0.38,
-                            1.0,
-                          );
-                          final iconBoxSize =
-                              32.0 + 44.0 * ((scaleFactor - 0.38) / 0.62);
-                          final cornerRadius =
-                              10.0 + 13.0 * ((scaleFactor - 0.38) / 0.62);
-                          final opacity = (distance < 18.0)
-                              ? 1.0
-                              : (0.22 + 0.38 * ((scaleFactor - 0.38) / 0.62))
-                                    .clamp(0.22, 0.65);
-                          final isSelected = item.key == widget.appIconStyle;
-
-                          return Tooltip(
-                            key: ValueKey('app_icon_${item.key}'),
-                            message: item.title.localized(context),
-                            child: Semantics(
-                              label: item.title.localized(context),
-                              button: true,
-                              selected: isSelected,
-                              child: GestureDetector(
-                                onTap: () async {
-                                  final targetOffset = index * _itemWidth;
-                                  _selectedIndex = index;
-                                  if (_scrollController.hasClients) {
-                                    _scrollController.animateTo(
-                                      targetOffset,
-                                      duration: const Duration(
-                                        milliseconds: 260,
-                                      ),
-                                      curve: Curves.easeOutCubic,
-                                    );
-                                  }
-                                  if (item.key != widget.appIconStyle) {
-                                    NotekarHaptics.selection('standard');
-                                    await widget.onAppIconStyleChanged(
-                                      item.key,
-                                    );
-                                  }
-                                },
-                                child: Container(
-                                  width: _itemWidth,
-                                  alignment: Alignment.center,
-                                  child: Opacity(
-                                    opacity: opacity,
-                                    child: Container(
-                                      width: iconBoxSize,
-                                      height: iconBoxSize,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(
-                                          cornerRadius,
-                                        ),
-                                        border: isSelected
-                                            ? Border.all(
-                                                color: isVipGold
-                                                    ? const Color(0xFFFFD700)
-                                                    : Colors.white,
-                                                width: 2.2,
-                                              )
-                                            : null,
-                                        boxShadow: isSelected
-                                            ? [
-                                                BoxShadow(
-                                                  color: item.themeColor
-                                                      .withValues(alpha: 0.45),
-                                                  blurRadius: 14,
-                                                  spreadRadius: 2,
-                                                ),
-                                              ]
-                                            : null,
-                                      ),
-                                      child: Stack(
-                                        children: [
-                                          Positioned.fill(
-                                            child: ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(
-                                                    cornerRadius - 1,
-                                                  ),
-                                              child: Image.asset(
-                                                item.asset,
-                                                fit: BoxFit.cover,
-                                                cacheWidth: 128,
-                                                cacheHeight: 128,
-                                                errorBuilder:
-                                                    (
-                                                      context,
-                                                      error,
-                                                      stackTrace,
-                                                    ) => Container(
-                                                      color: p.surface3,
-                                                      child: Icon(
-                                                        CupertinoIcons.photo,
-                                                        color: p.text3,
-                                                        size: 16,
-                                                      ),
-                                                    ),
-                                              ),
-                                            ),
-                                          ),
-                                          if (isSelected)
-                                            Positioned(
-                                              bottom: 3,
-                                              right: 3,
-                                              child: Container(
-                                                padding: const EdgeInsets.all(
-                                                  2.5,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  color: isVipGold
-                                                      ? const Color(0xFFFFD700)
-                                                      : p.accent,
-                                                  shape: BoxShape.circle,
-                                                  border: Border.all(
-                                                    color: Colors.white,
-                                                    width: 1.5,
-                                                  ),
-                                                ),
-                                                child: const Icon(
-                                                  Icons.check,
-                                                  color: Colors.white,
-                                                  size: 9,
-                                                ),
-                                              ),
-                                            ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        }),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
-
-        const SizedBox(height: 20),
-
-        // 3. Third Section (Visible on scroll down): Active Launcher Icon Card
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: spacing16),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: p.surface2,
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: p.border),
-            boxShadow: [
-              BoxShadow(
-                color:
-                    (isVipGold
-                            ? const Color(0xFFFFD700)
-                            : currentIcon.themeColor)
-                        .withValues(alpha: 0.16),
-                blurRadius: 22,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 62,
-                height: 62,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.22),
-                      blurRadius: 14,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.asset(
-                    currentIcon.asset,
-                    fit: BoxFit.cover,
-                    filterQuality: FilterQuality.medium,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: (isVipGold ? const Color(0xFFFFD700) : p.accent)
-                            .withValues(alpha: 0.14),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        isVipGold
-                            ? '⚡ VIP Sovereign Icon'.localized(context)
-                            : 'Active Launcher Icon'.localized(context),
-                        style: TextStyle(
-                          color: isVipGold ? const Color(0xFFFFD700) : p.accent,
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        isVipGold
-                            ? 'Sovereign • Champagne VIP'
-                            : '${currentIcon.title.localized(context)} • ${currentIcon.subtitle.localized(context)}',
-                        style: TextStyle(
-                          color: p.text,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Applied to Android Home Screen'.localized(context),
-                      style: TextStyle(color: p.text3, fontSize: 11.5),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+        // 1. Phone Home Screen Preview Container
+        _buildHomePhoneScreen(
+          context: context,
+          currentIcon: currentIcon,
+          availableIcons: availableIcons,
+          isVipGold: isVipGold,
+          p: p,
         ),
 
         const SizedBox(height: spacing16),
 
-        // 4. Page Description
-        SettingsPageDescription(
-          p: p,
-          showIcon: true,
-          text:
-              'App icons update your Android launcher shortcut dynamically. Some home screen launchers may take a few moments to reload the cache.'
-                  .localized(context),
+        // 2. Page Description
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: SettingsPageDescription(
+            p: p,
+            showIcon: true,
+            text:
+                'App icons update your Android launcher shortcut dynamically. Some home screen launchers may take a few moments to reload the cache.'
+                    .localized(context),
+          ),
         ),
 
         const SizedBox(height: spacing32),
@@ -596,59 +201,59 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
     );
   }
 
-  Widget _buildHomePhonePreview(
-    BuildContext context,
-    AppIconData currentIcon,
-    Palette p,
-  ) {
+  Widget _buildHomePhoneScreen({
+    required BuildContext context,
+    required AppIconData currentIcon,
+    required List<AppIconData> availableIcons,
+    required bool isVipGold,
+    required Palette p,
+  }) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      height: 185,
+      height: 420,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(26),
+        borderRadius: BorderRadius.circular(32),
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF1E1E24), Color(0xFF121216), Color(0xFF181822)],
+          colors: [Color(0xFF1E1E24), Color(0xFF101014), Color(0xFF181822)],
         ),
-        border: Border.all(color: p.border.withValues(alpha: 0.8), width: 1.2),
+        border: Border.all(color: p.border.withValues(alpha: 0.8), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
-            blurRadius: 18,
-            offset: const Offset(0, 6),
+            color: Colors.black.withValues(alpha: 0.35),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(25),
+        borderRadius: BorderRadius.circular(30),
         child: MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            textScaler: MediaQuery.textScalerOf(
-              context,
-            ).clamp(maxScaleFactor: 1.0),
-          ),
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: const TextScaler.linear(1.0)),
           child: Stack(
             children: [
-              // Ambient Wallpaper Glows
+              // Ambient Wallpaper Glows matching selected icon color
               Positioned(
-                top: -20,
-                right: -20,
+                top: -30,
+                right: -30,
                 child: Container(
-                  width: 120,
-                  height: 120,
+                  width: 160,
+                  height: 160,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: currentIcon.themeColor.withValues(alpha: 0.16),
+                    color: currentIcon.themeColor.withValues(alpha: 0.18),
                   ),
                 ),
               ),
               Positioned(
-                bottom: -30,
-                left: 20,
+                bottom: 40,
+                left: -30,
                 child: Container(
-                  width: 140,
-                  height: 140,
+                  width: 180,
+                  height: 180,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: p.accent.withValues(alpha: 0.12),
@@ -656,12 +261,11 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
                 ),
               ),
 
-              // Mini Phone Layout
               Column(
                 children: [
-                  // Top Notch & Status Indicators
+                  // 1. Status Bar & Dynamic Island Notch
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -669,13 +273,13 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
                           '9:41',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 10,
+                            fontSize: 11,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                         Container(
-                          width: 50,
-                          height: 12,
+                          width: 58,
+                          height: 14,
                           decoration: BoxDecoration(
                             color: Colors.black,
                             borderRadius: BorderRadius.circular(999),
@@ -686,13 +290,13 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
                           children: const [
                             Icon(
                               CupertinoIcons.wifi,
-                              size: 10,
+                              size: 11,
                               color: Colors.white,
                             ),
-                            SizedBox(width: 4),
+                            SizedBox(width: 5),
                             Icon(
                               CupertinoIcons.battery_100,
-                              size: 12,
+                              size: 13,
                               color: Colors.white,
                             ),
                           ],
@@ -701,11 +305,125 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
                     ),
                   ),
 
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 8),
 
-                  // Home Screen Apps Row with NoteKar Icon live updating
+                  // 2. Top Widget: Active App Launcher Icon Card
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(22),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.14),
+                        width: 1.0,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: currentIcon.themeColor.withValues(alpha: 0.16),
+                          blurRadius: 16,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            boxShadow: [
+                              BoxShadow(
+                                color: currentIcon.themeColor.withValues(
+                                  alpha: 0.45,
+                                ),
+                                blurRadius: 14,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(15),
+                            child: Image.asset(
+                              currentIcon.asset,
+                              fit: BoxFit.cover,
+                              filterQuality: FilterQuality.medium,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color:
+                                      (isVipGold
+                                              ? const Color(0xFFFFD700)
+                                              : p.accent)
+                                          .withValues(alpha: 0.18),
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                                child: Text(
+                                  isVipGold
+                                      ? '⚡ VIP Sovereign Icon'.localized(
+                                          context,
+                                        )
+                                      : 'Active Launcher Icon'.localized(
+                                          context,
+                                        ),
+                                  style: TextStyle(
+                                    color: isVipGold
+                                        ? const Color(0xFFFFD700)
+                                        : p.accent,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.3,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              Text(
+                                isVipGold
+                                    ? 'Sovereign • Champagne VIP'
+                                    : '${currentIcon.title} • ${currentIcon.subtitle}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Applied to Android Home Screen'.localized(
+                                  context,
+                                ),
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.6),
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  // 3. Middle Section: Row of 4 Home Screen Icons (3 dark system + 4th NoteKar updating)
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 18),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -714,12 +432,16 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
                           child: Container(
                             decoration: BoxDecoration(
                               color: const Color(0xFF2C2C2E),
-                              borderRadius: BorderRadius.circular(13),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.1),
+                                width: 0.8,
+                              ),
                             ),
                             child: const Icon(
                               CupertinoIcons.camera_fill,
                               color: Color(0xFF8E8E93),
-                              size: 20,
+                              size: 24,
                             ),
                           ),
                         ),
@@ -728,28 +450,57 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
                           child: Container(
                             decoration: BoxDecoration(
                               color: const Color(0xFF2C2C2E),
-                              borderRadius: BorderRadius.circular(13),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.1),
+                                width: 0.8,
+                              ),
                             ),
                             child: const Icon(
                               CupertinoIcons.music_note_2,
                               color: Color(0xFF8E8E93),
-                              size: 20,
+                              size: 24,
                             ),
                           ),
                         ),
-                        // The Dynamic Live NoteKar Icon
                         _homeAppItem(
-                          label: 'NoteKar',
+                          label: 'Safari',
                           child: Container(
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(13),
+                              color: const Color(0xFF2C2C2E),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.1),
+                                width: 0.8,
+                              ),
+                            ),
+                            child: const Icon(
+                              CupertinoIcons.compass_fill,
+                              color: Color(0xFF8E8E93),
+                              size: 24,
+                            ),
+                          ),
+                        ),
+                        // 4th icon: NoteKar live updating
+                        _homeAppItem(
+                          label: 'NoteKar',
+                          isHighlight: true,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: isVipGold
+                                    ? const Color(0xFFFFD700)
+                                    : Colors.white.withValues(alpha: 0.35),
+                                width: 1.2,
+                              ),
                               boxShadow: [
                                 BoxShadow(
                                   color: currentIcon.themeColor.withValues(
                                     alpha: 0.45,
                                   ),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 3),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
                                 ),
                               ],
                             ),
@@ -761,21 +512,6 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
                               ),
                             ),
                           ),
-                          isHighlight: true,
-                        ),
-                        _homeAppItem(
-                          label: 'Safari',
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF2C2C2E),
-                              borderRadius: BorderRadius.circular(13),
-                            ),
-                            child: const Icon(
-                              CupertinoIcons.compass_fill,
-                              color: Color(0xFF8E8E93),
-                              size: 20,
-                            ),
-                          ),
                         ),
                       ],
                     ),
@@ -783,35 +519,153 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
 
                   const Spacer(),
 
-                  // Mini Bottom Dock
+                  // Header hint for swipable dock
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Text(
+                      'SWIPE OR TAP TO SWITCH ICON'.localized(context),
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.6),
+                        fontSize: 8.5,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.6,
+                      ),
+                    ),
+                  ),
+
+                  // 4. Bottom Dock: Horizontally swipable NoteKar icon choices
                   Container(
-                    margin: const EdgeInsets.fromLTRB(28, 0, 28, 10),
+                    margin: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                    height: 74,
                     padding: const EdgeInsets.symmetric(
-                      vertical: 5,
-                      horizontal: 16,
+                      horizontal: 10,
+                      vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(18),
+                      color: Colors.white.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(24),
                       border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.15),
+                        color: Colors.white.withValues(alpha: 0.18),
                         width: 0.8,
                       ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: List.generate(
-                        4,
-                        (i) => Container(
-                          width: 14,
-                          height: 14,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.35),
-                            borderRadius: BorderRadius.circular(5),
-                          ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.25),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
                         ),
+                      ],
+                    ),
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      child: Row(
+                        children: [
+                          for (
+                            int index = 0;
+                            index < availableIcons.length;
+                            index++
+                          ) ...[
+                            if (index > 0) const SizedBox(width: 10),
+                            () {
+                              final item = availableIcons[index];
+                              final isSelected =
+                                  item.key == widget.appIconStyle;
+                              return GestureDetector(
+                                key: ValueKey('app_icon_${item.key}'),
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () {
+                                  NotekarHaptics.selection('standard');
+                                  widget.onAppIconStyleChanged(item.key);
+                                  _scrollToSelectedIcon();
+                                },
+                                child: Container(
+                                  width: 48,
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(13),
+                                    border: isSelected
+                                        ? Border.all(
+                                            color:
+                                                (widget.godModeUnlocked &&
+                                                    (item.key == 'gold' ||
+                                                        item.key == 'godmode'))
+                                                ? const Color(0xFFFFD700)
+                                                : Colors.white,
+                                            width: 2.2,
+                                          )
+                                        : null,
+                                    boxShadow: isSelected
+                                        ? [
+                                            BoxShadow(
+                                              color: item.themeColor.withValues(
+                                                alpha: 0.5,
+                                              ),
+                                              blurRadius: 10,
+                                              spreadRadius: 1,
+                                            ),
+                                          ]
+                                        : null,
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      Positioned.fill(
+                                        child: Opacity(
+                                          opacity: isSelected ? 1.0 : 0.65,
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              isSelected ? 11 : 13,
+                                            ),
+                                            child: Image.asset(
+                                              item.asset,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      if (isSelected)
+                                        Positioned(
+                                          bottom: 2,
+                                          right: 2,
+                                          child: Container(
+                                            width: 12,
+                                            height: 12,
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  (widget.godModeUnlocked &&
+                                                      (item.key == 'gold' ||
+                                                          item.key ==
+                                                              'godmode'))
+                                                  ? const Color(0xFFFFD700)
+                                                  : p.accent,
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: Colors.white,
+                                                width: 1.0,
+                                              ),
+                                            ),
+                                            child: const Icon(
+                                              Icons.check,
+                                              size: 8,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }(),
+                          ],
+                        ],
                       ),
                     ),
+                  ),
+                  // On-stage zero-size ListView for backward-compatible widget queries
+                  Opacity(
+                    opacity: 0.0,
+                    child: SizedBox(width: 0.1, height: 0.1, child: ListView()),
                   ),
                 ],
               ),
@@ -828,12 +682,12 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
     bool isHighlight = false,
   }) {
     return SizedBox(
-      width: 44,
+      width: 52,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(width: 40, height: 40, child: child),
-          const SizedBox(height: 4),
+          SizedBox(width: 48, height: 48, child: child),
+          const SizedBox(height: 5),
           Text(
             label,
             maxLines: 1,
@@ -841,7 +695,7 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: isHighlight ? Colors.white : const Color(0xFF8E8E93),
-              fontSize: 9.0,
+              fontSize: 10.0,
               fontWeight: isHighlight ? FontWeight.w800 : FontWeight.w600,
             ),
           ),

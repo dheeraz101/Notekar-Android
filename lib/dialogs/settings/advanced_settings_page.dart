@@ -651,49 +651,6 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
               'Data wipe operations permanently erase local storage and cannot be undone. Export a backup beforehand from Data & Backup.'
                   .localized(context),
         ),
-        const SizedBox(height: spacing12),
-        Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: p.surface2.withValues(alpha: 0.6),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: p.border.withValues(alpha: 0.4)),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(CupertinoIcons.lock_shield, size: 18, color: p.red),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Permanent Deletion & Zero-Knowledge Storage'.localized(
-                        context,
-                      ),
-                      style: TextStyle(
-                        color: p.text,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'NoteKar is built on a sovereign zero-knowledge architecture. We do not collect personal data, maintain user accounts, or store cloud backups. When you reset, your information is permanently purged from this device and cannot be recovered by anyone, including NoteKar.'
-                          .localized(context),
-                      style: TextStyle(
-                        color: p.text2,
-                        fontSize: 11,
-                        height: 1.35,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
         const SizedBox(height: spacing48),
       ],
     );

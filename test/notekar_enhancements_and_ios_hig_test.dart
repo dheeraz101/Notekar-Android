@@ -6,6 +6,7 @@ import 'package:notekar/dialogs/settings/life_audit_page.dart';
 import 'package:notekar/dialogs/settings/update_center_page.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/update_service.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -174,9 +175,18 @@ void main() {
 
   group('Apple Software Update & Legal Notices', () {
     testWidgets(
-      'UpdateCenterView renders Apple-style Software Update agreement notice',
+      'UpdateCenterView renders Apple-style agreement in update card and allows cancelling update',
       (tester) async {
         String? openedLink;
+        bool checkCalled = false;
+        final updateInfo = AppUpdateInfo(
+          version: '1.3.0',
+          tagName: 'v1.3.0',
+          body: 'Security improvements',
+          isSecurity: true,
+          isImportant: false,
+          type: 'Security Update',
+        );
 
         await tester.pumpWidget(
           MaterialApp(
@@ -188,7 +198,8 @@ void main() {
                   enableTranslucency: true,
                   reduceMotion: false,
                   onOpenLink: (url) => openedLink = url,
-                  onCheckUpdates: () {},
+                  onCheckUpdates: () => checkCalled = true,
+                  updateInfo: updateInfo,
                   checkingUpdates: false,
                   updateStatus: 'idle',
                   currentBuildChannel: 'stable',
@@ -200,23 +211,42 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // Find agreement text
-        final noticeFinder = find.textContaining(
-          'NoteKar keeps all records local on your device.',
+        // 1. Bottom duplicate agreement notice is removed
+        expect(
+          find.textContaining(
+            'NoteKar keeps all records local on your device.',
+          ),
+          findsNothing,
         );
+
+        // 2. Terms of service in the update card is present
+        final termsLink = find.text('Terms of Service').first;
         await tester.scrollUntilVisible(
-          noticeFinder,
+          termsLink,
           100,
           scrollable: find.byType(Scrollable).first,
         );
         await tester.pumpAndSettle();
-        expect(noticeFinder, findsOneWidget);
-
-        // Tap Terms of Service link
-        final termsLink = find.text('Terms of Service').first;
+        expect(termsLink, findsOneWidget);
         await tester.tap(termsLink);
         await tester.pump();
         expect(openedLink, termsUrl);
+
+        // 3. Cancel update button is present
+        final cancelBtn = find.text('Cancel Update').first;
+        expect(cancelBtn, findsOneWidget);
+        await tester.tap(cancelBtn);
+        await tester.pumpAndSettle();
+        await tester.pump(const Duration(seconds: 3));
+
+        // 4. Update card is now cancelled/postponed
+        expect(find.text('Update postponed'), findsOneWidget);
+
+        // 5. Explicitly tapping check for updates resets cancellation
+        final checkBtn = find.text('Check for updates').first;
+        await tester.tap(checkBtn);
+        await tester.pumpAndSettle();
+        expect(checkCalled, isTrue);
       },
     );
   });

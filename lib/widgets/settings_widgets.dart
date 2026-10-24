@@ -17,6 +17,7 @@ class SettingsGroup extends StatelessWidget {
     required this.children,
     this.title,
     this.description,
+    this.footer,
     this.showDividers = true,
     this.insetDividers = true,
   });
@@ -25,6 +26,7 @@ class SettingsGroup extends StatelessWidget {
   final List<Widget> children;
   final String? title;
   final String? description;
+  final String? footer;
   final bool showDividers;
   final bool insetDividers;
 
@@ -100,6 +102,14 @@ class SettingsGroup extends StatelessWidget {
             },
           ),
         ),
+        if (footer != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+            child: Text(
+              footer!.localized(context),
+              style: TextStyle(color: p.text3, fontSize: 12.5, height: 1.35),
+            ),
+          ),
       ],
     );
   }

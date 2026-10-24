@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -530,6 +532,7 @@ class _IosPillToastWidgetState extends State<_IosPillToastWidget>
   late final Animation<double> _scaleAnimation;
   late final Animation<double> _fadeAnimation;
   late final Animation<Offset> _slideAnimation;
+  Timer? _dismissTimer;
 
   @override
   void initState() {
@@ -555,7 +558,7 @@ class _IosPillToastWidgetState extends State<_IosPillToastWidget>
 
     _controller.forward();
 
-    Future.delayed(widget.duration, () async {
+    _dismissTimer = Timer(widget.duration, () async {
       if (mounted) {
         await _controller.reverse();
         widget.onDismiss();
@@ -565,6 +568,7 @@ class _IosPillToastWidgetState extends State<_IosPillToastWidget>
 
   @override
   void dispose() {
+    _dismissTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }

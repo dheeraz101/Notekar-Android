@@ -63,6 +63,7 @@ import 'package:notekar/utils/markdown_sync_service.dart';
 import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/utils/network_logger.dart';
 import 'package:notekar/utils/notice_service.dart';
+import 'package:notekar/utils/scroll_state_preserver.dart';
 import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/utils/update_service.dart';
 import 'package:notekar/widgets/common_elements.dart';
@@ -318,6 +319,23 @@ class _SettingsDialogState extends State<SettingsDialog> {
   final List<String> _categoryStack = [];
   int _prevStackLength = 0;
   final _activeController = ScrollController();
+  final Map<String, ScrollController> _scrollControllers = {};
+
+  ScrollController _getScrollController(String key) {
+    return _scrollControllers.putIfAbsent(key, () {
+      final initial = AppScrollState.get('settings_$key');
+      final c = ScrollController(
+        initialScrollOffset: initial,
+        keepScrollOffset: true,
+      );
+      c.addListener(() {
+        if (c.hasClients) {
+          AppScrollState.save('settings_$key', c.offset);
+        }
+      });
+      return c;
+    });
+  }
 
   void update(VoidCallback fn) => setState(fn);
 
@@ -1449,6 +1467,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
   void dispose() {
     widget.entriesNotifier.removeListener(_onEntriesChanged);
     widget.trashEntriesNotifier.removeListener(_onEntriesChanged);
+    for (final c in _scrollControllers.values) {
+      c.dispose();
+    }
     _activeController.dispose();
     _settingsSearchController.dispose();
     _settingsSearchFocusNode.dispose();
@@ -1916,6 +1937,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
     if (name == 'Network Monitor') {
       _loadNetworkLogs();
     }
+    final currentKey = category ?? 'root';
+    if (_scrollControllers[currentKey]?.hasClients == true) {
+      AppScrollState.save(
+        'settings_$currentKey',
+        _scrollControllers[currentKey]!.offset,
+      );
+    }
     setState(() {
       _prevStackLength = _categoryStack.length;
       if (category != null) _categoryStack.add(category!);
@@ -1934,6 +1962,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
   void _popCategory() {
     NotekarHaptics.selection(hapticStyle);
+    final poppingKey = category ?? 'root';
+    if (_scrollControllers[poppingKey]?.hasClients == true) {
+      AppScrollState.save(
+        'settings_$poppingKey',
+        _scrollControllers[poppingKey]!.offset,
+      );
+    }
     if (category == 'Search') {
       setState(() {
         _settingsQuery = '';
@@ -2401,7 +2436,7 @@ $cleanStack
         docked: true,
         blur: !reduceMotion && enableTranslucency && engine.supportsBlur,
         largeText: largeText,
-        controller: category == null ? _activeController : null,
+        controller: _getScrollController(category ?? 'root'),
         showLargeTitle: category == null,
         removeBottomPadding: true,
         scrollLeadingAction: category == null
@@ -2508,10 +2543,8 @@ $cleanStack
                           onPop: _popCategory,
                         )
                       : CustomScrollView(
-                          key: ValueKey('scroll-${category ?? 'root'}'),
-                          controller: category == null
-                              ? _activeController
-                              : null,
+                          key: PageStorageKey('scroll-${category ?? 'root'}'),
+                          controller: _getScrollController(category ?? 'root'),
                           physics: const BouncingScrollPhysics(
                             parent: AlwaysScrollableScrollPhysics(),
                           ),
@@ -2521,7 +2554,9 @@ $cleanStack
                                 child: AppSheetLargeTitle(
                                   p: p,
                                   title: 'Settings',
-                                  scrollController: _activeController,
+                                  scrollController: _getScrollController(
+                                    'root',
+                                  ),
                                 ),
                               ),
                               SliverPersistentHeader(
@@ -2547,8 +2582,9 @@ $cleanStack
                                       onTap: () => _openCategory('Search'),
                                       onChanged: (value) {
                                         setState(() => _settingsQuery = value);
-                                        if (_activeController.hasClients) {
-                                          _activeController.jumpTo(0.0);
+                                        final sc = _getScrollController('root');
+                                        if (sc.hasClients) {
+                                          sc.jumpTo(0.0);
                                         }
                                       },
                                       onClear: () {
@@ -2556,8 +2592,9 @@ $cleanStack
                                           _settingsQuery = '';
                                           _settingsSearchController.clear();
                                         });
-                                        if (_activeController.hasClients) {
-                                          _activeController.jumpTo(0.0);
+                                        final sc = _getScrollController('root');
+                                        if (sc.hasClients) {
+                                          sc.jumpTo(0.0);
                                         }
                                       },
                                     ),
@@ -3106,6 +3143,21 @@ $cleanStack
                                       );
                                     }
                                     setState(() => logAfterUnlock = value);
+                                    if (value && Platform.isAndroid) {
+                                      try {
+                                        await _fileChannel.invokeMethod(
+                                          'requestNotificationPermission',
+                                        );
+                                      } catch (_) {}
+                                    }
+                                    if (Platform.isAndroid) {
+                                      try {
+                                        await _fileChannel.invokeMethod(
+                                          'updateLogAfterUnlock',
+                                          {'enabled': value},
+                                        );
+                                      } catch (_) {}
+                                    }
                                   },
                                   onUnlockActionStyleChanged: (value) async {
                                     if (_prefs != null) {
@@ -3115,6 +3167,30 @@ $cleanStack
                                       );
                                     }
                                     setState(() => unlockActionStyle = value);
+                                    if (value == 'quick_note' &&
+                                        Platform.isAndroid) {
+                                      try {
+                                        final canDraw =
+                                            await _fileChannel
+                                                .invokeMethod<bool>(
+                                                  'canDrawOverlays',
+                                                ) ??
+                                            false;
+                                        if (!canDraw) {
+                                          await _fileChannel.invokeMethod(
+                                            'requestOverlayPermission',
+                                          );
+                                        }
+                                      } catch (_) {}
+                                    }
+                                    if (Platform.isAndroid) {
+                                      try {
+                                        await _fileChannel.invokeMethod(
+                                          'updateLogAfterUnlock',
+                                          {'enabled': logAfterUnlock},
+                                        );
+                                      } catch (_) {}
+                                    }
                                   },
                                   showCheckpointsOnHome: showCheckpointsOnHome,
                                   hideCheckpointsFromTimeline:

@@ -97,6 +97,14 @@ class MainActivity : FlutterActivity() {
         }.start()
 
         Thread {
+            try {
+                UnlockReceiver.updateUnlockReceiver(applicationContext)
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Failed to initialize UnlockReceiver", e)
+            }
+        }.start()
+
+        Thread {
             initSoundPool()
         }.start()
 
@@ -927,6 +935,20 @@ class MainActivity : FlutterActivity() {
                     result.success(true)
                 }
 
+                "updateLogAfterUnlock" -> {
+                    try {
+                        val enabled = call.argument<Boolean>("enabled")
+                        if (enabled != null) {
+                            val flutterPrefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+                            flutterPrefs.edit().putBoolean("flutter.m-log-after-unlock", enabled).apply()
+                        }
+                        UnlockReceiver.updateUnlockReceiver(applicationContext)
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.error("UNLOCK_RECEIVER_ERROR", e.message, null)
+                    }
+                }
+
                 else -> result.notImplemented()
             }
         }
@@ -1108,8 +1130,12 @@ class MainActivity : FlutterActivity() {
     private fun payloadFromIntent(intent: Intent?): Map<String, Any?>? {
         if (intent == null) return null
 
-        if (intent.getStringExtra("action") == "checkpoint" || intent.getStringExtra("route") == "checkpoint") {
+        if (intent.getStringExtra("action") == "checkpoint" || intent.getStringExtra("route") == "checkpoint" || intent.getStringExtra(EXTRA_LAUNCH_ACTION) == "checkpoint") {
             return mapOf("action" to "checkpoint")
+        }
+
+        if (intent.getStringExtra("action") == "session" || intent.getStringExtra("route") == "session" || intent.getStringExtra(EXTRA_LAUNCH_ACTION) == "session") {
+            return mapOf("action" to "session")
         }
 
         // 1. Check for Share Sheet image streams (ACTION_SEND or ACTION_SEND_MULTIPLE)
@@ -1329,6 +1355,8 @@ class MainActivity : FlutterActivity() {
             "updates", "update", "releases", "release" -> "releases"
             "sobriety" -> "sobriety"
             "life-audit", "lifeaudit", "audit" -> "life-audit"
+            "checkpoint", "checkpoints" -> "checkpoint"
+            "session", "session_start" -> "session"
             else -> null
         }
     }

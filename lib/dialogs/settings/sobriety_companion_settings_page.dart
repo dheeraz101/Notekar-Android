@@ -819,44 +819,6 @@ class MilestoneThemePage extends StatelessWidget {
   final String sobrietyMilestoneTheme;
   final ValueChanged<String> onThemeChanged;
 
-  IconData _getThemeIcon(String id) {
-    return switch (id) {
-      'science' => CupertinoIcons.lab_flask,
-      'warrior' => CupertinoIcons.shield_fill,
-      'navy' => CupertinoIcons.compass,
-      'clan' => CupertinoIcons.flag_fill,
-      'ancient' => CupertinoIcons.building_2_fill,
-      'samurai' => CupertinoIcons.shield,
-      'space' => CupertinoIcons.rocket_fill,
-      'kingdom' => CupertinoIcons.person_crop_circle_badge_checkmark,
-      'monk' => CupertinoIcons.sunrise_fill,
-      'phoenix' => CupertinoIcons.flame_fill,
-      'animals' => CupertinoIcons.paw,
-      'pokemon' => CupertinoIcons.bolt_fill,
-      'jjk' => CupertinoIcons.eye_fill,
-      'onepiece' => CupertinoIcons.flag,
-      'naruto' => CupertinoIcons.wind,
-      'ben10' => CupertinoIcons.stopwatch_fill,
-      'aot' => CupertinoIcons.square_grid_2x2_fill,
-      'bleach' => CupertinoIcons.moon_fill,
-      'mha' => CupertinoIcons.sparkles,
-      'vinland' => CupertinoIcons.hammer_fill,
-      'demonslayer' => CupertinoIcons.sun_max_fill,
-      'fma' => CupertinoIcons.circle_grid_hex_fill,
-      'dbz' => CupertinoIcons.star_circle_fill,
-      'codegeass' => CupertinoIcons.eye,
-      'deathnote' => CupertinoIcons.book_fill,
-      'gintama' => CupertinoIcons.eyeglasses,
-      'hxh' => CupertinoIcons.ticket_fill,
-      'sololeveling' => CupertinoIcons.waveform_path,
-      'rpg' => CupertinoIcons.cube_box_fill,
-      'tech' => CupertinoIcons.desktopcomputer,
-      'chess' => CupertinoIcons.square_grid_2x2_fill,
-      'starwars' => CupertinoIcons.wand_rays,
-      _ => CupertinoIcons.star_fill,
-    };
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -875,8 +837,11 @@ class MilestoneThemePage extends StatelessWidget {
             for (final theme in kMilestoneThemes)
               SettingsRow(
                 p: p,
-                icon: _getThemeIcon(theme.id),
-                title: '${theme.emoji} ${theme.name}',
+                customIcon: Text(
+                  theme.emoji,
+                  style: const TextStyle(fontSize: 16),
+                ),
+                title: theme.name,
                 subtitle: theme.description,
                 color: p.orange,
                 trailing: sobrietyMilestoneTheme == theme.id

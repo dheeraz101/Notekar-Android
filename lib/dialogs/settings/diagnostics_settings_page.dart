@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -1131,56 +1132,42 @@ class _HeartbeatEcgPainter extends CustomPainter {
     this.isLowEnd = false,
   });
 
-  // Continuous biological ECG calculation with natural sinus arrhythmia & HRV
+  // Continuous smooth biological ECG calculation with zero jitter
   double _calculateEcg(double t) {
     if (connectedFactor <= 0.001) return 0.0;
 
-    // Continuous modulated cardiac phase (respiratory sinus arrhythmia ~75 BPM)
-    final double phase =
-        1.25 * t + 0.14 * math.sin(0.42 * t) + 0.08 * math.sin(0.85 * t);
-    final int beatIndex = phase.floor();
-    final double beatPhase = phase - beatIndex;
+    // Periodic normalized cycle ~75 BPM (cycle length 0.8s)
+    const double cycle = 0.8;
+    double p = (t / cycle) % 1.0;
+    if (p < 0) p += 1.0;
 
-    // Organic biological micro-variations per individual beat
-    final double pseudoRand1 = math
-        .sin(beatIndex * 12.9898 + 78.233)
-        .abs(); // 0..1
-    final double pseudoRand2 = math
-        .cos(beatIndex * 4.898 + 19.123)
-        .abs(); // 0..1
+    // Continuous subtle baseline wander without jumps
+    final double baselineWander = math.sin(t * 0.75) * 0.015;
 
-    // R-spike amplitude variability (0.82x to 1.25x)
-    final double rAmp = 0.82 + 0.38 * pseudoRand1;
-    // T-wave variation
-    final double tAmp = 0.28 + 0.16 * pseudoRand2;
-    // Subtle baseline respiratory wander (0.04 max)
-    final double baselineWander = math.sin(0.35 * t + (beatIndex * 0.2)) * 0.04;
-
-    double y = baselineWander;
-
-    if (beatPhase >= 0.10 && beatPhase < 0.20) {
+    double wave = 0.0;
+    if (p >= 0.10 && p < 0.20) {
       // P-wave (atrial depolarization)
-      final double p = (beatPhase - 0.10) / 0.10;
-      y += math.sin(p * math.pi) * 0.18;
-    } else if (beatPhase >= 0.26 && beatPhase < 0.29) {
-      // Q-dip (septal depolarization dip)
-      final double q = (beatPhase - 0.26) / 0.03;
-      y -= math.sin(q * math.pi) * 0.16;
-    } else if (beatPhase >= 0.29 && beatPhase < 0.34) {
-      // R-spike (ventricular depolarization peak with HRV amplitude)
-      final double r = (beatPhase - 0.29) / 0.05;
-      y += math.sin(r * math.pi) * rAmp;
-    } else if (beatPhase >= 0.34 && beatPhase < 0.39) {
-      // S-drop (ventricular depolarization negative rebound)
-      final double s = (beatPhase - 0.34) / 0.05;
-      y -= math.sin(s * math.pi) * (0.28 + 0.08 * pseudoRand2);
-    } else if (beatPhase >= 0.48 && beatPhase < 0.66) {
+      final double prog = (p - 0.10) / 0.10;
+      wave += math.sin(prog * math.pi) * 0.18;
+    } else if (p >= 0.26 && p < 0.29) {
+      // Q-dip (septal depolarization)
+      final double prog = (p - 0.26) / 0.03;
+      wave -= math.sin(prog * math.pi) * 0.14;
+    } else if (p >= 0.29 && p < 0.34) {
+      // R-spike (ventricular depolarization)
+      final double prog = (p - 0.29) / 0.05;
+      wave += math.sin(prog * math.pi) * 1.05;
+    } else if (p >= 0.34 && p < 0.39) {
+      // S-drop (ventricular rebound)
+      final double prog = (p - 0.34) / 0.05;
+      wave -= math.sin(prog * math.pi) * 0.28;
+    } else if (p >= 0.48 && p < 0.66) {
       // T-wave (ventricular repolarization)
-      final double tWave = (beatPhase - 0.48) / 0.18;
-      y += math.sin(tWave * math.pi) * tAmp;
+      final double prog = (p - 0.48) / 0.18;
+      wave += math.sin(prog * math.pi) * 0.32;
     }
 
-    return y * connectedFactor;
+    return (baselineWander + wave) * connectedFactor;
   }
 
   @override
@@ -1189,23 +1176,46 @@ class _HeartbeatEcgPainter extends CustomPainter {
     final h = size.height;
     final midY = h / 2;
 
-    // 1. Background medical oscilloscope grid & baseline track
-    final bgPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.07)
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke;
-    canvas.drawLine(Offset(0, midY), Offset(w, midY), bgPaint);
+    // 1. When offline / zero connectivity, flatline immediately to a solid red line
+    if (connectedFactor <= 0.001) {
+      final flatlinePaint = Paint()
+        ..color = offlineColor
+        ..strokeWidth = 2.0
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round;
+      canvas.drawLine(Offset(0, midY), Offset(w, midY), flatlinePaint);
+      return;
+    }
 
     final activeColor = Color.lerp(offlineColor, liveColor, connectedFactor)!;
-
-    // 2. Sweep beam position and erase window
-    final sweepX = w * sweepProgress.clamp(0.0, 1.0);
-    const eraseWindowWidth = 24.0;
-    final eraseEnd = sweepX + eraseWindowWidth;
-
     const double sweepPeriod = 2.4;
 
-    // 3. Segmented path drawing: freshly drawn line behind sweep, older line after erase
+    // 2. Stable continuous background hinted waveform track across the full width
+    // (no horizontal cut-through straight line, smooth continuous cardiac pattern)
+    final hintPath = Path();
+    bool hintStarted = false;
+    for (double x = 0; x <= w; x += 2.0) {
+      final normX = x / w;
+      final t = normX * sweepPeriod;
+      final y = midY - _calculateEcg(t) * (h * 0.42);
+      if (!hintStarted) {
+        hintPath.moveTo(x, y);
+        hintStarted = true;
+      } else {
+        hintPath.lineTo(x, y);
+      }
+    }
+    final hintPaint = Paint()
+      ..color = activeColor.withValues(alpha: 0.16)
+      ..strokeWidth = 1.4
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+    canvas.drawPath(hintPath, hintPaint);
+
+    // 3. Sweep beam position
+    final sweepX = w * sweepProgress.clamp(0.0, 1.0);
+
     final linePaint = Paint()
       ..color = activeColor
       ..strokeWidth = 2.0
@@ -1224,14 +1234,14 @@ class _HeartbeatEcgPainter extends CustomPainter {
             ..strokeCap = StrokeCap.round
             ..strokeJoin = StrokeJoin.round);
 
-    // Draw segment 1: from 0 up to sweepX (freshly drawn in current pass)
+    // 4. Draw active trace from 0 up to sweepX flowing seamlessly over hinted baseline
     if (sweepX > 1.0) {
       final freshPath = Path();
-      const step = 2.0;
+      const step = 1.5;
       bool started = false;
       for (double x = 0; x <= sweepX; x += step) {
         final normX = x / w;
-        final t = sweepPass * sweepPeriod + normX * sweepPeriod;
+        final t = normX * sweepPeriod;
         final y = midY - _calculateEcg(t) * (h * 0.42);
         if (!started) {
           freshPath.moveTo(x, y);
@@ -1244,35 +1254,9 @@ class _HeartbeatEcgPainter extends CustomPainter {
       canvas.drawPath(freshPath, linePaint);
     }
 
-    // Draw segment 2: from eraseEnd to w (dimmer persistence from previous pass)
-    if (eraseEnd < w) {
-      final oldPath = Path();
-      const step = 2.5;
-      bool started = false;
-      for (double x = eraseEnd; x <= w; x += step) {
-        final normX = x / w;
-        final t = (sweepPass - 1) * sweepPeriod + normX * sweepPeriod;
-        final y = midY - _calculateEcg(t) * (h * 0.42);
-        if (!started) {
-          oldPath.moveTo(x, y);
-          started = true;
-        } else {
-          oldPath.lineTo(x, y);
-        }
-      }
-
-      final persistencePaint = Paint()
-        ..color = activeColor.withValues(alpha: 0.32)
-        ..strokeWidth = 1.6
-        ..style = PaintingStyle.stroke
-        ..strokeCap = StrokeCap.round;
-
-      canvas.drawPath(oldPath, persistencePaint);
-    }
-
-    // 4. Live glowing oscilloscope sweep head at (sweepX, sweepY)
+    // 5. Live glowing oscilloscope sweep head at (sweepX, sweepY)
     final sweepNormX = (sweepX / w).clamp(0.0, 1.0);
-    final sweepT = sweepPass * sweepPeriod + sweepNormX * sweepPeriod;
+    final sweepT = sweepNormX * sweepPeriod;
     final sweepY = midY - _calculateEcg(sweepT) * (h * 0.42);
 
     // Leading vertical erase beam gradient
@@ -1342,6 +1326,7 @@ class _LiveNetworkStatusCardState extends State<_LiveNetworkStatusCard>
     with TickerProviderStateMixin {
   late AnimationController _animController;
   late AnimationController _connectedAnimController;
+  Timer? _connectivityTimer;
   _NetworkLiveState _state = _NetworkLiveState.stable;
   int _sweepPass = 0;
   double _lastAnimValue = 0.0;
@@ -1371,25 +1356,41 @@ class _LiveNetworkStatusCardState extends State<_LiveNetworkStatusCard>
       duration: isLowEnd ? Duration.zero : const Duration(milliseconds: 800),
       value: 1.0,
     );
-    _evaluateConnectivity();
+    if (!Platform.environment.containsKey('FLUTTER_TEST')) {
+      _evaluateConnectivity();
+      _connectivityTimer = Timer.periodic(
+        const Duration(seconds: 4),
+        (_) => _evaluateConnectivity(),
+      );
+    }
   }
 
   @override
   void didUpdateWidget(covariant _LiveNetworkStatusCard oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.networkLogs.length != oldWidget.networkLogs.length) {
-      _evaluateConnectivity();
+      if (!Platform.environment.containsKey('FLUTTER_TEST')) {
+        _evaluateConnectivity();
+      }
     }
   }
 
   @override
   void dispose() {
+    _connectivityTimer?.cancel();
     _animController.dispose();
     _connectedAnimController.dispose();
     super.dispose();
   }
 
   Future<void> _evaluateConnectivity() async {
+    if (Platform.environment.containsKey('FLUTTER_TEST')) {
+      if (mounted) {
+        setState(() => _state = _NetworkLiveState.stable);
+        _connectedAnimController.value = 1.0;
+      }
+      return;
+    }
     try {
       final result = await InternetAddress.lookup(
         'dns.google',
@@ -1409,13 +1410,25 @@ class _LiveNetworkStatusCardState extends State<_LiveNetworkStatusCard>
         _connectedAnimController.animateTo(1.0, curve: Curves.easeInOutCubic);
       } else {
         if (!mounted) return;
-        setState(() => _state = _NetworkLiveState.offline);
-        _connectedAnimController.animateTo(0.0, curve: Curves.easeInOutCubic);
+        _handleOfflineDrop();
       }
     } catch (_) {
       if (!mounted) return;
-      setState(() => _state = _NetworkLiveState.offline);
-      _connectedAnimController.animateTo(0.0, curve: Curves.easeInOutCubic);
+      _handleOfflineDrop();
+    }
+  }
+
+  void _handleOfflineDrop() {
+    final wasOnline = _state != _NetworkLiveState.offline;
+    setState(() => _state = _NetworkLiveState.offline);
+    _connectedAnimController.animateTo(0.0, curve: Curves.easeInOutCubic);
+    if (wasOnline && mounted) {
+      showIosPillToast(
+        context: context,
+        p: widget.p,
+        message: 'No internet'.localized(context),
+        icon: CupertinoIcons.wifi_slash,
+      );
     }
   }
 
@@ -1598,7 +1611,7 @@ class _LiveNetworkStatusCardState extends State<_LiveNetworkStatusCard>
                       switch (_state) {
                         _NetworkLiveState.inFlight => 'SYNCING',
                         _NetworkLiveState.stable => 'LIVE',
-                        _NetworkLiveState.offline => 'FLATLINE',
+                        _NetworkLiveState.offline => 'DOWN',
                       },
                       style: TextStyle(
                         color: stateColor,

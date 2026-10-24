@@ -28,6 +28,7 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/moment_repository.dart';
+import 'package:notekar/utils/scroll_state_preserver.dart';
 import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/history_calendar_view.dart';
@@ -257,6 +258,26 @@ class _HistoryDialogState extends State<HistoryDialog> {
     _rebuildMemoizedLists();
     _loadHistoryPreferences();
     _loadGoals();
+
+    final initialOffset = AppScrollState.get('history_dialog');
+    _scrollController.addListener(() {
+      if (_scrollController.hasClients) {
+        AppScrollState.save('history_dialog', _scrollController.offset);
+      }
+    });
+    if (initialOffset > 0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          final target = initialOffset.clamp(
+            0.0,
+            _scrollController.position.maxScrollExtent,
+          );
+          if (target > 0) {
+            _scrollController.jumpTo(target);
+          }
+        }
+      });
+    }
   }
 
   Future<void> _loadGoals() async {
@@ -597,6 +618,31 @@ class _HistoryDialogState extends State<HistoryDialog> {
     }
   }
 
+  void _setSheetView(String? view) {
+    if (_inSheetView == null && view != null) {
+      if (_scrollController.hasClients) {
+        AppScrollState.save('history_dialog_main', _scrollController.offset);
+      }
+    }
+    setState(() => _inSheetView = view);
+    if (view == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          final saved = AppScrollState.get('history_dialog_main');
+          if (saved > 0) {
+            final target = saved.clamp(
+              0.0,
+              _scrollController.position.maxScrollExtent,
+            );
+            if (target > 0) {
+              _scrollController.jumpTo(target);
+            }
+          }
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final hasOlderRows = _hasOlderRows;
@@ -606,9 +652,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop) {
           if (_inSheetView == 'create_goal') {
-            setState(() => _inSheetView = 'goals');
+            _setSheetView('goals');
           } else if (_inSheetView != null) {
-            setState(() => _inSheetView = null);
+            _setSheetView(null);
           } else if (_activeInsightsSection != null) {
             setState(() => _activeInsightsSection = null);
           }
@@ -646,19 +692,17 @@ class _HistoryDialogState extends State<HistoryDialog> {
                 child: PressableScale(
                   onTap: () {
                     if (_inSheetView == 'create_goal') {
-                      setState(() => _inSheetView = 'goals');
+                      _setSheetView('goals');
                     } else if (_inSheetView == 'manual') {
                       final fromGoals = _manualInitialGoal != null;
-                      setState(() {
-                        _manualPrefilledStartTime = null;
-                        _manualPrefilledEndTime = null;
-                        _activeGapKey = null;
-                        _manualInitialGoal = null;
-                        _manualLockToSession = false;
-                        _inSheetView = fromGoals ? 'goals' : null;
-                      });
+                      _manualPrefilledStartTime = null;
+                      _manualPrefilledEndTime = null;
+                      _activeGapKey = null;
+                      _manualInitialGoal = null;
+                      _manualLockToSession = false;
+                      _setSheetView(fromGoals ? 'goals' : null);
                     } else if (_inSheetView != null) {
-                      setState(() => _inSheetView = null);
+                      _setSheetView(null);
                     } else if (_activeInsightsSection != null) {
                       setState(() => _activeInsightsSection = null);
                     }
@@ -832,15 +876,13 @@ class _HistoryDialogState extends State<HistoryDialog> {
                         _handleManualEntrySubmit(res, returnToGoals: fromGoals);
                       },
                       onCancel: () {
-                        setState(() {
-                          _manualPrefilledStartTime = null;
-                          _manualPrefilledEndTime = null;
-                          _activeGapKey = null;
-                          final fromGoals = _manualInitialGoal != null;
-                          _manualInitialGoal = null;
-                          _manualLockToSession = false;
-                          _inSheetView = fromGoals ? 'goals' : null;
-                        });
+                        _manualPrefilledStartTime = null;
+                        _manualPrefilledEndTime = null;
+                        _activeGapKey = null;
+                        final fromGoals = _manualInitialGoal != null;
+                        _manualInitialGoal = null;
+                        _manualLockToSession = false;
+                        _setSheetView(fromGoals ? 'goals' : null);
                       },
                     );
                   },
@@ -2442,24 +2484,22 @@ class _HistoryDialogState extends State<HistoryDialog> {
     DateTime? prefilledStartTime,
     DateTime? prefilledEndTime,
   }) async {
-    setState(() {
-      _manualPrefilledStartTime = prefilledStartTime;
-      _manualPrefilledEndTime = prefilledEndTime;
-      if (prefilledStartTime != null && prefilledEndTime != null) {
-        _activeGapKey =
-            '${prefilledStartTime.millisecondsSinceEpoch}-${prefilledEndTime.millisecondsSinceEpoch}';
-      } else {
-        _activeGapKey = null;
-      }
-      _inSheetView = 'manual';
-    });
+    _manualPrefilledStartTime = prefilledStartTime;
+    _manualPrefilledEndTime = prefilledEndTime;
+    if (prefilledStartTime != null && prefilledEndTime != null) {
+      _activeGapKey =
+          '${prefilledStartTime.millisecondsSinceEpoch}-${prefilledEndTime.millisecondsSinceEpoch}';
+    } else {
+      _activeGapKey = null;
+    }
+    _setSheetView('manual');
   }
 
   Future<void> _handleManualEntrySubmit(
     ManualEntryResult result, {
     bool returnToGoals = false,
   }) async {
-    setState(() => _inSheetView = returnToGoals ? 'goals' : null);
+    _setSheetView(returnToGoals ? 'goals' : null);
 
     final List<Moment> addedMoments = [];
     final maxId = _entries.isEmpty

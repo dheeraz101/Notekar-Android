@@ -398,6 +398,25 @@ class UpdateService {
     return resolveDeviceSuffix(abis);
   }
 
+  /// Generates ordered candidate APK asset filenames for a version and architecture suffix.
+  /// Checks both the full release version (e.g. 7.5.10-E1) and clean version (7.5.10),
+  /// prioritizing the ABI-specific APK followed by the universal APK fallback.
+  List<String> getCandidateApkFilenames(String version, String suffix) {
+    final cleanVersion = version.split('-').first;
+    final candidates = <String>[];
+    void add(String name) {
+      if (!candidates.contains(name)) candidates.add(name);
+    }
+
+    add('notekar-$version-$suffix.apk');
+    add('notekar-$cleanVersion-$suffix.apk');
+    if (suffix != 'universal') {
+      add('notekar-$version-universal.apk');
+      add('notekar-$cleanVersion-universal.apk');
+    }
+    return candidates;
+  }
+
   Future<String?> downloadApk(
     AppUpdateInfo info,
     void Function(double progress) onProgress,
@@ -405,39 +424,43 @@ class UpdateService {
     final cacheDir = await _channel.invokeMethod<String>('appCacheDir');
     if (cacheDir == null) return null;
 
-    String suffix = await _getDeviceSuffix();
-    final cleanVersion = info.version.split('-').first;
-    final url =
-        'https://github.com/dheeraz101/Notekar-Android/releases/download/${info.tagName}/notekar-$cleanVersion-$suffix.apk';
-    final savePath = '$cacheDir/notekar-$cleanVersion-$suffix.apk';
-
+    final suffix = await _getDeviceSuffix();
+    final candidates = getCandidateApkFilenames(info.version, suffix);
     final client = _createHttpClient(timeout: const Duration(seconds: 15));
+
     try {
-      var testRequest = await client.getUrl(Uri.parse(url));
-      testRequest.headers.set(
-        HttpHeaders.userAgentHeader,
-        'NoteKar/$appVersion',
-      );
-      testRequest.headers.set(HttpHeaders.rangeHeader, 'bytes=0-0');
+      HttpClientResponse? testResponse;
+      String? activeUrl;
+      String? activeSavePath;
 
-      var testResponse = await testRequest.close();
-      var activeUrl = url;
-      var activeSavePath = savePath;
+      for (final candidate in candidates) {
+        final candidateUrl =
+            'https://github.com/dheeraz101/Notekar-Android/releases/download/${info.tagName}/$candidate';
+        final candidateSavePath = '$cacheDir/$candidate';
 
-      if (testResponse.statusCode == 404 && suffix != 'universal') {
-        suffix = 'universal';
-        activeUrl =
-            'https://github.com/dheeraz101/Notekar-Android/releases/download/${info.tagName}/notekar-$cleanVersion-universal.apk';
-        activeSavePath = '$cacheDir/notekar-$cleanVersion-universal.apk';
+        try {
+          final testRequest = await client.getUrl(Uri.parse(candidateUrl));
+          testRequest.headers.set(
+            HttpHeaders.userAgentHeader,
+            'NoteKar/$appVersion',
+          );
+          testRequest.headers.set(HttpHeaders.rangeHeader, 'bytes=0-0');
+          final response = await testRequest.close();
+          if (response.statusCode != 404) {
+            testResponse = response;
+            activeUrl = candidateUrl;
+            activeSavePath = candidateSavePath;
+            break;
+          }
+          await response.drain();
+        } catch (_) {}
+      }
 
-        await testResponse.drain();
-        testRequest = await client.getUrl(Uri.parse(activeUrl));
-        testRequest.headers.set(
-          HttpHeaders.userAgentHeader,
-          'NoteKar/$appVersion',
+      if (testResponse == null || activeUrl == null || activeSavePath == null) {
+        _logger.warn(
+          'No accessible APK release asset found for tag ${info.tagName} (version ${info.version})',
         );
-        testRequest.headers.set(HttpHeaders.rangeHeader, 'bytes=0-0');
-        testResponse = await testRequest.close();
+        return null;
       }
 
       final finalUrl = testResponse.redirects.isNotEmpty
@@ -656,7 +679,24 @@ class UpdateService {
       });
       if (localHash == null || localHash.isEmpty) return false;
 
-      final localFilename = apkFilePath.split('/').last.split('\\').last;
+      final localFilename = apkFilePath
+          .split('/')
+          .last
+          .split('\\')
+          .last
+          .toLowerCase();
+      final cleanVersion = info.version.split('-').first.toLowerCase();
+      final fullVersion = info.version.toLowerCase();
+
+      final acceptableNames = <String>{localFilename};
+      if (cleanVersion != fullVersion) {
+        acceptableNames.add(
+          localFilename.replaceAll('-$cleanVersion-', '-$fullVersion-'),
+        );
+        acceptableNames.add(
+          localFilename.replaceAll('-$fullVersion-', '-$cleanVersion-'),
+        );
+      }
 
       // Extract hash of localFilename from manifest text
       final lines = manifestText.split('\n');
@@ -667,9 +707,9 @@ class UpdateService {
         if (parts.length >= 2) {
           final hash = parts[0].trim().toLowerCase();
           final filename = parts[1].trim().toLowerCase();
-          if (filename == localFilename.toLowerCase() &&
+          if (acceptableNames.contains(filename) &&
               hash == localHash.toLowerCase()) {
-            _logger.info('Checksum matches target: $hash');
+            _logger.info('Checksum matches target: $hash for $filename');
             return true;
           }
         }
@@ -688,14 +728,10 @@ class UpdateService {
     try {
       final cacheDir = await _channel.invokeMethod<String>('appCacheDir');
       if (cacheDir == null) return null;
-      final cleanVersion = version.split('-').first;
       final suffix = await _getDeviceSuffix();
-      var file = File('$cacheDir/notekar-$cleanVersion-$suffix.apk');
-      if (file.existsSync()) {
-        return file.path;
-      }
-      if (suffix != 'universal') {
-        file = File('$cacheDir/notekar-$cleanVersion-universal.apk');
+      final candidates = getCandidateApkFilenames(version, suffix);
+      for (final candidate in candidates) {
+        final file = File('$cacheDir/$candidate');
         if (file.existsSync()) {
           return file.path;
         }
@@ -769,49 +805,50 @@ class UpdateService {
   Future<double?> getApkSizeMb(AppUpdateInfo info) async {
     final client = _createHttpClient(timeout: const Duration(seconds: 5));
     try {
-      final cleanVersion = info.version.split('-').first;
       final suffix = await _getDeviceSuffix();
+      final candidates = getCandidateApkFilenames(info.version, suffix);
 
-      var url =
-          'https://github.com/dheeraz101/Notekar-Android/releases/download/${info.tagName}/notekar-$cleanVersion-$suffix.apk';
-      var request = await client.getUrl(Uri.parse(url));
-      request.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
-      request.headers.set(HttpHeaders.rangeHeader, 'bytes=0-0');
-      var response = await request.close();
+      for (final candidate in candidates) {
+        final url =
+            'https://github.com/dheeraz101/Notekar-Android/releases/download/${info.tagName}/$candidate';
+        try {
+          final request = await client.getUrl(Uri.parse(url));
+          request.headers.set(
+            HttpHeaders.userAgentHeader,
+            'NoteKar/$appVersion',
+          );
+          request.headers.set(HttpHeaders.rangeHeader, 'bytes=0-0');
+          final response = await request.close();
+          final statusCode = response.statusCode;
+          final contentRange = response.headers.value(
+            HttpHeaders.contentRangeHeader,
+          );
+          final contentLength = response.contentLength;
+          await response.drain();
 
-      if (response.statusCode == 404 && suffix != 'universal') {
-        await response.drain();
-        url =
-            'https://github.com/dheeraz101/Notekar-Android/releases/download/${info.tagName}/notekar-$cleanVersion-universal.apk';
-        request = await client.getUrl(Uri.parse(url));
-        request.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
-        request.headers.set(HttpHeaders.rangeHeader, 'bytes=0-0');
-        response = await request.close();
-      }
+          if (statusCode == 404) continue;
 
-      final contentRange = response.headers.value(
-        HttpHeaders.contentRangeHeader,
-      );
-      final statusCode = response.statusCode;
-      await response.drain();
+          await NetworkLogger.log(
+            url: url,
+            method: 'HEAD',
+            statusCode: statusCode,
+            purpose: 'Query Update Package Size',
+            size: '0.1 KB',
+          );
 
-      // Log this size metadata query
-      await NetworkLogger.log(
-        url: url,
-        method: 'HEAD',
-        statusCode: statusCode,
-        purpose: 'Query Update Package Size',
-        size: '0.1 KB',
-      );
-
-      if (contentRange != null && contentRange.contains('/')) {
-        final parts = contentRange.split('/');
-        if (parts.length == 2) {
-          final bytes = int.tryParse(parts[1]);
-          if (bytes != null) {
-            return bytes / (1024 * 1024);
+          if (contentRange != null && contentRange.contains('/')) {
+            final parts = contentRange.split('/');
+            if (parts.length == 2) {
+              final bytes = int.tryParse(parts[1]);
+              if (bytes != null) {
+                return bytes / (1024 * 1024);
+              }
+            }
           }
-        }
+          if (contentLength > 0) {
+            return contentLength / (1024 * 1024);
+          }
+        } catch (_) {}
       }
     } catch (_) {
     } finally {

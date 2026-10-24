@@ -936,13 +936,10 @@ class _DisplayLivePreviewState extends State<_DisplayLivePreview> {
                         ),
                         const SizedBox(height: 12),
 
-                        // Mock Recent Moment Card (Translucency & Saved Hint)
+                        // Mock Recent Moment Card (Apple HIG stacked layout: no text/badge collision)
                         Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 10,
-                          ),
+                          padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: enableTranslucency
                                 ? p.surface3.withValues(alpha: 0.55)
@@ -955,81 +952,117 @@ class _DisplayLivePreviewState extends State<_DisplayLivePreview> {
                               width: 0.8,
                             ),
                           ),
-                          child: Row(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Container(
-                                width: 28,
-                                height: 28,
-                                decoration: BoxDecoration(
-                                  color: p.accent.withValues(alpha: 0.16),
-                                  borderRadius: BorderRadius.circular(9),
-                                ),
-                                child: Icon(
-                                  CupertinoIcons.sparkles,
-                                  size: 14,
-                                  color: p.accent,
+                              // Top row: Category tag & optional Saved badge
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 7,
+                                      vertical: 3,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: p.accent.withValues(alpha: 0.14),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          CupertinoIcons.sparkles,
+                                          size: 10,
+                                          color: p.accent,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          'DEEP WORK',
+                                          style: TextStyle(
+                                            color: p.accent,
+                                            fontSize: 8.5,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (showLastSavedHint)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 7,
+                                        vertical: 2.5,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: p.green.withValues(alpha: 0.14),
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(
+                                          color: p.green.withValues(alpha: 0.3),
+                                          width: 0.6,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            CupertinoIcons.checkmark_alt,
+                                            size: 9,
+                                            color: p.green,
+                                          ),
+                                          const SizedBox(width: 3),
+                                          Text(
+                                            'Saved',
+                                            style: TextStyle(
+                                              color: p.green,
+                                              fontSize: 8.5,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 7),
+                              // Middle row: Distinct title with full width freedom
+                              Text(
+                                'Deep Work Session Completed',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: p.text,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.2,
                                 ),
                               ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Deep Work Session Completed',
+                              const SizedBox(height: 4),
+                              // Bottom row: Metadata track
+                              Row(
+                                children: [
+                                  Icon(
+                                    CupertinoIcons.lock_shield,
+                                    size: 10,
+                                    color: p.text3,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Expanded(
+                                    child: Text(
+                                      '45m elapsed • Sovereign Local Storage',
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
-                                        color: p.text,
-                                        fontSize: 11.5,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      'Offline Sovereign Encrypted Note',
-                                      style: TextStyle(
                                         color: p.text3,
                                         fontSize: 9.5,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
-                              if (showLastSavedHint)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 6,
-                                    vertical: 2.5,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: p.green.withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(
-                                      color: p.green.withValues(alpha: 0.35),
-                                      width: 0.6,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.check,
-                                        size: 9,
-                                        color: p.green,
-                                      ),
-                                      const SizedBox(width: 2),
-                                      Text(
-                                        'Saved',
-                                        style: TextStyle(
-                                          color: p.green,
-                                          fontSize: 8.5,
-                                          fontWeight: FontWeight.w800,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
                             ],
                           ),
                         ),

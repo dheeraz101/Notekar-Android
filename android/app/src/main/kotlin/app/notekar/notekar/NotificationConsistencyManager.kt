@@ -10,6 +10,7 @@ object NotificationConsistencyManager {
     const val CHANNEL_HIGH_ONGOING = "notekar_high_ongoing"
     const val CHANNEL_DEFAULT_REMINDERS = "notekar_default_reminders"
     const val CHANNEL_LOW_WISDOM = "notekar_low_wisdom"
+    const val CHANNEL_QUICK_LOG = "notekar_quick_log"
 
     fun setupChannels(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -45,9 +46,22 @@ object NotificationConsistencyManager {
                 description = "Official updates, advisories, and bulletin notices"
             }
 
+            // Channel 4 (High): Quick Log on Unlock
+            val quickLogChannel = NotificationChannel(
+                CHANNEL_QUICK_LOG,
+                "Quick Log on Unlock",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Interactive prompt to quickly log notes or checkpoints upon unlocking device"
+                enableVibration(true)
+                setShowBadge(false)
+                lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
+            }
+
             notificationManager?.createNotificationChannel(highChannel)
             notificationManager?.createNotificationChannel(defaultChannel)
             notificationManager?.createNotificationChannel(lowChannel)
+            notificationManager?.createNotificationChannel(quickLogChannel)
         }
     }
 }

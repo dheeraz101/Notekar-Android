@@ -342,11 +342,14 @@ void main() {
 
         expect(
           find.text('Permanent Deletion & Zero-Knowledge Storage'),
-          findsOneWidget,
+          findsNothing,
         );
+        expect(find.text('Reset Settings'), findsOneWidget);
+        expect(find.text('Reset All Data'), findsOneWidget);
+        expect(find.text('Factory Reset'), findsOneWidget);
         expect(
           find.textContaining(
-            'NoteKar is built on a sovereign zero-knowledge architecture',
+            'Data wipe operations permanently erase local storage',
           ),
           findsOneWidget,
         );
@@ -552,7 +555,7 @@ void main() {
           ),
         );
 
-        expect(find.text('FLUID MENISCUS RESERVOIR'), findsOneWidget);
+        expect(find.text('FLUID MENISCUS RESERVOIR'), findsNothing);
         expect(find.text('SWIPE OR TAP TO APPLY ACCENT'), findsOneWidget);
         expect(
           find.text('${kAccentColorPalette.length} Shades'),

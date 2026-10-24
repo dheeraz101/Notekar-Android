@@ -63,16 +63,65 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
 
   // Cache state
   double _cacheSizeMb = 0.0;
+  bool _updateCancelled = false;
 
   @override
   void initState() {
     super.initState();
+    _initCancelledState();
     _checkCache();
+  }
+
+  Future<void> _initCancelledState() async {
+    try {
+      final prefs = widget.prefs ?? await SharedPreferences.getInstance();
+      final cancelledTag = prefs.getString('cancelled_update_tag');
+      if (cancelledTag != null &&
+          widget.updateInfo != null &&
+          widget.updateInfo!.tagName == cancelledTag) {
+        if (mounted) setState(() => _updateCancelled = true);
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _cancelUpdate() async {
+    final prefs = widget.prefs ?? await SharedPreferences.getInstance();
+    if (widget.updateInfo != null) {
+      await prefs.setString('cancelled_update_tag', widget.updateInfo!.tagName);
+    }
+    if (mounted) {
+      setState(() => _updateCancelled = true);
+      showIosPillToast(
+        context: context,
+        p: widget.p,
+        message: 'Update cancelled'.localized(context),
+        icon: CupertinoIcons.xmark_circle_fill,
+      );
+    }
+  }
+
+  void _handleManualCheckUpdates() {
+    setState(() => _updateCancelled = false);
+    _clearCancelledUpdateTag();
+    widget.onCheckUpdates();
+  }
+
+  Future<void> _clearCancelledUpdateTag() async {
+    try {
+      final prefs = widget.prefs ?? await SharedPreferences.getInstance();
+      await prefs.remove('cancelled_update_tag');
+    } catch (_) {}
   }
 
   @override
   void didUpdateWidget(covariant UpdateCenterView oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.checkingUpdates) {
+      _updateCancelled = false;
+    }
+    if (widget.updateInfo != oldWidget.updateInfo) {
+      _initCancelledState();
+    }
     if (widget.updateInfo != oldWidget.updateInfo ||
         widget.checkingUpdates != oldWidget.checkingUpdates ||
         widget.updateStatus != oldWidget.updateStatus) {
@@ -581,83 +630,6 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
 
         // Cache cleaner card
         _buildCacheCard(p),
-        const SizedBox(height: spacing24),
-
-        SettingsPageDescription(
-          p: p,
-          text:
-              'NoteKar is open source. You can always find the latest builds and source code on GitHub.',
-          bottomPadding: spacing16,
-        ),
-        const SizedBox(height: spacing8),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text.rich(
-            TextSpan(
-              text: 'NoteKar keeps all records local on your device. '
-                  .localized(context),
-              style: TextStyle(
-                color: p.text3,
-                fontSize: 12,
-                height: 1.4,
-                fontFamily: 'Inter',
-              ),
-              children: [
-                WidgetSpan(
-                  alignment: PlaceholderAlignment.baseline,
-                  baseline: TextBaseline.alphabetic,
-                  child: GestureDetector(
-                    onTap: () => widget.onOpenLink(termsUrl),
-                    child: Text(
-                      'Terms of Service'.localized(context),
-                      style: TextStyle(
-                        color: p.accent,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'Inter',
-                      ),
-                    ),
-                  ),
-                ),
-                TextSpan(text: ' · '.localized(context)),
-                WidgetSpan(
-                  alignment: PlaceholderAlignment.baseline,
-                  baseline: TextBaseline.alphabetic,
-                  child: GestureDetector(
-                    onTap: () => widget.onOpenLink(privacyPolicyUrl),
-                    child: Text(
-                      'Privacy Policy'.localized(context),
-                      style: TextStyle(
-                        color: p.accent,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'Inter',
-                      ),
-                    ),
-                  ),
-                ),
-                TextSpan(text: ' · '.localized(context)),
-                WidgetSpan(
-                  alignment: PlaceholderAlignment.baseline,
-                  baseline: TextBaseline.alphabetic,
-                  child: GestureDetector(
-                    onTap: () => widget.onOpenLink(githubRepo),
-                    child: Text(
-                      'Source Code'.localized(context),
-                      style: TextStyle(
-                        color: p.accent,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'Inter',
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
         const SizedBox(height: spacing48),
       ],
     );
@@ -708,7 +680,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
       return _AnimatedUpdateCheckCard(p: p, blur: blurEnabled);
     }
 
-    if (widget.updateInfo == null) {
+    if (widget.updateInfo == null || _updateCancelled) {
       return Glass(
         p: p,
         radius: 24,
@@ -716,10 +688,17 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            Icon(CupertinoIcons.checkmark_circle, color: p.green, size: 48),
+            Icon(
+              _updateCancelled
+                  ? CupertinoIcons.arrow_counterclockwise_circle
+                  : CupertinoIcons.checkmark_circle,
+              color: _updateCancelled ? p.orange : p.green,
+              size: 48,
+            ),
             const SizedBox(height: 16),
             Text(
-              'You are up to date'.localized(context),
+              (_updateCancelled ? 'Update postponed' : 'You are up to date')
+                  .localized(context),
               style: TextStyle(
                 color: p.text,
                 fontSize: 16,
@@ -780,7 +759,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
-              onPressed: widget.onCheckUpdates,
+              onPressed: _handleManualCheckUpdates,
               child: Text('Check for updates'.localized(context)),
             ),
           ],
@@ -1052,8 +1031,21 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                       borderRadius: BorderRadius.circular(999),
                     ),
                   ),
-                  onPressed: widget.onCheckUpdates,
+                  onPressed: _handleManualCheckUpdates,
                   child: Text('Check for updates'.localized(context)),
+                ),
+                const SizedBox(height: 8),
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: p.surface3.withValues(alpha: 0.6),
+                    foregroundColor: p.text2,
+                    minimumSize: const Size.fromHeight(44),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                  onPressed: _cancelUpdate,
+                  child: Text('Cancel Update'.localized(context)),
                 ),
               ],
             ),
@@ -1105,8 +1097,21 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
-              onPressed: _fetchingApkSize ? null : widget.onCheckUpdates,
+              onPressed: _fetchingApkSize ? null : _handleManualCheckUpdates,
               child: Text('Check for updates'.localized(context)),
+            ),
+            const SizedBox(height: 8),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: p.surface3.withValues(alpha: 0.6),
+                foregroundColor: p.text2,
+                minimumSize: const Size.fromHeight(44),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+              onPressed: _cancelUpdate,
+              child: Text('Cancel Update'.localized(context)),
             ),
           ],
           const SizedBox(height: 14),
