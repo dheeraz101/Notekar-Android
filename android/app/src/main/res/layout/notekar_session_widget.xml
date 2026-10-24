@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_session_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="12dp"
+    android:background="@drawable/notekar_widget_background">
+
+    <!-- Top Label & Active Category -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="4dp">
+
+        <TextView
+            android:id="@+id/widget_session_header"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="SESSION"
+            android:textColor="#FF0A84FF"
+            android:textSize="10.5sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.12"
+            android:includeFontPadding="false" />
+
+        <TextView
+            android:id="@+id/widget_session_category"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="#80FFFFFF"
+            android:textSize="10.5sp"
+            android:textStyle="bold"
+            android:includeFontPadding="false" />
+    </LinearLayout>
+
+    <!-- Status Line (Active / Standby) -->
+    <TextView
+        android:id="@+id/widget_session_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="⚪ Standby"
+        android:textColor="#FFFFFFFF"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:includeFontPadding="false" />
+
+    <!-- Live Chronometer for Active Session -->
+    <Chronometer
+        android:id="@+id/widget_session_chronometer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textColor="#30D158"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        android:includeFontPadding="false" />
+
+    <!-- 1-Tap Toggle Action Button -->
+    <TextView
+        android:id="@+id/widget_session_toggle_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:gravity="center"
+        android:text="TAP TO START (IN)"
+        android:textColor="#FFFFFFFF"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:background="@drawable/notekar_widget_button"
+        android:includeFontPadding="false" />
+</LinearLayout>

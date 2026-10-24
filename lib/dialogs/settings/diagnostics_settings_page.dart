@@ -9,6 +9,7 @@ import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/screens/end_of_support_screen.dart';
 import 'package:notekar/services/circuit_breaker_service.dart';
+import 'package:notekar/services/device_health_manager.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -1122,6 +1123,7 @@ class _HeartbeatEcgPainter extends CustomPainter {
   final Color liveColor;
   final Color offlineColor;
   final bool isLowEnd;
+  final bool isThrottled;
 
   _HeartbeatEcgPainter({
     required this.sweepProgress,
@@ -1130,6 +1132,7 @@ class _HeartbeatEcgPainter extends CustomPainter {
     required this.liveColor,
     required this.offlineColor,
     this.isLowEnd = false,
+    this.isThrottled = false,
   });
 
   // Continuous smooth biological ECG calculation with zero jitter
@@ -1190,6 +1193,32 @@ class _HeartbeatEcgPainter extends CustomPainter {
     final activeColor = Color.lerp(offlineColor, liveColor, connectedFactor)!;
     const double sweepPeriod = 2.4;
 
+    if (isThrottled) {
+      // Adaptive Canvas Throttling: Lightweight static vector curve with instantaneous
+      // state changes and zero CPU timer ticks.
+      final staticPath = Path();
+      bool started = false;
+      for (double x = 0; x <= w; x += 3.5) {
+        final normX = x / w;
+        final t = normX * sweepPeriod;
+        final y = midY - _calculateEcg(t) * (h * 0.42);
+        if (!started) {
+          staticPath.moveTo(x, y);
+          started = true;
+        } else {
+          staticPath.lineTo(x, y);
+        }
+      }
+      final staticPaint = Paint()
+        ..color = activeColor
+        ..strokeWidth = 2.0
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round;
+      canvas.drawPath(staticPath, staticPaint);
+      return;
+    }
+
     // 2. Stable continuous background hinted waveform track across the full width
     // (no horizontal cut-through straight line, smooth continuous cardiac pattern)
     final hintPath = Path();
@@ -1223,16 +1252,20 @@ class _HeartbeatEcgPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
 
-    final glowPaint = isLowEnd
-        ? null
-        : (Paint()
+    final enableGlow =
+        !isLowEnd &&
+        !isThrottled &&
+        DeviceHealthManager.instance.enableGlowShader;
+    final glowPaint = enableGlow
+        ? (Paint()
             ..color = activeColor.withValues(
               alpha: (0.18 + 0.22 * connectedFactor).clamp(0.0, 1.0),
             )
             ..strokeWidth = 4.2
             ..style = PaintingStyle.stroke
             ..strokeCap = StrokeCap.round
-            ..strokeJoin = StrokeJoin.round);
+            ..strokeJoin = StrokeJoin.round)
+        : null;
 
     // 4. Draw active trace from 0 up to sweepX flowing seamlessly over hinted baseline
     if (sweepX > 1.0) {
@@ -1279,7 +1312,7 @@ class _HeartbeatEcgPainter extends CustomPainter {
         alpha: (0.35 + 0.45 * connectedFactor).clamp(0.0, 1.0),
       );
 
-    if (!isLowEnd) {
+    if (!isLowEnd && !isThrottled && enableGlow) {
       canvas.drawCircle(Offset(sweepX, sweepY), 6.5, outerHalo);
     }
     canvas.drawCircle(Offset(sweepX, sweepY), 3.0, dotPaint);
@@ -1297,7 +1330,8 @@ class _HeartbeatEcgPainter extends CustomPainter {
         oldDelegate.connectedFactor != connectedFactor ||
         oldDelegate.liveColor != liveColor ||
         oldDelegate.offlineColor != offlineColor ||
-        oldDelegate.isLowEnd != isLowEnd;
+        oldDelegate.isLowEnd != isLowEnd ||
+        oldDelegate.isThrottled != isThrottled;
   }
 }
 
@@ -1335,12 +1369,13 @@ class _LiveNetworkStatusCardState extends State<_LiveNetworkStatusCard>
   void initState() {
     super.initState();
     final isLowEnd = AdaptiveEngine().isLowEnd;
+    final shouldThrottle = DeviceHealthManager.instance.shouldThrottle;
     _animController = AnimationController(
       vsync: this,
       duration: isLowEnd
           ? const Duration(seconds: 8)
           : const Duration(milliseconds: 2400),
-      value: isLowEnd ? 0.6 : 0.0,
+      value: (isLowEnd || shouldThrottle) ? 1.0 : 0.0,
     );
     _animController.addListener(() {
       if (_animController.value < _lastAnimValue) {
@@ -1348,7 +1383,7 @@ class _LiveNetworkStatusCardState extends State<_LiveNetworkStatusCard>
       }
       _lastAnimValue = _animController.value;
     });
-    if (!isLowEnd) {
+    if (!isLowEnd && !shouldThrottle) {
       _animController.repeat();
     }
     _connectedAnimController = AnimationController(
@@ -1659,6 +1694,7 @@ class _LiveNetworkStatusCardState extends State<_LiveNetworkStatusCard>
                         : p.green,
                     offlineColor: p.red,
                     isLowEnd: AdaptiveEngine().isLowEnd,
+                    isThrottled: DeviceHealthManager.instance.shouldThrottle,
                   ),
                 ),
               );

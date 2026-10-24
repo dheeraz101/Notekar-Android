@@ -264,7 +264,6 @@ class CheckpointService {
     final today = dateKey(DateTime.now());
     return moments.any((m) {
       if (m.date != today) return false;
-      if (m.type == 'out') return false; // Avoid double-counting completion
       final cid = getCheckpointIdForMoment(m);
       return cid == presetId;
     });

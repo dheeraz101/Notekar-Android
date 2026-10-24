@@ -32,6 +32,7 @@ import 'package:notekar/dialogs/smart_trim_sheet.dart';
 import 'package:notekar/dialogs/time_reflection_sheet.dart';
 import 'package:notekar/dialogs/timeline_filter_sheet.dart';
 import 'package:notekar/dialogs/urge_surfing_dialog.dart';
+import 'package:notekar/dialogs/vault_password_dialog.dart';
 import 'package:notekar/main.dart';
 import 'package:notekar/models/backup_models.dart';
 import 'package:notekar/models/checkpoint.dart';
@@ -47,10 +48,12 @@ import 'package:notekar/screens/end_of_support_screen.dart';
 import 'package:notekar/screens/executive_intelligence_hub_screen.dart';
 import 'package:notekar/screens/welcome_screen.dart';
 import 'package:notekar/services/checkpoint_service.dart';
+import 'package:notekar/services/device_health_manager.dart';
 import 'package:notekar/services/digital_wellbeing_service.dart';
 import 'package:notekar/services/goals_service.dart';
 import 'package:notekar/services/project_service.dart';
 import 'package:notekar/services/user_profile_service.dart';
+import 'package:notekar/services/vault_encryption_service.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -533,6 +536,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      unawaited(DeviceHealthManager.instance.refresh());
       unawaited(DigitalWellbeingService.instance.checkPermission());
       if (_prefs != null) {
         unawaited(() async {
@@ -3580,6 +3584,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
           mimeType: 'application/json',
         ),
         onExportBackup: _exportBackupFile,
+        onExportVaultBackup: _exportVaultBackupFile,
         onImportBackup: _importBackupFile,
         onRestoreBackupFromString: _restoreBackupFromString,
         onSaveQuickBackup: _createQuickLocalBackup,

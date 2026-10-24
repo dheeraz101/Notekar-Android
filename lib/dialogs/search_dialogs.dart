@@ -9,12 +9,14 @@ import 'package:notekar/dialogs/timeline_filter_sheet.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/search_index_service.dart';
+import 'package:notekar/services/smart_search_filter.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
+import 'package:notekar/widgets/smart_search_chips_bar.dart';
 import 'package:notekar/widgets/timeline_media_attachment_card.dart';
 import 'package:notekar/widgets/timeline_voice_player_pill.dart';
 
@@ -100,6 +102,7 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
   final Set<int> _manuallyCollapsedVoiceIds = {};
   final List<Moment> _selectedMoments = [];
   late List<String> _knownTags;
+  SmartSearchFilter _smartFilter = const SmartSearchFilter();
 
   @override
   void initState() {
@@ -162,13 +165,23 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
   }
 
   List<Moment> get _matches {
+    final parsed = SmartSearchFilter.parseQuery(_query);
+    final combinedFilter = SmartSearchFilter(
+      activeFilters: {
+        ..._smartFilter.activeFilters,
+        ...parsed.filter.activeFilters,
+      },
+    );
+
     var list = SearchIndexService.instance.search(
       allMoments: widget.entries,
-      query: _query,
+      query: parsed.cleanQuery,
       mode: _filterCriteria.mode,
       category: _filterCriteria.category,
       hashtag: _filterCriteria.hashtag,
     );
+
+    list = combinedFilter.apply(moments: list);
 
     if (_filter == 'today') {
       final today = dateKey(DateTime.now());
@@ -397,8 +410,22 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
             _query = '';
             _visibleCount = _pageSize;
           }),
-          isFilterActive: _filter != 'all' || _filterCriteria.isActive,
+          isFilterActive:
+              _filter != 'all' ||
+              _filterCriteria.isActive ||
+              _smartFilter.isNotEmpty,
           onTapFilter: _openFilterSheet,
+        ),
+        const SizedBox(height: 8),
+        SmartSearchChipsBar(
+          p: widget.p,
+          filter: _smartFilter,
+          onToggleFilter: (type) {
+            setState(() {
+              _smartFilter = _smartFilter.toggle(type);
+              _visibleCount = _pageSize;
+            });
+          },
         ),
         if (_selectedMoments.isNotEmpty)
           Padding(

@@ -181,6 +181,40 @@ extension _HomeBackupLifecycleExtension on _NoteKarHomeState {
     await _prefs?.setInt('m-last-backup-at', now);
   }
 
+  Future<void> _exportVaultBackupFile() async {
+    final password = await VaultPasswordDialog.show(
+      context: context,
+      p: _p,
+      isExport: true,
+    );
+    if (password == null || password.isEmpty) return;
+
+    final content = _backupExport();
+    await _saveLocalBackup(content);
+
+    try {
+      final encryptedVault = VaultEncryptionService.instance.encryptVault(
+        plaintext: content,
+        password: password,
+      );
+
+      final ok = await _exportFile(
+        fileName: 'notekar-vault-${exportDateStamp()}.notekar-vault',
+        content: encryptedVault,
+        mimeType: 'text/plain',
+      );
+
+      if (!ok) return;
+
+      final now = DateTime.now().millisecondsSinceEpoch;
+      update(() => _lastBackupAt = now);
+      await _prefs?.setInt('m-last-backup-at', now);
+      if (mounted) _showToast('Encrypted vault exported successfully');
+    } catch (e) {
+      if (mounted) _showToast('Encryption failed: $e', warning: true);
+    }
+  }
+
   Future<void> _importBackupFile() async {
     String? content;
 
@@ -204,6 +238,31 @@ extension _HomeBackupLifecycleExtension on _NoteKarHomeState {
 
   Future<bool> _restoreBackupFromString(String content) async {
     try {
+      if (VaultEncryptionService.instance.isVaultContent(content)) {
+        final password = await VaultPasswordDialog.show(
+          context: context,
+          p: _p,
+          isExport: false,
+        );
+        if (password == null || password.isEmpty) {
+          _showToast('Vault decryption cancelled', warning: true);
+          return false;
+        }
+        try {
+          content = VaultEncryptionService.instance.decryptVault(
+            vaultContent: content,
+            password: password,
+          );
+          _showToast('Vault decrypted successfully');
+        } catch (_) {
+          _showToast(
+            'Decryption failed: Incorrect password or corrupted vault',
+            warning: true,
+          );
+          return false;
+        }
+      }
+
       final importTask = developer.TimelineTask()
         ..start('notekar.backup_import');
       var validation = developer.Timeline.timeSync(

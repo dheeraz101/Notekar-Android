@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
@@ -109,10 +110,19 @@ class AppIconsSettingsPage extends StatefulWidget {
 class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
   late ScrollController _scrollController;
   final double _dockItemWidth = 58.0;
+  int? _lastDockFocalIndex;
 
   @override
   void initState() {
     super.initState();
+    final availableIcons = widget.godModeUnlocked
+        ? [...kAppIconOptions, kGodModeIconOption]
+        : kAppIconOptions;
+    final initialIndex = availableIcons.indexWhere(
+      (icon) => icon.key == widget.appIconStyle,
+    );
+    _lastDockFocalIndex = initialIndex != -1 ? initialIndex : 0;
+
     _scrollController = ScrollController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToSelectedIcon(animate: false);
@@ -556,109 +566,126 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
                         ),
                       ],
                     ),
-                    child: SingleChildScrollView(
-                      controller: _scrollController,
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      child: Row(
-                        children: [
-                          for (
-                            int index = 0;
-                            index < availableIcons.length;
-                            index++
-                          ) ...[
-                            if (index > 0) const SizedBox(width: 10),
-                            () {
-                              final item = availableIcons[index];
-                              final isSelected =
-                                  item.key == widget.appIconStyle;
-                              return GestureDetector(
-                                key: ValueKey('app_icon_${item.key}'),
-                                behavior: HitTestBehavior.opaque,
-                                onTap: () {
-                                  NotekarHaptics.selection('standard');
-                                  widget.onAppIconStyleChanged(item.key);
-                                  _scrollToSelectedIcon();
-                                },
-                                child: Container(
-                                  width: 48,
-                                  height: 48,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(13),
-                                    border: isSelected
-                                        ? Border.all(
-                                            color:
-                                                (widget.godModeUnlocked &&
-                                                    (item.key == 'gold' ||
-                                                        item.key == 'godmode'))
-                                                ? const Color(0xFFFFD700)
-                                                : Colors.white,
-                                            width: 2.2,
-                                          )
-                                        : null,
-                                    boxShadow: isSelected
-                                        ? [
-                                            BoxShadow(
-                                              color: item.themeColor.withValues(
-                                                alpha: 0.5,
-                                              ),
-                                              blurRadius: 10,
-                                              spreadRadius: 1,
-                                            ),
-                                          ]
-                                        : null,
-                                  ),
-                                  child: Stack(
-                                    children: [
-                                      Positioned.fill(
-                                        child: Opacity(
-                                          opacity: isSelected ? 1.0 : 0.65,
-                                          child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(
-                                              isSelected ? 11 : 13,
-                                            ),
-                                            child: Image.asset(
-                                              item.asset,
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      if (isSelected)
-                                        Positioned(
-                                          bottom: 2,
-                                          right: 2,
-                                          child: Container(
-                                            width: 12,
-                                            height: 12,
-                                            decoration: BoxDecoration(
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (notification) {
+                        if (notification is ScrollUpdateNotification &&
+                            _scrollController.hasClients) {
+                          final currentScroll = _scrollController.offset;
+                          final nearestIndex = (currentScroll / _dockItemWidth)
+                              .round()
+                              .clamp(0, availableIcons.length - 1);
+                          if (nearestIndex != _lastDockFocalIndex) {
+                            _lastDockFocalIndex = nearestIndex;
+                            HapticFeedback.selectionClick();
+                          }
+                        }
+                        return false;
+                      },
+                      child: SingleChildScrollView(
+                        controller: _scrollController,
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        child: Row(
+                          children: [
+                            for (
+                              int index = 0;
+                              index < availableIcons.length;
+                              index++
+                            ) ...[
+                              if (index > 0) const SizedBox(width: 10),
+                              () {
+                                final item = availableIcons[index];
+                                final isSelected =
+                                    item.key == widget.appIconStyle;
+                                return GestureDetector(
+                                  key: ValueKey('app_icon_${item.key}'),
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    NotekarHaptics.selection('standard');
+                                    widget.onAppIconStyleChanged(item.key);
+                                    _scrollToSelectedIcon();
+                                  },
+                                  child: Container(
+                                    width: 48,
+                                    height: 48,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(13),
+                                      border: isSelected
+                                          ? Border.all(
                                               color:
                                                   (widget.godModeUnlocked &&
                                                       (item.key == 'gold' ||
                                                           item.key ==
                                                               'godmode'))
                                                   ? const Color(0xFFFFD700)
-                                                  : p.accent,
-                                              shape: BoxShape.circle,
-                                              border: Border.all(
-                                                color: Colors.white,
-                                                width: 1.0,
+                                                  : Colors.white,
+                                              width: 2.2,
+                                            )
+                                          : null,
+                                      boxShadow: isSelected
+                                          ? [
+                                              BoxShadow(
+                                                color: item.themeColor
+                                                    .withValues(alpha: 0.5),
+                                                blurRadius: 10,
+                                                spreadRadius: 1,
                                               ),
-                                            ),
-                                            child: const Icon(
-                                              Icons.check,
-                                              size: 8,
-                                              color: Colors.white,
+                                            ]
+                                          : null,
+                                    ),
+                                    child: Stack(
+                                      children: [
+                                        Positioned.fill(
+                                          child: Opacity(
+                                            opacity: isSelected ? 1.0 : 0.65,
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                    isSelected ? 11 : 13,
+                                                  ),
+                                              child: Image.asset(
+                                                item.asset,
+                                                fit: BoxFit.cover,
+                                              ),
                                             ),
                                           ),
                                         ),
-                                    ],
+                                        if (isSelected)
+                                          Positioned(
+                                            bottom: 2,
+                                            right: 2,
+                                            child: Container(
+                                              width: 12,
+                                              height: 12,
+                                              decoration: BoxDecoration(
+                                                color:
+                                                    (widget.godModeUnlocked &&
+                                                        (item.key == 'gold' ||
+                                                            item.key ==
+                                                                'godmode'))
+                                                    ? const Color(0xFFFFD700)
+                                                    : p.accent,
+                                                shape: BoxShape.circle,
+                                                border: Border.all(
+                                                  color: Colors.white,
+                                                  width: 1.0,
+                                                ),
+                                              ),
+                                              child: const Icon(
+                                                Icons.check,
+                                                size: 8,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              );
-                            }(),
+                                );
+                              }(),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
                     ),
                   ),

@@ -213,8 +213,39 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
                 .putInt("flutter.pending_count", currentPendingCount + 1)
                 .commit()
 
-            // Do NOT mutate local preferences anymore to avoid state de-syncs.
-            // Flutter will process the queue and update the widgets via MethodChannel.
+            // Update widget preferences instantly so home screen widget state & chronometer reflect immediately
+            val widgetPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val todayCount = widgetPrefs.getInt(KEY_TODAY_COUNT, 0)
+            val mode = widgetPrefs.getString(KEY_MODE, "two-way") ?: "two-way"
+            val currentNextAction = widgetPrefs.getString(KEY_NEXT_ACTION, "in") ?: "in"
+            val newNextAction = if (mode == "two-way") {
+                if (type == "in") "out"
+                else if (type == "out") "in"
+                else currentNextAction
+            } else {
+                "single"
+            }
+
+            val editor = widgetPrefs.edit()
+                .putInt(KEY_TODAY_COUNT, todayCount + 1)
+                .putString(KEY_NEXT_ACTION, newNextAction)
+                .putLong(KEY_LAST_TIMESTAMP, now)
+                .putBoolean(KEY_HAS_MOMENTS, true)
+                .putString(KEY_LAST_TYPE, type)
+
+            if (type == "in" || type == "out") {
+                editor.putBoolean(KEY_IS_PAUSED, false)
+                    .putLong(KEY_PAUSED_AT, 0L)
+            }
+            editor.apply()
+
+            // Update all widgets visually and instantly
+            updateAllWidgets(context)
+
+            // Update persistent control panel notification
+            MainActivity.updatePersistentControlPanel(context)
+
+            // Notify running foreground activity
             MainActivity.notifyBackgroundLogRecorded()
             Toast.makeText(context, "⚡ Logged to NoteKar", Toast.LENGTH_SHORT).show()
         }
@@ -608,6 +639,16 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
             val instantCameraIds = manager.getAppWidgetIds(instantCameraComponent)
             for (id in instantCameraIds) {
                 InstantCameraWidgetProvider.updateWidget(context, manager, id)
+            }
+
+            // 6. Update Fast Session Widgets
+            val sessionComponent = ComponentName(
+                context,
+                SessionWidgetProvider::class.java
+            )
+            val sessionIds = manager.getAppWidgetIds(sessionComponent)
+            for (id in sessionIds) {
+                SessionWidgetProvider.updateWidget(context, manager, id)
             }
 
             // 4. Also refresh persistent control panel if enabled

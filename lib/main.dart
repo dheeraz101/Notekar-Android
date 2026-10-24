@@ -13,6 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'services/circuit_breaker_service.dart';
+import 'services/device_health_manager.dart';
 import 'utils/settings_controller.dart';
 import 'utils/settings_provider.dart';
 
@@ -104,6 +105,7 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   CircuitBreakerService.instance.init(prefs);
   unawaited(AdaptiveEngine().initialize(prefs: prefs));
+  unawaited(DeviceHealthManager.instance.initialize());
   unawaited(
     MomentRepository()
         .ensureInitialized(preloadedPrefs: prefs)

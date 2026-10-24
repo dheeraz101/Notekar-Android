@@ -29,6 +29,22 @@ class ReminderReceiver : BroadcastReceiver() {
 
         if (action == ACTION_DAILY_MAINTENANCE) {
             scheduleDailyMaintenance(context)
+            val powerManager = context.getSystemService(Context.POWER_SERVICE) as? android.os.PowerManager
+            val batteryStatus = context.registerReceiver(null, android.content.IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+            val plugged = batteryStatus?.getIntExtra(android.os.BatteryManager.EXTRA_PLUGGED, 0) ?: 0
+            val isCharging = plugged != 0
+            val isInteractive = powerManager?.isInteractive ?: true
+            val isDeviceIdle = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                powerManager?.isDeviceIdleMode ?: false
+            } else {
+                false
+            }
+
+            // Midnight Maintenance Doze Harmony: If device is in deep Doze on nightstand, avoid heavy wakeups
+            if (isDeviceIdle && !isCharging && !isInteractive) {
+                return
+            }
+
             try {
                 UnlockReceiver.updateUnlockReceiver(context)
             } catch (_: Exception) {}
@@ -220,21 +236,14 @@ class ReminderReceiver : BroadcastReceiver() {
             }
 
             try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    // Maintenance is not user-time-critical. Avoid consuming
-                    // exact-alarm access for this housekeeping task.
-                    alarmManager.setAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        calendar.timeInMillis,
-                        pendingIntent
-                    )
-                } else {
-                    alarmManager.setExact(
-                        AlarmManager.RTC_WAKEUP,
-                        calendar.timeInMillis,
-                        pendingIntent
-                    )
-                }
+                // Midnight Maintenance Doze Harmony: Use non-wakeup AlarmManager.RTC.
+                // Ensures 0 wakeups when on the nightstand; triggers during natural
+                // maintenance windows or upon device interaction.
+                alarmManager.set(
+                    AlarmManager.RTC,
+                    calendar.timeInMillis,
+                    pendingIntent
+                )
             } catch (_: Exception) {}
         }
 

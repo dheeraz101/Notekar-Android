@@ -30,4 +30,6 @@
     <string name="widget_sobriety_minimal_description">Apple-inspired live counter showing days, hours, and seconds clean.</string>
     <string name="widget_instant_camera_title">NoteKar Instant Camera</string>
     <string name="widget_instant_camera_description">Log photo moments instantly with a single tap and view recent photo preview.</string>
+    <string name="widget_session_title">NoteKar Fast Session</string>
+    <string name="widget_session_description">1-Tap interactive session toggle for fast In/Out tracking.</string>
 </resources>

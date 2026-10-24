@@ -10,6 +10,7 @@ import android.content.ComponentName
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.media.AudioAttributes
 import android.media.MediaPlayer
@@ -17,6 +18,7 @@ import android.media.MediaRecorder
 import android.media.RingtoneManager
 import android.media.SoundPool
 import android.net.Uri
+import android.os.BatteryManager
 import android.os.Build
 import android.os.Environment
 import android.os.PowerManager
@@ -628,6 +630,28 @@ class MainActivity : FlutterActivity() {
                 "isIgnoringBatteryOptimizations" -> {
                     val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
                     result.success(pm.isIgnoringBatteryOptimizations(packageName))
+                }
+
+                "isPowerSaveMode" -> {
+                    val pm = getSystemService(Context.POWER_SERVICE) as? PowerManager
+                    result.success(pm?.isPowerSaveMode ?: false)
+                }
+
+                "getBatteryLevel" -> {
+                    val batteryIntent = registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+                    val level = batteryIntent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
+                    val scale = batteryIntent?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: -1
+                    if (level >= 0 && scale > 0) {
+                        result.success((level * 100) / scale)
+                    } else {
+                        result.success(100)
+                    }
+                }
+
+                "isPluggedIn" -> {
+                    val batteryIntent = registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+                    val plugged = batteryIntent?.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) ?: 0
+                    result.success(plugged != 0)
                 }
 
                 "requestIgnoreBatteryOptimizations" -> {
@@ -1846,24 +1870,30 @@ class MainActivity : FlutterActivity() {
                 .setOnlyAlertOnce(true)
                 .setSilent(true)
                 .setSound(null)
-                .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
-                .setPublicVersion(
-                    NotificationCompat.Builder(context, PERSISTENT_CHANNEL_ID)
-                        .setSmallIcon(R.drawable.ic_stat_notekar)
-                        .setContentTitle("NoteKar")
-                        .setContentText("Tap to open NoteKar")
-                        .setPriority(NotificationCompat.PRIORITY_LOW)
-                        .build()
-                )
+            val publicBuilder = NotificationCompat.Builder(context, PERSISTENT_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_stat_notekar)
+                .setContentTitle(title)
+                .setContentText(contentText)
+                .setContentIntent(mainPending)
+                .setOngoing(true)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
 
             if (isCurrentlyIn && !isPaused && lastTimestamp > 0L) {
                 builder.setUsesChronometer(true)
                 builder.setWhen(lastTimestamp)
                 builder.setShowWhen(true)
+                publicBuilder.setUsesChronometer(true)
+                publicBuilder.setWhen(lastTimestamp)
+                publicBuilder.setShowWhen(true)
             } else {
                 builder.setUsesChronometer(false)
                 builder.setShowWhen(false)
+                publicBuilder.setUsesChronometer(false)
+                publicBuilder.setShowWhen(false)
             }
+
+            builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            builder.setPublicVersion(publicBuilder.build())
 
             val toggleIntent = Intent(context, NotificationActionReceiver::class.java).apply {
                 action = NotificationActionReceiver.ACTION_TOGGLE_MODE

@@ -26,6 +26,7 @@ class DataBackupSettingsPage extends StatelessWidget {
     this.onExportMarkdown,
     this.onExportCalendar,
     required this.onExportBackup,
+    this.onExportVaultBackup,
     required this.onImportBackup,
     required this.onRestoreBackupFromString,
     required this.onSaveQuickBackup,
@@ -46,6 +47,7 @@ class DataBackupSettingsPage extends StatelessWidget {
   final VoidCallback? onExportMarkdown;
   final VoidCallback? onExportCalendar;
   final VoidCallback onExportBackup;
+  final VoidCallback? onExportVaultBackup;
   final VoidCallback onImportBackup;
   final Future<bool> Function(String content) onRestoreBackupFromString;
   final VoidCallback onSaveQuickBackup;
@@ -239,6 +241,18 @@ class DataBackupSettingsPage extends StatelessWidget {
           title: 'Database Backups',
           insetDividers: true,
           children: [
+            if (onExportVaultBackup != null)
+              SettingsRow(
+                p: p,
+                icon: CupertinoIcons.lock_shield,
+                title: 'Export Encrypted Vault (.notekar-vault)'.localized(
+                  context,
+                ),
+                status: 'Encrypted'.localized(context),
+                color: p.green,
+                rowKind: 'link',
+                onTap: onExportVaultBackup!,
+              ),
             SettingsRow(
               p: p,
               icon: CupertinoIcons.archivebox,

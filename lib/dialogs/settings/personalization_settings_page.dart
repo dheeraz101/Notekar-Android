@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/services/device_health_manager.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
@@ -246,6 +247,7 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
   late String _currentColorKey;
   Color _currentColor = const Color(0xFF007AFF);
   bool _isPouring = false;
+  int? _lastFocalHapticIndex;
 
   final double _itemWidth = 78.0;
 
@@ -254,17 +256,22 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
     super.initState();
     _currentColorKey = widget.accentColor.isEmpty ? 'blue' : widget.accentColor;
     _currentColor = _findColor(_currentColorKey);
+    final initialIndex = kAccentColorPalette.indexWhere(
+      (c) => c.key == _currentColorKey,
+    );
+    _lastFocalHapticIndex = initialIndex != -1 ? initialIndex : 0;
 
     _scrollController = ScrollController();
     final isLowEnd = AdaptiveEngine().isLowEnd;
+    final shouldThrottle = DeviceHealthManager.instance.shouldThrottle;
     _waveController = AnimationController(
       vsync: this,
       duration: isLowEnd
           ? const Duration(seconds: 10)
           : const Duration(milliseconds: 2200),
-      value: isLowEnd ? 0.5 : 0.0,
+      value: (isLowEnd || shouldThrottle) ? 0.5 : 0.0,
     );
-    if (!isLowEnd) {
+    if (!isLowEnd && !shouldThrottle) {
       _waveController.repeat();
     }
 
@@ -389,6 +396,7 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
                   drainLevel: _drainController.value,
                   isPouring: _isPouring,
                   isLowEnd: AdaptiveEngine().isLowEnd,
+                  isThrottled: DeviceHealthManager.instance.shouldThrottle,
                 ),
               );
             },
@@ -545,6 +553,17 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
                       // Horizontal List with Degraded Outward Sizing & Fluid Spring Snap
                       NotificationListener<ScrollNotification>(
                         onNotification: (notification) {
+                          if (notification is ScrollUpdateNotification &&
+                              _scrollController.hasClients) {
+                            final currentScroll = _scrollController.offset;
+                            final nearestIndex = (currentScroll / _itemWidth)
+                                .round()
+                                .clamp(0, kAccentColorPalette.length - 1);
+                            if (nearestIndex != _lastFocalHapticIndex) {
+                              _lastFocalHapticIndex = nearestIndex;
+                              HapticFeedback.selectionClick();
+                            }
+                          }
                           if (notification is ScrollEndNotification &&
                               _scrollController.hasClients) {
                             final currentScroll = _scrollController.offset;
@@ -689,6 +708,7 @@ class _FullPageFluidBucketPainter extends CustomPainter {
   final double drainLevel;
   final bool isPouring;
   final bool isLowEnd;
+  final bool isThrottled;
 
   _FullPageFluidBucketPainter({
     required this.fillLevel,
@@ -697,6 +717,7 @@ class _FullPageFluidBucketPainter extends CustomPainter {
     required this.drainLevel,
     required this.isPouring,
     this.isLowEnd = false,
+    this.isThrottled = false,
   });
 
   @override
@@ -729,7 +750,7 @@ class _FullPageFluidBucketPainter extends CustomPainter {
       fluidPath.moveTo(0, h);
       fluidPath.lineTo(0, surfaceY);
 
-      if (isLowEnd) {
+      if (isLowEnd || isThrottled) {
         fluidPath.lineTo(w, surfaceY);
       } else {
         final waveAmp =
@@ -758,6 +779,17 @@ class _FullPageFluidBucketPainter extends CustomPainter {
         ).createShader(Rect.fromLTWH(0, surfaceY, w, h - surfaceY));
       canvas.drawPath(fluidPath, fluidPaint);
 
+      // Subtle glow shader on top of fluid meniscus for Flagship / High-performance tier
+      if (!isLowEnd &&
+          !isThrottled &&
+          DeviceHealthManager.instance.enableGlowShader) {
+        final glowShaderPaint = Paint()
+          ..color = fluidColor.withValues(alpha: 0.35)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 4.0;
+        canvas.drawPath(fluidPath, glowShaderPaint);
+      }
+
       // Meniscus crest highlight line
       final crestPaint = Paint()
         ..color = Colors.white.withValues(alpha: 0.35)
@@ -765,7 +797,7 @@ class _FullPageFluidBucketPainter extends CustomPainter {
         ..strokeWidth = 1.8;
       final crestPath = Path();
       crestPath.moveTo(0, surfaceY);
-      if (isLowEnd) {
+      if (isLowEnd || isThrottled) {
         crestPath.lineTo(w, surfaceY);
       } else {
         final waveAmp =
@@ -818,6 +850,7 @@ class _FullPageFluidBucketPainter extends CustomPainter {
         oldDelegate.fluidColor != fluidColor ||
         oldDelegate.drainLevel != drainLevel ||
         oldDelegate.isPouring != isPouring ||
-        oldDelegate.isLowEnd != isLowEnd;
+        oldDelegate.isLowEnd != isLowEnd ||
+        oldDelegate.isThrottled != isThrottled;
   }
 }

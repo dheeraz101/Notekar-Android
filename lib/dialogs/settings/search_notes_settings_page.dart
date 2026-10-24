@@ -8,6 +8,7 @@ import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/search_index_service.dart';
+import 'package:notekar/services/smart_search_filter.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
@@ -15,6 +16,7 @@ import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
+import 'package:notekar/widgets/smart_search_chips_bar.dart';
 import 'package:notekar/widgets/timeline_media_attachment_card.dart';
 import 'package:notekar/widgets/timeline_voice_player_pill.dart';
 
@@ -36,13 +38,22 @@ class SearchNotesSettingsPage {
     required VoidCallback onClearRecentSearches,
     TimelineFilterCriteria filterCriteria = const TimelineFilterCriteria(),
     ValueChanged<TimelineFilterCriteria>? onFilterCriteriaChanged,
+    SmartSearchFilter smartFilter = const SmartSearchFilter(),
+    ValueChanged<SmartFilterType>? onToggleSmartFilter,
     List<Moment> selectedMoments = const [],
     ValueChanged<Moment>? onToggleSelectMoment,
     VoidCallback? onClearSelection,
     bool rainbowCards = false,
     ValueChanged<Moment>? onEditNote,
   }) {
-    final q = settingsQuery.trim().toLowerCase();
+    final parsed = SmartSearchFilter.parseQuery(settingsQuery);
+    final combinedSmartFilter = SmartSearchFilter(
+      activeFilters: {
+        ...smartFilter.activeFilters,
+        ...parsed.filter.activeFilters,
+      },
+    );
+    final q = parsed.cleanQuery.toLowerCase();
     final allTags = SearchIndexService.instance
         .getAllKnownTags()
         .where((tag) => !tag.toLowerCase().contains('godmode'))
@@ -61,7 +72,7 @@ class SearchNotesSettingsPage {
       }
     }
 
-    final notes = SearchIndexService.instance
+    var notes = SearchIndexService.instance
         .search(
           allMoments: entries,
           query: q,
@@ -79,6 +90,11 @@ class SearchNotesSettingsPage {
               !e.note.contains('#godmode'),
         )
         .toList();
+
+    notes = combinedSmartFilter.apply(
+      moments: notes,
+      sessionLookup: sessionLookup,
+    );
 
     return [
       SliverPersistentHeader(
@@ -119,6 +135,33 @@ class SearchNotesSettingsPage {
                 }
               },
             ),
+          ),
+        ),
+      ),
+
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 4, bottom: 10),
+          child: SmartSearchChipsBar(
+            p: p,
+            filter: combinedSmartFilter,
+            onToggleFilter: (type) {
+              if (onToggleSmartFilter != null) {
+                onToggleSmartFilter(type);
+              } else {
+                final def = kSmartSearchChips.firstWhere((c) => c.type == type);
+                if (combinedSmartFilter.isFilterActive(type)) {
+                  onQueryChanged(
+                    settingsQuery.replaceAll(def.queryRule, '').trim(),
+                  );
+                } else {
+                  final newQ = settingsQuery.isEmpty
+                      ? def.queryRule
+                      : '$settingsQuery ${def.queryRule}';
+                  onQueryChanged(newQ);
+                }
+              }
+            },
           ),
         ),
       ),
