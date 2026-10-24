@@ -301,13 +301,13 @@ jobs:
             echo "⚠️ VIRUSTOTAL_API_KEY secret is not configured — skipping upload"
           fi
 
-          # Determine the channel and type based on the branch name
-          if [ "${{ github.ref_name }}" = "beta" ]; then
-            CHANNEL="beta"
-            UPDATE_TYPE="Beta Update"
-          elif [ "${{ github.ref_name }}" = "experiment" ]; then
+          # Determine the channel and type based on the branch name or version conventions
+          if [[ "${{ github.ref_name }}" == "experiment" ]] || [[ "$VER" =~ [Ee][0-9]+ ]] || [[ "$APP_BUILD" =~ [Ee][Rr] ]]; then
             CHANNEL="experiment"
             UPDATE_TYPE="Experimental Release"
+          elif [ "${{ github.ref_name }}" = "beta" ] || [[ "$VER" =~ [Bb][Ee][Tt][Aa] ]] || [[ "$APP_BUILD" =~ [Bb][Rr] ]]; then
+            CHANNEL="beta"
+            UPDATE_TYPE="Beta Update"
           elif [ "${{ github.ref_name }}" = "priority" ] || [ "${{ github.ref_name }}" = "security" ]; then
             CHANNEL="priority"
             UPDATE_TYPE="Priority Release"
@@ -374,9 +374,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.tag }}
-          name: ${{ (github.ref_name == 'priority' || github.ref_name == 'security') && format('Notekar {0} (Priority Release)', steps.version.outputs.tag) || (github.ref_name == 'beta' && format('Notekar {0} (Beta)', steps.version.outputs.tag) || (github.ref_name == 'experiment' && format('Notekar {0} (Experimental Release)', steps.version.outputs.tag) || format('Notekar {0}', steps.version.outputs.tag))) }}
-          make_latest: ${{ github.ref_name == 'release' || github.ref_name == 'priority' || github.ref_name == 'security' }}
-          prerelease: ${{ github.ref_name == 'beta' || github.ref_name == 'experiment' }}
+          name: ${{ (github.ref_name == 'priority' || github.ref_name == 'security') && format('Notekar {0} (Priority Release)', steps.version.outputs.tag) || (github.ref_name == 'beta' && format('Notekar {0} (Beta)', steps.version.outputs.tag) || ((github.ref_name == 'experiment' || contains(steps.version.outputs.version, 'E')) && format('Notekar {0} (Experimental Release)', steps.version.outputs.tag) || format('Notekar {0}', steps.version.outputs.tag))) }}
+          make_latest: ${{ (github.ref_name == 'release' || github.ref_name == 'priority' || github.ref_name == 'security' || github.ref_name == 'main') && !contains(steps.version.outputs.version, 'E') && !contains(steps.version.outputs.version, 'beta') }}
+          prerelease: ${{ github.ref_name == 'beta' || github.ref_name == 'experiment' || contains(steps.version.outputs.version, 'E') || contains(steps.version.outputs.version, 'beta') }}
           body_path: /tmp/release_notes.md
           files: |
             build/app/outputs/flutter-apk/notekar-*.apk

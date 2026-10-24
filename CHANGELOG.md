@@ -6,6 +6,31 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [7.5.10E1] - 2026-10-24 (versionCode 26ER1024) [ER]
+
+> *Experimental Architecture, Hospital-Grade ECG Oscilloscope, Apple HIG Optical Previews & Performance Governor.*
+
+### What's New
+- **Hospital-Grade ECG Oscilloscope**: Real-time organic heartbeat pulse waveform in Network Monitor that transitions smoothly and flatlines upon disconnection.
+- **Apple HIG Miniature Previews & Optical Carousels**: Interactive miniature live cards in Display Settings and touch-centered optical selection carousels for Accent Colors and App Icons with distance-based scaling and peripheral luminance dimming.
+- **Universal Title Tap-to-Scroll**: Tap any page, modal, or sheet title anywhere across NoteKar to smoothly glide back to the top with tactile feedback.
+- **External Link HTTPS Verification**: Intelligent departure confirmation modal validating HTTPS security certificates and warning on insecure HTTP links.
+- **Low-End Adaptive Performance Governor**: Real-time hardware telemetry automatically disables complex canvas waveforms and optical transforms on lower-tier devices.
+- **Habit Routine Checkpoints & Session Handover**: Bundle multi-phase daily habits into unified Two-Way chronometer sessions with milestone checkpoint sheets and swipeable note previews.
+
+### Improvements & Polish
+- **Network Monitor Ergonomics**: Redesigned stable pill, icon placement, and status copy for improved glanceability.
+- **Display Preview Fidelity**: Real-time rendering of typography, contrast, and blur effects inside a miniature live card.
+- **Device Health Simplification**: Consolidated device health metrics into a single readable sheet with Apple-style data privacy reassurance.
+- **Factory Reset Transparency**: Apple HIG data-sovereignty disclosure affirming zero telemetry collection and irrecoverable deletion.
+
+### Bug Fixes
+- Fixed optical carousel center snapping and distance scaling calculations.
+- Fixed waveform animation loop consistency and reset state on reconnect.
+- Resolved app icon test keys, accessibility overflows, and scroll interactions.
+
+---
+
 ## [7.5.10] - 2026-10-14 (versionCode 26BR1014) [BR]
 
 > *Telegram Writing Suite, Headless Silent Share Intake, Sobriety Evolution & Apple HIG Precision.*

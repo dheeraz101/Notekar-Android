@@ -8,6 +8,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ChangelogDialog extends StatefulWidget {
   const ChangelogDialog({
@@ -27,70 +28,70 @@ class ChangelogDialog extends StatefulWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.5.10',
-    date: 'October 14, 2026',
-    edition: 'Telegram Writing Suite, Silent Intake & Sobriety Evolution',
-    badgeColor: Color(0xFF007AFF),
+    version: '7.5.10E1',
+    date: 'October 24, 2026',
+    edition: 'Experimental Architecture & Sensory Refinements',
+    badgeColor: Color(0xFFFF3B30),
     highlights: [
       (
-        title: 'Telegram-Style Writing Suite',
+        title: 'Hospital-Grade ECG Oscilloscope',
         desc:
-            'Keyboard-docked formatting toolbar with selection-aware markdown tokens, single-tap tactile Undo/Redo, word count telemetry, and smart inline hashtag autocomplete.',
-        icon: Icons.edit_note_rounded,
-        tag: 'Composer',
+            'Dynamic medical pulse waveform animation monitoring live network connectivity with smooth organic frequency and flatline disconnect.',
+        icon: Icons.monitor_heart_rounded,
+        tag: 'Network',
       ),
       (
-        title: 'Headless Silent Share Intake',
+        title: 'Apple HIG Live Previews & Optical Carousels',
         desc:
-            'Share images, text, and web links directly to NoteKar in the background with immediate timestamp logging—without launching or interrupting the active app window.',
-        icon: Icons.share_rounded,
-        tag: 'Share',
-      ),
-      (
-        title: 'Sobriety Companion Overhaul',
-        desc:
-            'Redesigned glass capsule streak pill with flame emblem, 1-tap settings routing, reliable instant relapse resets, and 365-day offline sovereignty safeguard.',
-        icon: Icons.local_fire_department_rounded,
-        tag: 'Sobriety',
-      ),
-      (
-        title: 'Formatted Markdown Note Previews',
-        desc:
-            'Note previews render clean typography, headings, dividers, checklists, bullets, and monospace code while stripping raw tokens like *** and guarding links.',
-        icon: Icons.article_rounded,
-        tag: 'Notes',
-      ),
-      (
-        title: 'Unified Targets & Goals Engine',
-        desc:
-            'Integrated Griply project initiatives and milestones into a unified Targets & Goals ecosystem with daily pacing, reflections, and auto-scrolling field validation.',
-        icon: Icons.flag_circle_rounded,
-        tag: 'Goals',
-      ),
-      (
-        title: 'Sensory Feedback & Apple HIG Polish',
-        desc:
-            'Single crisp acoustic click on live session undo, persistent live undo pill, black & white official bulletins, and dedicated full-screen daily wrap-up page.',
-        icon: Icons.touch_app_rounded,
+            'Live miniature interface cards for display settings and touch-centered optical selection carousels for app icons and accent colors.',
+        icon: Icons.auto_awesome_rounded,
         tag: 'Design',
+      ),
+      (
+        title: 'Universal Title Tap-to-Scroll',
+        desc:
+            'Tap any page, modal, or sheet title anywhere across NoteKar to smoothly glide directly back to the top of the content.',
+        icon: Icons.arrow_upward_rounded,
+        tag: 'Navigation',
+      ),
+      (
+        title: 'External Link HTTPS Verification',
+        desc:
+            'Enhanced departure alert sheets inspecting connection protocols, validating secure destinations, and alerting on unencrypted HTTP links.',
+        icon: Icons.security_rounded,
+        tag: 'Security',
+      ),
+      (
+        title: 'Low-End Adaptive Performance Governor',
+        desc:
+            'Automatically throttles real-time waveform animations and optical physics on lower-tier hardware for fluid battery-friendly speed.',
+        icon: Icons.speed_rounded,
+        tag: 'Performance',
+      ),
+      (
+        title: 'Habit Routine Checkpoints & Session Handover',
+        desc:
+            'Seamlessly bundle multi-phase habits into unified Two-Way session records with milestone checkpoint sheets.',
+        icon: Icons.checklist_rounded,
+        tag: 'Habits',
       ),
     ],
     items: [
-      'Telegram Writing Suite, Headless Silent Share Intake, Sobriety Evolution, and Apple HIG Sensory Craft.',
-      '+ Telegram Writing Suite: Keyboard-docked formatting toolbar (bold, italic, code, strike, quotes, checklists, bullets) with Undo/Redo',
-      '+ Live Writing Telemetry: Real-time word count, character count, and reading time estimates (<1 min, 2 min read) as you type',
-      '+ Headless Share Intake: Background ShareReceiverActivity ingests text, URLs, and photos silently with instant timestamp capture',
-      '+ Sandboxed Media: Shared photos persisted directly to sandboxed internal storage with automatic timeline linking',
-      '+ Sobriety Companion: Redesigned Apple HIG glass pill, instant #relapse reset engine, and home widget reset action',
-      '+ End of Support Safeguard: 365-day offline sovereignty reassurance card and hidden 7-tap Developer Quest easter egg',
-      '+ Formatted Note Previews: Clean markdown rendering without raw syntax tokens (***, **, *, ~~), preserving paragraph linebreaks',
-      '+ Departure Security Alerts: Native Apple HIG confirmation sheet guards all external web links before opening browser',
-      '+ Targets & Goals Unification: Merged project initiatives with milestone progress, timeframe pills, and session attribution',
-      '+ Acoustic Feedback: Eliminated duplicate click sounds on live session undo with tactile haptic pulse',
-      '+ Persistent Session Undo: Undo button remains accessible throughout active 2-way sessions until finalized',
-      '+ Official Bulletins: High-contrast Apple monochrome black & white theme on bulletin badges and action buttons',
-      '+ Dedicated Daily Wrap-up: Converted wrap-up into a dedicated full-screen page with day-sealing persistence',
-      '+ History Sheet Clean-up: Removed redundant Today\'s Insights card for a streamlined chronological timeline',
+      'Experimental Architecture, Hospital-Grade Oscilloscope, Apple HIG Optical Previews, and Performance Tuning.',
+      '+ Hospital-Grade ECG Oscilloscope: Real-time organic heartbeat pulse waveform in Network Monitor that transitions smoothly and flatlines upon disconnection',
+      '+ Apple HIG Display Preview: Interactive miniature live card previewing blur, typography, and contrast changes in real time',
+      '+ Optical Center Carousels: Focus-zooming carousels for Accent Colors and App Icons with distance-based scaling and peripheral dimming',
+      '+ Universal Title Tap-to-Scroll: Tap any page or sheet header title to smoothly glide back to the top',
+      '+ External Link HTTPS Verification: Intelligent departure confirmation modal validating HTTPS security certificates and warning on HTTP links',
+      '+ Adaptive Performance Governor: Automatically disables complex canvas animations and optical transformations on lower-end devices',
+      '+ Habit Routine Checkpoints: Two-Way session sheet with interval checkpoint logging and entry consolidation',
+      '+ Sobriety Companion Overhaul: Apple HIG glass capsule streak card, instant #relapse reset engine, and home widget sync',
+      '+ Telegram-Style Writing Suite: Keyboard-docked formatting toolbar with live word count telemetry and tactile undo/redo',
+      '+ Headless Silent Share Intake: Background ingestion of text, URLs, and photos without window interruption',
+      '+ Sandboxed Media Storage: Shared photos stored safely in isolated app storage with automatic timeline linking',
+      '+ End of Support Safeguard: 365-day offline sovereignty card and 7-tap developer quest diagnostics easter egg',
+      '+ Acoustic Feedback: Single tactile haptic click and acoustic sound on live session undo',
+      '+ Departure Security Alerts: Native Apple HIG confirmation modal guarding external web destinations',
       '* All 313 unit and widget tests passing with 0 lint warnings and 100% offline privacy preservation',
     ],
   );
@@ -141,14 +142,51 @@ class _ChangelogDialogState extends State<ChangelogDialog> {
       if (res.statusCode == 200) {
         final List<dynamic> data = jsonDecode(res.body) as List<dynamic>;
         if (data.isNotEmpty) {
-          final first = data.first as Map<String, dynamic>;
-          final items = (first['fullChangelog'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList();
-          if (items != null && items.isNotEmpty && mounted) {
-            setState(() {
-              _currentItems = items;
-            });
+          final prefs = await SharedPreferences.getInstance();
+          final userChannel = prefs.getString('m-update-channel') ?? 'stable';
+
+          Map<String, dynamic>? selectedRelease;
+          for (final item in data) {
+            if (item is! Map<String, dynamic>) continue;
+            final channel = (item['channel'] as String? ?? 'stable')
+                .toLowerCase();
+            final isExp =
+                item['isExperiment'] == true ||
+                (item['version'] as String? ?? '').contains(
+                  RegExp(r'[Ee]\d+'),
+                ) ||
+                channel == 'experiment';
+            final isBeta =
+                item['isBeta'] == true ||
+                channel == 'beta' ||
+                (item['version'] as String? ?? '').toLowerCase().contains(
+                  'beta',
+                );
+
+            final bool eligible;
+            if (userChannel == 'experiment') {
+              eligible = true;
+            } else if (userChannel == 'beta') {
+              eligible = !isExp;
+            } else {
+              eligible = !isExp && !isBeta;
+            }
+
+            if (eligible) {
+              selectedRelease = item;
+              break;
+            }
+          }
+
+          if (selectedRelease != null) {
+            final items = (selectedRelease['fullChangelog'] as List<dynamic>?)
+                ?.map((e) => e.toString())
+                .toList();
+            if (items != null && items.isNotEmpty && mounted) {
+              setState(() {
+                _currentItems = items;
+              });
+            }
           }
         }
       }
@@ -294,83 +332,14 @@ class _ChangelogDialogState extends State<ChangelogDialog> {
     );
   }
 
-  Widget _buildChangelogItem(BuildContext context, Palette p, String item) {
-    var trimmed = item.trim();
-    if (trimmed.startsWith('•')) {
-      trimmed = trimmed.substring(1).trim();
-    }
-    String text = trimmed;
-    IconData iconData = Icons.circle;
-    double iconSize = 6;
-    Color iconColor = p.accent;
-    Color iconBg = p.accent.withValues(alpha: 0.12);
-
-    if (trimmed.startsWith('+') || trimmed.toLowerCase().startsWith('add')) {
-      text = trimmed.startsWith('+') ? trimmed.substring(1).trim() : trimmed;
-      iconData = Icons.add_rounded;
-      iconSize = 13;
-      iconColor = const Color(0xFF30D158);
-      iconBg = const Color(0xFF30D158).withValues(alpha: 0.15);
-    } else if (trimmed.startsWith('-') ||
-        trimmed.toLowerCase().startsWith('remove')) {
-      text = trimmed.startsWith('-') ? trimmed.substring(1).trim() : trimmed;
-      iconData = Icons.remove_rounded;
-      iconSize = 13;
-      iconColor = const Color(0xFFFF453A);
-      iconBg = const Color(0xFFFF453A).withValues(alpha: 0.15);
-    } else if (trimmed.startsWith('!') ||
-        trimmed.toLowerCase().startsWith('fix') ||
-        trimmed.toLowerCase().startsWith('resolve')) {
-      text = trimmed.startsWith('!') ? trimmed.substring(1).trim() : trimmed;
-      iconData = Icons.build_circle_outlined;
-      iconSize = 13;
-      iconColor = const Color(0xFF0A84FF);
-      iconBg = const Color(0xFF0A84FF).withValues(alpha: 0.15);
-    } else if (trimmed.startsWith('*') ||
-        trimmed.toLowerCase().startsWith('refine') ||
-        trimmed.toLowerCase().startsWith('optimize') ||
-        trimmed.toLowerCase().startsWith('update')) {
-      text = trimmed.startsWith('*') ? trimmed.substring(1).trim() : trimmed;
-      iconData = Icons.star_rounded;
-      iconSize = 14;
-      iconColor = const Color(0xFFFF9F0A);
-      iconBg = const Color(0xFFFF9F0A).withValues(alpha: 0.15);
-    }
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 22,
-            height: 22,
-            decoration: BoxDecoration(
-              color: iconBg,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            alignment: Alignment.center,
-            child: Icon(iconData, size: iconSize, color: iconColor),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              text.localized(context),
-              style: TextStyle(color: p.text2, fontSize: 13, height: 1.4),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildHeroCard(BuildContext context, Palette p) {
     final rel = ChangelogDialog.latestRelease;
+    final isExp = rel.version.contains(RegExp(r'[Ee]\d+'));
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: p.surface2,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: rel.badgeColor.withValues(alpha: 0.35),
           width: 1.2,
@@ -405,7 +374,9 @@ class _ChangelogDialogState extends State<ChangelogDialog> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      Icons.auto_awesome_rounded,
+                      isExp
+                          ? Icons.science_rounded
+                          : Icons.auto_awesome_rounded,
                       size: 14,
                       color: rel.badgeColor,
                     ),
@@ -515,6 +486,76 @@ class _ChangelogDialogState extends State<ChangelogDialog> {
                   style: TextStyle(color: p.text2, fontSize: 12.5, height: 1.4),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChangelogItem(BuildContext context, Palette p, String item) {
+    var trimmed = item.trim();
+    if (trimmed.startsWith('•')) {
+      trimmed = trimmed.substring(1).trim();
+    }
+    String text = trimmed;
+    IconData iconData = Icons.circle;
+    double iconSize = 6;
+    Color iconColor = p.accent;
+    Color iconBg = p.accent.withValues(alpha: 0.12);
+
+    if (trimmed.startsWith('+') || trimmed.toLowerCase().startsWith('add')) {
+      text = trimmed.startsWith('+') ? trimmed.substring(1).trim() : trimmed;
+      iconData = Icons.add_rounded;
+      iconSize = 13;
+      iconColor = const Color(0xFF30D158);
+      iconBg = const Color(0xFF30D158).withValues(alpha: 0.15);
+    } else if (trimmed.startsWith('-') ||
+        trimmed.toLowerCase().startsWith('remove')) {
+      text = trimmed.startsWith('-') ? trimmed.substring(1).trim() : trimmed;
+      iconData = Icons.remove_rounded;
+      iconSize = 13;
+      iconColor = const Color(0xFFFF453A);
+      iconBg = const Color(0xFFFF453A).withValues(alpha: 0.15);
+    } else if (trimmed.startsWith('!') ||
+        trimmed.toLowerCase().startsWith('fix') ||
+        trimmed.toLowerCase().startsWith('resolve')) {
+      text = trimmed.startsWith('!') ? trimmed.substring(1).trim() : trimmed;
+      iconData = Icons.build_circle_outlined;
+      iconSize = 13;
+      iconColor = const Color(0xFF0A84FF);
+      iconBg = const Color(0xFF0A84FF).withValues(alpha: 0.15);
+    } else if (trimmed.startsWith('*') ||
+        trimmed.toLowerCase().startsWith('refine') ||
+        trimmed.toLowerCase().startsWith('optimize') ||
+        trimmed.toLowerCase().startsWith('update')) {
+      text = trimmed.startsWith('*') ? trimmed.substring(1).trim() : trimmed;
+      iconData = Icons.star_rounded;
+      iconSize = 14;
+      iconColor = const Color(0xFFFF9F0A);
+      iconBg = const Color(0xFFFF9F0A).withValues(alpha: 0.15);
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 22,
+            height: 22,
+            decoration: BoxDecoration(
+              color: iconBg,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            alignment: Alignment.center,
+            child: Icon(iconData, size: iconSize, color: iconColor),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text.localized(context),
+              style: TextStyle(color: p.text2, fontSize: 13, height: 1.4),
             ),
           ),
         ],

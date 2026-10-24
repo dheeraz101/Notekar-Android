@@ -78,9 +78,12 @@ void main() {
   });
 
   group('Build Channel Codes & Priority Release Tests', () {
-    test('kAppBuildNumber adheres to YY<CHANNEL>MMDD format with SR/BR/PR', () {
-      expect(kAppBuildNumber, matches(r'^\d{2}(BR|SR|PR)\d{4}[a-z]?$'));
-    });
+    test(
+      'kAppBuildNumber adheres to YY<CHANNEL>MMDD format with SR/BR/PR/ER',
+      () {
+        expect(kAppBuildNumber, matches(r'^\d{2}(BR|SR|PR|ER)\d{4}[a-z]?$'));
+      },
+    );
   });
 
   group('Time Reflection & Mindfulness Tests', () {

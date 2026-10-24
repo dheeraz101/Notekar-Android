@@ -679,9 +679,17 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
         .where((part) => part.isNotEmpty)
         .map(int.parse)
         .toList();
-    bool isInstalledBeta = widget.appVersion.toLowerCase().contains('beta');
+    final isInstalledExperiment =
+        widget.appVersion.contains(RegExp(r'[Ee]\d+')) ||
+        widget.appVersion.toLowerCase().contains('experiment') ||
+        kAppBuildNumber.toLowerCase().contains('er');
+    bool isInstalledBeta =
+        !isInstalledExperiment &&
+        widget.appVersion.toLowerCase().contains('beta');
     bool isInstalledPriority = false;
-    if (!isInstalledBeta && versionParts.length >= 3) {
+    if (!isInstalledExperiment &&
+        !isInstalledBeta &&
+        versionParts.length >= 3) {
       final minor = versionParts[1];
       final patch = versionParts[2];
       if (minor > 0 && patch == 0) {
@@ -690,9 +698,11 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
         isInstalledBeta = true;
       }
     }
-    final currentBuildChannel = isInstalledPriority
-        ? 'priority'
-        : (isInstalledBeta ? 'beta' : 'stable');
+    final currentBuildChannel = isInstalledExperiment
+        ? 'experiment'
+        : (isInstalledPriority
+              ? 'priority'
+              : (isInstalledBeta ? 'beta' : 'stable'));
 
     if (widget.checkingUpdates) {
       return _AnimatedUpdateCheckCard(p: p, blur: blurEnabled);
@@ -724,24 +734,32 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: currentBuildChannel == 'priority'
-                      ? p.red.withValues(alpha: 0.12)
-                      : (currentBuildChannel == 'beta'
-                            ? p.green.withValues(alpha: 0.12)
-                            : p.accent.withValues(alpha: 0.12)),
+                  color: currentBuildChannel == 'experiment'
+                      ? const Color(0xFFFF3B30).withValues(alpha: 0.12)
+                      : (currentBuildChannel == 'priority'
+                            ? p.red.withValues(alpha: 0.12)
+                            : (currentBuildChannel == 'beta'
+                                  ? p.green.withValues(alpha: 0.12)
+                                  : p.accent.withValues(alpha: 0.12))),
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
-                  (currentBuildChannel == 'priority'
-                          ? 'Priority Release'
-                          : (currentBuildChannel == 'beta'
-                                ? 'Beta Release'
-                                : 'Stable Release'))
+                  (currentBuildChannel == 'experiment'
+                          ? 'Experiment Release'
+                          : (currentBuildChannel == 'priority'
+                                ? 'Priority Release'
+                                : (currentBuildChannel == 'beta'
+                                      ? 'Beta Release'
+                                      : 'Stable Release')))
                       .localized(context),
                   style: TextStyle(
-                    color: currentBuildChannel == 'priority'
-                        ? p.red
-                        : (currentBuildChannel == 'beta' ? p.green : p.accent),
+                    color: currentBuildChannel == 'experiment'
+                        ? const Color(0xFFFF3B30)
+                        : (currentBuildChannel == 'priority'
+                              ? p.red
+                              : (currentBuildChannel == 'beta'
+                                    ? p.green
+                                    : p.accent)),
                     fontSize: 10.5,
                     fontWeight: FontWeight.w800,
                   ),
@@ -800,21 +818,25 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: widget.updateInfo!.type == 'Security Update'
-                  ? p.red.withValues(alpha: 0.12)
-                  : (widget.updateInfo!.type == 'Feature Update'
-                        ? p.accent.withValues(alpha: 0.12)
-                        : p.green.withValues(alpha: 0.12)),
+              color: widget.updateInfo!.type.contains('Experiment')
+                  ? const Color(0xFFFF3B30).withValues(alpha: 0.12)
+                  : (widget.updateInfo!.type == 'Security Update'
+                        ? p.red.withValues(alpha: 0.12)
+                        : (widget.updateInfo!.type == 'Feature Update'
+                              ? p.accent.withValues(alpha: 0.12)
+                              : p.green.withValues(alpha: 0.12))),
               borderRadius: BorderRadius.circular(999),
             ),
             child: Text(
               widget.updateInfo!.type.localized(context),
               style: TextStyle(
-                color: widget.updateInfo!.type == 'Security Update'
-                    ? p.red
-                    : (widget.updateInfo!.type == 'Feature Update'
-                          ? p.accent
-                          : p.green),
+                color: widget.updateInfo!.type.contains('Experiment')
+                    ? const Color(0xFFFF3B30)
+                    : (widget.updateInfo!.type == 'Security Update'
+                          ? p.red
+                          : (widget.updateInfo!.type == 'Feature Update'
+                                ? p.accent
+                                : p.green)),
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
               ),

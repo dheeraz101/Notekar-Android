@@ -423,7 +423,15 @@ if (Test-Path -LiteralPath $versionsJsonPath)
         $editionName = "Feature & Quality Evolution"
         $colorHex = "#30D158"
 
-        if ($beta)
+        if ($experiment -or ($Version -match '[Ee]\d+'))
+        {
+            $channelName = "experiment"
+            $tagLabel = "[Experiment]"
+            $isBetaRelease = $true
+            $editionName = "Experimental Architecture & Sensory Refinements"
+            $colorHex = "#FF3B30"
+        }
+        elseif ($beta)
         {
             $channelName = "beta"
             $tagLabel = "[Beta]"

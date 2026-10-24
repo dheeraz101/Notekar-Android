@@ -1,0 +1,7 @@
+What's New in NoteKar v7.5.10E1:
+• Hospital-Grade ECG: Live waveform pulse with flatline disconnect
+• Apple HIG Previews: Miniature live preview cards & optical carousels
+• Universal Scroll-to-Top: Tap any sheet or page title to scroll up
+• Safe Link Shield: HTTPS inspection & insecure HTTP warnings
+• Adaptive Performance: Auto-disables heavy effects on low-end devices
+• Habit Checkpoints: 2-way session intervals & quick logging
