@@ -220,7 +220,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 600));
 
         expect(find.text('SWIPE OR TAP TO SWITCH ICON'), findsOneWidget);
-        expect(find.byType(ListView), findsWidgets);
+        expect(find.byType(SingleChildScrollView), findsWidgets);
       },
     );
   });

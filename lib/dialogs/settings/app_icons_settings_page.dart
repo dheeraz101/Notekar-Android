@@ -110,6 +110,7 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
   late ScrollController _scrollController;
   int _selectedIndex = 0;
   final double _itemWidth = 80.0;
+  bool _isUserInteracting = false;
 
   @override
   void initState() {
@@ -191,15 +192,20 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'SWIPE OR TAP TO SWITCH ICON'.localized(context),
-                style: TextStyle(
-                  color: p.text3,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.8,
+              Expanded(
+                child: Text(
+                  'SWIPE OR TAP TO SWITCH ICON'.localized(context),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: p.text3,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.8,
+                  ),
                 ),
               ),
+              const SizedBox(width: 8),
               Text(
                 '${availableIcons.length} Icons',
                 style: TextStyle(
@@ -262,6 +268,9 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
                   // Horizontal List with Distance-Based Scaling & Real-Time Auto-Select
                   NotificationListener<ScrollNotification>(
                     onNotification: (notification) {
+                      if (notification is ScrollStartNotification) {
+                        _isUserInteracting = notification.dragDetails != null;
+                      }
                       if (_scrollController.hasClients) {
                         final currentScroll = _scrollController.offset;
                         final nearestIndex = (currentScroll / _itemWidth)
@@ -270,169 +279,199 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
                         if (nearestIndex != _selectedIndex) {
                           _selectedIndex = nearestIndex;
                           final newKey = availableIcons[nearestIndex].key;
-                          if (newKey != widget.appIconStyle) {
+                          if (_isUserInteracting &&
+                              newKey != widget.appIconStyle) {
                             NotekarHaptics.selection('standard');
                             widget.onAppIconStyleChanged(newKey);
                           }
                         }
                       }
-                      if (notification is ScrollEndNotification &&
-                          _scrollController.hasClients) {
-                        final currentScroll = _scrollController.offset;
-                        final nearestIndex = (currentScroll / _itemWidth)
-                            .round()
-                            .clamp(0, availableIcons.length - 1);
-                        final snapOffset = nearestIndex * _itemWidth;
-                        if ((currentScroll - snapOffset).abs() > 0.5) {
-                          Future.microtask(() {
-                            if (_scrollController.hasClients) {
-                              _scrollController.animateTo(
-                                snapOffset,
-                                duration: const Duration(milliseconds: 220),
-                                curve: Curves.easeOutCubic,
-                              );
+                      if (notification is ScrollEndNotification) {
+                        final hadUserInteraction = _isUserInteracting;
+                        _isUserInteracting = false;
+                        if (_scrollController.hasClients) {
+                          final currentScroll = _scrollController.offset;
+                          final nearestIndex = (currentScroll / _itemWidth)
+                              .round()
+                              .clamp(0, availableIcons.length - 1);
+                          final snapOffset = nearestIndex * _itemWidth;
+                          if ((currentScroll - snapOffset).abs() > 0.5) {
+                            Future.microtask(() {
+                              if (_scrollController.hasClients) {
+                                _scrollController.animateTo(
+                                  snapOffset,
+                                  duration: const Duration(milliseconds: 220),
+                                  curve: Curves.easeOutCubic,
+                                );
+                              }
+                            });
+                          }
+                          if (hadUserInteraction) {
+                            final newKey = availableIcons[nearestIndex].key;
+                            if (newKey != widget.appIconStyle) {
+                              NotekarHaptics.selection('standard');
+                              widget.onAppIconStyleChanged(newKey);
                             }
-                          });
+                          }
                         }
                       }
                       setState(() {});
                       return false;
                     },
-                    child: ListView.builder(
+                    child: SingleChildScrollView(
                       controller: _scrollController,
                       scrollDirection: Axis.horizontal,
                       physics: const BouncingScrollPhysics(),
                       padding: EdgeInsets.symmetric(
                         horizontal: halfViewport - (_itemWidth / 2),
                       ),
-                      itemCount: availableIcons.length,
-                      itemBuilder: (context, index) {
-                        final item = availableIcons[index];
-                        final itemCenterOffset = index * _itemWidth;
-                        final currentScroll = _scrollController.hasClients
-                            ? _scrollController.offset
-                            : 0.0;
-                        final distance = (itemCenterOffset - currentScroll)
-                            .abs();
+                      child: Row(
+                        children: List.generate(availableIcons.length, (index) {
+                          final item = availableIcons[index];
+                          final itemCenterOffset = index * _itemWidth;
+                          final currentScroll = _scrollController.hasClients
+                              ? _scrollController.offset
+                              : 0.0;
+                          final distance = (itemCenterOffset - currentScroll)
+                              .abs();
 
-                        // Optical distance scaling & dimming
-                        final scaleFactor = (1.0 - (distance / 140.0)).clamp(
-                          0.38,
-                          1.0,
-                        );
-                        final iconBoxSize =
-                            32.0 + 44.0 * ((scaleFactor - 0.38) / 0.62);
-                        final cornerRadius =
-                            10.0 + 13.0 * ((scaleFactor - 0.38) / 0.62);
-                        final opacity = (distance < 18.0)
-                            ? 1.0
-                            : (0.22 + 0.38 * ((scaleFactor - 0.38) / 0.62))
-                                  .clamp(0.22, 0.65);
-                        final isSelected = item.key == widget.appIconStyle;
+                          // Optical distance scaling & dimming
+                          final scaleFactor = (1.0 - (distance / 140.0)).clamp(
+                            0.38,
+                            1.0,
+                          );
+                          final iconBoxSize =
+                              32.0 + 44.0 * ((scaleFactor - 0.38) / 0.62);
+                          final cornerRadius =
+                              10.0 + 13.0 * ((scaleFactor - 0.38) / 0.62);
+                          final opacity = (distance < 18.0)
+                              ? 1.0
+                              : (0.22 + 0.38 * ((scaleFactor - 0.38) / 0.62))
+                                    .clamp(0.22, 0.65);
+                          final isSelected = item.key == widget.appIconStyle;
 
-                        return GestureDetector(
-                          onTap: () async {
-                            final targetOffset = index * _itemWidth;
-                            _selectedIndex = index;
-                            if (_scrollController.hasClients) {
-                              _scrollController.animateTo(
-                                targetOffset,
-                                duration: const Duration(milliseconds: 260),
-                                curve: Curves.easeOutCubic,
-                              );
-                            }
-                            if (item.key != widget.appIconStyle) {
-                              NotekarHaptics.selection('standard');
-                              await widget.onAppIconStyleChanged(item.key);
-                            }
-                          },
-                          child: Container(
-                            width: _itemWidth,
-                            alignment: Alignment.center,
-                            child: Opacity(
-                              opacity: opacity,
-                              child: Container(
-                                width: iconBoxSize,
-                                height: iconBoxSize,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(
-                                    cornerRadius,
-                                  ),
-                                  border: isSelected
-                                      ? Border.all(
-                                          color: isVipGold
-                                              ? const Color(0xFFFFD700)
-                                              : Colors.white,
-                                          width: 2.2,
-                                        )
-                                      : null,
-                                  boxShadow: isSelected
-                                      ? [
-                                          BoxShadow(
-                                            color: item.themeColor.withValues(
-                                              alpha: 0.45,
-                                            ),
-                                            blurRadius: 14,
-                                            spreadRadius: 2,
-                                          ),
-                                        ]
-                                      : null,
-                                ),
-                                child: Stack(
-                                  children: [
-                                    Positioned.fill(
-                                      child: ClipRRect(
+                          return Tooltip(
+                            key: ValueKey('app_icon_${item.key}'),
+                            message: item.title.localized(context),
+                            child: Semantics(
+                              label: item.title.localized(context),
+                              button: true,
+                              selected: isSelected,
+                              child: GestureDetector(
+                                onTap: () async {
+                                  final targetOffset = index * _itemWidth;
+                                  _selectedIndex = index;
+                                  if (_scrollController.hasClients) {
+                                    _scrollController.animateTo(
+                                      targetOffset,
+                                      duration: const Duration(
+                                        milliseconds: 260,
+                                      ),
+                                      curve: Curves.easeOutCubic,
+                                    );
+                                  }
+                                  if (item.key != widget.appIconStyle) {
+                                    NotekarHaptics.selection('standard');
+                                    await widget.onAppIconStyleChanged(
+                                      item.key,
+                                    );
+                                  }
+                                },
+                                child: Container(
+                                  width: _itemWidth,
+                                  alignment: Alignment.center,
+                                  child: Opacity(
+                                    opacity: opacity,
+                                    child: Container(
+                                      width: iconBoxSize,
+                                      height: iconBoxSize,
+                                      decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(
-                                          cornerRadius - 1,
+                                          cornerRadius,
                                         ),
-                                        child: Image.asset(
-                                          item.asset,
-                                          fit: BoxFit.cover,
-                                          cacheWidth: 128,
-                                          cacheHeight: 128,
-                                          errorBuilder:
-                                              (context, error, stackTrace) =>
-                                                  Container(
-                                                    color: p.surface3,
-                                                    child: Icon(
-                                                      CupertinoIcons.photo,
-                                                      color: p.text3,
-                                                      size: 16,
-                                                    ),
+                                        border: isSelected
+                                            ? Border.all(
+                                                color: isVipGold
+                                                    ? const Color(0xFFFFD700)
+                                                    : Colors.white,
+                                                width: 2.2,
+                                              )
+                                            : null,
+                                        boxShadow: isSelected
+                                            ? [
+                                                BoxShadow(
+                                                  color: item.themeColor
+                                                      .withValues(alpha: 0.45),
+                                                  blurRadius: 14,
+                                                  spreadRadius: 2,
+                                                ),
+                                              ]
+                                            : null,
+                                      ),
+                                      child: Stack(
+                                        children: [
+                                          Positioned.fill(
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                    cornerRadius - 1,
                                                   ),
-                                        ),
+                                              child: Image.asset(
+                                                item.asset,
+                                                fit: BoxFit.cover,
+                                                cacheWidth: 128,
+                                                cacheHeight: 128,
+                                                errorBuilder:
+                                                    (
+                                                      context,
+                                                      error,
+                                                      stackTrace,
+                                                    ) => Container(
+                                                      color: p.surface3,
+                                                      child: Icon(
+                                                        CupertinoIcons.photo,
+                                                        color: p.text3,
+                                                        size: 16,
+                                                      ),
+                                                    ),
+                                              ),
+                                            ),
+                                          ),
+                                          if (isSelected)
+                                            Positioned(
+                                              bottom: 3,
+                                              right: 3,
+                                              child: Container(
+                                                padding: const EdgeInsets.all(
+                                                  2.5,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: isVipGold
+                                                      ? const Color(0xFFFFD700)
+                                                      : p.accent,
+                                                  shape: BoxShape.circle,
+                                                  border: Border.all(
+                                                    color: Colors.white,
+                                                    width: 1.5,
+                                                  ),
+                                                ),
+                                                child: const Icon(
+                                                  Icons.check,
+                                                  color: Colors.white,
+                                                  size: 9,
+                                                ),
+                                              ),
+                                            ),
+                                        ],
                                       ),
                                     ),
-                                    if (isSelected)
-                                      Positioned(
-                                        bottom: 3,
-                                        right: 3,
-                                        child: Container(
-                                          padding: const EdgeInsets.all(2.5),
-                                          decoration: BoxDecoration(
-                                            color: isVipGold
-                                                ? const Color(0xFFFFD700)
-                                                : p.accent,
-                                            shape: BoxShape.circle,
-                                            border: Border.all(
-                                              color: Colors.white,
-                                              width: 1.5,
-                                            ),
-                                          ),
-                                          child: const Icon(
-                                            Icons.check,
-                                            color: Colors.white,
-                                            size: 9,
-                                          ),
-                                        ),
-                                      ),
-                                  ],
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        }),
+                      ),
                     ),
                   ),
                 ],
@@ -583,194 +622,201 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(25),
-        child: Stack(
-          children: [
-            // Ambient Wallpaper Glows
-            Positioned(
-              top: -20,
-              right: -20,
-              child: Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: currentIcon.themeColor.withValues(alpha: 0.16),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: -30,
-              left: 20,
-              child: Container(
-                width: 140,
-                height: 140,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: p.accent.withValues(alpha: 0.12),
-                ),
-              ),
-            ),
-
-            // Mini Phone Layout
-            Column(
-              children: [
-                // Top Notch & Status Indicators
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        '9:41',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      Container(
-                        width: 50,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          color: Colors.black,
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Icon(
-                            CupertinoIcons.wifi,
-                            size: 10,
-                            color: Colors.white,
-                          ),
-                          SizedBox(width: 4),
-                          Icon(
-                            CupertinoIcons.battery_100,
-                            size: 12,
-                            color: Colors.white,
-                          ),
-                        ],
-                      ),
-                    ],
+        child: MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: MediaQuery.textScalerOf(
+              context,
+            ).clamp(maxScaleFactor: 1.0),
+          ),
+          child: Stack(
+            children: [
+              // Ambient Wallpaper Glows
+              Positioned(
+                top: -20,
+                right: -20,
+                child: Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: currentIcon.themeColor.withValues(alpha: 0.16),
                   ),
                 ),
+              ),
+              Positioned(
+                bottom: -30,
+                left: 20,
+                child: Container(
+                  width: 140,
+                  height: 140,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: p.accent.withValues(alpha: 0.12),
+                  ),
+                ),
+              ),
 
-                const SizedBox(height: 14),
-
-                // Home Screen Apps Row with NoteKar Icon live updating
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _homeAppItem(
-                        label: 'Camera',
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF2C2C2E),
-                            borderRadius: BorderRadius.circular(13),
-                          ),
-                          child: const Icon(
-                            CupertinoIcons.camera_fill,
-                            color: Color(0xFF8E8E93),
-                            size: 20,
+              // Mini Phone Layout
+              Column(
+                children: [
+                  // Top Notch & Status Indicators
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          '9:41',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                      ),
-                      _homeAppItem(
-                        label: 'Music',
-                        child: Container(
+                        Container(
+                          width: 50,
+                          height: 12,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF2C2C2E),
-                            borderRadius: BorderRadius.circular(13),
-                          ),
-                          child: const Icon(
-                            CupertinoIcons.music_note_2,
-                            color: Color(0xFF8E8E93),
-                            size: 20,
+                            color: Colors.black,
+                            borderRadius: BorderRadius.circular(999),
                           ),
                         ),
-                      ),
-                      // The Dynamic Live NoteKar Icon
-                      _homeAppItem(
-                        label: 'NoteKar',
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(13),
-                            boxShadow: [
-                              BoxShadow(
-                                color: currentIcon.themeColor.withValues(
-                                  alpha: 0.45,
-                                ),
-                                blurRadius: 10,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(13),
-                            child: Image.asset(
-                              currentIcon.asset,
-                              fit: BoxFit.cover,
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Icon(
+                              CupertinoIcons.wifi,
+                              size: 10,
+                              color: Colors.white,
+                            ),
+                            SizedBox(width: 4),
+                            Icon(
+                              CupertinoIcons.battery_100,
+                              size: 12,
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  // Home Screen Apps Row with NoteKar Icon live updating
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _homeAppItem(
+                          label: 'Camera',
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF2C2C2E),
+                              borderRadius: BorderRadius.circular(13),
+                            ),
+                            child: const Icon(
+                              CupertinoIcons.camera_fill,
+                              color: Color(0xFF8E8E93),
+                              size: 20,
                             ),
                           ),
                         ),
-                        isHighlight: true,
+                        _homeAppItem(
+                          label: 'Music',
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF2C2C2E),
+                              borderRadius: BorderRadius.circular(13),
+                            ),
+                            child: const Icon(
+                              CupertinoIcons.music_note_2,
+                              color: Color(0xFF8E8E93),
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                        // The Dynamic Live NoteKar Icon
+                        _homeAppItem(
+                          label: 'NoteKar',
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(13),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: currentIcon.themeColor.withValues(
+                                    alpha: 0.45,
+                                  ),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(13),
+                              child: Image.asset(
+                                currentIcon.asset,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          isHighlight: true,
+                        ),
+                        _homeAppItem(
+                          label: 'Safari',
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF2C2C2E),
+                              borderRadius: BorderRadius.circular(13),
+                            ),
+                            child: const Icon(
+                              CupertinoIcons.compass_fill,
+                              color: Color(0xFF8E8E93),
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const Spacer(),
+
+                  // Mini Bottom Dock
+                  Container(
+                    margin: const EdgeInsets.fromLTRB(28, 0, 28, 10),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 5,
+                      horizontal: 16,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        width: 0.8,
                       ),
-                      _homeAppItem(
-                        label: 'Safari',
-                        child: Container(
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: List.generate(
+                        4,
+                        (i) => Container(
+                          width: 14,
+                          height: 14,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF2C2C2E),
-                            borderRadius: BorderRadius.circular(13),
+                            color: Colors.white.withValues(alpha: 0.35),
+                            borderRadius: BorderRadius.circular(5),
                           ),
-                          child: const Icon(
-                            CupertinoIcons.compass_fill,
-                            color: Color(0xFF8E8E93),
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const Spacer(),
-
-                // Mini Bottom Dock
-                Container(
-                  margin: const EdgeInsets.fromLTRB(28, 0, 28, 10),
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 5,
-                    horizontal: 16,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.15),
-                      width: 0.8,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: List.generate(
-                      4,
-                      (i) => Container(
-                        width: 14,
-                        height: 14,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.35),
-                          borderRadius: BorderRadius.circular(5),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -781,20 +827,26 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
     required Widget child,
     bool isHighlight = false,
   }) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(width: 46, height: 46, child: child),
-        const SizedBox(height: 5),
-        Text(
-          label,
-          style: TextStyle(
-            color: isHighlight ? Colors.white : const Color(0xFF8E8E93),
-            fontSize: 9.5,
-            fontWeight: isHighlight ? FontWeight.w800 : FontWeight.w600,
+    return SizedBox(
+      width: 44,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(width: 40, height: 40, child: child),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: isHighlight ? Colors.white : const Color(0xFF8E8E93),
+              fontSize: 9.0,
+              fontWeight: isHighlight ? FontWeight.w800 : FontWeight.w600,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
