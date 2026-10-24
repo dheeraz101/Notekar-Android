@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
@@ -192,19 +193,31 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
   Color _currentColor = const Color(0xFF007AFF);
   bool _isPouring = false;
 
-  final double _itemWidth = 64.0;
+  int _selectedIndex = 0;
+  final double _itemWidth = 78.0;
 
   @override
   void initState() {
     super.initState();
     _currentColorKey = widget.accentColor.isEmpty ? 'blue' : widget.accentColor;
     _currentColor = _findColor(_currentColorKey);
+    final initialIndex = kAccentColorPalette.indexWhere(
+      (c) => c.key == _currentColorKey,
+    );
+    _selectedIndex = initialIndex != -1 ? initialIndex : 0;
 
     _scrollController = ScrollController();
+    final isLowEnd = AdaptiveEngine().isLowEnd;
     _waveController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2200),
-    )..repeat();
+      duration: isLowEnd
+          ? const Duration(seconds: 10)
+          : const Duration(milliseconds: 2200),
+      value: isLowEnd ? 0.5 : 0.0,
+    );
+    if (!isLowEnd) {
+      _waveController.repeat();
+    }
 
     _fillController = AnimationController(
       vsync: this,
@@ -278,6 +291,7 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
   void _scrollToColor(String key, {bool animate = true}) {
     final index = kAccentColorPalette.indexWhere((c) => c.key == key);
     if (index == -1 || !_scrollController.hasClients) return;
+    _selectedIndex = index;
 
     final targetOffset = index * _itemWidth;
     if (animate) {
@@ -289,6 +303,17 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
     } else {
       _scrollController.jumpTo(targetOffset);
     }
+  }
+
+  void _applyColorFromScroll(String newKey) {
+    if (newKey == _currentColorKey) return;
+    HapticFeedback.selectionClick();
+    setState(() {
+      _currentColorKey = newKey;
+      _currentColor = _findColor(newKey);
+      _isPouring = false;
+    });
+    widget.onAccentColorChanged(newKey);
   }
 
   void _showToast(String message) {
@@ -459,6 +484,7 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
                           fluidColor: _currentColor,
                           drainLevel: _drainController.value,
                           isPouring: _isPouring,
+                          isLowEnd: AdaptiveEngine().isLowEnd,
                         ),
                       );
                     },
@@ -537,9 +563,9 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
         ),
         const SizedBox(height: 12),
 
-        // 2. Optical Scaling Horizontal Color Carousel
+        // 2. Optical Scaling Horizontal Color Carousel with Real-Time Snapping Auto-Select
         SizedBox(
-          height: 96,
+          height: 108,
           child: LayoutBuilder(
             builder: (context, constraints) {
               final viewportWidth = constraints.maxWidth;
@@ -548,33 +574,70 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
               return Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Center Stationary Target Indicator Ring
+                  // Center Stationary Target Indicator Rings (Apple HIG Glow & Outer Frame)
                   Container(
-                    width: 72,
-                    height: 72,
+                    width: 96,
+                    height: 96,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: _currentColor.withValues(alpha: 0.4),
-                        width: 2.0,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: _currentColor.withValues(alpha: 0.15),
+                        color: _currentColor.withValues(alpha: 0.16),
                         width: 1.0,
                       ),
                     ),
                   ),
+                  Container(
+                    width: 86,
+                    height: 86,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: _currentColor.withValues(alpha: 0.45),
+                        width: 2.2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _currentColor.withValues(alpha: 0.20),
+                          blurRadius: 16,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                  ),
 
-                  // Horizontal List with Distance-Based Scaling
+                  // Horizontal List with Distance-Based Scaling & Real-Time Auto-Select
                   NotificationListener<ScrollNotification>(
                     onNotification: (notification) {
+                      if (_scrollController.hasClients) {
+                        final currentScroll = _scrollController.offset;
+                        final nearestIndex = (currentScroll / _itemWidth)
+                            .round()
+                            .clamp(0, kAccentColorPalette.length - 1);
+                        if (nearestIndex != _selectedIndex) {
+                          _selectedIndex = nearestIndex;
+                          final newKey = kAccentColorPalette[nearestIndex].key;
+                          _applyColorFromScroll(newKey);
+                        }
+                      }
+                      if (notification is ScrollEndNotification &&
+                          _scrollController.hasClients) {
+                        final currentScroll = _scrollController.offset;
+                        final nearestIndex = (currentScroll / _itemWidth)
+                            .round()
+                            .clamp(0, kAccentColorPalette.length - 1);
+                        final snapOffset = nearestIndex * _itemWidth;
+                        if ((currentScroll - snapOffset).abs() > 0.5) {
+                          Future.microtask(() {
+                            if (_scrollController.hasClients) {
+                              _scrollController.animateTo(
+                                snapOffset,
+                                duration: const Duration(milliseconds: 220),
+                                curve: Curves.easeOutCubic,
+                              );
+                            }
+                          });
+                        }
+                      }
                       setState(() {});
                       return false;
                     },
@@ -595,16 +658,17 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
                         final distance = (itemCenterOffset - currentScroll)
                             .abs();
 
-                        // Distance-based optical scaling
-                        final scaleFactor = (1.0 - (distance / 180.0)).clamp(
-                          0.48,
+                        // Distance-based optical scaling & dimming
+                        final scaleFactor = (1.0 - (distance / 140.0)).clamp(
+                          0.38,
                           1.0,
                         );
-                        final circleDiameter = 32.0 + 28.0 * scaleFactor;
-                        final opacity = (0.40 + 0.60 * scaleFactor).clamp(
-                          0.4,
-                          1.0,
-                        );
+                        final circleDiameter =
+                            30.0 + 44.0 * ((scaleFactor - 0.38) / 0.62);
+                        final opacity = (distance < 18.0)
+                            ? 1.0
+                            : (0.22 + 0.38 * ((scaleFactor - 0.38) / 0.62))
+                                  .clamp(0.22, 0.65);
                         final isSelected = item.key == _currentColorKey;
 
                         return GestureDetector(
@@ -679,6 +743,7 @@ class _LiquidWavePainter extends CustomPainter {
   final Color fluidColor;
   final double drainLevel;
   final bool isPouring;
+  final bool isLowEnd;
 
   _LiquidWavePainter({
     required this.fillLevel,
@@ -686,6 +751,7 @@ class _LiquidWavePainter extends CustomPainter {
     required this.fluidColor,
     required this.drainLevel,
     required this.isPouring,
+    this.isLowEnd = false,
   });
 
   @override
@@ -714,16 +780,20 @@ class _LiquidWavePainter extends CustomPainter {
       fluidPath.moveTo(0, h);
       fluidPath.lineTo(0, surfaceY);
 
-      final waveAmp =
-          (4.5 * math.sin(effectiveFill * math.pi) * (isPouring ? 1.6 : 0.8))
-              .clamp(0.0, 7.5);
-      for (double x = 0; x <= w; x += 4) {
-        final normX = x / w;
-        final waveY =
-            surfaceY +
-            math.sin((normX * 2 * math.pi) + (wavePhase * 2 * math.pi)) *
-                waveAmp;
-        fluidPath.lineTo(x, waveY);
+      if (isLowEnd) {
+        fluidPath.lineTo(w, surfaceY);
+      } else {
+        final waveAmp =
+            (4.5 * math.sin(effectiveFill * math.pi) * (isPouring ? 1.6 : 0.8))
+                .clamp(0.0, 7.5);
+        for (double x = 0; x <= w; x += 4) {
+          final normX = x / w;
+          final waveY =
+              surfaceY +
+              math.sin((normX * 2 * math.pi) + (wavePhase * 2 * math.pi)) *
+                  waveAmp;
+          fluidPath.lineTo(x, waveY);
+        }
       }
 
       fluidPath.lineTo(w, h);
@@ -747,13 +817,20 @@ class _LiquidWavePainter extends CustomPainter {
         ..strokeWidth = 2.2;
       final crestPath = Path();
       crestPath.moveTo(0, surfaceY);
-      for (double x = 0; x <= w; x += 4) {
-        final normX = x / w;
-        final waveY =
-            surfaceY +
-            math.sin((normX * 2 * math.pi) + (wavePhase * 2 * math.pi)) *
-                waveAmp;
-        crestPath.lineTo(x, waveY);
+      if (isLowEnd) {
+        crestPath.lineTo(w, surfaceY);
+      } else {
+        final waveAmp =
+            (4.5 * math.sin(effectiveFill * math.pi) * (isPouring ? 1.6 : 0.8))
+                .clamp(0.0, 7.5);
+        for (double x = 0; x <= w; x += 4) {
+          final normX = x / w;
+          final waveY =
+              surfaceY +
+              math.sin((normX * 2 * math.pi) + (wavePhase * 2 * math.pi)) *
+                  waveAmp;
+          crestPath.lineTo(x, waveY);
+        }
       }
       canvas.drawPath(crestPath, crestPaint);
     }
@@ -799,6 +876,7 @@ class _LiquidWavePainter extends CustomPainter {
         oldDelegate.wavePhase != wavePhase ||
         oldDelegate.fluidColor != fluidColor ||
         oldDelegate.drainLevel != drainLevel ||
-        oldDelegate.isPouring != isPouring;
+        oldDelegate.isPouring != isPouring ||
+        oldDelegate.isLowEnd != isLowEnd;
   }
 }

@@ -108,12 +108,18 @@ class AppIconsSettingsPage extends StatefulWidget {
 
 class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
   late ScrollController _scrollController;
-  final double _itemWidth = 76.0;
+  int _selectedIndex = 0;
+  final double _itemWidth = 80.0;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
+    final icons = _getAvailableIcons();
+    final initialIdx = icons.indexWhere(
+      (opt) => opt.key == widget.appIconStyle,
+    );
+    _selectedIndex = initialIdx != -1 ? initialIdx : 0;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToSelectedIcon(animate: false);
     });
@@ -141,6 +147,7 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
     final icons = _getAvailableIcons();
     final index = icons.indexWhere((opt) => opt.key == widget.appIconStyle);
     if (index == -1 || !_scrollController.hasClients) return;
+    _selectedIndex = index;
 
     final targetOffset = index * _itemWidth;
     if (animate) {
@@ -206,9 +213,9 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
         ),
         const SizedBox(height: 10),
 
-        // 2. Second Section: Horizontal Optical Scaling Icon Chooser (fits above fold)
+        // 2. Second Section: Horizontal Optical Scaling Icon Chooser with Snapping Auto-Select
         SizedBox(
-          height: 98,
+          height: 108,
           child: LayoutBuilder(
             builder: (context, constraints) {
               final viewportWidth = constraints.maxWidth;
@@ -217,23 +224,77 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
               return Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Center Stationary Target Squircle Indicator
+                  // Center Stationary Target Squircle Indicator (Outer Glow & Apple HIG Squircle)
                   Container(
-                    width: 72,
-                    height: 72,
+                    width: 96,
+                    height: 96,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(28),
                       border: Border.all(
                         color: (isVipGold ? const Color(0xFFFFD700) : p.accent)
-                            .withValues(alpha: 0.45),
-                        width: 2.0,
+                            .withValues(alpha: 0.16),
+                        width: 1.0,
                       ),
                     ),
                   ),
+                  Container(
+                    width: 88,
+                    height: 88,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: (isVipGold ? const Color(0xFFFFD700) : p.accent)
+                            .withValues(alpha: 0.50),
+                        width: 2.2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color:
+                              (isVipGold ? const Color(0xFFFFD700) : p.accent)
+                                  .withValues(alpha: 0.22),
+                          blurRadius: 16,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                  ),
 
-                  // Horizontal List with Distance-Based Scaling
+                  // Horizontal List with Distance-Based Scaling & Real-Time Auto-Select
                   NotificationListener<ScrollNotification>(
                     onNotification: (notification) {
+                      if (_scrollController.hasClients) {
+                        final currentScroll = _scrollController.offset;
+                        final nearestIndex = (currentScroll / _itemWidth)
+                            .round()
+                            .clamp(0, availableIcons.length - 1);
+                        if (nearestIndex != _selectedIndex) {
+                          _selectedIndex = nearestIndex;
+                          final newKey = availableIcons[nearestIndex].key;
+                          if (newKey != widget.appIconStyle) {
+                            NotekarHaptics.selection('standard');
+                            widget.onAppIconStyleChanged(newKey);
+                          }
+                        }
+                      }
+                      if (notification is ScrollEndNotification &&
+                          _scrollController.hasClients) {
+                        final currentScroll = _scrollController.offset;
+                        final nearestIndex = (currentScroll / _itemWidth)
+                            .round()
+                            .clamp(0, availableIcons.length - 1);
+                        final snapOffset = nearestIndex * _itemWidth;
+                        if ((currentScroll - snapOffset).abs() > 0.5) {
+                          Future.microtask(() {
+                            if (_scrollController.hasClients) {
+                              _scrollController.animateTo(
+                                snapOffset,
+                                duration: const Duration(milliseconds: 220),
+                                curve: Curves.easeOutCubic,
+                              );
+                            }
+                          });
+                        }
+                      }
                       setState(() {});
                       return false;
                     },
@@ -254,25 +315,36 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
                         final distance = (itemCenterOffset - currentScroll)
                             .abs();
 
-                        // Optical distance scaling
-                        final scaleFactor = (1.0 - (distance / 170.0)).clamp(
-                          0.48,
+                        // Optical distance scaling & dimming
+                        final scaleFactor = (1.0 - (distance / 140.0)).clamp(
+                          0.38,
                           1.0,
                         );
-                        final iconBoxSize = 36.0 + 26.0 * scaleFactor;
-                        final cornerRadius = 11.0 + 7.0 * scaleFactor;
-                        final opacity = (0.40 + 0.60 * scaleFactor).clamp(
-                          0.4,
-                          1.0,
-                        );
+                        final iconBoxSize =
+                            32.0 + 44.0 * ((scaleFactor - 0.38) / 0.62);
+                        final cornerRadius =
+                            10.0 + 13.0 * ((scaleFactor - 0.38) / 0.62);
+                        final opacity = (distance < 18.0)
+                            ? 1.0
+                            : (0.22 + 0.38 * ((scaleFactor - 0.38) / 0.62))
+                                  .clamp(0.22, 0.65);
                         final isSelected = item.key == widget.appIconStyle;
 
                         return GestureDetector(
                           onTap: () async {
-                            if (item.key == widget.appIconStyle) return;
-                            NotekarHaptics.selection('standard');
-                            await widget.onAppIconStyleChanged(item.key);
-                            _scrollToSelectedIcon(animate: true);
+                            final targetOffset = index * _itemWidth;
+                            _selectedIndex = index;
+                            if (_scrollController.hasClients) {
+                              _scrollController.animateTo(
+                                targetOffset,
+                                duration: const Duration(milliseconds: 260),
+                                curve: Curves.easeOutCubic,
+                              );
+                            }
+                            if (item.key != widget.appIconStyle) {
+                              NotekarHaptics.selection('standard');
+                              await widget.onAppIconStyleChanged(item.key);
+                            }
                           },
                           child: Container(
                             width: _itemWidth,

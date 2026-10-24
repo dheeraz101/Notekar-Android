@@ -760,254 +760,350 @@ class _DisplayLivePreviewState extends State<_DisplayLivePreview> {
             ),
           ),
 
-          // Mini Home Phone Frame
+          // Mini Apple HIG iPhone Mockup Frame
           Container(
-            margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-            padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+            margin: const EdgeInsets.fromLTRB(14, 2, 14, 16),
             decoration: BoxDecoration(
               color: surfaceBg,
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BorderRadius.circular(26),
               border: Border.all(
                 color: enableTranslucency
-                    ? p.border.withValues(alpha: 0.4)
-                    : p.border.withValues(alpha: 0.7),
-                width: 0.8,
+                    ? p.border.withValues(alpha: 0.55)
+                    : p.border.withValues(alpha: 0.85),
+                width: 1.2,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.16),
+                  blurRadius: 14,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-            child: Column(
-              children: [
-                // Top Island / Pill row (if homeMenuPill enabled)
-                if (homeMenuPill) ...[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(25),
+              child: Stack(
+                children: [
+                  if (enableTranslucency)
+                    Positioned.fill(
+                      child: Container(
                         decoration: BoxDecoration(
-                          color: p.surface3.withValues(alpha: 0.8),
-                          borderRadius: BorderRadius.circular(999),
-                          border: Border.all(
-                            color: p.accent.withValues(alpha: 0.35),
-                            width: 0.8,
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              p.accent.withValues(alpha: 0.08),
+                              p.surface2.withValues(alpha: 0.45),
+                              p.surface.withValues(alpha: 0.85),
+                            ],
                           ),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                      ),
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // iPhone Status Bar: 9:41, Dynamic Island / Notch, Glyphs
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Container(
-                              width: 6,
-                              height: 6,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: p.accent,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
                             Text(
-                              previewModeLabel.localized(context),
+                              '9:41',
                               style: TextStyle(
-                                color: p.text,
+                                color: p.text2,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                ],
-
-                // Live Clock Display
-                Center(
-                  child: RichText(
-                    text: TextSpan(
-                      style: TextStyle(
-                        fontFamily: clockFont,
-                        fontSize: 38,
-                        fontWeight: FontWeight.w800,
-                        color: p.text,
-                        letterSpacing: 0.5,
-                      ),
-                      children: [
-                        TextSpan(text: timeStr),
-                        if (showSeconds)
-                          TextSpan(
-                            text: secondsStr,
-                            style: TextStyle(
-                              color: highlightSeconds ? p.accent : p.text3,
-                              fontSize: 28,
-                            ),
-                          ),
-                        if (!use24HourFormat)
-                          TextSpan(
-                            text: periodStr,
-                            style: TextStyle(
-                              color: p.text2,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                // Mock Recent Moment Card (reflecting Translucency & Hint)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: enableTranslucency
-                        ? p.surface3.withValues(alpha: 0.60)
-                        : p.surface3,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: p.border.withValues(alpha: 0.35),
-                      width: 0.8,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 28,
-                        height: 28,
-                        decoration: BoxDecoration(
-                          color: p.accent.withValues(alpha: 0.16),
-                          borderRadius: BorderRadius.circular(9),
-                        ),
-                        child: Icon(
-                          CupertinoIcons.sparkles,
-                          size: 14,
-                          color: p.accent,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Deep Work Session Completed',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: p.text,
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w700,
+                            // Dynamic Island Pill or Compact Notch
+                            if (homeMenuPill)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 9,
+                                  vertical: 3.5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withValues(alpha: 0.45),
+                                  borderRadius: BorderRadius.circular(999),
+                                  border: Border.all(
+                                    color: p.accent.withValues(alpha: 0.45),
+                                    width: 0.8,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      width: 5.5,
+                                      height: 5.5,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: p.accent,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: p.accent.withValues(
+                                              alpha: 0.6,
+                                            ),
+                                            blurRadius: 4,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      previewModeLabel.localized(context),
+                                      style: TextStyle(
+                                        color: p.text,
+                                        fontSize: 9.5,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            else
+                              Container(
+                                width: 28,
+                                height: 5,
+                                decoration: BoxDecoration(
+                                  color: p.text3.withValues(alpha: 0.35),
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'Offline Sovereign Encrypted Note',
-                              style: TextStyle(color: p.text3, fontSize: 9.5),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.signal_cellular_4_bar_rounded,
+                                  size: 10,
+                                  color: p.text2,
+                                ),
+                                const SizedBox(width: 3),
+                                Icon(
+                                  Icons.wifi_rounded,
+                                  size: 10,
+                                  color: p.text2,
+                                ),
+                                const SizedBox(width: 3),
+                                Icon(
+                                  Icons.battery_full_rounded,
+                                  size: 11,
+                                  color: p.text2,
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ),
-                      if (showLastSavedHint)
+                        const SizedBox(height: 12),
+
+                        // Center Live Clock Display
+                        Center(
+                          child: RichText(
+                            text: TextSpan(
+                              style: TextStyle(
+                                fontFamily: clockFont,
+                                fontSize: 38,
+                                fontWeight: FontWeight.w800,
+                                color: p.text,
+                                letterSpacing: 0.5,
+                              ),
+                              children: [
+                                TextSpan(text: timeStr),
+                                if (showSeconds)
+                                  TextSpan(
+                                    text: secondsStr,
+                                    style: TextStyle(
+                                      color: highlightSeconds
+                                          ? p.accent
+                                          : p.text3,
+                                      fontSize: 28,
+                                    ),
+                                  ),
+                                if (!use24HourFormat)
+                                  TextSpan(
+                                    text: periodStr,
+                                    style: TextStyle(
+                                      color: p.text2,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Mock Recent Moment Card (Translucency & Saved Hint)
                         Container(
+                          width: double.infinity,
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2.5,
+                            horizontal: 12,
+                            vertical: 10,
                           ),
                           decoration: BoxDecoration(
-                            color: p.green.withValues(alpha: 0.14),
-                            borderRadius: BorderRadius.circular(6),
+                            color: enableTranslucency
+                                ? p.surface3.withValues(alpha: 0.55)
+                                : p.surface3,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: enableTranslucency
+                                  ? p.border.withValues(alpha: 0.45)
+                                  : p.border.withValues(alpha: 0.65),
+                              width: 0.8,
+                            ),
                           ),
                           child: Row(
-                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.check, size: 9, color: p.green),
-                              const SizedBox(width: 2),
-                              Text(
-                                'Saved',
-                                style: TextStyle(
-                                  color: p.green,
-                                  fontSize: 8.5,
-                                  fontWeight: FontWeight.w800,
+                              Container(
+                                width: 28,
+                                height: 28,
+                                decoration: BoxDecoration(
+                                  color: p.accent.withValues(alpha: 0.16),
+                                  borderRadius: BorderRadius.circular(9),
                                 ),
+                                child: Icon(
+                                  CupertinoIcons.sparkles,
+                                  size: 14,
+                                  color: p.accent,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Deep Work Session Completed',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: p.text,
+                                        fontSize: 11.5,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'Offline Sovereign Encrypted Note',
+                                      style: TextStyle(
+                                        color: p.text3,
+                                        fontSize: 9.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              if (showLastSavedHint)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2.5,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: p.green.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(
+                                      color: p.green.withValues(alpha: 0.35),
+                                      width: 0.6,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.check,
+                                        size: 9,
+                                        color: p.green,
+                                      ),
+                                      const SizedBox(width: 2),
+                                      Text(
+                                        'Saved',
+                                        style: TextStyle(
+                                          color: p.green,
+                                          fontSize: 8.5,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Home Screen Action Bar Preview (reflects largeControls & buttonLabels)
+                        Container(
+                          height: largeControls ? 60 : 46,
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          decoration: BoxDecoration(
+                            color: enableTranslucency
+                                ? p.surface.withValues(alpha: 0.70)
+                                : p.surface,
+                            borderRadius: BorderRadius.circular(
+                              largeControls ? 18 : 14,
+                            ),
+                            border: Border.all(
+                              color: p.border.withValues(alpha: 0.5),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              _previewControlItem(
+                                icon: CupertinoIcons.clock_fill,
+                                label: showHistoryText ? 'History' : 'Logs',
+                                showLabel: buttonLabels,
+                                large: largeControls,
+                                p: p,
+                              ),
+                              _previewControlItem(
+                                icon: CupertinoIcons.add,
+                                label: 'Log',
+                                showLabel: buttonLabels,
+                                large: largeControls,
+                                isPrimary: true,
+                                p: p,
+                              ),
+                              _previewControlItem(
+                                icon: CupertinoIcons.bell_fill,
+                                label: 'Remind',
+                                showLabel: buttonLabels,
+                                large: largeControls,
+                                p: p,
+                              ),
+                              _previewControlItem(
+                                icon: CupertinoIcons.ellipsis,
+                                label: 'Menu',
+                                showLabel: buttonLabels,
+                                large: largeControls,
+                                p: p,
                               ),
                             ],
                           ),
                         ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 14),
+                        const SizedBox(height: 10),
 
-                // Home Screen Action Bar Preview (Large Controls & Button Labels)
-                Container(
-                  height: largeControls ? 64 : 48,
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: enableTranslucency
-                        ? p.surface.withValues(alpha: 0.65)
-                        : p.surface,
-                    borderRadius: BorderRadius.circular(
-                      largeControls ? 18 : 14,
-                    ),
-                    border: Border.all(
-                      color: p.border.withValues(alpha: 0.4),
-                      width: 0.8,
+                        // Apple Home Bar Indicator
+                        Center(
+                          child: Container(
+                            width: 52,
+                            height: 3.5,
+                            decoration: BoxDecoration(
+                              color: p.text3.withValues(alpha: 0.35),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _previewControlItem(
-                        icon: CupertinoIcons.clock_fill,
-                        label: showHistoryText ? 'History' : 'Logs',
-                        showLabel: buttonLabels,
-                        large: largeControls,
-                        p: p,
-                      ),
-                      _previewControlItem(
-                        icon: CupertinoIcons.add,
-                        label: 'Log',
-                        showLabel: buttonLabels,
-                        large: largeControls,
-                        isPrimary: true,
-                        p: p,
-                      ),
-                      _previewControlItem(
-                        icon: CupertinoIcons.bell_fill,
-                        label: 'Remind',
-                        showLabel: buttonLabels,
-                        large: largeControls,
-                        p: p,
-                      ),
-                      _previewControlItem(
-                        icon: CupertinoIcons.ellipsis,
-                        label: 'Menu',
-                        showLabel: buttonLabels,
-                        large: largeControls,
-                        p: p,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Visual Settings Feature Pills
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
-            child: Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: [
-                _featurePill('Translucency', enableTranslucency, p),
-                _featurePill('Large Controls', largeControls, p),
-                _featurePill('Button Labels', buttonLabels, p),
-                _featurePill('Seconds', showSeconds, p),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -1054,46 +1150,6 @@ class _DisplayLivePreviewState extends State<_DisplayLivePreview> {
           ),
         ],
       ],
-    );
-  }
-
-  Widget _featurePill(String name, bool active, Palette p) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-      decoration: BoxDecoration(
-        color: active
-            ? p.accent.withValues(alpha: 0.12)
-            : p.surface3.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: active
-              ? p.accent.withValues(alpha: 0.3)
-              : p.border.withValues(alpha: 0.3),
-          width: 0.7,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 4.5,
-            height: 4.5,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: active ? p.accent : p.text3,
-            ),
-          ),
-          const SizedBox(width: 4),
-          Text(
-            name,
-            style: TextStyle(
-              color: active ? p.accent : p.text3,
-              fontSize: 9,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

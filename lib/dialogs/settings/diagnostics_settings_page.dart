@@ -1116,16 +1116,72 @@ class _FeatureAdaptationCard extends StatelessWidget {
 
 class _HeartbeatEcgPainter extends CustomPainter {
   final double sweepProgress;
+  final int sweepPass;
   final double connectedFactor;
   final Color liveColor;
   final Color offlineColor;
+  final bool isLowEnd;
 
   _HeartbeatEcgPainter({
     required this.sweepProgress,
+    this.sweepPass = 0,
     required this.connectedFactor,
     required this.liveColor,
     required this.offlineColor,
+    this.isLowEnd = false,
   });
+
+  // Continuous biological ECG calculation with natural sinus arrhythmia & HRV
+  double _calculateEcg(double t) {
+    if (connectedFactor <= 0.001) return 0.0;
+
+    // Continuous modulated cardiac phase (respiratory sinus arrhythmia ~75 BPM)
+    final double phase =
+        1.25 * t + 0.14 * math.sin(0.42 * t) + 0.08 * math.sin(0.85 * t);
+    final int beatIndex = phase.floor();
+    final double beatPhase = phase - beatIndex;
+
+    // Organic biological micro-variations per individual beat
+    final double pseudoRand1 = math
+        .sin(beatIndex * 12.9898 + 78.233)
+        .abs(); // 0..1
+    final double pseudoRand2 = math
+        .cos(beatIndex * 4.898 + 19.123)
+        .abs(); // 0..1
+
+    // R-spike amplitude variability (0.82x to 1.25x)
+    final double rAmp = 0.82 + 0.38 * pseudoRand1;
+    // T-wave variation
+    final double tAmp = 0.28 + 0.16 * pseudoRand2;
+    // Subtle baseline respiratory wander (0.04 max)
+    final double baselineWander = math.sin(0.35 * t + (beatIndex * 0.2)) * 0.04;
+
+    double y = baselineWander;
+
+    if (beatPhase >= 0.10 && beatPhase < 0.20) {
+      // P-wave (atrial depolarization)
+      final double p = (beatPhase - 0.10) / 0.10;
+      y += math.sin(p * math.pi) * 0.18;
+    } else if (beatPhase >= 0.26 && beatPhase < 0.29) {
+      // Q-dip (septal depolarization dip)
+      final double q = (beatPhase - 0.26) / 0.03;
+      y -= math.sin(q * math.pi) * 0.16;
+    } else if (beatPhase >= 0.29 && beatPhase < 0.34) {
+      // R-spike (ventricular depolarization peak with HRV amplitude)
+      final double r = (beatPhase - 0.29) / 0.05;
+      y += math.sin(r * math.pi) * rAmp;
+    } else if (beatPhase >= 0.34 && beatPhase < 0.39) {
+      // S-drop (ventricular depolarization negative rebound)
+      final double s = (beatPhase - 0.34) / 0.05;
+      y -= math.sin(s * math.pi) * (0.28 + 0.08 * pseudoRand2);
+    } else if (beatPhase >= 0.48 && beatPhase < 0.66) {
+      // T-wave (ventricular repolarization)
+      final double tWave = (beatPhase - 0.48) / 0.18;
+      y += math.sin(tWave * math.pi) * tAmp;
+    }
+
+    return y * connectedFactor;
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1133,96 +1189,131 @@ class _HeartbeatEcgPainter extends CustomPainter {
     final h = size.height;
     final midY = h / 2;
 
-    // Background baseline track
+    // 1. Background medical oscilloscope grid & baseline track
     final bgPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.08)
-      ..strokeWidth = 1.2
+      ..color = Colors.white.withValues(alpha: 0.07)
+      ..strokeWidth = 1.0
       ..style = PaintingStyle.stroke;
     canvas.drawLine(Offset(0, midY), Offset(w, midY), bgPaint);
 
     final activeColor = Color.lerp(offlineColor, liveColor, connectedFactor)!;
 
-    // Piecewise hospital ECG heartbeat calculation
-    double getEcgOffset(double normX) {
-      if (connectedFactor <= 0.001) return 0.0;
-      // 2 cardiac cycles across width, shifted by sweepProgress
-      final cycle = ((normX - sweepProgress) % 1.0 + 1.0) % 1.0;
-      double y = 0.0;
-      if (cycle >= 0.15 && cycle < 0.25) {
-        // P-wave (rounded pre-bump)
-        final p = (cycle - 0.15) / 0.10;
-        y = math.sin(p * math.pi) * 0.22;
-      } else if (cycle >= 0.28 && cycle < 0.31) {
-        // Q-dip (sharp downward deflection)
-        final q = (cycle - 0.28) / 0.03;
-        y = -math.sin(q * math.pi) * 0.15;
-      } else if (cycle >= 0.31 && cycle < 0.36) {
-        // R-spike (sharp tall systolic spike)
-        final r = (cycle - 0.31) / 0.05;
-        y = math.sin(r * math.pi) * 0.95;
-      } else if (cycle >= 0.36 && cycle < 0.41) {
-        // S-dip (sharp negative rebound)
-        final s = (cycle - 0.36) / 0.05;
-        y = -math.sin(s * math.pi) * 0.32;
-      } else if (cycle >= 0.48 && cycle < 0.62) {
-        // T-wave (smooth repolarization dome)
-        final t = (cycle - 0.48) / 0.14;
-        y = math.sin(t * math.pi) * 0.35;
-      }
-      return y * connectedFactor;
-    }
+    // 2. Sweep beam position and erase window
+    final sweepX = w * sweepProgress.clamp(0.0, 1.0);
+    const eraseWindowWidth = 24.0;
+    final eraseEnd = sweepX + eraseWindowWidth;
 
-    final path = Path();
-    const pointCount = 120;
-    path.moveTo(0, midY - getEcgOffset(0) * (h * 0.42));
+    const double sweepPeriod = 2.4;
 
-    for (int i = 1; i <= pointCount; i++) {
-      final nx = i / pointCount;
-      final px = nx * w;
-      final py = midY - getEcgOffset(nx) * (h * 0.42);
-      path.lineTo(px, py);
-    }
-
-    // Outer glow path
-    final glowPaint = Paint()
-      ..color = activeColor.withValues(
-        alpha: (0.2 + 0.3 * connectedFactor).clamp(0.0, 1.0),
-      )
-      ..strokeWidth = 3.6
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-    canvas.drawPath(path, glowPaint);
-
-    // Primary sharp ECG stroke
-    final mainPaint = Paint()
+    // 3. Segmented path drawing: freshly drawn line behind sweep, older line after erase
+    final linePaint = Paint()
       ..color = activeColor
-      ..strokeWidth = 1.8
+      ..strokeWidth = 2.0
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
-    canvas.drawPath(path, mainPaint);
 
-    // Live glowing sweep head dot when connected
-    if (connectedFactor > 0.05) {
-      final headNormX = ((sweepProgress + 0.36) % 1.0 + 1.0) % 1.0;
-      final headX = headNormX * w;
-      final headY = midY - getEcgOffset(headNormX) * (h * 0.42);
+    final glowPaint = isLowEnd
+        ? null
+        : (Paint()
+            ..color = activeColor.withValues(
+              alpha: (0.18 + 0.22 * connectedFactor).clamp(0.0, 1.0),
+            )
+            ..strokeWidth = 4.2
+            ..style = PaintingStyle.stroke
+            ..strokeCap = StrokeCap.round
+            ..strokeJoin = StrokeJoin.round);
 
-      final dotPaint = Paint()..color = activeColor;
-      final dotHalo = Paint()
-        ..color = activeColor.withValues(alpha: 0.35 * connectedFactor);
-      canvas.drawCircle(Offset(headX, headY), 5.5, dotHalo);
-      canvas.drawCircle(Offset(headX, headY), 2.4, dotPaint);
+    // Draw segment 1: from 0 up to sweepX (freshly drawn in current pass)
+    if (sweepX > 1.0) {
+      final freshPath = Path();
+      const step = 2.0;
+      bool started = false;
+      for (double x = 0; x <= sweepX; x += step) {
+        final normX = x / w;
+        final t = sweepPass * sweepPeriod + normX * sweepPeriod;
+        final y = midY - _calculateEcg(t) * (h * 0.42);
+        if (!started) {
+          freshPath.moveTo(x, y);
+          started = true;
+        } else {
+          freshPath.lineTo(x, y);
+        }
+      }
+      if (glowPaint != null) canvas.drawPath(freshPath, glowPaint);
+      canvas.drawPath(freshPath, linePaint);
     }
+
+    // Draw segment 2: from eraseEnd to w (dimmer persistence from previous pass)
+    if (eraseEnd < w) {
+      final oldPath = Path();
+      const step = 2.5;
+      bool started = false;
+      for (double x = eraseEnd; x <= w; x += step) {
+        final normX = x / w;
+        final t = (sweepPass - 1) * sweepPeriod + normX * sweepPeriod;
+        final y = midY - _calculateEcg(t) * (h * 0.42);
+        if (!started) {
+          oldPath.moveTo(x, y);
+          started = true;
+        } else {
+          oldPath.lineTo(x, y);
+        }
+      }
+
+      final persistencePaint = Paint()
+        ..color = activeColor.withValues(alpha: 0.32)
+        ..strokeWidth = 1.6
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round;
+
+      canvas.drawPath(oldPath, persistencePaint);
+    }
+
+    // 4. Live glowing oscilloscope sweep head at (sweepX, sweepY)
+    final sweepNormX = (sweepX / w).clamp(0.0, 1.0);
+    final sweepT = sweepPass * sweepPeriod + sweepNormX * sweepPeriod;
+    final sweepY = midY - _calculateEcg(sweepT) * (h * 0.42);
+
+    // Leading vertical erase beam gradient
+    final beamPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          activeColor.withValues(alpha: 0.0),
+          activeColor.withValues(alpha: 0.45 * connectedFactor),
+          activeColor.withValues(alpha: 0.0),
+        ],
+      ).createShader(Rect.fromLTWH(sweepX - 1.5, 0, 3.0, h));
+    canvas.drawLine(Offset(sweepX, 4), Offset(sweepX, h - 4), beamPaint);
+
+    // Glowing phosphor sweep head dot exactly at the drawing wave tip
+    final dotPaint = Paint()..color = activeColor;
+    final outerHalo = Paint()
+      ..color = activeColor.withValues(
+        alpha: (0.35 + 0.45 * connectedFactor).clamp(0.0, 1.0),
+      );
+
+    if (!isLowEnd) {
+      canvas.drawCircle(Offset(sweepX, sweepY), 6.5, outerHalo);
+    }
+    canvas.drawCircle(Offset(sweepX, sweepY), 3.0, dotPaint);
+    canvas.drawCircle(
+      Offset(sweepX, sweepY),
+      1.5,
+      Paint()..color = Colors.white,
+    );
   }
 
   @override
   bool shouldRepaint(covariant _HeartbeatEcgPainter oldDelegate) {
     return oldDelegate.sweepProgress != sweepProgress ||
+        oldDelegate.sweepPass != sweepPass ||
         oldDelegate.connectedFactor != connectedFactor ||
         oldDelegate.liveColor != liveColor ||
-        oldDelegate.offlineColor != offlineColor;
+        oldDelegate.offlineColor != offlineColor ||
+        oldDelegate.isLowEnd != isLowEnd;
   }
 }
 
@@ -1252,17 +1343,32 @@ class _LiveNetworkStatusCardState extends State<_LiveNetworkStatusCard>
   late AnimationController _animController;
   late AnimationController _connectedAnimController;
   _NetworkLiveState _state = _NetworkLiveState.stable;
+  int _sweepPass = 0;
+  double _lastAnimValue = 0.0;
 
   @override
   void initState() {
     super.initState();
+    final isLowEnd = AdaptiveEngine().isLowEnd;
     _animController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2200),
-    )..repeat();
+      duration: isLowEnd
+          ? const Duration(seconds: 8)
+          : const Duration(milliseconds: 2400),
+      value: isLowEnd ? 0.6 : 0.0,
+    );
+    _animController.addListener(() {
+      if (_animController.value < _lastAnimValue) {
+        _sweepPass++;
+      }
+      _lastAnimValue = _animController.value;
+    });
+    if (!isLowEnd) {
+      _animController.repeat();
+    }
     _connectedAnimController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 800),
+      duration: isLowEnd ? Duration.zero : const Duration(milliseconds: 800),
       value: 1.0,
     );
     _evaluateConnectivity();
@@ -1533,11 +1639,13 @@ class _LiveNetworkStatusCardState extends State<_LiveNetworkStatusCard>
                   size: const Size(double.infinity, 38),
                   painter: _HeartbeatEcgPainter(
                     sweepProgress: _animController.value,
+                    sweepPass: _sweepPass,
                     connectedFactor: _connectedAnimController.value,
                     liveColor: _state == _NetworkLiveState.inFlight
                         ? p.accent
                         : p.green,
                     offlineColor: p.red,
+                    isLowEnd: AdaptiveEngine().isLowEnd,
                   ),
                 ),
               );

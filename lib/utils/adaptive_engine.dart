@@ -35,6 +35,13 @@ class AdaptiveEngine {
 
   bool get isLowEnd => _tier == PerformanceTier.low;
 
+  bool get isLowEndDevice => _tier == PerformanceTier.low;
+
+  bool get supportsContinuousAnimations => _tier != PerformanceTier.low;
+
+  Duration animationDuration(Duration standard) =>
+      isLowEnd ? Duration.zero : standard;
+
   bool get supportsBlur => _tier != PerformanceTier.low;
 
   bool get supportsAdvancedAnimations => _tier == PerformanceTier.high;

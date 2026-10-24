@@ -804,6 +804,103 @@ const List<HelpGuideItem> allGuideItems = [
       'receive share',
     ],
   ),
+  HelpGuideItem(
+    icon: Icons.link_rounded,
+    title: 'Interactive Note Preview Links & Safe Departure',
+    content:
+        'Web URLs and Markdown links in note preview popups are highlighted and clickable. Tapping any link opens NoteKar\'s Cupertino external link departure alert, displaying the destination domain and confirming your intent before opening your browser.',
+    isFaq: false,
+    keywords: [
+      'links',
+      'clickable links',
+      'note preview',
+      'url',
+      'external link',
+      'safe link',
+      'departure warning',
+      'markdown link',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.arrow_upward_rounded,
+    title: 'Universal Title Tap-to-Scroll',
+    content:
+        'Tap any sheet title, page header, or dialog navigation bar to smoothly and instantly scroll back to the top. Accompanied by a subtle haptic feedback click, this gesture works universally across History, Life Audit, Settings, and details views.',
+    isFaq: false,
+    keywords: [
+      'title scroll',
+      'tap header to top',
+      'scroll to top',
+      'tap to top',
+      'universal scroll',
+      'quick scroll',
+      'header tap',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.lock_outline_rounded,
+    title: 'External Link HTTPS Verification & Security Check',
+    content:
+        'NoteKar actively checks external URLs before launching them in your browser. Encrypted HTTPS links display an emerald verified badge confirming transport security, while plain HTTP links trigger an amber caution advising that unencrypted links expose browsing activity.',
+    isFaq: false,
+    keywords: [
+      'https',
+      'encrypted link',
+      'external url',
+      'safe links',
+      'link security',
+      'departure sheet',
+      'http warning',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.monitor_heart_rounded,
+    title: 'Real-Time ECG Network Oscilloscope',
+    content:
+        'The Network Monitor includes a hospital-grade oscilloscope sweep beam displaying procedurally varied cardiac cycles with organic Heart Rate Variability (HRV), P-Q-R-S-T waves, and trailing phosphorescence. If internet connectivity drops, the sweep transitions smoothly into a crimson flatline.',
+    isFaq: false,
+    keywords: [
+      'ecg',
+      'heartbeat',
+      'oscilloscope',
+      'pulse',
+      'cardiac',
+      'network monitor',
+      'sweep',
+      'flatline',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.speed_rounded,
+    title: 'Adaptive Performance & Low-End Acceleration',
+    content:
+        'NoteKar\'s AdaptiveEngine inspects your device hardware (RAM capacity and processor cores) to set the optimal performance tier. On low-end devices, continuous canvas animation loops and GPU-heavy blur shaders are automatically bypassed, and transition durations collapse to zero for instant responsiveness.',
+    isFaq: false,
+    keywords: [
+      'adaptive engine',
+      'low end',
+      'acceleration',
+      'hardware governor',
+      'target fps',
+      'instant transitions',
+      'performance tier',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.psychology_rounded,
+    title: 'Circadian Relapse Trigger & Behavioral Pattern Analysis',
+    content:
+        'Sobriety Companion incorporates deep circadian trigger and emotional precursor analysis. It categorizes vulnerability hours across Morning, Afternoon, Evening, and Late Night windows, clustering triggers (Stress, Fatigue, Boredom, Social) to predict and prevent relapse.',
+    isFaq: false,
+    keywords: [
+      'circadian triggers',
+      'relapse prevention',
+      'trigger analysis',
+      'mood precursors',
+      'sobriety companion',
+      'vulnerability',
+    ],
+  ),
 ];
 
 const List<HelpGuideItem> allHelpFaqItems = [
@@ -1496,23 +1593,6 @@ const List<HelpGuideItem> allHelpFaqItems = [
       'diagnostics',
       'build number',
       'tap 7 times',
-    ],
-  ),
-  HelpGuideItem(
-    icon: Icons.link_rounded,
-    title: 'Interactive Note Preview Links & Safe Departure',
-    content:
-        'Web URLs and Markdown links in note preview popups are highlighted and clickable. Tapping any link opens NoteKar\'s Cupertino external link departure alert, displaying the destination domain and confirming your intent before opening your browser.',
-    isFaq: false,
-    keywords: [
-      'links',
-      'clickable links',
-      'note preview',
-      'url',
-      'external link',
-      'safe link',
-      'departure warning',
-      'markdown link',
     ],
   ),
 ];
