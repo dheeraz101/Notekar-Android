@@ -460,6 +460,16 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
     super.dispose();
   }
 
+  void _handleToggle() {
+    if (!widget.enabled) {
+      final message = widget.disabledMessage;
+      if (message != null) widget.onDisabledTap?.call(message);
+      return;
+    }
+    if (widget.isSecurity) HapticFeedback.heavyImpact();
+    widget.onChanged(!widget.value);
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = widget.p;
@@ -469,177 +479,184 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
     final hasSubtitle = widget.subtitle != null && widget.subtitle!.isNotEmpty;
     final hasIcon = widget.icon != null;
 
-    return GestureDetector(
-      onTapDown: (_) {
-        _stretchController.forward();
-      },
-      onTapUp: (_) {
-        _stretchController.reverse();
-      },
-      onTapCancel: () {
-        _stretchController.reverse();
-      },
-      onTap: () {
-        if (!enabled) {
-          final message = widget.disabledMessage;
-          if (message != null) widget.onDisabledTap?.call(message);
-          return;
-        }
-        if (widget.isSecurity) {
-          HapticFeedback.heavyImpact();
-        }
-        widget.onChanged(!value);
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: hasIcon ? 16 : 20,
-          vertical: 12,
-        ),
-        decoration: const BoxDecoration(color: Colors.transparent),
-        child: Row(
-          crossAxisAlignment: hasSubtitle
-              ? CrossAxisAlignment.start
-              : CrossAxisAlignment.center,
-          children: [
-            if (hasIcon) ...[
-              Container(
-                width: 29,
-                height: 29,
-                margin: hasSubtitle ? const EdgeInsets.only(top: 9) : null,
-                decoration: BoxDecoration(
-                  color: (enabled && value ? switchColor : p.text3).withValues(
-                    alpha: 0.10,
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  widget.icon,
-                  color: enabled && value ? switchColor : p.text2,
-                  size: 18,
-                ),
-              ),
-              const SizedBox(width: 12),
-            ],
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (hasSubtitle) const SizedBox(height: 3),
-                  Text(
-                    widget.title.localized(context),
-                    style: TextStyle(
-                      color: enabled ? p.text : p.text2,
-                      fontWeight: FontWeight.w600,
-                      fontVariations: const [FontVariation('wght', 600)],
-                      fontSize: hasSubtitle ? 14 : 15,
-                    ),
-                  ),
-                  if (hasSubtitle) ...[
-                    const SizedBox(height: 3),
-                    Text(
-                      widget.subtitle!.localized(context),
-                      style: TextStyle(
-                        color: enabled ? p.text2 : p.text3,
-                        fontSize: 12,
-                        height: 1.3,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
+    final semanticLabel = widget.subtitle == null
+        ? widget.title.localized(context)
+        : '${widget.title.localized(context)}. ${widget.subtitle!.localized(context)}';
+
+    return Semantics(
+      label: semanticLabel,
+      toggled: value,
+      enabled: enabled,
+      hint: enabled
+          ? 'Double tap to change'.localized(context)
+          : widget.disabledMessage?.localized(context),
+      onTap: enabled ? _handleToggle : null,
+      child: ExcludeSemantics(
+        child: GestureDetector(
+          onTapDown: (_) {
+            _stretchController.forward();
+          },
+          onTapUp: (_) {
+            _stretchController.reverse();
+          },
+          onTapCancel: () {
+            _stretchController.reverse();
+          },
+          onTap: _handleToggle,
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: hasIcon ? 16 : 20,
+              vertical: 12,
             ),
-            const SizedBox(width: 16),
-            Padding(
-              padding: EdgeInsets.only(top: hasSubtitle ? 4 : 0),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeInOut,
-                width: 62,
-                // Refined HIG width
-                height: 32,
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  color: enabled && value ? switchColor : p.surface3,
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(
-                    color: enabled && value ? switchColor : p.border,
+            decoration: const BoxDecoration(color: Colors.transparent),
+            child: Row(
+              crossAxisAlignment: hasSubtitle
+                  ? CrossAxisAlignment.start
+                  : CrossAxisAlignment.center,
+              children: [
+                if (hasIcon) ...[
+                  Container(
+                    width: 29,
+                    height: 29,
+                    margin: hasSubtitle ? const EdgeInsets.only(top: 9) : null,
+                    decoration: BoxDecoration(
+                      color: (enabled && value ? switchColor : p.text3)
+                          .withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      widget.icon,
+                      color: enabled && value ? switchColor : p.text2,
+                      size: 18,
+                    ),
                   ),
-                ),
-                child: RepaintBoundary(
-                  child: Stack(
+                  const SizedBox(width: 12),
+                ],
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // "On" Indicator (Apple HIG Accessibility '|' Bar)
-                      AnimatedOpacity(
-                        duration: const Duration(milliseconds: 200),
-                        opacity: value ? 1.0 : 0.0,
-                        child: Align(
-                          alignment: const Alignment(-0.58, 0),
-                          child: Container(
-                            width: 2.0,
-                            height: 10.5,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.85),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
+                      if (hasSubtitle) const SizedBox(height: 3),
+                      Text(
+                        widget.title.localized(context),
+                        style: TextStyle(
+                          color: enabled ? p.text : p.text2,
+                          fontWeight: FontWeight.w600,
+                          fontVariations: const [FontVariation('wght', 600)],
+                          fontSize: hasSubtitle ? 14 : 15,
+                        ),
+                      ),
+                      if (hasSubtitle) ...[
+                        const SizedBox(height: 3),
+                        Text(
+                          widget.subtitle!.localized(context),
+                          style: TextStyle(
+                            color: enabled ? p.text2 : p.text3,
+                            fontSize: 12,
+                            height: 1.3,
                           ),
                         ),
-                      ),
-                      // "Off" Indicator (Apple HIG Accessibility 'O' Ring)
-                      AnimatedOpacity(
-                        duration: const Duration(milliseconds: 200),
-                        opacity: !value ? 1.0 : 0.0,
-                        child: Align(
-                          alignment: const Alignment(0.72, 0),
-                          child: Container(
-                            width: 8.0,
-                            height: 8.0,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: p.text3.withValues(alpha: 0.50),
-                                width: 1.5,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      AnimatedAlign(
-                        duration: const Duration(milliseconds: 200),
-                        curve: Curves.easeInOut,
-                        alignment: value
-                            ? Alignment.centerRight
-                            : Alignment.centerLeft,
-                        child: AnimatedBuilder(
-                          animation: _stretchController,
-                          builder: (context, child) {
-                            // Fluid "pill" thumb stretch animation
-                            final stretch = _stretchController.value * 10;
-                            return Container(
-                              width:
-                                  34 + stretch, // Refined base thumb width 34
-                              height: 28,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(999),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.15),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ),
+                      ],
                     ],
                   ),
                 ),
-              ),
+                const SizedBox(width: 16),
+                Padding(
+                  padding: EdgeInsets.only(top: hasSubtitle ? 4 : 0),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInOut,
+                    width: 62,
+                    // Refined HIG width
+                    height: 32,
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: enabled && value ? switchColor : p.surface3,
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: enabled && value ? switchColor : p.border,
+                      ),
+                    ),
+                    child: RepaintBoundary(
+                      child: Stack(
+                        children: [
+                          // "On" Indicator (Apple HIG Accessibility '|' Bar)
+                          AnimatedOpacity(
+                            duration: const Duration(milliseconds: 200),
+                            opacity: value ? 1.0 : 0.0,
+                            child: Align(
+                              alignment: const Alignment(-0.58, 0),
+                              child: Container(
+                                width: 2.0,
+                                height: 10.5,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.85),
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                              ),
+                            ),
+                          ),
+                          // "Off" Indicator (Apple HIG Accessibility 'O' Ring)
+                          AnimatedOpacity(
+                            duration: const Duration(milliseconds: 200),
+                            opacity: !value ? 1.0 : 0.0,
+                            child: Align(
+                              alignment: const Alignment(0.72, 0),
+                              child: Container(
+                                width: 8.0,
+                                height: 8.0,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: p.text3.withValues(alpha: 0.50),
+                                    width: 1.5,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          AnimatedAlign(
+                            duration: const Duration(milliseconds: 200),
+                            curve: Curves.easeInOut,
+                            alignment: value
+                                ? Alignment.centerRight
+                                : Alignment.centerLeft,
+                            child: AnimatedBuilder(
+                              animation: _stretchController,
+                              builder: (context, child) {
+                                // Fluid "pill" thumb stretch animation
+                                final stretch = _stretchController.value * 10;
+                                return Container(
+                                  width:
+                                      34 +
+                                      stretch, // Refined base thumb width 34
+                                  height: 28,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(999),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(
+                                          alpha: 0.15,
+                                        ),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -820,67 +837,92 @@ class ColorChoiceSetting extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 8,
-            runSpacing: 8,
-            children: _choices.map((key) {
-              final color = accentColorFor(key, theme: p.name);
-              final active = value == key;
-              final label = key.localized(context);
-              return Semantics(
-                button: true,
-                selected: active,
-                label: '$label accent'.localized(context),
-                child: Tooltip(
-                  message: label,
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkResponse(
+          LayoutBuilder(
+            builder: (context, constraints) {
+              const cellExtent = 56.0;
+              const spacing = 8.0;
+              final columns =
+                  ((constraints.maxWidth + spacing) / (cellExtent + spacing))
+                      .floor()
+                      .clamp(1, 5)
+                      .toInt();
+              return GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _choices.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: columns,
+                  crossAxisSpacing: spacing,
+                  mainAxisSpacing: spacing,
+                  mainAxisExtent: cellExtent,
+                ),
+                itemBuilder: (context, index) {
+                  final key = _choices[index];
+                  final color = accentColorFor(key, theme: p.name);
+                  final active = value == key;
+                  final label = '${key.localized(context)} accent';
+                  return Center(
+                    child: Semantics(
+                      button: true,
+                      selected: active,
                       onTap: () => onChanged(key),
-                      radius: 30,
-                      containedInkWell: true,
-                      customBorder: const CircleBorder(),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
-                        curve: Curves.easeOutCubic,
-                        width: 48,
-                        height: 48,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: active
-                              ? color.withValues(alpha: 0.16)
-                              : Colors.transparent,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: active ? color : p.border,
-                            width: active ? 2 : 1,
+                      label: active
+                          ? 'Selected: $label'.localized(context)
+                          : label.localized(context),
+                      child: ExcludeSemantics(
+                        child: Tooltip(
+                          message: key.localized(context),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkResponse(
+                              onTap: () => onChanged(key),
+                              radius: 30,
+                              containedInkWell: true,
+                              customBorder: const CircleBorder(),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 180),
+                                curve: Curves.easeOutCubic,
+                                width: 48,
+                                height: 48,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: active
+                                      ? color.withValues(alpha: 0.16)
+                                      : Colors.transparent,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: active ? color : p.border,
+                                    width: active ? 2 : 1,
+                                  ),
+                                ),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 180),
+                                  width: active ? 28 : 32,
+                                  height: active ? 28 : 32,
+                                  decoration: BoxDecoration(
+                                    color: color,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: active
+                                      ? Icon(
+                                          CupertinoIcons.checkmark,
+                                          size: 15,
+                                          color: color.computeLuminance() > 0.48
+                                              ? Colors.black87
+                                              : Colors.white,
+                                        )
+                                      : null,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 180),
-                          width: active ? 28 : 32,
-                          height: active ? 28 : 32,
-                          decoration: BoxDecoration(
-                            color: color,
-                            shape: BoxShape.circle,
-                          ),
-                          child: active
-                              ? Icon(
-                                  CupertinoIcons.checkmark,
-                                  size: 15,
-                                  color: color.computeLuminance() > 0.48
-                                      ? Colors.black87
-                                      : Colors.white,
-                                )
-                              : null,
                         ),
                       ),
                     ),
-                  ),
-                ),
+                  );
+                },
               );
-            }).toList(),
+            },
           ),
           const SizedBox(height: 20),
           _AccentPreview(
@@ -901,6 +943,11 @@ class _AccentPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final timeOfDay = TimeOfDay.fromDateTime(now);
+    final timeLabel = MaterialLocalizations.of(
+      context,
+    ).formatTimeOfDay(timeOfDay);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -912,14 +959,14 @@ class _AccentPreview extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Live preview'.localized(context),
+            'Example home preview'.localized(context),
             style: TextStyle(
               color: p.text2,
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Row(
             children: [
               Expanded(
@@ -927,87 +974,110 @@ class _AccentPreview extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Today'.localized(context),
-                      style: TextStyle(color: p.text3, fontSize: 12),
+                      'Home'.localized(context),
+                      style: TextStyle(
+                        color: p.text3,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 4),
                     Text(
-                      'A focused day'.localized(context),
+                      timeLabel,
                       style: TextStyle(
                         color: p.text,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 27,
+                        fontWeight: FontWeight.w700,
+                        fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                     ),
                   ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 11,
-                  vertical: 7,
-                ),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  'Selected'.localized(context),
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'Example'.localized(context),
+                    style: TextStyle(color: p.text3, fontSize: 10),
                   ),
-                ),
+                  const SizedBox(height: 5),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      'Focus mode'.localized(context),
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
-          ),
-          const SizedBox(height: 14),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: LinearProgressIndicator(
-              value: 0.68,
-              minHeight: 5,
-              backgroundColor: p.surface3,
-              valueColor: AlwaysStoppedAnimation<Color>(color),
-            ),
           ),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              Icon(
-                CupertinoIcons.checkmark_circle_fill,
-                color: color,
-                size: 17,
-              ),
-              const SizedBox(width: 7),
-              Expanded(
-                child: Text(
-                  'Highlights and controls use this accent'.localized(context),
-                  style: TextStyle(color: p.text2, fontSize: 12),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 7,
-                ),
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  'Action'.localized(context),
-                  style: TextStyle(
-                    color: color.computeLuminance() > 0.48
-                        ? Colors.black87
-                        : Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: p.surface2,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: p.border.withValues(alpha: 0.65)),
+            ),
+            child: Row(
+              children: [
+                Icon(CupertinoIcons.circle_fill, color: color, size: 8),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Focus session'.localized(context),
+                        style: TextStyle(
+                          color: p.text,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Today · 42 min'.localized(context),
+                        style: TextStyle(color: p.text3, fontSize: 11),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-            ],
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 7,
+                  ),
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    'Quick log'.localized(context),
+                    style: TextStyle(
+                      color: color.computeLuminance() > 0.48
+                          ? Colors.black87
+                          : Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

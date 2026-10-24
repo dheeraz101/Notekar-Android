@@ -83,6 +83,47 @@ class _ResetAllConfirmSheetState extends State<ResetAllConfirmSheet> {
               ),
             ),
           ),
+          const SizedBox(height: spacing12),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: p.surface2.withValues(alpha: 0.6),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: p.border.withValues(alpha: 0.4)),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(CupertinoIcons.lock_shield, size: 16, color: p.red),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Zero-Knowledge Notice'.localized(context),
+                        style: TextStyle(
+                          color: p.text,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        'NoteKar does not collect or sync data to any cloud or remote server. Once confirmed, this data is permanently erased from this device and cannot be recovered by anyone.'
+                            .localized(context),
+                        style: TextStyle(
+                          color: p.text2,
+                          fontSize: 10.5,
+                          height: 1.35,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: spacing20),
           Row(
             children: [

@@ -99,6 +99,27 @@ BackupValidationResult validateNoteKarBackupContent(String content) {
     }
 
     final timestamp = timestampValue.toInt();
+    final rawTags = item['tags'];
+    final List<String> tags = rawTags is List
+        ? rawTags.map((e) => e.toString()).toList()
+        : const [];
+    final category = item['category'] is String
+        ? item['category'] as String
+        : null;
+    final goalId = item['goalId'] is String ? item['goalId'] as String : null;
+    final projectId = item['projectId'] is String
+        ? item['projectId'] as String
+        : null;
+    final imagePath = item['imagePath'] is String
+        ? item['imagePath'] as String
+        : null;
+    final voicePath = item['voicePath'] is String
+        ? item['voicePath'] as String
+        : null;
+    final voiceDurationMs = item['voiceDurationMs'] is num
+        ? (item['voiceDurationMs'] as num).toInt()
+        : null;
+
     final moment = Moment(
       id: i + 1,
       // ID will be reassigned during merge
@@ -106,6 +127,13 @@ BackupValidationResult validateNoteKarBackupContent(String content) {
       type: validatedType,
       date: dateKey(DateTime.fromMillisecondsSinceEpoch(timestamp)),
       note: note.length > 2000 ? note.substring(0, 2000) : note,
+      category: category,
+      tags: tags,
+      goalId: goalId,
+      projectId: projectId,
+      imagePath: imagePath,
+      voicePath: voicePath,
+      voiceDurationMs: voiceDurationMs,
     );
 
     if (moment.isValid) {

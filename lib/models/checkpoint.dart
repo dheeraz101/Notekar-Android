@@ -102,8 +102,10 @@ class CheckpointStats {
     return '$h12:$mStr $ampm';
   }
 
+  bool get hasSufficientData => totalLoggedCount >= 3;
+
   String get formattedVariance {
-    if (totalLoggedCount <= 1) return '±0m';
+    if (!hasSufficientData) return 'Need 3+ logs';
     final mins = stdDevMinutes.round();
     if (mins >= 60) {
       final h = mins ~/ 60;
@@ -114,6 +116,10 @@ class CheckpointStats {
   }
 
   String get consistencyLevel {
+    if (!hasSufficientData) {
+      if (totalLoggedCount == 0) return 'No logs yet';
+      return 'Building Rhythm ($totalLoggedCount/3)';
+    }
     if (consistencyScore >= 85) return 'Optimal Consistency';
     if (consistencyScore >= 70) return 'Moderate Consistency';
     if (consistencyScore >= 50) return 'Variable Rhythm';
@@ -121,6 +127,7 @@ class CheckpointStats {
   }
 
   Color get consistencyColor {
+    if (!hasSufficientData) return const Color(0xFF8E8E93);
     if (consistencyScore >= 85) return const Color(0xFF30D158);
     if (consistencyScore >= 70) return const Color(0xFF0A84FF);
     if (consistencyScore >= 50) return const Color(0xFFFF9F0A);

@@ -486,48 +486,59 @@ class DashboardMetricsService {
     DateTime now,
   ) {
     final todayStart = DateTime(now.year, now.month, now.day);
+    final tomorrowStart = todayStart.add(const Duration(days: 1));
     final yesterdayStart = todayStart.subtract(const Duration(days: 1));
 
     switch (timeframe) {
       case DashboardTimeframe.today:
+        final todayKey = dateKey(now);
         final current = allEntries.where((e) {
+          if (e.date == todayKey) return true;
           final dt = DateTime.fromMillisecondsSinceEpoch(e.timestamp);
-          return dt.isAfter(todayStart);
+          return !dt.isBefore(todayStart) && dt.isBefore(tomorrowStart);
         }).toList();
         final prev = allEntries.where((e) {
           final dt = DateTime.fromMillisecondsSinceEpoch(e.timestamp);
-          return dt.isAfter(yesterdayStart) && dt.isBefore(todayStart);
+          return !dt.isBefore(yesterdayStart) && dt.isBefore(todayStart);
         }).toList();
         return (current, prev, 'yesterday');
 
       case DashboardTimeframe.week:
-        final weekStart = todayStart.subtract(const Duration(days: 7));
+        // Calendar week aligned with tracked duration calculation
+        final weekStart = todayStart.subtract(Duration(days: now.weekday - 1));
+        final nextWeekStart = weekStart.add(const Duration(days: 7));
         final prevWeekStart = weekStart.subtract(const Duration(days: 7));
         final current = allEntries.where((e) {
           final dt = DateTime.fromMillisecondsSinceEpoch(e.timestamp);
-          return dt.isAfter(weekStart);
+          return !dt.isBefore(weekStart) && dt.isBefore(nextWeekStart);
         }).toList();
         final prev = allEntries.where((e) {
           final dt = DateTime.fromMillisecondsSinceEpoch(e.timestamp);
-          return dt.isAfter(prevWeekStart) && dt.isBefore(weekStart);
+          return !dt.isBefore(prevWeekStart) && dt.isBefore(weekStart);
         }).toList();
         return (current, prev, 'last week');
 
       case DashboardTimeframe.month:
-        final monthStart = todayStart.subtract(const Duration(days: 30));
-        final prevMonthStart = monthStart.subtract(const Duration(days: 30));
+        // Calendar month aligned with tracked duration calculation
+        final monthStart = DateTime(now.year, now.month, 1);
+        final nextMonthStart = DateTime(now.year, now.month + 1, 1);
+        final prevMonthStart = DateTime(now.year, now.month - 1, 1);
         final current = allEntries.where((e) {
           final dt = DateTime.fromMillisecondsSinceEpoch(e.timestamp);
-          return dt.isAfter(monthStart);
+          return !dt.isBefore(monthStart) && dt.isBefore(nextMonthStart);
         }).toList();
         final prev = allEntries.where((e) {
           final dt = DateTime.fromMillisecondsSinceEpoch(e.timestamp);
-          return dt.isAfter(prevMonthStart) && dt.isBefore(monthStart);
+          return !dt.isBefore(prevMonthStart) && dt.isBefore(monthStart);
         }).toList();
         return (current, prev, 'last month');
 
       case DashboardTimeframe.all:
-        return (allEntries, [], 'previous');
+        // Exclude invalid future timestamps from all-time stats
+        final validEntries = allEntries
+            .where((e) => e.timestamp <= now.millisecondsSinceEpoch)
+            .toList();
+        return (validEntries, [], 'previous');
     }
   }
 

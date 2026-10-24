@@ -590,7 +590,74 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
           bottomPadding: spacing16,
         ),
         const SizedBox(height: spacing8),
-        SettingsBetaNote(p: p, onLearnMore: widget.onLearnMoreBeta),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text.rich(
+            TextSpan(
+              text: 'NoteKar keeps all records local on your device. '
+                  .localized(context),
+              style: TextStyle(
+                color: p.text3,
+                fontSize: 12,
+                height: 1.4,
+                fontFamily: 'Inter',
+              ),
+              children: [
+                WidgetSpan(
+                  alignment: PlaceholderAlignment.baseline,
+                  baseline: TextBaseline.alphabetic,
+                  child: GestureDetector(
+                    onTap: () => widget.onOpenLink(termsUrl),
+                    child: Text(
+                      'Terms of Service'.localized(context),
+                      style: TextStyle(
+                        color: p.accent,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Inter',
+                      ),
+                    ),
+                  ),
+                ),
+                TextSpan(text: ' · '.localized(context)),
+                WidgetSpan(
+                  alignment: PlaceholderAlignment.baseline,
+                  baseline: TextBaseline.alphabetic,
+                  child: GestureDetector(
+                    onTap: () => widget.onOpenLink(privacyPolicyUrl),
+                    child: Text(
+                      'Privacy Policy'.localized(context),
+                      style: TextStyle(
+                        color: p.accent,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Inter',
+                      ),
+                    ),
+                  ),
+                ),
+                TextSpan(text: ' · '.localized(context)),
+                WidgetSpan(
+                  alignment: PlaceholderAlignment.baseline,
+                  baseline: TextBaseline.alphabetic,
+                  child: GestureDetector(
+                    onTap: () => widget.onOpenLink(githubRepo),
+                    child: Text(
+                      'Source Code'.localized(context),
+                      style: TextStyle(
+                        color: p.accent,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Inter',
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
         const SizedBox(height: spacing48),
       ],
     );
@@ -1020,6 +1087,60 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
               child: Text('Check for updates'.localized(context)),
             ),
           ],
+          const SizedBox(height: 14),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Text.rich(
+              TextSpan(
+                text:
+                    'By downloading and installing updates, you agree to NoteKar’s '
+                        .localized(context),
+                style: TextStyle(
+                  color: p.text3,
+                  fontSize: 11,
+                  height: 1.35,
+                  fontFamily: 'Inter',
+                ),
+                children: [
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.baseline,
+                    baseline: TextBaseline.alphabetic,
+                    child: GestureDetector(
+                      onTap: () => widget.onOpenLink(termsUrl),
+                      child: Text(
+                        'Terms of Service'.localized(context),
+                        style: TextStyle(
+                          color: p.accent,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ),
+                  ),
+                  TextSpan(text: ' and acknowledge our '.localized(context)),
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.baseline,
+                    baseline: TextBaseline.alphabetic,
+                    child: GestureDetector(
+                      onTap: () => widget.onOpenLink(privacyPolicyUrl),
+                      child: Text(
+                        'Privacy Policy'.localized(context),
+                        style: TextStyle(
+                          color: p.accent,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ),
+                  ),
+                  const TextSpan(text: '.'),
+                ],
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
         ],
       ),
     );

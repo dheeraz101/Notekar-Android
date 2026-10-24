@@ -33,23 +33,42 @@ class _ActivityTagsSettingsPageState extends State<ActivityTagsSettingsPage> {
   bool _loading = true;
 
   static final List<int> _availableGlyphs = [
-    CupertinoIcons.tag_fill.codePoint,
-    CupertinoIcons.compass_fill.codePoint,
-    CupertinoIcons.flame_fill.codePoint,
-    CupertinoIcons.book_fill.codePoint,
-    CupertinoIcons.device_laptop.codePoint,
-    CupertinoIcons.drop_fill.codePoint,
-    CupertinoIcons.sparkles.codePoint,
-    CupertinoIcons.doc_text_fill.codePoint,
-    CupertinoIcons.heart_circle_fill.codePoint,
-    CupertinoIcons.car_fill.codePoint,
-    CupertinoIcons.flame.codePoint,
-    CupertinoIcons.trash.codePoint,
-    CupertinoIcons.gamecontroller_fill.codePoint,
-    CupertinoIcons.person_2_fill.codePoint,
-    CupertinoIcons.suit_club_fill.codePoint,
-    CupertinoIcons.moon_fill.codePoint,
+    Icons.label_rounded.codePoint,
+    Icons.explore_rounded.codePoint,
+    Icons.local_fire_department_rounded.codePoint,
+    Icons.menu_book_rounded.codePoint,
+    Icons.laptop_mac_rounded.codePoint,
+    Icons.water_drop_rounded.codePoint,
+    Icons.auto_awesome_rounded.codePoint,
+    Icons.description_rounded.codePoint,
+    Icons.favorite_rounded.codePoint,
+    Icons.directions_car_rounded.codePoint,
+    Icons.delete_rounded.codePoint,
+    Icons.sports_esports_rounded.codePoint,
+    Icons.people_rounded.codePoint,
+    Icons.park_rounded.codePoint,
+    Icons.dark_mode_rounded.codePoint,
+    Icons.self_improvement_rounded.codePoint,
   ];
+
+  static final Map<int, String> _glyphLabels = {
+    Icons.label_rounded.codePoint: 'Tag',
+    Icons.explore_rounded.codePoint: 'Explore',
+    Icons.local_fire_department_rounded.codePoint: 'Energy',
+    Icons.menu_book_rounded.codePoint: 'Reading',
+    Icons.laptop_mac_rounded.codePoint: 'Work',
+    Icons.water_drop_rounded.codePoint: 'Water',
+    Icons.auto_awesome_rounded.codePoint: 'Creative',
+    Icons.description_rounded.codePoint: 'Writing',
+    Icons.favorite_rounded.codePoint: 'Health',
+    Icons.directions_car_rounded.codePoint: 'Travel',
+    Icons.delete_rounded.codePoint: 'Chores',
+    Icons.sports_esports_rounded.codePoint: 'Games',
+    Icons.people_rounded.codePoint: 'Social',
+    Icons.park_rounded.codePoint: 'Outdoors',
+    Icons.dark_mode_rounded.codePoint: 'Rest',
+    Icons.self_improvement_rounded.codePoint: 'Mindfulness',
+  };
 
   @override
   void initState() {
@@ -70,7 +89,12 @@ class _ActivityTagsSettingsPageState extends State<ActivityTagsSettingsPage> {
   Future<void> _promptAddOrEditTag([ActivityTag? existing]) async {
     HapticFeedback.lightImpact();
     final labelCtrl = TextEditingController(text: existing?.label ?? '');
-    int selectedGlyph = existing?.iconCodePoint ?? _availableGlyphs[0];
+    int selectedGlyph = existing == null
+        ? _availableGlyphs[0]
+        : ActivityTag.iconForCodePoint(existing.iconCodePoint).codePoint;
+    if (!_availableGlyphs.contains(selectedGlyph)) {
+      selectedGlyph = _availableGlyphs[0];
+    }
 
     final saved = await showDialog<bool>(
       context: context,
@@ -127,31 +151,54 @@ class _ActivityTagsSettingsPageState extends State<ActivityTagsSettingsPage> {
                     alignment: WrapAlignment.center,
                     children: _availableGlyphs.map((glyph) {
                       final isSelected = selectedGlyph == glyph;
-                      return GestureDetector(
-                        onTap: () {
-                          setDialogState(() => selectedGlyph = glyph);
-                        },
-                        child: Container(
-                          width: 34,
-                          height: 34,
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? widget.p.accent.withValues(alpha: 0.2)
-                                : widget.p.surface3,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: isSelected
-                                  ? widget.p.accent
-                                  : widget.p.border.withValues(alpha: 0.4),
-                              width: isSelected ? 1.8 : 0.8,
+                      final icon = ActivityTag.iconForCodePoint(glyph);
+                      void selectGlyph() {
+                        setDialogState(() => selectedGlyph = glyph);
+                      }
+
+                      return Semantics(
+                        button: true,
+                        selected: isSelected,
+                        onTap: selectGlyph,
+                        label: isSelected
+                            ? 'Selected: ${_glyphLabels[glyph]!.localized(context)}'
+                                  .localized(context)
+                            : _glyphLabels[glyph]!.localized(context),
+                        child: ExcludeSemantics(
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: selectGlyph,
+                            child: SizedBox(
+                              width: 48,
+                              height: 48,
+                              child: Center(
+                                child: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? widget.p.accent.withValues(alpha: 0.2)
+                                        : widget.p.surface3,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? widget.p.accent
+                                          : widget.p.border.withValues(
+                                              alpha: 0.4,
+                                            ),
+                                      width: isSelected ? 1.8 : 0.8,
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    icon,
+                                    size: 18,
+                                    color: isSelected
+                                        ? widget.p.accent
+                                        : widget.p.text2,
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
-                          child: Icon(
-                            ActivityTag.iconForCodePoint(glyph),
-                            size: 16,
-                            color: isSelected
-                                ? widget.p.accent
-                                : widget.p.text2,
                           ),
                         ),
                       );
@@ -195,6 +242,8 @@ class _ActivityTagsSettingsPageState extends State<ActivityTagsSettingsPage> {
         final updated = existing.copyWith(
           label: label,
           iconCodePoint: selectedGlyph,
+          iconFontFamily: 'MaterialIcons',
+          clearIconFontPackage: true,
         );
         await _tagService.updateActivityTag(updated);
         if (oldLabel.toLowerCase() != label.toLowerCase()) {

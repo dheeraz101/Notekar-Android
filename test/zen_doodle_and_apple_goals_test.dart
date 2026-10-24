@@ -150,7 +150,7 @@ void main() {
 
         // Check Apple grouped headers
         expect(find.text('GOAL TITLE'), findsOneWidget);
-        expect(find.text('Target Allocation'), findsOneWidget);
+        expect(find.text('Target Allocation *'), findsOneWidget);
         expect(find.text('TIMEFRAME'), findsOneWidget);
         expect(find.text('CATEGORY SCOPE'), findsOneWidget);
 

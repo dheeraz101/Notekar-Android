@@ -1852,14 +1852,14 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                       valueListenable: _titleController,
                       builder: (context, value, _) {
                         final length = value.text.length;
-                        const maxLength = 9;
+                        const maxLength = 40;
                         final remaining = maxLength - length;
                         final progress = length / maxLength;
 
                         Color ringColor;
-                        if (length >= 8) {
+                        if (length >= 38) {
                           ringColor = widget.p.red;
-                        } else if (length >= 6) {
+                        } else if (length >= 34) {
                           ringColor = widget.p.orange;
                         } else {
                           ringColor = widget.p.accent;
@@ -1919,8 +1919,8 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                 const SizedBox(height: 6),
                 CupertinoTextField(
                   controller: _titleController,
-                  maxLength: 9,
-                  inputFormatters: [LengthLimitingTextInputFormatter(9)],
+                  maxLength: 40,
+                  inputFormatters: [LengthLimitingTextInputFormatter(40)],
                   autofocus: widget.goal == null,
                   padding: EdgeInsets.zero,
                   decoration: null,
@@ -1939,7 +1939,8 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Max 9 characters for widget and pill fit'.localized(context),
+                  'Up to 40 characters. Compact views shorten longer titles.'
+                      .localized(context),
                   style: TextStyle(
                     color: widget.p.text3.withValues(alpha: 0.8),
                     fontSize: 10.5,
@@ -1979,7 +1980,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Description / Scope'.localized(context).toUpperCase(),
+                  'Description / Scope *'.localized(context).toUpperCase(),
                   style: TextStyle(
                     color: _descHasError ? widget.p.red : widget.p.text3,
                     fontSize: 10.5,
@@ -1988,6 +1989,16 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                   ),
                 ),
                 const SizedBox(height: 6),
+                Text(
+                  'Describe what this goal means and what counts toward it.'
+                      .localized(context),
+                  style: TextStyle(
+                    color: widget.p.text3,
+                    fontSize: 11,
+                    height: 1.3,
+                  ),
+                ),
+                const SizedBox(height: 8),
                 CupertinoTextField(
                   controller: _descController,
                   maxLines: 2,
@@ -2056,7 +2067,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                           ),
                         ),
                         Text(
-                          'Target Allocation'.localized(context),
+                          'Target Allocation *'.localized(context),
                           style: TextStyle(
                             color: _timeHasError
                                 ? widget.p.red
@@ -2132,24 +2143,31 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                 ),
                 const SizedBox(height: 12),
                 // Apple preset pills
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [2, 5, 10, 15, 20, 30, 40].map((hrs) {
-                      final selected = _targetHours == hrs;
-                      final label = '${hrs}h';
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 6),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [2, 5, 10, 15, 20, 30, 40].map((hrs) {
+                    final selected = _targetHours == hrs;
+                    final label = '${hrs}h';
+                    void selectTargetHours() {
+                      HapticFeedback.selectionClick();
+                      setState(() {
+                        _targetHours = hrs;
+                        _timeHasError = false;
+                      });
+                    }
+
+                    return Semantics(
+                      button: true,
+                      selected: selected,
+                      onTap: selectTargetHours,
+                      label: '$label target'.localized(context),
+                      child: ExcludeSemantics(
                         child: PressableScale(
-                          onTap: () {
-                            HapticFeedback.selectionClick();
-                            setState(() {
-                              _targetHours = hrs;
-                              _timeHasError = false;
-                            });
-                          },
+                          onTap: selectTargetHours,
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 140),
+                            constraints: const BoxConstraints(minHeight: 44),
                             padding: const EdgeInsets.symmetric(
                               horizontal: 12,
                               vertical: 6,
@@ -2180,9 +2198,9 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                             ),
                           ),
                         ),
-                      );
-                    }).toList(),
-                  ),
+                      ),
+                    );
+                  }).toList(),
                 ),
                 if (_timeHasError) ...[
                   const SizedBox(height: 8),

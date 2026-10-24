@@ -202,16 +202,14 @@ class SobrietyCompanionSettingsPage extends StatelessWidget {
             children: [
               SettingsRow(
                 p: p,
-                icon: CupertinoIcons.paintbrush,
                 title: 'Theme Style'.localized(context),
                 subtitle: () {
                   final t = kMilestoneThemes.firstWhere(
                     (t) => t.id == sobrietyMilestoneTheme,
                     orElse: () => kMilestoneThemes.first,
                   );
-                  return '${t.emoji} ${t.name.localized(context)}: ${t.description.localized(context)}';
+                  return '${t.emoji} ${t.name.localized(context)}';
                 }(),
-                color: p.orange,
                 trailing: Icon(
                   CupertinoIcons.chevron_forward,
                   color: p.text3,
@@ -224,12 +222,9 @@ class SobrietyCompanionSettingsPage extends StatelessWidget {
               ),
               SettingsRow(
                 p: p,
-                icon: CupertinoIcons.star_fill,
                 title: 'View All Milestones'.localized(context),
-                subtitle:
-                    'See all 21 milestones with descriptions from day 1 to 10 years.'
-                        .localized(context),
-                color: p.orange,
+                subtitle: 'Explore 21 milestones from day 1 to 10 years'
+                    .localized(context),
                 trailing: Icon(
                   CupertinoIcons.chevron_forward,
                   color: p.text3,
@@ -266,7 +261,7 @@ class TriggerAnalysisPage extends StatelessWidget {
         SettingsPageDescription(
           p: p,
           text:
-              'Offline analysis of your logged relapse moments. No data leaves your device.'
+              'In-depth offline behavioral analysis of your recovery trajectory and temporal triggers. 100% private on-device processing.'
                   .localized(context),
         ),
         _buildSobrietyAnalyticsCard(context),
@@ -279,38 +274,71 @@ class TriggerAnalysisPage extends StatelessWidget {
     final relapseMoments = entries
         .where((e) => e.note.contains('#relapse'))
         .toList();
+
     if (relapseMoments.isEmpty) {
       return Container(
         margin: const EdgeInsets.symmetric(
           horizontal: spacing16,
           vertical: spacing8,
         ),
-        padding: const EdgeInsets.all(spacing16),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: p.surface2,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: p.border),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: p.border.withValues(alpha: 0.6)),
         ),
         child: Column(
           children: [
-            Icon(
-              CupertinoIcons.leaf_arrow_circlepath,
-              color: p.accent,
-              size: 28,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'No relapses recorded yet!'.localized(context),
-              style: TextStyle(
-                color: p.text,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: p.green.withValues(alpha: 0.14),
+                border: Border.all(
+                  color: p.green.withValues(alpha: 0.3),
+                  width: 1.2,
+                ),
+              ),
+              child: Icon(
+                CupertinoIcons.leaf_arrow_circlepath,
+                color: p.green,
+                size: 28,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 12),
             Text(
-              'Your clean streak is active and running.'.localized(context),
-              style: TextStyle(color: p.text2, fontSize: 12),
+              'Unbroken Clean Trajectory'.localized(context),
+              style: TextStyle(
+                color: p.text,
+                fontWeight: FontWeight.w800,
+                fontSize: 16,
+                letterSpacing: -0.2,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Zero relapses recorded in your sovereign offline log. Your clean streak momentum is active and running strong.'
+                  .localized(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: p.text2, fontSize: 12.5, height: 1.4),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: p.green.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                '100% RECOVERY ADHERENCE',
+                style: TextStyle(
+                  color: p.green,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.8,
+                ),
+              ),
             ),
           ],
         ),
@@ -383,82 +411,258 @@ class TriggerAnalysisPage extends StatelessWidget {
       }
     });
 
+    final sortedTriggers = triggerCounts.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    final totalRelapses = relapseMoments.length;
+
     return Container(
       margin: const EdgeInsets.symmetric(
         horizontal: spacing16,
         vertical: spacing8,
       ),
-      padding: const EdgeInsets.all(spacing16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: p.surface2,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: p.border),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: p.border.withValues(alpha: 0.6)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(
-                CupertinoIcons.chart_bar_square_fill,
-                color: p.orange,
-                size: 20,
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: p.orange.withValues(alpha: 0.15),
+                ),
+                child: Icon(
+                  CupertinoIcons.chart_bar_square_fill,
+                  color: p.orange,
+                  size: 18,
+                ),
               ),
-              const SizedBox(width: 8),
-              Text(
-                'Sobriety Trigger Analysis'.localized(context),
-                style: TextStyle(
-                  color: p.text,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 14,
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Sobriety Trigger Analysis'.localized(context),
+                      style: TextStyle(
+                        color: p.text,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    Text(
+                      'Deep Behavioral Patterns & Temporal Vulnerability'
+                          .localized(context),
+                      style: TextStyle(color: p.text3, fontSize: 11),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
+          // 4 Key Metric Matrix
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
                 child: _buildMetricTile(
                   context,
-                  'Total Relapses',
-                  '${relapseMoments.length}',
+                  'Total Resets',
+                  '$totalRelapses',
+                  sub: 'Logged moments',
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: _buildMetricTile(context, 'Top Trigger', topTrigger),
+                child: _buildMetricTile(
+                  context,
+                  'Top Trigger',
+                  topTrigger,
+                  sub: maxTriggerCount > 0
+                      ? '${((maxTriggerCount / totalRelapses) * 100).toStringAsFixed(0)}% frequency'
+                      : 'None',
+                ),
               ),
             ],
           ),
           const SizedBox(height: 8),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(child: _buildMetricTile(context, 'Top Mood', topMood)),
+              Expanded(
+                child: _buildMetricTile(
+                  context,
+                  'Top Mood',
+                  topMood,
+                  sub: maxMoodCount > 0
+                      ? '${((maxMoodCount / totalRelapses) * 100).toStringAsFixed(0)}% occurrences'
+                      : 'None',
+                ),
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: _buildMetricTile(
                   context,
-                  'Peak Risk Window',
+                  'Peak Window',
                   peakTimeRange,
+                  sub: 'Highest risk hours',
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 20),
+          Divider(color: p.border.withValues(alpha: 0.3), height: 1),
+          const SizedBox(height: 16),
+          // Circadian Risk Timeline Section
+          Text(
+            'CIRCADIAN RISK DISTRIBUTION'.localized(context),
+            style: TextStyle(
+              color: p.text3,
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.8,
+            ),
+          ),
+          const SizedBox(height: 10),
+          for (final entry in rangeCounts.entries) ...[
+            _buildCircadianBar(
+              context,
+              label: entry.key,
+              timeSpan: switch (entry.key) {
+                'Morning' => '05:00 - 12:00',
+                'Afternoon' => '12:00 - 17:00',
+                'Evening' => '17:00 - 21:00',
+                _ => '21:00 - 05:00',
+              },
+              count: entry.value,
+              total: totalRelapses,
+              isPeak: entry.key == peakTimeRange,
+            ),
+            const SizedBox(height: 8),
+          ],
+          if (sortedTriggers.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            Divider(color: p.border.withValues(alpha: 0.3), height: 1),
+            const SizedBox(height: 16),
+            Text(
+              'RANKED TRIGGER VULNERABILITY'.localized(context),
+              style: TextStyle(
+                color: p.text3,
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.8,
+              ),
+            ),
+            const SizedBox(height: 10),
+            for (final t in sortedTriggers.take(4)) ...[
+              _buildTriggerRow(
+                context,
+                triggerName: t.key.replaceAll('_', ' '),
+                count: t.value,
+                total: totalRelapses,
+              ),
+              const SizedBox(height: 8),
+            ],
+          ],
+          if (moodCounts.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            Divider(color: p.border.withValues(alpha: 0.3), height: 1),
+            const SizedBox(height: 16),
+            Text(
+              'EMOTIONAL PRECURSOR CLUSTERS'.localized(context),
+              style: TextStyle(
+                color: p.text3,
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.8,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final m in moodCounts.entries)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: p.surface3,
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: p.border.withValues(alpha: 0.5),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Text(
+                      '${m.key.toUpperCase()} • ${m.value}',
+                      style: TextStyle(
+                        color: p.text,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 18),
+          // Apple-style on-device sovereign note
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: p.surface3.withValues(alpha: 0.4),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  CupertinoIcons.checkmark_shield_fill,
+                  size: 16,
+                  color: p.green,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'All behavioral correlations are computed locally in device memory. Zero analytics data is ever transmitted.'
+                        .localized(context),
+                    style: TextStyle(
+                      color: p.text3,
+                      fontSize: 10.5,
+                      height: 1.3,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildMetricTile(BuildContext context, String title, String value) {
+  Widget _buildMetricTile(
+    BuildContext context,
+    String title,
+    String value, {
+    String? sub,
+  }) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: p.surface3,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: p.border),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: p.border.withValues(alpha: 0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -466,23 +670,139 @@ class TriggerAnalysisPage extends StatelessWidget {
           Text(
             title.localized(context).toUpperCase(),
             style: TextStyle(
-              color: p.text2,
+              color: p.text3,
               fontSize: 9,
               fontWeight: FontWeight.w900,
-              letterSpacing: 1.0,
+              letterSpacing: 0.8,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             value.localized(context),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: p.text,
-              fontSize: 13,
+              fontSize: 13.5,
               fontWeight: FontWeight.w800,
             ),
           ),
+          if (sub != null) ...[
+            const SizedBox(height: 2),
+            Text(
+              sub.localized(context),
+              style: TextStyle(color: p.text3, fontSize: 10),
+            ),
+          ],
         ],
       ),
+    );
+  }
+
+  Widget _buildCircadianBar(
+    BuildContext context, {
+    required String label,
+    required String timeSpan,
+    required int count,
+    required int total,
+    required bool isPeak,
+  }) {
+    final frac = total > 0 ? (count / total).clamp(0.0, 1.0) : 0.0;
+    final color = isPeak ? p.orange : p.accent;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Text(
+                  label.localized(context),
+                  style: TextStyle(
+                    color: p.text,
+                    fontSize: 12,
+                    fontWeight: isPeak ? FontWeight.w800 : FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  '($timeSpan)',
+                  style: TextStyle(color: p.text3, fontSize: 10.5),
+                ),
+              ],
+            ),
+            Text(
+              '$count (${(frac * 100).toStringAsFixed(0)}%)',
+              style: TextStyle(
+                color: isPeak ? p.orange : p.text2,
+                fontSize: 11,
+                fontWeight: isPeak ? FontWeight.w800 : FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(999),
+          child: Container(
+            height: 6,
+            width: double.infinity,
+            color: p.surface3,
+            child: FractionallySizedBox(
+              alignment: Alignment.centerLeft,
+              widthFactor: frac,
+              child: Container(color: color),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTriggerRow(
+    BuildContext context, {
+    required String triggerName,
+    required int count,
+    required int total,
+  }) {
+    final frac = total > 0 ? (count / total).clamp(0.0, 1.0) : 0.0;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              triggerName.toUpperCase(),
+              style: TextStyle(
+                color: p.text,
+                fontSize: 11.5,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            Text(
+              '$count resets (${(frac * 100).toStringAsFixed(0)}%)',
+              style: TextStyle(color: p.text2, fontSize: 11),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(999),
+          child: Container(
+            height: 5,
+            width: double.infinity,
+            color: p.surface3,
+            child: FractionallySizedBox(
+              alignment: Alignment.centerLeft,
+              widthFactor: frac,
+              child: Container(color: p.orange),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -502,28 +822,38 @@ class MilestoneThemePage extends StatelessWidget {
   IconData _getThemeIcon(String id) {
     return switch (id) {
       'science' => CupertinoIcons.lab_flask,
-      'warrior' => CupertinoIcons.shield,
+      'warrior' => CupertinoIcons.shield_fill,
       'navy' => CupertinoIcons.compass,
-      'clan' => CupertinoIcons.flag,
-      'ancient' => CupertinoIcons.calendar,
-      'samurai' => CupertinoIcons.shield_fill,
-      'space' => CupertinoIcons.paperplane,
-      'kingdom' => CupertinoIcons.person_2,
-      'monk' => CupertinoIcons.person,
-      'phoenix' => CupertinoIcons.flame,
+      'clan' => CupertinoIcons.flag_fill,
+      'ancient' => CupertinoIcons.building_2_fill,
+      'samurai' => CupertinoIcons.shield,
+      'space' => CupertinoIcons.rocket_fill,
+      'kingdom' => CupertinoIcons.person_crop_circle_badge_checkmark,
+      'monk' => CupertinoIcons.sunrise_fill,
+      'phoenix' => CupertinoIcons.flame_fill,
       'animals' => CupertinoIcons.paw,
-      'pokemon' || 'jjk' => CupertinoIcons.bolt,
-      'onepiece' || 'bleach' => CupertinoIcons.exclamationmark_shield,
-      'naruto' || 'vinland' || 'demonslayer' => CupertinoIcons.waveform,
-      'ben10' => CupertinoIcons.time,
-      'aot' => CupertinoIcons.square_grid_2x2,
-      'mha' || 'fma' || 'dbz' => CupertinoIcons.infinite,
-      'codegeass' || 'deathnote' => CupertinoIcons.eye,
-      'gintama' || 'hxh' => CupertinoIcons.sportscourt,
-      'sololeveling' || 'starwars' => CupertinoIcons.sparkles,
-      'rpg' || 'tech' => CupertinoIcons.hammer,
-      'chess' => CupertinoIcons.gamecontroller,
-      _ => CupertinoIcons.star,
+      'pokemon' => CupertinoIcons.bolt_fill,
+      'jjk' => CupertinoIcons.eye_fill,
+      'onepiece' => CupertinoIcons.flag,
+      'naruto' => CupertinoIcons.wind,
+      'ben10' => CupertinoIcons.stopwatch_fill,
+      'aot' => CupertinoIcons.square_grid_2x2_fill,
+      'bleach' => CupertinoIcons.moon_fill,
+      'mha' => CupertinoIcons.sparkles,
+      'vinland' => CupertinoIcons.hammer_fill,
+      'demonslayer' => CupertinoIcons.sun_max_fill,
+      'fma' => CupertinoIcons.circle_grid_hex_fill,
+      'dbz' => CupertinoIcons.star_circle_fill,
+      'codegeass' => CupertinoIcons.eye,
+      'deathnote' => CupertinoIcons.book_fill,
+      'gintama' => CupertinoIcons.eyeglasses,
+      'hxh' => CupertinoIcons.ticket_fill,
+      'sololeveling' => CupertinoIcons.waveform_path,
+      'rpg' => CupertinoIcons.cube_box_fill,
+      'tech' => CupertinoIcons.desktopcomputer,
+      'chess' => CupertinoIcons.square_grid_2x2_fill,
+      'starwars' => CupertinoIcons.wand_rays,
+      _ => CupertinoIcons.star_fill,
     };
   }
 
@@ -546,11 +876,15 @@ class MilestoneThemePage extends StatelessWidget {
               SettingsRow(
                 p: p,
                 icon: _getThemeIcon(theme.id),
-                title: theme.name,
+                title: '${theme.emoji} ${theme.name}',
                 subtitle: theme.description,
                 color: p.orange,
                 trailing: sobrietyMilestoneTheme == theme.id
-                    ? Icon(CupertinoIcons.checkmark, color: p.accent, size: 18)
+                    ? Icon(
+                        CupertinoIcons.checkmark_circle_fill,
+                        color: p.accent,
+                        size: 20,
+                      )
                     : const SizedBox.shrink(),
                 onTap: () => onThemeChanged(theme.id),
               ),

@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:notekar/models/moment.dart';
+import 'package:notekar/utils/app_utils.dart';
 
 /// A mathematically bounded continuous time segment in NoteKar.
 class CanonicalInterval {
@@ -116,9 +117,11 @@ class UniversalIntervalLedger {
       if (m.type == 'single') {
         singles.add(m);
       } else {
-        final trackKey = m.effectiveGoalId != null
-            ? 'goal_${m.effectiveGoalId}'
-            : (m.category?.toLowerCase() ?? 'default');
+        // P1: Multi-track pairing respects both category and goal identity,
+        // mirroring the canonical History timeline session pairing rules.
+        final cat = m.category?.trim().toLowerCase() ?? 'default';
+        final goal = m.effectiveGoalId ?? '';
+        final trackKey = '$cat|$goal';
         streams.putIfAbsent(trackKey, () => []).add(m);
       }
     }
@@ -216,8 +219,26 @@ class UniversalIntervalLedger {
       }
 
       if (activeIn != null) {
-        // Ongoing session
-        final endTs = math.max(activeIn.timestamp + 1000, nowMs);
+        // If the unclosed IN moment is from a past date, it was abandoned.
+        // Cap it to end-of-day or 2 hours max, mirroring TimelineSessionItem.
+        final inDt = DateTime.fromMillisecondsSinceEpoch(activeIn.timestamp);
+        final inDateKey = activeIn.date;
+        final nowDateKey = dateKey(DateTime.fromMillisecondsSinceEpoch(nowMs));
+        final isToday = inDateKey == nowDateKey;
+        final endTs = isToday
+            ? math.max(activeIn.timestamp + 1000, nowMs)
+            : math.min(
+                DateTime(
+                  inDt.year,
+                  inDt.month,
+                  inDt.day,
+                  23,
+                  59,
+                  59,
+                  999,
+                ).millisecondsSinceEpoch,
+                activeIn.timestamp + const Duration(hours: 2).inMilliseconds,
+              );
         rawIntervals.add(
           CanonicalInterval(
             id: 'ongoing_${activeIn.id}',
@@ -230,7 +251,7 @@ class UniversalIntervalLedger {
             note: activeIn.note,
             tags: activeIn.tags,
             inMomentId: activeIn.id,
-            isOngoing: true,
+            isOngoing: isToday,
           ),
         );
       }

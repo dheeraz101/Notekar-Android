@@ -22,6 +22,7 @@ class AppSheet extends StatefulWidget {
     this.trailingAction,
     this.largeText = false,
     this.removeBottomPadding = false,
+    this.onTitleTap,
   });
 
   final Palette p;
@@ -37,6 +38,7 @@ class AppSheet extends StatefulWidget {
   final Widget? trailingAction;
   final bool largeText;
   final bool removeBottomPadding;
+  final VoidCallback? onTitleTap;
 
   @override
   State<AppSheet> createState() => _AppSheetState();
@@ -84,6 +86,41 @@ class _AppSheetState extends State<AppSheet> {
     final newOpacity = ((offset - 45) / 20).clamp(0.0, 1.0);
     if (newOpacity != _titleOpacity) {
       setState(() => _titleOpacity = newOpacity);
+    }
+  }
+
+  void _handleTitleTap(BuildContext context) {
+    if (widget.onTitleTap != null) {
+      widget.onTitleTap!();
+      return;
+    }
+    if (widget.controller?.hasClients == true) {
+      widget.controller!.animateTo(
+        0.0,
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
+      );
+      HapticFeedback.selectionClick();
+      return;
+    }
+    final primary = PrimaryScrollController.maybeOf(context);
+    if (primary?.hasClients == true) {
+      primary!.animateTo(
+        0.0,
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
+      );
+      HapticFeedback.selectionClick();
+      return;
+    }
+    final scrollable = Scrollable.maybeOf(context);
+    if (scrollable?.position.hasContentDimensions == true) {
+      scrollable!.position.animateTo(
+        0.0,
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
+      );
+      HapticFeedback.selectionClick();
     }
   }
 
@@ -189,17 +226,20 @@ class _AppSheetState extends State<AppSheet> {
                                 child: FittedBox(
                                   key: ValueKey<String>(widget.title),
                                   fit: BoxFit.scaleDown,
-                                  child: Text(
-                                    widget.title.localized(context),
-                                    maxLines: 1,
-                                    softWrap: false,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: p.text,
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: -0.4,
-                                      fontFamily: 'Inter',
+                                  child: PressableScale(
+                                    onTap: () => _handleTitleTap(context),
+                                    child: Text(
+                                      widget.title.localized(context),
+                                      maxLines: 1,
+                                      softWrap: false,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: p.text,
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: -0.4,
+                                        fontFamily: 'Inter',
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -311,12 +351,49 @@ class AppSheetLargeTitle extends StatelessWidget {
     required this.title,
     this.extra,
     this.scrollController,
+    this.onTap,
   });
 
   final Palette p;
   final String title;
   final Widget? extra;
   final ScrollController? scrollController;
+  final VoidCallback? onTap;
+
+  void _handleTap(BuildContext context) {
+    if (onTap != null) {
+      onTap!();
+      return;
+    }
+    if (scrollController?.hasClients == true) {
+      scrollController!.animateTo(
+        0.0,
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
+      );
+      HapticFeedback.selectionClick();
+      return;
+    }
+    final primary = PrimaryScrollController.maybeOf(context);
+    if (primary?.hasClients == true) {
+      primary!.animateTo(
+        0.0,
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
+      );
+      HapticFeedback.selectionClick();
+      return;
+    }
+    final scrollable = Scrollable.maybeOf(context);
+    if (scrollable?.position.hasContentDimensions == true) {
+      scrollable!.position.animateTo(
+        0.0,
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
+      );
+      HapticFeedback.selectionClick();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -335,14 +412,17 @@ class AppSheetLargeTitle extends StatelessWidget {
               opacity: opacity,
               child: Padding(
                 padding: const EdgeInsets.only(bottom: spacing16),
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    color: p.text,
-                    fontSize: 34,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -1.4,
-                    fontFamily: 'Inter',
+                child: PressableScale(
+                  onTap: () => _handleTap(context),
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      color: p.text,
+                      fontSize: 34,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -1.4,
+                      fontFamily: 'Inter',
+                    ),
                   ),
                 ),
               ),

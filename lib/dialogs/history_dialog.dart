@@ -508,6 +508,16 @@ class _HistoryDialogState extends State<HistoryDialog> {
     }
   }
 
+  void _scrollToTop() {
+    if (!_scrollController.hasClients) return;
+    HapticFeedback.selectionClick();
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
   IconData get _emptyIcon {
     return switch (_filter) {
       'today' => Icons.today_rounded,
@@ -626,6 +636,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
             _inSheetView == null &&
             _activeInsightsSection == null &&
             _viewMode == 'list',
+        onTitleTap: (_inSheetView == null && _activeInsightsSection == null)
+            ? _scrollToTop
+            : null,
         removeBottomPadding: true,
         leadingAction: (_inSheetView != null || _activeInsightsSection != null)
             ? Tooltip(
@@ -1010,6 +1023,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                   p: widget.p,
                                   title: 'History'.localized(context),
                                   scrollController: _scrollController,
+                                  onTap: _scrollToTop,
                                 ),
                               ),
                             ),
@@ -1043,11 +1057,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                     'all',
                                                     'sessions',
                                                     'single',
-                                                    'notes',
-                                                    'checkpoints',
-                                                    'consolidate',
-                                                    'media',
-                                                    'date',
                                                   ])
                                                     Padding(
                                                       padding:
@@ -1141,66 +1150,23 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                             : null,
                                                       ),
                                                     ),
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                          right: spacing8,
-                                                        ),
-                                                    child: ChipButton(
-                                                      p: widget.p,
-                                                      label: 'Advanced'
-                                                          .localized(context),
-                                                      icon: Icons.tune_rounded,
-                                                      active:
-                                                          _filter ==
-                                                              'advanced' ||
-                                                          _timelineFilterCriteria
-                                                              .isActive,
-                                                      onTap:
-                                                          _openAdvancedFilter,
-                                                    ),
-                                                  ),
                                                 ],
                                               ),
                                             ),
                                           ),
                                           const SizedBox(width: spacing8),
-                                          Tooltip(
-                                            message: 'Scroll to top',
-                                            child: PressableScale(
-                                              onTap: () {
-                                                if (!_scrollController
-                                                    .hasClients) {
-                                                  return;
-                                                }
-                                                _scrollController.animateTo(
-                                                  0,
-                                                  duration: const Duration(
-                                                    milliseconds: 250,
-                                                  ),
-                                                  curve: Curves.easeOutCubic,
-                                                );
-                                              },
-                                              child: Container(
-                                                width: 36,
-                                                height: 36,
-                                                alignment: Alignment.center,
-                                                decoration: BoxDecoration(
-                                                  color: widget.p.surface2,
-                                                  shape: BoxShape.circle,
-                                                  border: Border.all(
-                                                    color: widget.p.border,
-                                                  ),
-                                                ),
-                                                child: Icon(
-                                                  Icons
-                                                      .keyboard_double_arrow_up_rounded,
-                                                  color: widget.p.text2,
-                                                  size: 19,
-                                                ),
-                                              ),
-                                            ),
+                                          ChipButton(
+                                            p: widget.p,
+
+                                            semanticLabel:
+                                                _secondaryFilterSemanticsLabel,
+                                            icon: _hasSecondaryHistoryFilter
+                                                ? Icons.filter_alt_rounded
+                                                : Icons.tune_rounded,
+                                            active: _hasSecondaryHistoryFilter,
+                                            onTap: _openFilterSheet,
                                           ),
+
                                           const SizedBox(width: 4),
                                         ],
                                       ),
@@ -2961,6 +2927,31 @@ class _HistoryDialogState extends State<HistoryDialog> {
     );
   }
 
+  bool get _hasSecondaryHistoryFilter =>
+      !(const {'all', 'sessions', 'single'}.contains(_filter)) ||
+      _timelineFilterCriteria.isActive;
+
+  String get _secondaryHistoryFilterLabel {
+    if (!_hasSecondaryHistoryFilter) return 'More filters'.localized(context);
+    return switch (_filter) {
+      'today' => 'Today'.localized(context),
+      'week' => 'This Week'.localized(context),
+      'in' => 'IN Moments'.localized(context),
+      'out' => 'OUT Moments'.localized(context),
+      'notes' => 'With Notes'.localized(context),
+      'checkpoints' => 'Checkpoints'.localized(context),
+      'consolidate' => 'Grouped'.localized(context),
+      'media' => 'Media'.localized(context),
+      'date' => 'Date'.localized(context),
+      'advanced' => 'Advanced'.localized(context),
+      _ => 'More filters'.localized(context),
+    };
+  }
+
+  String get _secondaryFilterSemanticsLabel => _hasSecondaryHistoryFilter
+      ? _secondaryHistoryFilterLabel
+      : 'More filters';
+
   void _openFilterSheet() {
     showCupertinoModalPopup<void>(
       context: context,
@@ -2988,8 +2979,12 @@ class _HistoryDialogState extends State<HistoryDialog> {
               'today',
               'week',
               'sessions',
+              'in',
+              'out',
               'single',
               'notes',
+              'checkpoints',
+              'consolidate',
               'media',
               'date',
             ])
@@ -3027,8 +3022,12 @@ class _HistoryDialogState extends State<HistoryDialog> {
                         'today' => 'Today'.localized(context),
                         'week' => 'This Week'.localized(context),
                         'sessions' => 'Sessions (In/Out)'.localized(context),
+                        'in' => 'IN Moments'.localized(context),
+                        'out' => 'OUT Moments'.localized(context),
                         'single' => 'Single Logs'.localized(context),
                         'notes' => 'With Notes'.localized(context),
+                        'checkpoints' => 'Checkpoints'.localized(context),
+                        'consolidate' => 'Grouped'.localized(context),
                         'media' => 'Media (Voice/Images)'.localized(context),
                         'date' => 'Pick Specific Date...'.localized(context),
                         _ => f,

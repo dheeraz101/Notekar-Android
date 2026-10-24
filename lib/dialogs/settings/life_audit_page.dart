@@ -62,7 +62,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
         SettingsPageDescription(
           p: p,
           text:
-              'Life Audit ledger measuring the cost of unaccounted time. Un-tracked hours within your daily conscious window are computed as lost mortal void.'
+              'Review the time you logged and the time you have not tracked yet. Estimates are based on your selected waking hours.'
                   .localized(context),
         ),
         const SizedBox(height: 12),
@@ -75,11 +75,11 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
         _buildTimeframeSelector(),
         const SizedBox(height: 16),
 
-        // 3. The Brutal Reality Hero Card ("Wild Nature")
-        _buildBrutalRealityCard(summary),
+        // 3. A neutral summary of tracked and untracked time.
+        _buildTimeOverviewCard(summary),
         const SizedBox(height: 16),
 
-        // 4. Life Horizon Impact & Lifespan Erosion Bridge
+        // 4. Optional life horizon estimate
         _buildLifeHorizonBridge(summary),
         const SizedBox(height: 16),
 
@@ -88,11 +88,26 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
         const SizedBox(height: 16),
 
         // 5. Stoic Philosophical Colophon
-        _buildStoicColophonCard(),
+        _buildTrackingNoteCard(),
 
-        // 6. Beta Refinement Note
+        // 6. Mindful Informational Aid Disclaimer (Apple Health Pattern)
+        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Text(
+            'Life Audit metrics and time projections are informational aids designed for mindful reflection. They do not constitute medical, psychological, or diagnostic advice.'
+                .localized(context),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: p.text3,
+              fontSize: 11.5,
+              height: 1.4,
+              fontFamily: 'Inter',
+            ),
+          ),
+        ),
         if (widget.onLearnMoreBeta != null) ...[
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           SettingsBetaNote(p: p, onLearnMore: widget.onLearnMoreBeta!),
         ],
         const SizedBox(height: spacing48),
@@ -201,14 +216,14 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                     ),
                     const SizedBox(width: 1.5),
                   ],
-                  // Conscious Void
+                  // Time inside the configured waking window that is not logged.
                   Expanded(
                     flex: (voidToday * 10).round().clamp(1, 240),
                     child: Container(
                       color:
                           (todayRecord != null &&
                               todayRecord.wastedDuration > Duration.zero)
-                          ? p.red
+                          ? p.text3
                           : p.surface3,
                     ),
                   ),
@@ -241,9 +256,9 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                 color:
                     (todayRecord != null &&
                         todayRecord.wastedDuration > Duration.zero)
-                    ? p.red
+                    ? p.text3
                     : p.text3,
-                label: '${'Void'.localized(context)} ($formattedWasted)',
+                label: '${'Untracked'.localized(context)} ($formattedWasted)',
               ),
             ],
           ),
@@ -350,38 +365,54 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
   Widget _buildTimeframeSelector() {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: LifeAuditTimeframe.values.map((tf) {
           final isSelected = _timeframe == tf;
+          final label = tf.label.localized(context);
+          void selectTimeframe() {
+            HapticFeedback.selectionClick();
+            setState(() => _timeframe = tf);
+          }
+
           return Padding(
             padding: const EdgeInsets.only(right: 8),
-            child: PressableScale(
-              onTap: () {
-                HapticFeedback.selectionClick();
-                setState(() => _timeframe = tf);
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 160),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected ? p.accent : p.surface2,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: isSelected
-                        ? p.accent
-                        : p.border.withValues(alpha: 0.5),
-                    width: 0.8,
-                  ),
-                ),
-                child: Text(
-                  tf.label.localized(context),
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : p.text,
-                    fontSize: 13,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            child: Semantics(
+              button: true,
+              selected: isSelected,
+              onTap: selectTimeframe,
+              label: label,
+              child: ExcludeSemantics(
+                child: PressableScale(
+                  onTap: selectTimeframe,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 160),
+                    constraints: const BoxConstraints(minHeight: 44),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected ? p.accent : p.surface2,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isSelected
+                            ? p.accent
+                            : p.border.withValues(alpha: 0.5),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : p.text,
+                        fontSize: 13,
+                        fontWeight: isSelected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -392,7 +423,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
     );
   }
 
-  Widget _buildBrutalRealityCard(LifeAuditSummary summary) {
+  Widget _buildTimeOverviewCard(LifeAuditSummary summary) {
     if (!summary.hasData) {
       final isNewUser = widget.entries.isEmpty;
       final recordedDays = summary.availableHistoryDays;
@@ -415,7 +446,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
               children: [
                 Expanded(
                   child: Text(
-                    'The Cost of the Void'.localized(context).toUpperCase(),
+                    'Your Time Overview'.localized(context).toUpperCase(),
                     style: TextStyle(
                       color: p.accent,
                       fontSize: 11,
@@ -452,7 +483,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
               child: Text(
-                '0h ${'Lost'.localized(context)}',
+                '0h ${'Untracked'.localized(context)}',
                 maxLines: 1,
                 style: TextStyle(
                   color: p.text,
@@ -467,9 +498,9 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
             const SizedBox(height: 6),
             Text(
               isNewUser
-                  ? 'No session history recorded yet. Log your first focus session to start calculating your conscious audit.'
+                  ? 'No activity has been logged yet. Add your first log to start a daily time summary.'
                         .localized(context)
-                  : 'Accumulated $recordedDays of $requiredDays days required for the full $horizonName horizon. Void calculations will unlock once full period data is logged.'
+                  : 'Not enough logged data for the full $horizonName period yet. $recordedDays of $requiredDays days currently have data.'
                         .localized(context),
               style: TextStyle(color: p.text2, fontSize: 13, height: 1.4),
             ),
@@ -495,7 +526,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Waking Days Lost'.localized(context),
+                            'Days with untracked time'.localized(context),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -637,16 +668,16 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
     final isGood = ratio >= 70.0;
 
     final headlineVerdict = isGood
-        ? 'Disciplined Presence'
+        ? 'Strong tracking coverage'
         : isSevere
-        ? 'Critical Life Void'
-        : 'Substantial Mortal Drift';
+        ? 'More time is untracked'
+        : 'Some time is untracked';
 
     final verdictQuote = isGood
-        ? 'You are commanding your conscious hours with intention and discipline.'
+        ? 'Most of your estimated waking time is represented in your logs.'
         : isSevere
-        ? 'Over ${voidRatio.toStringAsFixed(0)}% of your waking existence dissolved into unaccounted void.'
-        : 'Half of your mortal window slipped by without a record or dedicated session.';
+        ? 'About ${voidRatio.toStringAsFixed(0)}% of your estimated waking time is not represented in your logs.'
+        : 'Some of your estimated waking time is not represented in your logs.';
 
     return Container(
       width: double.infinity,
@@ -656,7 +687,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
         borderRadius: BorderRadius.circular(28),
         border: Border.all(
           color: isSevere
-              ? p.red.withValues(alpha: 0.3)
+              ? p.border.withValues(alpha: 0.7)
               : p.border.withValues(alpha: 0.5),
           width: 1,
         ),
@@ -669,9 +700,9 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
             children: [
               Expanded(
                 child: Text(
-                  'The Cost of the Void'.localized(context).toUpperCase(),
+                  'Your Time Overview'.localized(context).toUpperCase(),
                   style: TextStyle(
-                    color: isSevere ? p.red : p.orange,
+                    color: isSevere ? p.text2 : p.accent,
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1.1,
@@ -720,13 +751,13 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: (isSevere ? p.red : p.orange).withValues(alpha: 0.12),
+              color: p.accent.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
               headlineVerdict.localized(context),
               style: TextStyle(
-                color: isSevere ? p.red : p.orange,
+                color: p.accent,
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
               ),
@@ -739,10 +770,10 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: Text(
-              '$wasted ${'Wasted'.localized(context)}',
+              '$wasted ${'Untracked'.localized(context)}',
               maxLines: 1,
               style: TextStyle(
-                color: isSevere ? p.red : p.text,
+                color: p.text,
                 fontSize: 34,
                 fontWeight: FontWeight.w900,
                 letterSpacing: -0.8,
@@ -778,7 +809,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Waking Days Lost'.localized(context),
+                          'Days with untracked time'.localized(context),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -794,7 +825,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                           child: Text(
                             wakingLost,
                             style: TextStyle(
-                              color: p.red,
+                              color: p.text2,
                               fontSize: 22,
                               fontWeight: FontWeight.w900,
                               letterSpacing: -0.6,
@@ -872,9 +903,9 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                 ),
               ),
               Text(
-                '${voidRatio.toStringAsFixed(1)}% ${'Void'.localized(context)}',
+                '${voidRatio.toStringAsFixed(1)}% ${'Untracked'.localized(context)}',
                 style: TextStyle(
-                  color: p.red,
+                  color: p.text2,
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                 ),
@@ -896,7 +927,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                   if (voidRatio > 0)
                     Expanded(
                       flex: (voidRatio * 10).round(),
-                      child: Container(color: p.red),
+                      child: Container(color: p.text3),
                     ),
                 ],
               ),
@@ -988,7 +1019,6 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                 accent: p.accent,
                 green: p.green,
                 orange: p.orange,
-                red: p.red,
               );
 
               return Padding(
@@ -1039,11 +1069,11 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                           const SizedBox(width: 8),
                           Text(
                             r.wastedDuration.inMinutes > 0
-                                ? '${r.formattedWasted} ${'lost'.localized(context)}'
+                                ? '${r.formattedWasted} ${'untracked'.localized(context)}'
                                 : 'Fully Accounted'.localized(context),
                             style: TextStyle(
                               color: r.wastedDuration.inMinutes > 0
-                                  ? p.red
+                                  ? p.text2
                                   : p.green,
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
@@ -1070,7 +1100,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                                   flex:
                                       ((100 - r.intentionalityPercentage) * 10)
                                           .round(),
-                                  child: Container(color: p.red),
+                                  child: Container(color: p.text3),
                                 ),
                             ],
                           ),
@@ -1109,7 +1139,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
     );
   }
 
-  Widget _buildStoicColophonCard() {
+  Widget _buildTrackingNoteCard() {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(22),
@@ -1122,12 +1152,12 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
         children: [
           Row(
             children: [
-              Icon(CupertinoIcons.flame, size: 18, color: p.orange),
+              Icon(CupertinoIcons.info, size: 18, color: p.accent),
               const SizedBox(width: 8),
               Text(
-                'THE STOIC REALITY'.localized(context),
+                'A NOTE ON TRACKING'.localized(context),
                 style: TextStyle(
-                  color: p.orange,
+                  color: p.accent,
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.1,
@@ -1137,7 +1167,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
           ),
           const SizedBox(height: 12),
           Text(
-            '“It is not that we have a short time to live, but that we waste a lot of it. Life is long enough, and a sufficiently generous estimate has been given to us for the highest achievements, if it were all well invested.”'
+            'Tracking is a tool for reflection. A missing entry is simply information you have not recorded.'
                 .localized(context),
             style: TextStyle(
               color: p.text,
@@ -1147,14 +1177,6 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
             ),
           ),
           const SizedBox(height: 6),
-          Text(
-            '— Seneca, On the Shortness of Life',
-            style: TextStyle(
-              color: p.text3,
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
         ],
       ),
     );
@@ -1198,7 +1220,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'LIFE HORIZON EROSION'.localized(context),
+                      'OPTIONAL LIFE HORIZON'.localized(context),
                       style: TextStyle(
                         color: p.accent,
                         fontSize: 10,
@@ -1207,7 +1229,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                       ),
                     ),
                     Text(
-                      'Memento Mori Lifespan Audit'.localized(context),
+                      'Estimated time projection'.localized(context),
                       style: TextStyle(
                         color: p.text,
                         fontSize: 15,
@@ -1248,7 +1270,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
           const SizedBox(height: 14),
           if (hasDob) ...[
             Text(
-              'At your current intentionality rate of ${ratio.toStringAsFixed(0)}%, out of ~${remainingYears.toStringAsFixed(0)} estimated remaining years:'
+              'Illustrative estimate based on recent tracking coverage (${ratio.toStringAsFixed(0)}%) and about ${remainingYears.toStringAsFixed(0)} profile-based remaining years. This is not a prediction.'
                   .localized(context),
               style: TextStyle(color: p.text2, fontSize: 12.5, height: 1.4),
             ),
@@ -1266,7 +1288,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Conscious Life'.localized(context),
+                          'Estimated tracked time'.localized(context),
                           style: TextStyle(
                             color: p.text3,
                             fontSize: 10.5,
@@ -1299,7 +1321,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Lost to Void'.localized(context),
+                          'Estimated untracked time'.localized(context),
                           style: TextStyle(
                             color: p.text3,
                             fontSize: 10.5,
@@ -1310,7 +1332,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                         Text(
                           '${voidYears.toStringAsFixed(1)} Years',
                           style: TextStyle(
-                            color: p.red,
+                            color: p.text2,
                             fontSize: 16,
                             fontWeight: FontWeight.w900,
                             fontFeatures: const [FontFeature.tabularFigures()],
@@ -1337,7 +1359,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                     if (voidYears > 0)
                       Expanded(
                         flex: (voidYears * 10).round().clamp(1, 1000),
-                        child: Container(color: p.red),
+                        child: Container(color: p.text3),
                       ),
                   ],
                 ),
@@ -1345,7 +1367,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
             ),
           ] else ...[
             Text(
-              'Set your birthdate to unlock your personalized Memento Mori horizon projection and see your exact conscious years remaining vs lost to the void.'
+              'Add your birth date to see an optional life horizon estimate based on the profile details you provide.'
                   .localized(context),
               style: TextStyle(color: p.text2, fontSize: 12.5, height: 1.4),
             ),

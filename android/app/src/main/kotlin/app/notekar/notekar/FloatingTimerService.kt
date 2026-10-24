@@ -25,10 +25,17 @@ class FloatingTimerService : Service() {
     private var windowManager: WindowManager? = null
     private var floatingView: View? = null
     private var chronometer: Chronometer? = null
+    private var idleStatusText: TextView? = null
     private var statusDot: View? = null
     private var categoryText: TextView? = null
     private var actionsContainer: LinearLayout? = null
     private var btnPauseResume: TextView? = null
+    private var btnPrimary: TextView? = null
+    private var btnOut: TextView? = null
+    private var btnToggleMode: TextView? = null
+    private var btnQuickNote: TextView? = null
+    private var btnOpenApp: TextView? = null
+    private var btnClose: TextView? = null
 
     private var isExpanded = false
 
@@ -90,7 +97,7 @@ class FloatingTimerService : Service() {
             elevation = 12 * density
         }
 
-        // Top Row: Status Dot + Chronometer + Category Badge
+        // Top Row: Status Dot + Chronometer / Idle Text + Category Badge
         val mainRow = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
@@ -123,6 +130,21 @@ class FloatingTimerService : Service() {
         }
         mainRow.addView(chronometer)
 
+        idleStatusText = TextView(this).apply {
+            setTextColor(Color.WHITE)
+            textSize = 12.5f
+            typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.BOLD)
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                marginEnd = (9 * density).toInt()
+                gravity = Gravity.CENTER_VERTICAL
+            }
+            visibility = View.GONE
+        }
+        mainRow.addView(idleStatusText)
+
         categoryText = TextView(this).apply {
             textSize = 10f
             setTextColor(Color.parseColor("#FF64D2FF"))
@@ -139,7 +161,7 @@ class FloatingTimerService : Service() {
 
         root.addView(mainRow)
 
-        // Bottom Expandable Actions Bar (Pause/Resume, Note, OUT, Close)
+        // Bottom Expandable Actions Bar (Pause/Resume, Primary [IN/LOG], OUT, Mode Toggle, Note, App, Close)
         actionsContainer = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
@@ -176,7 +198,97 @@ class FloatingTimerService : Service() {
         }
         actionsContainer?.addView(btnPauseResume)
 
-        val btnQuickNote = TextView(this).apply {
+        btnPrimary = TextView(this).apply {
+            text = "▶ IN"
+            textSize = 11f
+            typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
+            setTextColor(Color.WHITE)
+            gravity = Gravity.CENTER
+            val padH = (11 * density).toInt()
+            val padV = (5 * density).toInt()
+            setPadding(padH, padV, padH, padV)
+            background = GradientDrawable().apply {
+                setColor(Color.parseColor("#FF30D158"))
+                cornerRadius = 14 * density
+            }
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                marginEnd = (5 * density).toInt()
+            }
+            setOnClickListener {
+                val prefs = getSharedPreferences(NoteKarWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
+                val flutterPrefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+                val currentMode = prefs.getString(NoteKarWidgetProvider.KEY_MODE, null)
+                    ?: flutterPrefs.getString("flutter.m-mode", "two-way") ?: "two-way"
+                val actionType = if (currentMode == "two-way") "in" else "single"
+                NoteKarWidgetProvider.performBackgroundLog(this@FloatingTimerService, actionType, "")
+                refreshView()
+            }
+        }
+        actionsContainer?.addView(btnPrimary)
+
+        btnOut = TextView(this).apply {
+            text = "OUT"
+            textSize = 11f
+            typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
+            setTextColor(Color.WHITE)
+            gravity = Gravity.CENTER
+            val padH = (11 * density).toInt()
+            val padV = (5 * density).toInt()
+            setPadding(padH, padV, padH, padV)
+            background = GradientDrawable().apply {
+                setColor(Color.parseColor("#FFFF3B30"))
+                cornerRadius = 14 * density
+            }
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                marginEnd = (5 * density).toInt()
+            }
+            setOnClickListener {
+                NoteKarWidgetProvider.performBackgroundLog(this@FloatingTimerService, "out", "")
+                refreshView()
+            }
+        }
+        actionsContainer?.addView(btnOut)
+
+        btnToggleMode = TextView(this).apply {
+            text = "⇄ Single"
+            textSize = 10.5f
+            typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
+            setTextColor(Color.WHITE)
+            gravity = Gravity.CENTER
+            val padH = (9 * density).toInt()
+            val padV = (5 * density).toInt()
+            setPadding(padH, padV, padH, padV)
+            background = GradientDrawable().apply {
+                setColor(Color.parseColor("#26FFFFFF"))
+                cornerRadius = 14 * density
+            }
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                marginEnd = (5 * density).toInt()
+            }
+            setOnClickListener {
+                val flutterPrefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+                val widgetPrefs = getSharedPreferences(NoteKarWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
+                val currentMode = widgetPrefs.getString(NoteKarWidgetProvider.KEY_MODE, null)
+                    ?: flutterPrefs.getString("flutter.m-mode", "two-way") ?: "two-way"
+                val newMode = if (currentMode == "two-way") "single" else "two-way"
+                flutterPrefs.edit().putString("flutter.m-mode", newMode).apply()
+                widgetPrefs.edit().putString(NoteKarWidgetProvider.KEY_MODE, newMode).apply()
+                NoteKarWidgetProvider.updateAllWidgets(this@FloatingTimerService)
+                refreshView()
+            }
+        }
+        actionsContainer?.addView(btnToggleMode)
+
+        btnQuickNote = TextView(this).apply {
             text = "✎ Note"
             textSize = 11f
             typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
@@ -204,17 +316,17 @@ class FloatingTimerService : Service() {
         }
         actionsContainer?.addView(btnQuickNote)
 
-        val btnOut = TextView(this).apply {
-            text = "OUT"
-            textSize = 11f
+        btnOpenApp = TextView(this).apply {
+            text = "↗ App"
+            textSize = 10.5f
             typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
             setTextColor(Color.WHITE)
             gravity = Gravity.CENTER
-            val padH = (11 * density).toInt()
+            val padH = (9 * density).toInt()
             val padV = (5 * density).toInt()
             setPadding(padH, padV, padH, padV)
             background = GradientDrawable().apply {
-                setColor(Color.parseColor("#FFFF3B30"))
+                setColor(Color.parseColor("#26FFFFFF"))
                 cornerRadius = 14 * density
             }
             layoutParams = LinearLayout.LayoutParams(
@@ -224,13 +336,17 @@ class FloatingTimerService : Service() {
                 marginEnd = (5 * density).toInt()
             }
             setOnClickListener {
-                NoteKarWidgetProvider.performBackgroundLog(this@FloatingTimerService, "out", "")
-                stopSelf()
+                val launchIntent = packageManager.getLaunchIntentForPackage(packageName)?.apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+                }
+                if (launchIntent != null) {
+                    startActivity(launchIntent)
+                }
             }
         }
-        actionsContainer?.addView(btnOut)
+        actionsContainer?.addView(btnOpenApp)
 
-        val btnClose = TextView(this).apply {
+        btnClose = TextView(this).apply {
             text = "✕"
             textSize = 11.5f
             setTextColor(Color.parseColor("#B3FFFFFF"))
@@ -243,6 +359,8 @@ class FloatingTimerService : Service() {
                 cornerRadius = 14 * density
             }
             setOnClickListener {
+                val flutterPrefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+                flutterPrefs.edit().putBoolean("flutter.floating_timer_enabled", false).apply()
                 stopSelf()
             }
         }
@@ -311,7 +429,7 @@ class FloatingTimerService : Service() {
                                     actionsContainer?.visibility = if (isExpanded) View.VISIBLE else View.GONE
                                 }
                             }
-                            tapHandler.postDelayed(pendingSingleTap!!, 260)
+                            pendingSingleTap?.let { tapHandler.postDelayed(it, 260) }
                         }
                     } else {
                         // Magnetic edge snapping
@@ -368,45 +486,69 @@ class FloatingTimerService : Service() {
         }
 
         val isCurrentlyIn = mode == "two-way" && nextAction == "out"
-        if (!isCurrentlyIn || lastTimestamp <= 0L) {
-            stopSelf()
-            return
-        }
+        val isActive = isCurrentlyIn && lastTimestamp > 0L
 
         categoryText?.text = activeCategory.uppercase(Locale.ROOT)
-        btnPauseResume?.text = if (isPaused) "▶" else "⏸"
 
-        if (isPaused) {
-            statusDot?.clearAnimation()
-            (statusDot?.background as? GradientDrawable)?.setColor(Color.parseColor("#FFFF9F0A"))
-        } else {
-            (statusDot?.background as? GradientDrawable)?.setColor(Color.parseColor("#FF30D158"))
-            if (statusDot?.animation == null) {
-                val pulseAnim = android.view.animation.AlphaAnimation(1.0f, 0.45f).apply {
-                    duration = 850
-                    repeatMode = android.view.animation.Animation.REVERSE
-                    repeatCount = android.view.animation.Animation.INFINITE
+        if (isActive) {
+            idleStatusText?.visibility = View.GONE
+            chronometer?.visibility = View.VISIBLE
+            btnPauseResume?.visibility = View.VISIBLE
+            btnPauseResume?.text = if (isPaused) "▶" else "⏸"
+            btnOut?.visibility = View.VISIBLE
+            btnPrimary?.visibility = View.GONE
+            btnToggleMode?.visibility = View.GONE
+
+            if (isPaused) {
+                statusDot?.clearAnimation()
+                (statusDot?.background as? GradientDrawable)?.setColor(Color.parseColor("#FFFF9F0A"))
+            } else {
+                (statusDot?.background as? GradientDrawable)?.setColor(Color.parseColor("#FF30D158"))
+                if (statusDot?.animation == null) {
+                    val pulseAnim = android.view.animation.AlphaAnimation(1.0f, 0.45f).apply {
+                        duration = 850
+                        repeatMode = android.view.animation.Animation.REVERSE
+                        repeatCount = android.view.animation.Animation.INFINITE
+                    }
+                    statusDot?.startAnimation(pulseAnim)
                 }
-                statusDot?.startAnimation(pulseAnim)
             }
+
+            val elapsed = if (isPaused && pausedAt > 0L && pausedAt >= lastTimestamp) {
+                pausedAt - lastTimestamp
+            } else if (lastTimestamp > 0L) {
+                Math.max(0L, System.currentTimeMillis() - lastTimestamp)
+            } else {
+                0L
+            }
+            val base = SystemClock.elapsedRealtime() - elapsed
+            chronometer?.base = base
+            if (isPaused) {
+                chronometer?.stop()
+                chronometer?.setTextColor(Color.parseColor("#FFFF9F0A"))
+            } else {
+                chronometer?.start()
+                chronometer?.setTextColor(Color.WHITE)
+            }
+        } else {
+            statusDot?.clearAnimation()
+            (statusDot?.background as? GradientDrawable)?.setColor(Color.parseColor("#FF64D2FF"))
+            chronometer?.stop()
+            chronometer?.visibility = View.GONE
+            idleStatusText?.visibility = View.VISIBLE
+            idleStatusText?.text = if (mode == "two-way") "READY · IN" else "QUICK LOG"
+
+            btnPauseResume?.visibility = View.GONE
+            btnOut?.visibility = View.GONE
+            btnPrimary?.visibility = View.VISIBLE
+            btnPrimary?.text = if (mode == "two-way") "▶ IN" else "⚡ LOG"
+            btnToggleMode?.visibility = View.VISIBLE
+            btnToggleMode?.text = if (mode == "two-way") "⇄ Single" else "⇄ Two-Way"
         }
 
-        val elapsed = if (isPaused && pausedAt > 0L && pausedAt >= lastTimestamp) {
-            pausedAt - lastTimestamp
-        } else if (lastTimestamp > 0L) {
-            Math.max(0L, System.currentTimeMillis() - lastTimestamp)
-        } else {
-            0L
-        }
-        val base = SystemClock.elapsedRealtime() - elapsed
-        chronometer?.base = base
-        if (isPaused) {
-            chronometer?.stop()
-            chronometer?.setTextColor(Color.parseColor("#FFFF9F0A"))
-        } else {
-            chronometer?.start()
-            chronometer?.setTextColor(Color.WHITE)
-        }
+        btnQuickNote?.visibility = View.VISIBLE
+        btnOpenApp?.visibility = View.VISIBLE
+        btnClose?.visibility = View.VISIBLE
     }
 
     override fun onDestroy() {
@@ -445,19 +587,18 @@ class FloatingTimerService : Service() {
         }
 
         fun updateState(context: Context) {
+            val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+            val enabled = prefs.getBoolean("flutter.floating_timer_enabled", false)
+            if (!enabled) {
+                if (instance != null) {
+                    stop(context)
+                }
+                return
+            }
             if (instance != null) {
                 instance?.refreshView()
             } else {
-                val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-                val enabled = prefs.getBoolean("flutter.floating_timer_enabled", false)
-                if (enabled) {
-                    val widgetPrefs = context.getSharedPreferences(NoteKarWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
-                    val mode = widgetPrefs.getString(NoteKarWidgetProvider.KEY_MODE, "two-way") ?: "two-way"
-                    val nextAction = widgetPrefs.getString(NoteKarWidgetProvider.KEY_NEXT_ACTION, "in") ?: "in"
-                    if (mode == "two-way" && nextAction == "out") {
-                        start(context)
-                    }
-                }
+                start(context)
             }
         }
     }

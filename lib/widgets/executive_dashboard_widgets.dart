@@ -1397,9 +1397,7 @@ class MementoMoriLifeHorizonCard extends StatelessWidget {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                'Inspect Daily Life Audit & Void'.localized(
-                                  context,
-                                ),
+                                'View daily time summary'.localized(context),
                                 style: TextStyle(
                                   color: p.text,
                                   fontSize: 11.5,

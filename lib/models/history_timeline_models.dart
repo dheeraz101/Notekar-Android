@@ -287,6 +287,35 @@ class TimelineDaySection {
   final List<TimelineItem> items;
   final Map<String, Duration> categoryBreakdown;
 
+  static (int, int) calculateTotals(List<TimelineItem> items) {
+    int totalTrackedMs = 0;
+    int totalLogs = 0;
+    for (final it in items) {
+      if (it is TimelineSessionItem) {
+        totalTrackedMs += it.duration.inMilliseconds;
+        totalLogs += it.momentIds.length;
+      } else if (it is TimelineSingleItem) {
+        totalLogs += 1;
+      } else if (it is TimelineConsolidatedItem) {
+        totalLogs += it.items.length;
+        totalTrackedMs += it.totalDuration.inMilliseconds;
+      }
+    }
+    return (totalTrackedMs, totalLogs);
+  }
+
+  TimelineDaySection copyWithItems(List<TimelineItem> newItems) {
+    final (trackedMs, logs) = calculateTotals(newItems);
+    return TimelineDaySection(
+      dateKey: dateKey,
+      date: date,
+      displayTitle: displayTitle,
+      totalTrackedDuration: Duration(milliseconds: trackedMs),
+      totalLogs: logs,
+      items: newItems,
+    );
+  }
+
   static Map<String, Duration> _calculateCategoryBreakdown(
     List<TimelineItem> items,
   ) {
@@ -798,13 +827,8 @@ TimelineIsolateResult buildTimelineDataInIsolate(
   } else if (payload.filter == 'checkpoints') {
     sections = sections
         .map(
-          (s) => TimelineDaySection(
-            dateKey: s.dateKey,
-            date: s.date,
-            displayTitle: s.displayTitle,
-            totalTrackedDuration: s.totalTrackedDuration,
-            totalLogs: s.totalLogs,
-            items: s.items.where((it) {
+          (s) => s.copyWithItems(
+            s.items.where((it) {
               if (it is TimelineSingleItem) {
                 final m = it.moment;
                 return m.tags.contains('checkpoint') ||
@@ -831,13 +855,8 @@ TimelineIsolateResult buildTimelineDataInIsolate(
   if (payload.hideCheckpoints && payload.filter != 'checkpoints') {
     sections = sections
         .map(
-          (s) => TimelineDaySection(
-            dateKey: s.dateKey,
-            date: s.date,
-            displayTitle: s.displayTitle,
-            totalTrackedDuration: s.totalTrackedDuration,
-            totalLogs: s.totalLogs,
-            items: s.items.where((it) {
+          (s) => s.copyWithItems(
+            s.items.where((it) {
               if (it is TimelineSingleItem) {
                 final m = it.moment;
                 return !m.tags.contains('checkpoint') &&
@@ -853,16 +872,14 @@ TimelineIsolateResult buildTimelineDataInIsolate(
         )
         .where((s) => s.items.isNotEmpty)
         .toList();
-  } else if (payload.filter == 'media') {
+  }
+
+  // Independent media filtering (was previously skipped if hideCheckpoints was enabled)
+  if (payload.filter == 'media') {
     sections = sections
         .map(
-          (s) => TimelineDaySection(
-            dateKey: s.dateKey,
-            date: s.date,
-            displayTitle: s.displayTitle,
-            totalTrackedDuration: s.totalTrackedDuration,
-            totalLogs: s.totalLogs,
-            items: s.items.where((it) {
+          (s) => s.copyWithItems(
+            s.items.where((it) {
               if (it is TimelineSingleItem) {
                 final m = it.moment;
                 return (m.imagePath != null && m.imagePath!.isNotEmpty) ||
@@ -906,13 +923,8 @@ TimelineIsolateResult buildTimelineDataInIsolate(
 
     sections = sections
         .map(
-          (s) => TimelineDaySection(
-            dateKey: s.dateKey,
-            date: s.date,
-            displayTitle: s.displayTitle,
-            totalTrackedDuration: s.totalTrackedDuration,
-            totalLogs: s.totalLogs,
-            items: s.items.where((it) {
+          (s) => s.copyWithItems(
+            s.items.where((it) {
               if (mode == 'single' && it is! TimelineSingleItem) return false;
               if (mode == 'two-way' && it is! TimelineSessionItem) return false;
               if (mode == 'media') {
@@ -999,14 +1011,7 @@ TimelineIsolateResult buildTimelineDataInIsolate(
         (a, b) => b.primaryTimestamp.compareTo(a.primaryTimestamp),
       );
 
-      return TimelineDaySection(
-        dateKey: s.dateKey,
-        date: s.date,
-        displayTitle: s.displayTitle,
-        totalTrackedDuration: s.totalTrackedDuration,
-        totalLogs: s.totalLogs,
-        items: consolidatedList,
-      );
+      return s.copyWithItems(consolidatedList);
     }).toList();
   }
 

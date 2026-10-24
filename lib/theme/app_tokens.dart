@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Centralized Design System Tokens for NoteKar.
-/// Provides semantic constants for spacing, radii, touch targets, animation curves, and elevations.
+/// Provides semantic constants for spacing, radii, touch targets, animation curves, elevations, and Apple HIG typography.
 class NkTokens {
   NkTokens._();
 
@@ -11,6 +11,7 @@ class NkTokens {
   static const durations = NkDurations();
   static const curves = NkCurves();
   static const elevation = NkElevation();
+  static const typography = NkTypography();
 }
 
 class NkSpacing {
@@ -69,6 +70,8 @@ class NkRadii {
   final double smVal = 8.0;
   final double mdVal = 12.0;
   final double cardVal = 28.0;
+  final double squircleCardVal = 24.0;
+  final double squircleSheetVal = 28.0;
   final double sheetVal = 24.0;
   final double dialogVal = 28.0;
   final double pillVal = 999.0;
@@ -77,9 +80,25 @@ class NkRadii {
   BorderRadius get sm => BorderRadius.circular(8.0);
   BorderRadius get md => BorderRadius.circular(12.0);
   BorderRadius get card => BorderRadius.circular(28.0);
+  BorderRadius get squircleCard => BorderRadius.circular(24.0);
+  BorderRadius get squircleSheet => BorderRadius.circular(28.0);
   BorderRadius get sheet => BorderRadius.circular(24.0);
   BorderRadius get dialog => BorderRadius.circular(28.0);
   BorderRadius get pill => BorderRadius.circular(999.0);
+
+  /// Continuous squircle shape border for Apple HIG surface cards
+  ShapeBorder squircleCardBorder({BorderSide side = BorderSide.none}) =>
+      RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24.0),
+        side: side,
+      );
+
+  /// Continuous squircle shape border for Apple HIG modal sheets
+  ShapeBorder squircleSheetBorder({BorderSide side = BorderSide.none}) =>
+      RoundedRectangleBorder(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28.0)),
+        side: side,
+      );
 }
 
 class NkTouchTarget {
@@ -138,4 +157,98 @@ class NkElevation {
           spreadRadius: -2,
         ),
       ];
+}
+
+/// Centralized Apple HIG / JustNow Typography Scale.
+/// Provides proportional font sizes and negative tracking (letterSpacing) matching iOS SF Pro.
+class NkTypography {
+  const NkTypography();
+
+  TextStyle largeTitle(Color color) => TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 34,
+    fontWeight: FontWeight.w800,
+    letterSpacing: -1.3,
+    color: color,
+  );
+
+  TextStyle title1(Color color) => TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 28,
+    fontWeight: FontWeight.w700,
+    letterSpacing: -0.8,
+    color: color,
+  );
+
+  TextStyle title2(Color color) => TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 22,
+    fontWeight: FontWeight.w700,
+    letterSpacing: -0.6,
+    color: color,
+  );
+
+  TextStyle title3(Color color) => TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 20,
+    fontWeight: FontWeight.w600,
+    letterSpacing: -0.5,
+    color: color,
+  );
+
+  TextStyle headline(Color color) => TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 17,
+    fontWeight: FontWeight.w600,
+    letterSpacing: -0.4,
+    color: color,
+  );
+
+  TextStyle body(Color color) => TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 17,
+    fontWeight: FontWeight.w400,
+    letterSpacing: -0.3,
+    color: color,
+  );
+
+  TextStyle callout(Color color) => TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+    letterSpacing: -0.3,
+    color: color,
+  );
+
+  TextStyle subheadline(Color color) => TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 15,
+    fontWeight: FontWeight.w400,
+    letterSpacing: -0.2,
+    color: color,
+  );
+
+  TextStyle footnote(Color color) => TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 13,
+    fontWeight: FontWeight.w400,
+    letterSpacing: -0.1,
+    color: color,
+  );
+
+  TextStyle caption(Color color) => TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 12,
+    fontWeight: FontWeight.w500,
+    letterSpacing: 0.0,
+    color: color,
+  );
+
+  TextStyle caption2(Color color) => TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 11,
+    fontWeight: FontWeight.w500,
+    letterSpacing: 0.0,
+    color: color,
+  );
 }

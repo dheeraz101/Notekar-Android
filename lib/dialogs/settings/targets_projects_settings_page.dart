@@ -327,9 +327,9 @@ class _TargetsProjectsSettingsPageState
             ),
             SettingsSwitchRow(
               p: p,
-              title: 'Floating Dynamic Island'.localized(context),
+              title: 'Floating Control Pill'.localized(context),
               subtitle:
-                  'Compact floating pill with live timer and quick controls'
+                  'Always-on floating control pill like iOS AssistiveTouch to start, stop, switch modes, and log moments from any screen without opening notifications.'
                       .localized(context),
               value: _floatingTimerEnabled,
               color: p.green,

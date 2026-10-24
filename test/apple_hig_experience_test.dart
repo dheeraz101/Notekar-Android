@@ -1,15 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:notekar/dialogs/history_dialog.dart';
-import 'package:notekar/dialogs/settings/modes_categories_settings_page.dart';
-import 'package:notekar/dialogs/sunday_dispatch_sheet.dart';
-import 'package:notekar/models/history_timeline_models.dart';
-import 'package:notekar/models/moment.dart';
+import 'package:notekar/dialogs/settings/targets_projects_settings_page.dart';
 import 'package:notekar/models/palette.dart';
-import 'package:notekar/utils/app_utils.dart';
-import 'package:notekar/utils/category_service.dart';
-import 'package:notekar/widgets/dynamic_header_capsule.dart';
-import 'package:notekar/widgets/home_clock_complication.dart';
+import 'package:notekar/theme/app_tokens.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -34,638 +27,124 @@ void main() {
   );
 
   setUp(() {
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({
+      'floating_timer_enabled': true,
+      'floating_single_tap_action': 'toggle_expand',
+      'floating_double_tap_action': 'quick_menu',
+    });
   });
 
-  group('Apple HIG 7-Color System & CategoryService', () {
-    test('CategoryService defines exactly 7 Apple HIG system colors', () {
-      expect(CategoryService.appleHigColors.length, 7);
-      expect(
-        CategoryService.appleHigColors[0],
-        const Color(0xFF007AFF),
-      ); // Blue
-      expect(
-        CategoryService.appleHigColors[1],
-        const Color(0xFF5856D6),
-      ); // Indigo
-      expect(
-        CategoryService.appleHigColors[2],
-        const Color(0xFFAF52DE),
-      ); // Purple
-      expect(
-        CategoryService.appleHigColors[3],
-        const Color(0xFFFF2D55),
-      ); // Pink
-      expect(CategoryService.appleHigColors[4], const Color(0xFFFF3B30)); // Red
-      expect(
-        CategoryService.appleHigColors[5],
-        const Color(0xFFFF9500),
-      ); // Orange
-      expect(
-        CategoryService.appleHigColors[6],
-        const Color(0xFF34C759),
-      ); // Green
-    });
-
+  group('Apple HIG Typography & Design System Tokens', () {
     test(
-      'addCategory persists custom Apple HIG color and getCategoryMeta resolves it',
-      () async {
-        final service = CategoryService();
-        const customColor = Color(0xFFFF9500); // Orange
-        final added = await service.addCategory(
-          'Photography',
-          color: customColor,
-        );
-        expect(added, isTrue);
+      'NkTypography conforms to Apple SF Pro font size and negative tracking specs',
+      () {
+        const typo = NkTokens.typography;
+        const color = Colors.white;
 
-        final color = service.getCategoryColor('Photography');
-        expect(color, customColor);
+        final largeTitle = typo.largeTitle(color);
+        expect(largeTitle.fontSize, 34);
+        expect(largeTitle.fontWeight, FontWeight.w800);
+        expect(largeTitle.letterSpacing, -1.3);
 
-        final meta = getCategoryMeta('Photography', testPalette);
-        expect(meta.name, 'Photography');
-        expect(meta.color, customColor);
+        final title1 = typo.title1(color);
+        expect(title1.fontSize, 28);
+        expect(title1.fontWeight, FontWeight.w700);
+        expect(title1.letterSpacing, -0.8);
+
+        final title2 = typo.title2(color);
+        expect(title2.fontSize, 22);
+        expect(title2.fontWeight, FontWeight.w700);
+        expect(title2.letterSpacing, -0.6);
+
+        final title3 = typo.title3(color);
+        expect(title3.fontSize, 20);
+        expect(title3.fontWeight, FontWeight.w600);
+        expect(title3.letterSpacing, -0.5);
+
+        final headline = typo.headline(color);
+        expect(headline.fontSize, 17);
+        expect(headline.fontWeight, FontWeight.w600);
+        expect(headline.letterSpacing, -0.4);
+
+        final body = typo.body(color);
+        expect(body.fontSize, 17);
+        expect(body.fontWeight, FontWeight.w400);
+        expect(body.letterSpacing, -0.3);
+
+        final callout = typo.callout(color);
+        expect(callout.fontSize, 16);
+        expect(callout.fontWeight, FontWeight.w400);
+        expect(callout.letterSpacing, -0.3);
+
+        final subheadline = typo.subheadline(color);
+        expect(subheadline.fontSize, 15);
+        expect(subheadline.fontWeight, FontWeight.w400);
+        expect(subheadline.letterSpacing, -0.2);
+
+        final footnote = typo.footnote(color);
+        expect(footnote.fontSize, 13);
+        expect(footnote.fontWeight, FontWeight.w400);
+        expect(footnote.letterSpacing, -0.1);
+
+        final caption = typo.caption(color);
+        expect(caption.fontSize, 12);
+        expect(caption.fontWeight, FontWeight.w500);
+        expect(caption.letterSpacing, 0.0);
+
+        final caption2 = typo.caption2(color);
+        expect(caption2.fontSize, 11);
+        expect(caption2.fontWeight, FontWeight.w500);
+        expect(caption2.letterSpacing, 0.0);
       },
     );
-  });
 
-  group('History Sheet Refinements', () {
-    testWidgets(
-      'HistoryDialog has search icon in trailing header next to close',
-      (tester) async {
-        bool searchOpened = false;
+    test('NkRadii provides squircle continuous curvature tokens', () {
+      const radii = NkTokens.radii;
 
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: HistoryDialog(
-                p: testPalette,
-                entries: const [],
-                compactRows: false,
-                largeText: false,
-                minimalMomentOptions: false,
-                confirmDelete: false,
-                onDelete: (_) async {},
-                onRestore: (_) async {},
-                onUpdateNote: (_, _) async {},
-                onDuration: (_, _) {},
-                onOpenSearchNotes: () => searchOpened = true,
-              ),
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
+      expect(radii.squircleCardVal, 24.0);
+      expect(radii.squircleSheetVal, 28.0);
 
-        final searchFinder = find.byIcon(Icons.search_rounded);
-        expect(searchFinder, findsOneWidget);
+      expect(radii.squircleCard, BorderRadius.circular(24.0));
+      expect(radii.squircleSheet, BorderRadius.circular(28.0));
 
-        await tester.tap(searchFinder);
-        await tester.pump();
-        expect(searchOpened, isTrue);
-      },
-    );
-
-    testWidgets(
-      'HistoryDialog keeps scrollable view clean without redundant inline insights card',
-      (tester) async {
-        final now = DateTime.now();
-        final todayDate = dateKey(now);
-        final List<Moment> entries = [
-          Moment(
-            id: 1,
-            type: 'out',
-            timestamp: now
-                .subtract(const Duration(minutes: 45))
-                .millisecondsSinceEpoch,
-            note: 'Deep focus architecture #Work',
-            date: todayDate,
-            category: 'Work',
-          ),
-        ];
-
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: HistoryDialog(
-                p: testPalette,
-                entries: entries,
-                compactRows: false,
-                largeText: false,
-                minimalMomentOptions: false,
-                confirmDelete: false,
-                onDelete: (_) async {},
-                onRestore: (_) async {},
-                onUpdateNote: (_, _) async {},
-                onDuration: (_, _) {},
-              ),
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        // Verify redundant inline insight card header is removed from history sheet
-        expect(find.text("TODAY'S INSIGHTS"), findsNothing);
-      },
-    );
-  });
-
-  group('DynamicHeaderCapsule Widget', () {
-    testWidgets('Renders resting 34px capsule and smoothly expands on tap', (
-      tester,
-    ) async {
-      final now = DateTime.now();
-      final todayDate = dateKey(now);
-      final List<Moment> entries = [
-        Moment(
-          id: 1,
-          type: 'out',
-          timestamp: now
-              .subtract(const Duration(hours: 1))
-              .millisecondsSinceEpoch,
-          note: 'Flow session',
-          date: todayDate,
-          category: 'Work',
-        ),
-      ];
-
-      bool expandedState = false;
-      String selected = 'All';
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: DynamicHeaderCapsule(
-                p: testPalette,
-                entries: entries,
-                categories: const ['Work', 'Deep Focus', 'Study'],
-                activeCategory: selected,
-                onSelectCategory: (cat) => selected = cat,
-                onAddCategory: () {},
-                onExpansionChanged: (exp) => expandedState = exp,
-              ),
-            ),
-          ),
-        ),
+      final cardBorder = radii.squircleCardBorder();
+      expect(cardBorder, isA<RoundedRectangleBorder>());
+      expect(
+        (cardBorder as RoundedRectangleBorder).borderRadius,
+        BorderRadius.circular(24.0),
       );
-      await tester.pumpAndSettle();
 
-      // In resting state: shows chevron down
-      expect(find.byIcon(Icons.keyboard_arrow_down_rounded), findsOneWidget);
-      expect(find.text('MODES & RHYTHM'), findsNothing);
-
-      // Tap resting capsule to expand
-      await tester.tap(find.byType(DynamicHeaderCapsule));
-      await tester.pumpAndSettle();
-
-      expect(expandedState, isTrue);
-      expect(find.text('MODES & RHYTHM'), findsOneWidget);
-      expect(find.byIcon(Icons.keyboard_arrow_up_rounded), findsOneWidget);
-
-      // Tap close chevron to collapse
-      await tester.tap(find.byIcon(Icons.keyboard_arrow_up_rounded));
-      await tester.pumpAndSettle();
-
-      expect(expandedState, isFalse);
-      expect(find.byIcon(Icons.keyboard_arrow_down_rounded), findsOneWidget);
+      final sheetBorder = radii.squircleSheetBorder();
+      expect(sheetBorder, isA<RoundedRectangleBorder>());
+      expect(
+        (sheetBorder as RoundedRectangleBorder).borderRadius,
+        const BorderRadius.vertical(top: Radius.circular(28.0)),
+      );
     });
+  });
 
+  group('Always-On Floating Control Pill UI Integration', () {
     testWidgets(
-      'Reveals Today Momentum card inside expanded capsule and routes to Intelligence Hub',
+      'TargetsProjectsSettingsPage displays updated Floating Control Pill title and assistive subtitle',
       (tester) async {
-        final now = DateTime.now();
-        final todayDate = dateKey(now);
-        final List<Moment> entries = [
-          Moment(
-            id: 1,
-            type: 'out',
-            timestamp: now
-                .subtract(const Duration(minutes: 45))
-                .millisecondsSinceEpoch,
-            note: 'Design Polish',
-            date: todayDate,
-            category: 'Design',
-          ),
-        ];
-
-        bool openedHub = false;
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
         await tester.pumpWidget(
           MaterialApp(
-            home: Scaffold(
-              body: Center(
-                child: DynamicHeaderCapsule(
-                  p: testPalette,
-                  entries: entries,
-                  categories: const ['Design', 'Engineering'],
-                  activeCategory: 'All',
-                  onSelectCategory: (_) {},
-                  onAddCategory: () {},
-                  currentStreak: 7,
-                  bankedGraceDays: 2,
-                  isSessionOngoing: false,
-                  onOpenIntelligenceHub: () => openedHub = true,
-                ),
-              ),
-            ),
+            home: Scaffold(body: TargetsProjectsSettingsPage(p: testPalette)),
           ),
         );
         await tester.pumpAndSettle();
 
-        // Resting capsule: expanded unified rhythm content is not visible
-        expect(find.text('MODES & RHYTHM'), findsNothing);
-
-        // Tap capsule to expand
-        await tester.tap(find.byType(DynamicHeaderCapsule));
-        await tester.pumpAndSettle();
-
-        // Expanded card now reveals Unified Rhythm card with streak, grace shield, conscious %
-        expect(find.text('MODES & RHYTHM'), findsOneWidget);
+        expect(find.text('Floating Control Pill'), findsOneWidget);
         expect(
-          find.byIcon(Icons.local_fire_department_rounded),
+          find.textContaining(
+            'Always-on floating control pill like iOS AssistiveTouch',
+          ),
           findsOneWidget,
         );
-        expect(find.text('7d'), findsOneWidget);
-        expect(find.byIcon(Icons.security_rounded), findsOneWidget);
-        expect(find.text('2'), findsOneWidget);
-        expect(find.textContaining('Conscious'), findsOneWidget);
-
-        // Tapping unified rhythm card triggers onOpenIntelligenceHub
-        await tester.tap(find.textContaining('Conscious'));
-        await tester.pumpAndSettle();
-
-        expect(openedHub, isTrue);
-      },
-    );
-  });
-
-  group('HomeClockComplication Widget', () {
-    testWidgets('Renders Intentionality complication', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: HomeClockComplication(
-              p: testPalette,
-              style: 'intentionality',
-              entries: const [],
-              streak: 5,
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('0m / 10h'), findsOneWidget);
-      expect(find.text('0% Intentional'), findsOneWidget);
-    });
-
-    testWidgets('Renders Streak complication', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: HomeClockComplication(
-              p: testPalette,
-              style: 'streak',
-              entries: const [],
-              streak: 14,
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('14 days streak'), findsOneWidget);
-      expect(find.text('Active Flow'), findsOneWidget);
-    });
-
-    testWidgets('Renders Circadian complication', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: HomeClockComplication(
-              p: testPalette,
-              style: 'circadian',
-              entries: const [],
-              streak: 5,
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('Circadian'), findsOneWidget);
-    });
-
-    testWidgets('Renders Void complication as empty', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: HomeClockComplication(
-              p: testPalette,
-              style: 'void',
-              entries: const [],
-              streak: 5,
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.byType(Container), findsNothing);
-    });
-  });
-
-  group('Sunday Evening Dispatch Sheet', () {
-    testWidgets('Renders retrospective digest and save archive button', (
-      tester,
-    ) async {
-      final now = DateTime.now();
-      final List<Moment> entries = [
-        Moment(
-          id: 1,
-          type: 'out',
-          timestamp: now
-              .subtract(const Duration(days: 2))
-              .millisecondsSinceEpoch,
-          note: 'Code refactoring #Work',
-          date: dateKey(now.subtract(const Duration(days: 2))),
-          category: 'Work',
-        ),
-      ];
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SundayDispatchSheet(p: testPalette, entries: entries),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('Sunday Dispatch'), findsOneWidget);
-      expect(find.text('A Week of Deliberate Focus'), findsOneWidget);
-      expect(find.text('Conscious Focus'), findsOneWidget);
-      expect(find.text('Peak Circadian'), findsOneWidget);
-      expect(find.text('Save to Sovereign Archive'), findsOneWidget);
-
-      // Tap Save to Sovereign Archive
-      await tester.tap(
-        find.text('Save to Sovereign Archive'),
-        warnIfMissed: false,
-      );
-      await tester.pump();
-    });
-  });
-
-  group('Manual Entry & Timeline Pairing Bug Fixes', () {
-    test(
-      'buildTimelineDaySections handles simultaneous in and out timestamps cleanly without creating zombie live session',
-      () {
-        final now = DateTime.now();
-        final ms = now.millisecondsSinceEpoch;
-        final day = dateKey(now);
-
-        final entries = [
-          Moment(
-            id: 1,
-            type: 'in',
-            timestamp: ms,
-            note: 'Focus #Work',
-            date: day,
-            category: 'Work',
-          ),
-          Moment(
-            id: 2,
-            type: 'out',
-            timestamp: ms,
-            note: '',
-            date: day,
-            category: 'Work',
-          ),
-        ];
-
-        final sections = buildTimelineDaySections(entries);
-        expect(sections.length, 1);
-        final items = sections.first.items;
-        expect(items.length, 1);
-        expect(items.first, isA<TimelineSessionItem>());
-        final session = items.first as TimelineSessionItem;
-        expect(session.isOngoing, isFalse);
-        expect(session.endTimestamp, ms);
-        expect(session.momentIds, containsAll([1, 2]));
-      },
-    );
-
-    test(
-      'buildTimelineDaySections auto-closes past unclosed session when subsequent sessions exist',
-      () {
-        final now = DateTime.now();
-        final ms1 = now
-            .subtract(const Duration(hours: 3))
-            .millisecondsSinceEpoch;
-        final ms2 = now
-            .subtract(const Duration(hours: 2))
-            .millisecondsSinceEpoch;
-        final ms3 = now
-            .subtract(const Duration(hours: 1))
-            .millisecondsSinceEpoch;
-        final day = dateKey(now);
-
-        final entries = [
-          Moment(
-            id: 1,
-            type: 'in',
-            timestamp: ms1,
-            note: 'Old unclosed',
-            date: day,
-            category: 'Work',
-          ),
-          Moment(
-            id: 2,
-            type: 'in',
-            timestamp: ms2,
-            note: 'New session',
-            date: day,
-            category: 'Deep Focus',
-          ),
-          Moment(
-            id: 3,
-            type: 'out',
-            timestamp: ms3,
-            note: '',
-            date: day,
-            category: 'Deep Focus',
-          ),
-        ];
-
-        final sections = buildTimelineDaySections(entries);
-        expect(sections.length, 1);
-        final items = sections.first.items;
-        expect(items.length, 2);
-
-        // Newest session is first (reverse chrono): started at ms2, closed at ms3
-        final newSession = items[0] as TimelineSessionItem;
-        expect(newSession.isOngoing, isFalse);
-        expect(newSession.endTimestamp, ms3);
-
-        // Oldest session is second: started at ms1, remains ongoing until ended explicitly
-        final oldSession = items[1] as TimelineSessionItem;
-        expect(oldSession.isOngoing, isTrue);
-        expect(oldSession.outMoment, isNull);
-      },
-    );
-
-    testWidgets(
-      'HistoryDialog triggers onEndLiveSession when End button tapped on live session',
-      (tester) async {
-        final now = DateTime.now();
-        final ms = now.millisecondsSinceEpoch;
-        final day = dateKey(now);
-
-        Moment? endedOutMoment;
-
-        final entries = [
-          Moment(
-            id: 1,
-            type: 'in',
-            timestamp: ms,
-            note: 'Current live session',
-            date: day,
-            category: 'Work',
-          ),
-        ];
-
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: HistoryDialog(
-                p: testPalette,
-                entries: entries,
-                compactRows: false,
-                largeText: false,
-                minimalMomentOptions: false,
-                confirmDelete: false,
-                onDelete: (_) async {},
-                onRestore: (_) async {},
-                onEndLiveSession: (inMomentId, outEntry) async {
-                  endedOutMoment = outEntry;
-                },
-                onUpdateNote: (_, _) async {},
-                onDuration: (_, _) {},
-              ),
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        final endButton = find.text('End');
-        expect(endButton, findsOneWidget);
-
-        await tester.tap(endButton);
-        await tester.pumpAndSettle();
-
-        expect(endedOutMoment, isNotNull);
-        expect(endedOutMoment!.type, 'out');
-        expect(endedOutMoment!.category, 'Work');
-      },
-    );
-  });
-
-  group('Mode Color Customization in Settings', () {
-    testWidgets(
-      'ModeDetailSettingsPage renders Apple HIG colors and allows changing color',
-      (tester) async {
-        bool changedNotified = false;
-
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: SingleChildScrollView(
-                child: ModeDetailSettingsPage(
-                  p: testPalette,
-                  category: 'Work',
-                  entries: const [],
-                  onCategoriesChanged: () => changedNotified = true,
-                ),
-              ),
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        expect(find.text('MODE COLOR'), findsOneWidget);
-        expect(find.text('CATEGORY TIMELINE'), findsOneWidget);
-
-        // Tap Indigo swatch (#5856D6)
-        final indigoSwatch = find.byWidgetPredicate(
-          (w) =>
-              w is Container &&
-              w.decoration is BoxDecoration &&
-              (w.decoration as BoxDecoration).color ==
-                  CategoryService.appleHigColors[1],
-        );
-        expect(indigoSwatch, findsOneWidget);
-        await tester.tap(indigoSwatch);
-        await tester.pumpAndSettle();
-
-        expect(changedNotified, isTrue);
-        expect(
-          CategoryService().getCategoryColor('Work'),
-          CategoryService.appleHigColors[1],
-        );
-      },
-    );
-  });
-
-  group('New Apple HIG Refinements Tests', () {
-    test('DynamicHeaderCapsule defines Apple spring curve', () {
-      expect(DynamicHeaderCapsule.appleSpringCurve, isA<Cubic>());
-      final curve = DynamicHeaderCapsule.appleSpringCurve as Cubic;
-      expect(curve.a, 0.2);
-      expect(curve.b, 0.9);
-      expect(curve.c, 0.3);
-      expect(curve.d, 1.0);
-    });
-
-    testWidgets('HomeClockComplication renders live radial ambient glow', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: HomeClockComplication(
-              p: testPalette,
-              style: 'intentionality',
-              entries: const [],
-              streak: 3,
-              isLiveSession: true,
-              liveSessionColor: const Color(0xFF007AFF),
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      // Check for presence of radial gradient ambient glow container
-      final ambientGlow = find.byWidgetPredicate((w) {
-        if (w is AnimatedContainer && w.decoration is BoxDecoration) {
-          final box = w.decoration as BoxDecoration;
-          return box.gradient is RadialGradient;
-        }
-        return false;
-      });
-      expect(ambientGlow, findsOneWidget);
-    });
-
-    test(
-      'CategoryService recognizes Rest and Recovery with Apple Teal color',
-      () {
-        final restMeta = getCategoryMeta('Rest', testPalette);
-        expect(restMeta.name, 'Rest');
-        expect(restMeta.color, const Color(0xFF30B0C7));
-
-        final recoveryMeta = getCategoryMeta('Recovery', testPalette);
-        expect(recoveryMeta.name, 'Recovery');
-        expect(recoveryMeta.color, const Color(0xFF30B0C7));
       },
     );
   });

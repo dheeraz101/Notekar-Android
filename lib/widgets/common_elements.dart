@@ -32,42 +32,51 @@ class ChipButton extends StatelessWidget {
     final hasLabel = label != null && label!.isNotEmpty;
     final hasIcon = icon != null;
 
-    return PressableScale(
+    return Semantics(
+      button: true,
+      selected: active,
+      label: (semanticLabel ?? label ?? 'Filter').localized(context),
       onTap: onTap,
       onLongPress: onLongPress,
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: (hasIcon && !hasLabel) ? 11 : 14,
-          vertical: 9,
-        ),
-        decoration: BoxDecoration(
-          color: active ? p.surface3 : p.surface2,
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: active ? p.accent : p.border),
-          boxShadow: active ? selectedGlow(p.accent) : null,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (hasIcon) ...[
-              Icon(
-                icon,
-                color: active ? p.text : p.text2,
-                size: 16,
-                semanticLabel: semanticLabel,
-              ),
-              if (hasLabel) const SizedBox(width: 6),
-            ],
-            if (hasLabel)
-              Text(
-                label!.localized(context),
-                style: TextStyle(
-                  color: active ? p.text : p.text2,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 12,
-                ),
-              ),
-          ],
+      child: ExcludeSemantics(
+        child: PressableScale(
+          onTap: onTap,
+          onLongPress: onLongPress,
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: (hasIcon && !hasLabel) ? 11 : 14,
+              vertical: 9,
+            ),
+            decoration: BoxDecoration(
+              color: active ? p.surface3 : p.surface2,
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(color: active ? p.accent : p.border),
+              boxShadow: active ? selectedGlow(p.accent) : null,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (hasIcon) ...[
+                  Icon(
+                    icon,
+                    color: active ? p.text : p.text2,
+                    size: 16,
+                    semanticLabel: semanticLabel,
+                  ),
+                  if (hasLabel) const SizedBox(width: 6),
+                ],
+                if (hasLabel)
+                  Text(
+                    label!.localized(context),
+                    style: TextStyle(
+                      color: active ? p.text : p.text2,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 12,
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -921,11 +930,19 @@ class ExternalLinkConfirmSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String domain = url;
+    bool isHttps = false;
     try {
       final uri = Uri.parse(url);
       domain = uri.host;
       if (domain.isEmpty) domain = url;
-    } catch (_) {}
+      isHttps = uri.scheme.toLowerCase() == 'https';
+    } catch (_) {
+      isHttps = url.toLowerCase().startsWith('https://');
+    }
+
+    final badgeColor = isHttps
+        ? CupertinoColors.systemGreen
+        : CupertinoColors.systemRed;
 
     return CupertinoTheme(
       data: CupertinoThemeData(
@@ -933,7 +950,11 @@ class ExternalLinkConfirmSheet extends StatelessWidget {
         primaryColor: p.accent,
       ),
       child: CupertinoAlertDialog(
-        title: Text('External Navigation'.localized(context)),
+        title: Text(
+          isHttps
+              ? 'Secure External Link'.localized(context)
+              : 'Unencrypted Link Warning'.localized(context),
+        ),
         content: Padding(
           padding: const EdgeInsets.only(top: 8),
           child: Column(
@@ -941,8 +962,11 @@ class ExternalLinkConfirmSheet extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'You are now leaving NoteKar to access an external website. Please review the destination address carefully:'
-                    .localized(context),
+                isHttps
+                    ? 'You are leaving NoteKar to visit an external website. This link is encrypted and secure to open:'
+                          .localized(context)
+                    : 'You are leaving NoteKar to visit an unencrypted website. This link is NOT secure:'
+                          .localized(context),
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 13, height: 1.35),
               ),
@@ -955,7 +979,7 @@ class ExternalLinkConfirmSheet extends StatelessWidget {
                       : (!p.isDark ? const Color(0xFFE5E5EA) : p.surface3),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: p.border.withValues(alpha: 0.4),
+                    color: badgeColor.withValues(alpha: 0.35),
                     width: 0.8,
                   ),
                 ),
@@ -964,34 +988,55 @@ class ExternalLinkConfirmSheet extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        const Icon(
-                          Icons.gpp_good_rounded,
-                          color: CupertinoColors.systemGreen,
-                          size: 13,
+                        Icon(
+                          isHttps
+                              ? CupertinoIcons.lock_shield_fill
+                              : CupertinoIcons.exclamationmark_triangle_fill,
+                          color: badgeColor,
+                          size: 14,
                         ),
                         const SizedBox(width: 5),
                         Expanded(
+                          flex: 3,
                           child: Text(
-                            domain.toUpperCase(),
+                            isHttps
+                                ? 'SECURE HTTPS · SAFE'
+                                : 'UNENCRYPTED HTTP · NOT SAFE',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color: p.text3,
-                              fontSize: 9.5,
+                              color: badgeColor,
+                              fontSize: 9.0,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 0.4,
                             ),
                           ),
                         ),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          flex: 2,
+                          child: Text(
+                            domain.toUpperCase(),
+                            maxLines: 1,
+                            textAlign: TextAlign.end,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: p.text3,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     Text(
                       url,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: p.accent,
+                        color: isHttps ? p.accent : badgeColor,
                         fontSize: 11.5,
                         fontFamily: 'monospace',
                       ),
@@ -999,25 +1044,38 @@ class ExternalLinkConfirmSheet extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               Text(
-                'NoteKar is offline-first. Your private data remains securely stored on your local device and is never shared.'
-                    .localized(context),
+                isHttps
+                    ? 'This link uses modern SSL/TLS encryption (HTTPS). Your communication with this website is encrypted and safe to proceed.'
+                          .localized(context)
+                    : 'This website does not use modern encryption (HTTP). Your connection is unencrypted, and any data sent or received may be intercepted or monitored. We recommend avoiding non-HTTPS links.'
+                          .localized(context),
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 11, color: p.text3, height: 1.3),
+                style: TextStyle(
+                  fontSize: 11,
+                  color: isHttps ? p.text3 : badgeColor.withValues(alpha: 0.85),
+                  height: 1.35,
+                ),
               ),
             ],
           ),
         ),
         actions: [
           CupertinoDialogAction(
+            isDefaultAction: !isHttps,
             onPressed: () => Navigator.of(context).pop(false),
             child: Text('Cancel'.localized(context)),
           ),
           CupertinoDialogAction(
-            isDefaultAction: true,
+            isDefaultAction: isHttps,
+            isDestructiveAction: !isHttps,
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text('Open Link'.localized(context)),
+            child: Text(
+              isHttps
+                  ? 'Open Link'.localized(context)
+                  : 'Open Anyway'.localized(context),
+            ),
           ),
         ],
       ),

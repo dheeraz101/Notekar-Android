@@ -4,10 +4,11 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
+import 'package:notekar/services/universal_interval_ledger.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 
-/// Time horizons supported by the Life Audit & Time Wastage engine.
+/// Time horizons supported by the Life Audit summary.
 enum LifeAuditTimeframe {
   today,
   week,
@@ -35,7 +36,7 @@ enum LifeAuditTimeframe {
   };
 }
 
-/// The intentionality status of a single day's conscious window.
+/// The tracking coverage status of a single day's estimated waking window.
 enum DayAuditStatus {
   transcendent,
   substantial,
@@ -45,11 +46,11 @@ enum DayAuditStatus {
   noData;
 
   String get label => switch (this) {
-    DayAuditStatus.transcendent => 'Transcendent (Over-Accounted)',
-    DayAuditStatus.substantial => 'Substantial Focus',
-    DayAuditStatus.partial => 'Partially Accounted',
-    DayAuditStatus.severeVoid => 'Severe Void',
-    DayAuditStatus.totalLoss => 'Total Void Loss',
+    DayAuditStatus.transcendent => 'Above estimated window',
+    DayAuditStatus.substantial => 'Strong tracking coverage',
+    DayAuditStatus.partial => 'Some time untracked',
+    DayAuditStatus.severeVoid => 'Most time untracked',
+    DayAuditStatus.totalLoss => 'No activity logged',
     DayAuditStatus.noData => 'No Data Logged',
   };
 
@@ -57,14 +58,13 @@ enum DayAuditStatus {
     required Color accent,
     required Color green,
     required Color orange,
-    required Color red,
   }) {
     return switch (this) {
       DayAuditStatus.transcendent => accent,
       DayAuditStatus.substantial => green,
       DayAuditStatus.partial => orange,
-      DayAuditStatus.severeVoid => red.withValues(alpha: 0.8),
-      DayAuditStatus.totalLoss => red,
+      DayAuditStatus.severeVoid => orange,
+      DayAuditStatus.totalLoss => Colors.grey,
       DayAuditStatus.noData => Colors.grey,
     };
   }
@@ -293,30 +293,31 @@ class LifeAuditService {
       todayStart.difference(firstLogDay).inDays + 1,
     );
 
-    // Build timeline sections to accurately capture session durations per day
-    final daySections = buildTimelineDaySections(entries);
+    // P1: Reconstruct canonical intervals and slice across midnights so multi-day sessions
+    // distribute exact hours to their respective calendar days, rather than lumping on day 1.
+    final canonicalSlices = UniversalIntervalLedger.reconstructAndSlice(
+      entries,
+      referenceNow: referenceNow ?? now,
+    );
     final Map<String, Duration> trackedByDateKey = {};
-    for (final section in daySections) {
-      int sectionTrackedMs = 0;
-      bool hasOngoingSession = false;
-      for (final it in section.items) {
-        if (it is TimelineSessionItem) {
-          if (it.outMoment == null) {
-            hasOngoingSession = true;
-            final effectiveEnd = (referenceNow ?? now).millisecondsSinceEpoch;
-            final elapsed = math.max(0, effectiveEnd - it.inMoment.timestamp);
-            sectionTrackedMs += elapsed;
-          } else {
-            sectionTrackedMs += it.duration.inMilliseconds;
-          }
-        } else if (it is TimelineSingleItem) {
-          // Point-in-time check-ins do not fabricate duration in conscious audit
-        }
+    for (final slice in canonicalSlices) {
+      if (slice.isSession) {
+        final existing = trackedByDateKey[slice.dateKey] ?? Duration.zero;
+        trackedByDateKey[slice.dateKey] = Duration(
+          milliseconds: math.min(
+            existing.inMilliseconds + slice.durationMs,
+            const Duration(hours: 24).inMilliseconds,
+          ),
+        );
       }
-      // If today and activeSessionStart is provided without an ongoing TimelineSessionItem
-      if (section.dateKey == dateKey(now) &&
-          !hasOngoingSession &&
-          activeSessionStart != null) {
+    }
+
+    if (activeSessionStart != null) {
+      final todayKey = dateKey(now);
+      final hasActiveOngoingInDate = canonicalSlices.any(
+        (s) => s.dateKey == todayKey && s.isOngoing,
+      );
+      if (!hasActiveOngoingInDate) {
         final todayMidnightMs = DateTime(
           now.year,
           now.month,
@@ -328,16 +329,17 @@ class LifeAuditService {
         );
         final elapsed = math.max(
           0,
-          now.millisecondsSinceEpoch - effectiveSessionStartForToday,
+          (referenceNow ?? now).millisecondsSinceEpoch -
+              effectiveSessionStartForToday,
         );
-        sectionTrackedMs += elapsed;
+        final existing = trackedByDateKey[todayKey] ?? Duration.zero;
+        trackedByDateKey[todayKey] = Duration(
+          milliseconds: math.min(
+            existing.inMilliseconds + elapsed,
+            const Duration(hours: 24).inMilliseconds,
+          ),
+        );
       }
-      trackedByDateKey[section.dateKey] = Duration(
-        milliseconds: math.min(
-          sectionTrackedMs,
-          const Duration(hours: 24).inMilliseconds,
-        ),
-      );
     }
 
     // Determine if user has sufficient history for this macro horizon.
@@ -493,6 +495,7 @@ class LifeAuditService {
     final timeframeStartMs = todayStart
         .subtract(Duration(days: requiredDays - 1))
         .millisecondsSinceEpoch;
+    final daySections = buildTimelineDaySections(entries);
     final List<TimelineItem> timeframeItems = [];
     for (final s in daySections) {
       for (final it in s.items) {

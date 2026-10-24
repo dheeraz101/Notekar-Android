@@ -835,6 +835,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       await _repository.initialize(preloadedPrefs: prefs);
       await TagMigrationService.migrateIfNeeded();
       await TagService.instance.load();
+      await CheckpointService.instance.init(prefs);
       final migrated = await _repository.migrateLegacyData();
       var entries = _repository.getAllMoments();
       final trash = _repository.getTrashMoments();
@@ -1028,7 +1029,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     }
   }
 
-  void _updateDynamicShortcuts() {
+  Future<void> _updateDynamicShortcuts() async {
     try {
       const quickActions = QuickActions();
       final items = <ShortcutItem>[];
@@ -1082,8 +1083,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
         ),
       );
 
-      quickActions.setShortcutItems(items);
-    } catch (_) {}
+      await quickActions.setShortcutItems(items);
+    } on PlatformException catch (e) {
+      developer.log('QuickActions unsupported on this launcher: ${e.message}');
+    } catch (e) {
+      developer.log('Failed to update dynamic shortcuts: $e');
+    }
   }
 
   Future<void> _unlockAfterFirstPaint(SharedPreferences prefs) async {
@@ -2567,12 +2572,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
     setState(() => _floatingTimerEnabled = enabled);
     await _saveSetting('floating_timer_enabled', enabled);
     if (!mounted) return;
-    final isActive = _mode == 'two-way' && _sessionStart != null;
     final message = enabled
-        ? (isActive
-              ? 'Floating Timer enabled'
-              : 'Floating Timer enabled (will show during active session)')
-        : 'Floating Timer disabled';
+        ? 'Floating Control Pill enabled (always on screen)'
+        : 'Floating Control Pill disabled';
     _showToast(message.localized(context));
   }
 
@@ -2670,6 +2672,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
       return;
     }
     if (_isDelayBlocked()) return;
+    if (!_hasTappedBefore) {
+      _hasTappedBefore = true;
+      unawaited(_prefs?.setBool('notekar.has_tapped_before', true));
+    }
 
     if (_mode == 'two-way' && _inout != 'out' && forcedType == null) {
       final selectedCat = await _showModeSelectorSheet();
@@ -5054,6 +5060,37 @@ class _NoteKarHomeState extends State<NoteKarHome>
               ],
             ),
           ),
+          if (!_hasTappedBefore &&
+              _entries.isEmpty &&
+              !_headerExpanded &&
+              !lastSaved)
+            Positioned(
+              left: spacing24,
+              right: spacing24,
+              bottom: 82 + bottomInset,
+              child: IgnorePointer(
+                child: Text(
+                  _mode == 'single'
+                      ? 'Tap to log · Hold to add a note'.localized(context)
+                      : (_sessionStart == null && _inout != 'out'
+                            ? 'Tap to start · Hold to add a note'.localized(
+                                context,
+                              )
+                            : 'Tap to end · Hold to add a note'.localized(
+                                context,
+                              )),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: palette.text3,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.1,
+                  ),
+                ),
+              ),
+            ),
           if (lastSaved && _showLastSavedHint)
             Positioned(
               left: 0,

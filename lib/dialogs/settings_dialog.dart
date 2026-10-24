@@ -18,7 +18,6 @@ import 'package:notekar/dialogs/settings/app_icons_settings_page.dart';
 import 'package:notekar/dialogs/settings/app_lock_settings_page.dart';
 import 'package:notekar/dialogs/settings/app_philosophy_settings_page.dart';
 import 'package:notekar/dialogs/settings/capture_settings_page.dart';
-import 'package:notekar/services/checkpoint_service.dart';
 import 'package:notekar/dialogs/settings/commits_settings_page.dart';
 import 'package:notekar/dialogs/settings/data_backup_settings_page.dart';
 import 'package:notekar/dialogs/settings/diagnostics_settings_page.dart';
@@ -52,6 +51,7 @@ import 'package:notekar/models/help_guide_data.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/screens/executive_intelligence_hub_screen.dart';
+import 'package:notekar/services/checkpoint_service.dart';
 import 'package:notekar/services/circuit_breaker_service.dart';
 import 'package:notekar/services/user_profile_service.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
@@ -2833,6 +2833,9 @@ $cleanStack
                                   highlightSeconds: highlightSeconds,
                                   use24HourFormat: use24Hour,
                                   clockFont: clockFont,
+                                  previewModeLabel:
+                                      widget.activeCategory ??
+                                      widget.defaultMode,
                                   buttonLabels: buttonLabels,
                                   showHistoryText: showHistoryText,
                                   largeControls: largeControls,

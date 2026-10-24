@@ -159,6 +159,15 @@ class PrivacySecuritySettingsPage extends StatelessWidget {
               title: 'Network Use',
               color: p.accent,
               status: 'Limited',
+              trailing: Icon(
+                CupertinoIcons.chevron_forward,
+                color: p.text3,
+                size: 20,
+              ),
+              onTap: () => onOpenCategory(
+                'Network Monitor',
+                parent: 'Developer Options',
+              ),
             ),
           ],
         ),

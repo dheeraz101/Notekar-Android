@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
-import 'package:notekar/screens/device_health_intro_screen.dart';
 import 'package:notekar/screens/end_of_support_screen.dart';
 import 'package:notekar/services/circuit_breaker_service.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
@@ -344,147 +343,115 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
 
   Widget _buildDeviceHealth(BuildContext context) {
     final engine = AdaptiveEngine();
+    final p = widget.p;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _LiveDeviceHealthGovernorCard(p: widget.p, engine: engine),
-        const SizedBox(height: 12),
-        PressableScale(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            DeviceHealthIntroScreen.show(
-              context,
-              p: widget.p,
-              isStandaloneFromSettings: true,
-            );
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: widget.p.accent.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: widget.p.accent.withValues(alpha: 0.28),
-                width: 1.0,
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  CupertinoIcons.doc_plaintext,
-                  size: 20,
-                  color: widget.p.accent,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Device Health & Feature Restrictions'.localized(
-                          context,
-                        ),
-                        style: TextStyle(
-                          color: widget.p.accent,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'View the full guide on how features adapt to your hardware'
-                            .localized(context),
-                        style: TextStyle(color: widget.p.text2, fontSize: 11),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  size: 18,
-                  color: widget.p.accent,
-                ),
-              ],
+        _DeviceHealthHeroHeader(p: p),
+        const SizedBox(height: 18),
+        _buildHardwareSpecCard(context, engine, p),
+        const SizedBox(height: 20),
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text(
+            'FEATURE ADAPTATION BREAKDOWN'.localized(context),
+            style: TextStyle(
+              color: p.text3,
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.6,
             ),
           ),
         ),
-        const SizedBox(height: 16),
-        if (engine.isLowEnd || engine.tier == PerformanceTier.low) ...[
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: widget.p.orange.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: widget.p.orange.withValues(alpha: 0.3)),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  CupertinoIcons.exclamationmark_triangle_fill,
-                  color: widget.p.orange,
-                  size: 24,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Optimized Performance Mode',
-                        style: TextStyle(
-                          color: widget.p.orange,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        'NoteKar has automatically scaled back live animations and blur effects to preserve battery and maintain maximum responsiveness on your device hardware.',
-                        style: TextStyle(
-                          color: widget.p.text2,
-                          fontSize: 12,
-                          height: 1.35,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-        ],
+        // 1. Gaussian Blur
+        _FeatureAdaptationCard(
+          p: p,
+          icon: CupertinoIcons.sparkles,
+          title: 'System & Dialog Blur',
+          isRestricted: !engine.supportsBlur,
+          statusText: engine.supportsBlur
+              ? 'Full Real-Time Blur'
+              : 'Power-Saving Opaque Glass',
+          explanation: engine.supportsBlur
+              ? 'Your GPU effortlessly processes Gaussian backdrop blurs without frame drops.'
+              : 'Backdrop blurs are restricted to eliminate frame stutter and prevent device heating.',
+        ),
+        const SizedBox(height: 10),
+        // 2. Animation Physics
+        _FeatureAdaptationCard(
+          p: p,
+          icon: CupertinoIcons.arrow_2_circlepath_circle,
+          title: 'Spring Animation Curves',
+          isRestricted: engine.tier == PerformanceTier.low,
+          statusText: '${engine.targetFps} FPS Target Curve',
+          explanation: engine.tier == PerformanceTier.high
+              ? 'Full 120 FPS high refresh-rate physics curves active for silky gestures.'
+              : (engine.tier == PerformanceTier.balanced
+                    ? 'Balanced 60 FPS spring transitions optimized for smooth battery life.'
+                    : 'Lightweight curve transitions active to preserve processor battery budget.'),
+        ),
+        const SizedBox(height: 10),
+        // 3. Visual Particles
+        _FeatureAdaptationCard(
+          p: p,
+          icon: CupertinoIcons.wand_stars,
+          title: 'Particle Celebrations',
+          isRestricted: !engine.enableParticleEffects,
+          statusText: engine.enableParticleEffects
+              ? 'Dynamic Physics Particle Bursts'
+              : 'Lightweight Fade Celebrations',
+          explanation: engine.enableParticleEffects
+              ? 'Goal milestones render interactive particle physics dynamics.'
+              : 'Milestones use lightweight visual celebrations to save memory heap.',
+        ),
+        const SizedBox(height: 10),
+        // 4. Background Polling
+        _FeatureAdaptationCard(
+          p: p,
+          icon: CupertinoIcons.clock,
+          title: 'Background Engine Precision',
+          isRestricted: engine.isLowEnd,
+          statusText: engine.backgroundPollingStatusLabel,
+          explanation: engine.isLowEnd
+              ? 'Task executions are throttled to hourly batches to protect battery life.'
+              : 'Adaptive 15-minute sync intervals maintain up-to-date tracking accuracy.',
+        ),
+        const SizedBox(height: 10),
+        // 5. Tactile Haptics
+        _FeatureAdaptationCard(
+          p: p,
+          icon: CupertinoIcons.hand_point_right,
+          title: 'Sensory Haptics',
+          isRestricted: false,
+          statusText: 'Active & Calibrated',
+          explanation:
+              'Subtle mechanical haptics calibrated for tactile reassurance without excessive motor draw.',
+        ),
+        const SizedBox(height: 20),
         SettingsGroup(
-          p: widget.p,
+          p: p,
           title: 'Hardware Diagnostics',
           children: [
+            DiagnosticRow(p: p, label: 'Device Model', value: engine.model),
+            DiagnosticRow(p: p, label: 'OS Version', value: engine.osVersion),
             DiagnosticRow(
-              p: widget.p,
-              label: 'Device Model',
-              value: engine.model,
-            ),
-            DiagnosticRow(
-              p: widget.p,
-              label: 'OS Version',
-              value: engine.osVersion,
-            ),
-            DiagnosticRow(
-              p: widget.p,
+              p: p,
               label: 'System Health',
               value: engine.healthStatus,
             ),
             DiagnosticRow(
-              p: widget.p,
+              p: p,
               label: 'RAM Capacity',
               value: engine.ramGb > 0 ? '${engine.ramGb} GB' : 'Dynamic Heap',
             ),
             DiagnosticRow(
-              p: widget.p,
+              p: p,
               label: 'CPU Cores',
               value: '${engine.processors} Cores',
             ),
             DiagnosticRow(
-              p: widget.p,
+              p: p,
               label: 'Architecture',
               value: engine.supportedAbis.isNotEmpty
                   ? (engine.supportedAbis.any(
@@ -498,68 +465,178 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
             ),
           ],
         ),
-        SettingsPageDescription(
-          p: widget.p,
-          text:
-              'Technical hardware telemetry detected by the Adaptive Engine at launch.'
-                  .localized(context),
-        ),
-
         const SizedBox(height: 16),
-        SettingsGroup(
-          p: widget.p,
-          title: 'Performance Tiers & Capabilities',
-          children: [
-            DiagnosticRow(
-              p: widget.p,
-              label: 'Active Tier',
-              value: '${engine.tierLabel} (${engine.tier.name.toUpperCase()})',
-            ),
-            DiagnosticRow(
-              p: widget.p,
-              label: 'Target Frame Rate',
-              value: '${engine.targetFps} FPS',
-            ),
-            DiagnosticRow(
-              p: widget.p,
-              label: 'System Blur',
-              value: engine.blurStatusLabel,
-            ),
-            DiagnosticRow(
-              p: widget.p,
-              label: 'Live Animations',
-              value: engine.animationsStatusLabel,
-            ),
-            DiagnosticRow(
-              p: widget.p,
-              label: 'Visual Effects',
-              value: engine.visualEffectsStatusLabel,
-            ),
-            DiagnosticRow(
-              p: widget.p,
-              label: 'Sensory Haptics',
-              value: engine.hapticsStatusLabel,
-            ),
-            DiagnosticRow(
-              p: widget.p,
-              label: 'Background Polling',
-              value: engine.backgroundPollingStatusLabel,
-            ),
-          ],
+        // Apple-style Hardware Privacy Notice
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: p.surface2.withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: p.border.withValues(alpha: 0.4)),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(CupertinoIcons.lock_shield, size: 18, color: p.green),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Hardware Privacy & Sovereign Processing'.localized(
+                        context,
+                      ),
+                      style: TextStyle(
+                        color: p.text,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'All hardware telemetry is measured 100% locally on your device. NoteKar does not transmit hardware profiles, serial numbers, or diagnostic metrics to any remote server or third party. Calibrations are stored on-device and reset upon uninstallation.'
+                          .localized(context),
+                      style: TextStyle(
+                        color: p.text2,
+                        fontSize: 11,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-        SettingsPageDescription(
-          p: widget.p,
-          text:
-              '${engine.tierDefinition}\n\n'
-                      'Tier definitions:\n'
-                      '• Pro (High): Full 120 FPS spring physics, Gaussian glass blur, and particle dynamics.\n'
-                      '• Balanced: 60 FPS standard transitions and battery-efficient glass overlays.\n'
-                      '• Power Saver (Low): Translucency and live physics scaled back to guarantee smooth responsiveness without lag or thermal throttling.'
-                  .localized(context),
-        ),
-
-        SettingsBetaNote(p: widget.p, onLearnMore: widget.onLearnMoreBeta),
         const SizedBox(height: spacing48),
+      ],
+    );
+  }
+
+  Widget _buildHardwareSpecCard(
+    BuildContext context,
+    AdaptiveEngine engine,
+    Palette p,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: p.surface2,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: p.border.withValues(alpha: 0.6), width: 0.8),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.phone_android_rounded, size: 16, color: p.accent),
+                  const SizedBox(width: 8),
+                  Text(
+                    engine.model,
+                    style: TextStyle(
+                      color: p.text,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: (engine.isLowEnd ? p.orange : p.green).withValues(
+                    alpha: 0.15,
+                  ),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  '${engine.tierLabel} (${engine.targetFps} FPS)',
+                  style: TextStyle(
+                    color: engine.isLowEnd ? p.orange : p.green,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Divider(color: p.border.withValues(alpha: 0.4), height: 1),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _specSubItem(
+                  p: p,
+                  icon: Icons.memory_rounded,
+                  label: 'Processor Cores',
+                  value: '${engine.processors} Cores',
+                ),
+              ),
+              Container(
+                width: 1,
+                height: 28,
+                color: p.border.withValues(alpha: 0.4),
+              ),
+              Expanded(
+                child: _specSubItem(
+                  p: p,
+                  icon: Icons.storage_rounded,
+                  label: 'RAM Capacity',
+                  value: engine.ramGb > 0
+                      ? '${engine.ramGb} GB'
+                      : 'Dynamic Heap',
+                ),
+              ),
+              Container(
+                width: 1,
+                height: 28,
+                color: p.border.withValues(alpha: 0.4),
+              ),
+              Expanded(
+                child: _specSubItem(
+                  p: p,
+                  icon: CupertinoIcons.layers_alt,
+                  label: 'OS Version',
+                  value: engine.osVersion,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _specSubItem({
+    required Palette p,
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Column(
+      children: [
+        Icon(icon, size: 14, color: p.text3),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: p.text,
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        Text(
+          label,
+          maxLines: 1,
+          style: TextStyle(color: p.text3, fontSize: 9.5),
+        ),
       ],
     );
   }
@@ -829,19 +906,16 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
   }
 }
 
-class _LiveDeviceHealthGovernorCard extends StatefulWidget {
-  const _LiveDeviceHealthGovernorCard({required this.p, required this.engine});
-
+class _DeviceHealthHeroHeader extends StatefulWidget {
+  const _DeviceHealthHeroHeader({required this.p});
   final Palette p;
-  final AdaptiveEngine engine;
 
   @override
-  State<_LiveDeviceHealthGovernorCard> createState() =>
-      _LiveDeviceHealthGovernorCardState();
+  State<_DeviceHealthHeroHeader> createState() =>
+      _DeviceHealthHeroHeaderState();
 }
 
-class _LiveDeviceHealthGovernorCardState
-    extends State<_LiveDeviceHealthGovernorCard>
+class _DeviceHealthHeroHeaderState extends State<_DeviceHealthHeroHeader>
     with SingleTickerProviderStateMixin {
   late AnimationController _pulseController;
 
@@ -862,230 +936,293 @@ class _LiveDeviceHealthGovernorCardState
 
   @override
   Widget build(BuildContext context) {
-    final engine = widget.engine;
     final p = widget.p;
-
     return AnimatedBuilder(
       animation: _pulseController,
-      builder: (context, child) {
+      builder: (context, _) {
         final t = _pulseController.value;
         final pulse = 0.5 + 0.5 * math.sin(t * 2 * math.pi);
-
-        return Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: p.surface2,
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(
-              color: Color.lerp(
-                p.accent.withValues(alpha: 0.25),
-                p.accent.withValues(alpha: 0.55),
-                pulse,
-              )!,
-              width: 1.2,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: p.accent.withValues(alpha: 0.06 * pulse),
-                blurRadius: 18,
-                spreadRadius: 2,
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header with glowing indicator
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        return Column(
+          children: [
+            Center(
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 10,
-                        height: 10,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: p.green,
-                          boxShadow: [
-                            BoxShadow(
-                              color: p.green.withValues(
-                                alpha: 0.4 + 0.5 * pulse,
-                              ),
-                              blurRadius: 8 * pulse + 2,
-                              spreadRadius: 2 * pulse,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'ADAPTIVE PERFORMANCE'.localized(context),
-                        style: TextStyle(
-                          color: p.accent,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                    ],
+                  Container(
+                    width: 76,
+                    height: 76,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: p.accent.withValues(alpha: 0.08 + 0.08 * pulse),
+                    ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 9,
-                      vertical: 3.5,
-                    ),
+                    width: 58,
+                    height: 58,
                     decoration: BoxDecoration(
-                      color: p.accent.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(99),
+                      shape: BoxShape.circle,
+                      color: p.accent.withValues(alpha: 0.16),
                       border: Border.all(
-                        color: p.accent.withValues(alpha: 0.25),
-                        width: 0.8,
+                        color: p.accent.withValues(alpha: 0.35 + 0.35 * pulse),
+                        width: 1.5,
                       ),
                     ),
-                    child: Text(
-                      '${engine.targetFps} FPS TARGET',
-                      style: TextStyle(
-                        color: p.accent,
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.3,
-                      ),
+                    child: Icon(
+                      CupertinoIcons.heart_circle_fill,
+                      size: 34,
+                      color: p.accent,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
-              // Real-time Tuning Overview description merged right here
-              Text(
-                'Optimized for Your Device'.localized(context),
-                style: TextStyle(
-                  color: p.text,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 14.5,
-                  letterSpacing: -0.2,
-                ),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              'Device Health & Adaptation'.localized(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: p.text,
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.3,
               ),
-              const SizedBox(height: 4),
-              Text(
-                'NoteKar automatically tunes visual effects, animations, and background tasks to ensure your phone stays smooth, fast, and battery efficient.'
-                    .localized(context),
-                style: TextStyle(color: p.text2, fontSize: 12.5, height: 1.38),
-              ),
-              const SizedBox(height: 16),
-              // Dynamic Multi-Bar Telemetry Frequency Equalizer
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'NoteKar calibrates every animation, blur, and background service to match your hardware profile for maximum smoothness and battery health.'
+                  .localized(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: p.text2, fontSize: 12.5, height: 1.38),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _FeatureAdaptationCard extends StatelessWidget {
+  const _FeatureAdaptationCard({
+    required this.p,
+    required this.icon,
+    required this.title,
+    required this.isRestricted,
+    required this.statusText,
+    required this.explanation,
+  });
+
+  final Palette p;
+  final IconData icon;
+  final String title;
+  final bool isRestricted;
+  final String statusText;
+  final String explanation;
+
+  @override
+  Widget build(BuildContext context) {
+    final statusColor = isRestricted ? p.orange : p.green;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: p.surface2,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: p.border.withValues(alpha: 0.6), width: 0.8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 14,
-                ),
+                width: 30,
+                height: 30,
                 decoration: BoxDecoration(
-                  color: p.surface3.withValues(alpha: 0.50),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(
-                    color: p.border.withValues(alpha: 0.35),
-                    width: 0.8,
-                  ),
+                  color: p.surface3,
+                  borderRadius: BorderRadius.circular(10),
                 ),
+                child: Icon(icon, size: 16, color: p.text),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'LIVE SYSTEM ACTIVITY'.localized(context),
-                          style: TextStyle(
-                            color: p.text3,
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.6,
-                          ),
-                        ),
-                        Text(
-                          'Optimal Performance'.localized(context),
-                          style: TextStyle(
-                            color: p.green,
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      height: 38,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: List.generate(24, (i) {
-                          final wave =
-                              0.5 +
-                              0.5 *
-                                  math.sin(
-                                    (t * 2 * math.pi) +
-                                        (i * (math.pi / 12) * 1.8),
-                                  );
-                          final envelope = math.sin((i + 1) / 25 * math.pi);
-                          final barHeight = (8.0 + 28.0 * wave * envelope)
-                              .clamp(6.0, 36.0);
-                          return Container(
-                            width: 5.5,
-                            height: barHeight,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(99),
-                              gradient: LinearGradient(
-                                begin: Alignment.bottomCenter,
-                                end: Alignment.topCenter,
-                                colors: [
-                                  p.accent,
-                                  Color.lerp(p.accent, p.green, wave)!,
-                                ],
-                              ),
-                            ),
-                          );
-                        }),
+                    Text(
+                      title.localized(context),
+                      style: TextStyle(
+                        color: p.text,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(height: 12),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'Frame Timing (Optimal)'.localized(context),
-                          style: TextStyle(
-                            color: p.text2,
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w600,
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: statusColor,
+                            shape: BoxShape.circle,
                           ),
                         ),
-                        Row(
-                          children: [
-                            Icon(
-                              CupertinoIcons.checkmark_seal_fill,
-                              color: p.green,
-                              size: 11,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${engine.targetFps} Hz Refresh',
-                              style: TextStyle(
-                                color: p.green,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ],
+                        const SizedBox(width: 5),
+                        Text(
+                          statusText.localized(context),
+                          style: TextStyle(
+                            color: statusColor,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ],
                     ),
                   ],
                 ),
               ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                decoration: BoxDecoration(
+                  color: isRestricted
+                      ? p.orange.withValues(alpha: 0.12)
+                      : p.green.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  isRestricted ? 'RESTRICTED' : 'ENABLED',
+                  style: TextStyle(
+                    color: statusColor,
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+              ),
             ],
           ),
-        );
-      },
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.only(left: 40),
+            child: Text(
+              explanation.localized(context),
+              style: TextStyle(color: p.text2, fontSize: 11.5, height: 1.35),
+            ),
+          ),
+        ],
+      ),
     );
+  }
+}
+
+class _HeartbeatEcgPainter extends CustomPainter {
+  final double sweepProgress;
+  final double connectedFactor;
+  final Color liveColor;
+  final Color offlineColor;
+
+  _HeartbeatEcgPainter({
+    required this.sweepProgress,
+    required this.connectedFactor,
+    required this.liveColor,
+    required this.offlineColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+    final midY = h / 2;
+
+    // Background baseline track
+    final bgPaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.08)
+      ..strokeWidth = 1.2
+      ..style = PaintingStyle.stroke;
+    canvas.drawLine(Offset(0, midY), Offset(w, midY), bgPaint);
+
+    final activeColor = Color.lerp(offlineColor, liveColor, connectedFactor)!;
+
+    // Piecewise hospital ECG heartbeat calculation
+    double getEcgOffset(double normX) {
+      if (connectedFactor <= 0.001) return 0.0;
+      // 2 cardiac cycles across width, shifted by sweepProgress
+      final cycle = ((normX - sweepProgress) % 1.0 + 1.0) % 1.0;
+      double y = 0.0;
+      if (cycle >= 0.15 && cycle < 0.25) {
+        // P-wave (rounded pre-bump)
+        final p = (cycle - 0.15) / 0.10;
+        y = math.sin(p * math.pi) * 0.22;
+      } else if (cycle >= 0.28 && cycle < 0.31) {
+        // Q-dip (sharp downward deflection)
+        final q = (cycle - 0.28) / 0.03;
+        y = -math.sin(q * math.pi) * 0.15;
+      } else if (cycle >= 0.31 && cycle < 0.36) {
+        // R-spike (sharp tall systolic spike)
+        final r = (cycle - 0.31) / 0.05;
+        y = math.sin(r * math.pi) * 0.95;
+      } else if (cycle >= 0.36 && cycle < 0.41) {
+        // S-dip (sharp negative rebound)
+        final s = (cycle - 0.36) / 0.05;
+        y = -math.sin(s * math.pi) * 0.32;
+      } else if (cycle >= 0.48 && cycle < 0.62) {
+        // T-wave (smooth repolarization dome)
+        final t = (cycle - 0.48) / 0.14;
+        y = math.sin(t * math.pi) * 0.35;
+      }
+      return y * connectedFactor;
+    }
+
+    final path = Path();
+    const pointCount = 120;
+    path.moveTo(0, midY - getEcgOffset(0) * (h * 0.42));
+
+    for (int i = 1; i <= pointCount; i++) {
+      final nx = i / pointCount;
+      final px = nx * w;
+      final py = midY - getEcgOffset(nx) * (h * 0.42);
+      path.lineTo(px, py);
+    }
+
+    // Outer glow path
+    final glowPaint = Paint()
+      ..color = activeColor.withValues(
+        alpha: (0.2 + 0.3 * connectedFactor).clamp(0.0, 1.0),
+      )
+      ..strokeWidth = 3.6
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+    canvas.drawPath(path, glowPaint);
+
+    // Primary sharp ECG stroke
+    final mainPaint = Paint()
+      ..color = activeColor
+      ..strokeWidth = 1.8
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+    canvas.drawPath(path, mainPaint);
+
+    // Live glowing sweep head dot when connected
+    if (connectedFactor > 0.05) {
+      final headNormX = ((sweepProgress + 0.36) % 1.0 + 1.0) % 1.0;
+      final headX = headNormX * w;
+      final headY = midY - getEcgOffset(headNormX) * (h * 0.42);
+
+      final dotPaint = Paint()..color = activeColor;
+      final dotHalo = Paint()
+        ..color = activeColor.withValues(alpha: 0.35 * connectedFactor);
+      canvas.drawCircle(Offset(headX, headY), 5.5, dotHalo);
+      canvas.drawCircle(Offset(headX, headY), 2.4, dotPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _HeartbeatEcgPainter oldDelegate) {
+    return oldDelegate.sweepProgress != sweepProgress ||
+        oldDelegate.connectedFactor != connectedFactor ||
+        oldDelegate.liveColor != liveColor ||
+        oldDelegate.offlineColor != offlineColor;
   }
 }
 
@@ -1111,8 +1248,9 @@ class _LiveNetworkStatusCard extends StatefulWidget {
 }
 
 class _LiveNetworkStatusCardState extends State<_LiveNetworkStatusCard>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController _animController;
+  late AnimationController _connectedAnimController;
   _NetworkLiveState _state = _NetworkLiveState.stable;
 
   @override
@@ -1120,8 +1258,13 @@ class _LiveNetworkStatusCardState extends State<_LiveNetworkStatusCard>
     super.initState();
     _animController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2000),
+      duration: const Duration(milliseconds: 2200),
     )..repeat();
+    _connectedAnimController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+      value: 1.0,
+    );
     _evaluateConnectivity();
   }
 
@@ -1136,6 +1279,7 @@ class _LiveNetworkStatusCardState extends State<_LiveNetworkStatusCard>
   @override
   void dispose() {
     _animController.dispose();
+    _connectedAnimController.dispose();
     super.dispose();
   }
 
@@ -1156,13 +1300,16 @@ class _LiveNetworkStatusCardState extends State<_LiveNetworkStatusCard>
               ? _NetworkLiveState.inFlight
               : _NetworkLiveState.stable;
         });
+        _connectedAnimController.animateTo(1.0, curve: Curves.easeInOutCubic);
       } else {
         if (!mounted) return;
         setState(() => _state = _NetworkLiveState.offline);
+        _connectedAnimController.animateTo(0.0, curve: Curves.easeInOutCubic);
       }
     } catch (_) {
       if (!mounted) return;
       setState(() => _state = _NetworkLiveState.offline);
+      _connectedAnimController.animateTo(0.0, curve: Curves.easeInOutCubic);
     }
   }
 
@@ -1243,29 +1390,33 @@ class _LiveNetworkStatusCardState extends State<_LiveNetworkStatusCard>
           const SizedBox(height: 16),
           Divider(color: p.border.withValues(alpha: 0.3), height: 1),
           const SizedBox(height: 14),
-          // Transparent Live Transmission Status
+          // Redesigned Live Connectivity Status Row
           Row(
             children: [
               Container(
-                width: 32,
-                height: 32,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
+                  borderRadius: BorderRadius.circular(12),
                   color: stateColor.withValues(alpha: 0.14),
+                  border: Border.all(
+                    color: stateColor.withValues(alpha: 0.28),
+                    width: 0.8,
+                  ),
                 ),
                 child: Icon(
                   switch (_state) {
                     _NetworkLiveState.inFlight =>
-                      CupertinoIcons.arrow_up_arrow_down,
+                      CupertinoIcons.arrow_2_circlepath,
                     _NetworkLiveState.stable =>
-                      CupertinoIcons.checkmark_shield_fill,
+                      CupertinoIcons.waveform_path_ecg,
                     _NetworkLiveState.offline => CupertinoIcons.wifi_slash,
                   },
-                  size: 16,
+                  size: 18,
                   color: stateColor,
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1273,15 +1424,15 @@ class _LiveNetworkStatusCardState extends State<_LiveNetworkStatusCard>
                     Text(
                       switch (_state) {
                         _NetworkLiveState.inFlight =>
-                          'Active HTTPS Connection'.localized(context),
+                          'Active HTTPS Transmission'.localized(context),
                         _NetworkLiveState.stable =>
-                          'Network Connected'.localized(context),
+                          'Network Live & Verified'.localized(context),
                         _NetworkLiveState.offline =>
                           'Offline Sovereign Mode'.localized(context),
                       },
                       style: TextStyle(
                         color: p.text,
-                        fontSize: 13,
+                        fontSize: 13.5,
                         fontWeight: FontWeight.w700,
                         letterSpacing: -0.2,
                       ),
@@ -1289,13 +1440,13 @@ class _LiveNetworkStatusCardState extends State<_LiveNetworkStatusCard>
                     const SizedBox(height: 2),
                     Text(switch (_state) {
                       _NetworkLiveState.inFlight =>
-                        'Checking GitHub Releases / remote notices • 0 user telemetry'
+                        'Direct channel open • Zero tracking or diagnostic data sent'
                             .localized(context),
                       _NetworkLiveState.stable =>
-                        'Zero tracking telemetry • 100% offline sovereign database'
+                        'Live cardiac pulse active • Zero telemetry • 100% offline DB'
                             .localized(context),
                       _NetworkLiveState.offline =>
-                        'No external connections • All data stored strictly on device'
+                        'Heartbeat flatlined • Offline sovereign mode • No packets sent'
                             .localized(context),
                     }, style: TextStyle(color: p.text3, fontSize: 11, height: 1.3)),
                   ],
@@ -1303,81 +1454,91 @@ class _LiveNetworkStatusCardState extends State<_LiveNetworkStatusCard>
               ),
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                 decoration: BoxDecoration(
                   color: stateColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(99),
+                  borderRadius: BorderRadius.circular(999),
                   border: Border.all(
-                    color: stateColor.withValues(alpha: 0.25),
+                    color: stateColor.withValues(alpha: 0.3),
                     width: 0.8,
                   ),
                 ),
-                child: Text(
-                  switch (_state) {
-                    _NetworkLiveState.inFlight => 'ACTIVE',
-                    _NetworkLiveState.stable => 'STABLE',
-                    _NetworkLiveState.offline => 'OFFLINE',
-                  },
-                  style: TextStyle(
-                    color: stateColor,
-                    fontSize: 9.5,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.5,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AnimatedBuilder(
+                      animation: _animController,
+                      builder: (context, _) {
+                        final pulseAlpha = _state == _NetworkLiveState.offline
+                            ? 1.0
+                            : (0.4 +
+                                      0.6 *
+                                          math.sin(
+                                            _animController.value * 2 * math.pi,
+                                          ))
+                                  .clamp(0.2, 1.0);
+                        return Container(
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: stateColor.withValues(alpha: pulseAlpha),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      switch (_state) {
+                        _NetworkLiveState.inFlight => 'SYNCING',
+                        _NetworkLiveState.stable => 'LIVE',
+                        _NetworkLiveState.offline => 'FLATLINE',
+                      },
+                      style: TextStyle(
+                        color: stateColor,
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          // Minimal Line-Style Live Activity Indicator
+          const SizedBox(height: 14),
+          // Hospital-Style Animated ECG Heartbeat Waveform
           AnimatedBuilder(
-            animation: _animController,
+            animation: Listenable.merge([
+              _animController,
+              _connectedAnimController,
+            ]),
             builder: (context, _) {
-              final t = _animController.value;
-              return ClipRRect(
-                borderRadius: BorderRadius.circular(99),
-                child: Container(
-                  height: 4,
-                  width: double.infinity,
-                  color: p.surface3,
-                  child: switch (_state) {
-                    _NetworkLiveState.inFlight => LayoutBuilder(
-                      builder: (ctx, constraints) {
-                        final width = constraints.maxWidth;
-                        return Stack(
-                          children: [
-                            Positioned(
-                              left: (t * 1.4 - 0.3) * width,
-                              width: width * 0.35,
-                              top: 0,
-                              bottom: 0,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      p.accent.withValues(alpha: 0.0),
-                                      p.accent,
-                                      p.accent.withValues(alpha: 0.0),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                    _NetworkLiveState.stable => Container(
-                      decoration: BoxDecoration(
-                        color: p.green.withValues(
-                          alpha: 0.45 + 0.25 * math.sin(t * 2 * math.pi),
-                        ),
-                      ),
-                    ),
-                    _NetworkLiveState.offline => Container(
-                      color: p.red.withValues(alpha: 0.25),
-                    ),
-                  },
+              return Container(
+                height: 46,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: p.border.withValues(alpha: 0.4),
+                    width: 0.8,
+                  ),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                child: CustomPaint(
+                  size: const Size(double.infinity, 38),
+                  painter: _HeartbeatEcgPainter(
+                    sweepProgress: _animController.value,
+                    connectedFactor: _connectedAnimController.value,
+                    liveColor: _state == _NetworkLiveState.inFlight
+                        ? p.accent
+                        : p.green,
+                    offlineColor: p.red,
+                  ),
                 ),
               );
             },

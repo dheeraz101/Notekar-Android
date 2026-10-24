@@ -329,9 +329,9 @@ const List<HelpGuideItem> allGuideItems = [
   ),
   HelpGuideItem(
     icon: Icons.screen_lock_portrait_rounded,
-    title: 'Lock Screen & Mortal Drift',
+    title: 'Lock Screen & Time Tracking',
     content:
-        'Enable the persistent control panel in Settings > Logging to view real-time conscious hours versus mortal drift ("Today: 3h 15m Conscious • 4h 45m Mortal Drift") directly on your lock screen, with one-tap IN/OUT, Quick Note, and Mode toggle.',
+        'Enable the persistent control panel in Settings > Logging to view your tracked and untracked time ("Today: 3h 15m tracked • 4h 45m untracked") directly on your lock screen, with one-tap IN/OUT, Quick Note, and Mode toggle.',
     isFaq: false,
     keywords: [
       'lock screen',

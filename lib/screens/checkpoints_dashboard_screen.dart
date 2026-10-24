@@ -2,18 +2,16 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/checkpoint.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/checkpoint_service.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
-import 'package:notekar/widgets/apple_hig_action_sheet.dart';
 import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
-/// Flagship Apple HIG Checkpoints & Habits Consistency Dashboard.
+/// Full-page Checkpoints & Habits Consistency Dashboard.
 /// Tracks routine habit execution (Waking Up, Bedtime, Bathing, Breakfast, etc.),
 /// timing variance (mean time μ, standard deviation ±σ), streaks, and 7-day completion matrices.
 class CheckpointsDashboardScreen extends StatefulWidget {
@@ -38,16 +36,9 @@ class CheckpointsDashboardScreen extends StatefulWidget {
     String? initialPresetId,
   }) {
     HapticFeedback.selectionClick();
-    return showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.45),
-      isScrollControlled: true,
-      useSafeArea: true,
-      sheetAnimationStyle: kTelegramSpringSheetAnimation,
-      builder: (ctx) => FractionallySizedBox(
-        heightFactor: 0.90,
-        child: CheckpointsDashboardScreen(
+    return Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => CheckpointsDashboardScreen(
           p: p,
           moments: moments,
           onLogCheckpoint: onLogCheckpoint,
@@ -112,47 +103,52 @@ class _CheckpointsDashboardScreenState
         ? null
         : statsMap[_selectedPresetId!];
 
-    return AppSheet(
-      p: p,
-      title: 'Habit Checkpoints',
-      trailingAction: PressableScale(
-        onTap: () => Navigator.pop(context),
-        child: Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: p.surface2,
-            shape: BoxShape.circle,
-            border: Border.all(color: p.border.withValues(alpha: 0.5)),
+    return Scaffold(
+      backgroundColor: p.bg,
+      appBar: AppBar(
+        backgroundColor: p.bg,
+        foregroundColor: p.text,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        leading: IconButton(
+          tooltip: 'Back'.localized(context),
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 19),
+        ),
+        title: Text(
+          'Habit Checkpoints'.localized(context),
+          style: TextStyle(
+            color: p.text,
+            fontSize: 19,
+            fontWeight: FontWeight.w700,
           ),
-          alignment: Alignment.center,
-          child: Icon(Icons.close_rounded, size: 18, color: p.text2),
         ),
       ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Overall Consistency Summary Card
-            _buildOverallConsistencyCard(
-              p,
-              overallConsistency,
-              activeCount,
-              presets.length,
-            ),
-            const SizedBox(height: 16),
-
-            // Horizontal Filter Chips
-            _buildHabitFilterBar(p, presets),
-            const SizedBox(height: 16),
-
-            // Detail Content
-            if (selectedPreset != null && selectedStats != null)
-              _buildSingleHabitView(p, selectedPreset, selectedStats)
-            else
-              _buildAllHabitsOverview(p, presets, statsMap),
-          ],
+      body: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildOverallConsistencyCard(
+                p,
+                overallConsistency,
+                activeCount,
+                presets.length,
+              ),
+              const SizedBox(height: 16),
+              _buildHabitFilterBar(p, presets),
+              const SizedBox(height: 16),
+              if (selectedPreset != null && selectedStats != null)
+                _buildSingleHabitView(p, selectedPreset, selectedStats)
+              else
+                _buildAllHabitsOverview(p, presets, statsMap),
+            ],
+          ),
         ),
       ),
     );

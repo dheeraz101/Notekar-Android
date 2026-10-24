@@ -119,38 +119,34 @@ extension _HomeBackupLifecycleExtension on _NoteKarHomeState {
   }
 
   Future<void> _saveLocalBackup(String content) async {
-    try {
-      final dir = await _getLocalBackupDir();
-      final dateStr = exportDateStamp();
-      final targetPath = '${dir.path}/notekar-backup-$dateStr.json';
-      final tempFile = File('$targetPath.tmp');
+    final dir = await _getLocalBackupDir();
+    final dateStr = exportDateStamp();
+    final targetPath = '${dir.path}/notekar-backup-$dateStr.json';
+    final tempFile = File('$targetPath.tmp');
 
-      // 1. Atomic write to temporary file first
-      await tempFile.writeAsString(content, flush: true);
-      await tempFile.rename(targetPath);
+    // 1. Atomic write to temporary file first
+    await tempFile.writeAsString(content, flush: true);
+    await tempFile.rename(targetPath);
 
-      // 2. Automated retention pruning (keep latest 15 local backups)
-      final List<FileSystemEntity> entities = await dir.list().toList();
-      final List<File> backupFiles = entities
-          .whereType<File>()
-          .where((f) => f.path.endsWith('.json'))
-          .toList();
+    // 2. Automated retention pruning (keep latest 15 local backups)
+    final List<FileSystemEntity> entities = await dir.list().toList();
+    final List<File> backupFiles = entities
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.json'))
+        .toList();
 
-      if (backupFiles.length > 15) {
-        backupFiles.sort((a, b) {
-          final aTime = a.lastModifiedSync();
-          final bTime = b.lastModifiedSync();
-          return bTime.compareTo(aTime);
-        });
+    if (backupFiles.length > 15) {
+      backupFiles.sort((a, b) {
+        final aTime = a.lastModifiedSync();
+        final bTime = b.lastModifiedSync();
+        return bTime.compareTo(aTime);
+      });
 
-        for (int i = 15; i < backupFiles.length; i++) {
-          try {
-            await backupFiles[i].delete();
-          } catch (_) {}
-        }
+      for (int i = 15; i < backupFiles.length; i++) {
+        try {
+          await backupFiles[i].delete();
+        } catch (_) {}
       }
-    } catch (e) {
-      developer.log('Error saving local backup: $e');
     }
   }
 
@@ -162,7 +158,8 @@ extension _HomeBackupLifecycleExtension on _NoteKarHomeState {
       final now = DateTime.now().millisecondsSinceEpoch;
       update(() => _lastBackupAt = now);
       await _prefs?.setInt('m-last-backup-at', now);
-    } catch (_) {
+    } catch (e) {
+      developer.log('Error creating local backup: $e');
       _showToast('Failed to create local backup', warning: true);
     }
   }
@@ -328,15 +325,8 @@ extension _HomeBackupLifecycleExtension on _NoteKarHomeState {
         if (existingKeys.contains(key)) continue;
 
         existingKeys.add(key);
-        merged.add(
-          Moment(
-            id: nextId++,
-            timestamp: entry.timestamp,
-            type: entry.type,
-            date: entry.date,
-            note: entry.note,
-          ),
-        );
+        // P1: Preserve all rich fields (category, tags, goalId, projectId, media paths) during restore merge
+        merged.add(entry.copyWith(id: nextId++));
         addedCount++;
       }
 

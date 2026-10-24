@@ -21,13 +21,22 @@ class SobrietyWidgetProvider : AppWidgetProvider() {
         if (action == NoteKarWidgetProvider.ACTION_LOG_BG) {
             val logType = intent.getStringExtra(NoteKarWidgetProvider.EXTRA_LOG_TYPE) ?: return
             val note = intent.getStringExtra("note") ?: ""
-            NoteKarWidgetProvider.performBackgroundLog(context, logType, note = note)
 
             if (note.contains("#relapse")) {
                 val widgetPrefs = context.getSharedPreferences(
                     NoteKarWidgetProvider.PREFS_NAME,
                     Context.MODE_PRIVATE
                 )
+                val sobrietyEnabled = widgetPrefs.getBoolean(
+                    NoteKarWidgetProvider.KEY_SOBRIETY_ENABLED,
+                    false
+                )
+                // P0 Safety Invariant: Never write relapse moments or reset streak when sobriety is disabled
+                if (!sobrietyEnabled) {
+                    return
+                }
+
+                NoteKarWidgetProvider.performBackgroundLog(context, logType, note = note)
                 val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
                 val timeStr = timeFormat.format(Date())
                 widgetPrefs.edit()
@@ -35,6 +44,8 @@ class SobrietyWidgetProvider : AppWidgetProvider() {
                     .putString(NoteKarWidgetProvider.KEY_LAST_RELAPSE_TIME, timeStr)
                     .apply()
                 updateAllWidgets(context)
+            } else {
+                NoteKarWidgetProvider.performBackgroundLog(context, logType, note = note)
             }
         }
     }
@@ -193,15 +204,29 @@ class SobrietyWidgetProvider : AppWidgetProvider() {
                     )
                 )
 
-                views.setOnClickPendingIntent(
-                    R.id.widget_single,
-                    launchBackgroundLogIntent(
-                        context,
-                        appWidgetId + 10,
-                        "single",
-                        "#relapse"
+                if (!sobrietyEnabled) {
+                    views.setTextViewText(R.id.widget_single, "SET UP")
+                    views.setOnClickPendingIntent(
+                        R.id.widget_single,
+                        launchIntent(
+                            context,
+                            appWidgetId + 10,
+                            "app.notekar.notekar.ACTION_OPEN",
+                            "sobriety"
+                        )
                     )
-                )
+                } else {
+                    views.setTextViewText(R.id.widget_single, "RESET STREAK")
+                    views.setOnClickPendingIntent(
+                        R.id.widget_single,
+                        launchBackgroundLogIntent(
+                            context,
+                            appWidgetId + 10,
+                            "single",
+                            "#relapse"
+                        )
+                    )
+                }
 
                 views.setOnClickPendingIntent(
                     R.id.widget_note,

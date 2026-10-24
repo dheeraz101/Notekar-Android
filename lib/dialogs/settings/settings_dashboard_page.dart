@@ -1037,8 +1037,6 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
     final hasData = summary.hasData;
     final wasted = hasData ? summary.formattedTotalWasted : '0h';
     final wakingLost = hasData ? summary.wakingDaysLostText : '0 days';
-    final isSevere = hasData && (summary.intentionalityRatio < 40.0);
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: GestureDetector(
@@ -1049,9 +1047,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
             color: p.surface2,
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: isSevere
-                  ? p.red.withValues(alpha: 0.35)
-                  : p.border.withValues(alpha: 0.5),
+              color: p.border.withValues(alpha: 0.5),
               width: 0.8,
             ),
           ),
@@ -1067,9 +1063,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                         Icon(
                           CupertinoIcons.stopwatch,
                           size: 17,
-                          color: isSevere
-                              ? p.red
-                              : (hasData ? p.orange : p.accent),
+                          color: hasData ? p.accent : p.text3,
                         ),
                         const SizedBox(width: 7),
                         Flexible(
@@ -1078,9 +1072,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color: isSevere
-                                  ? p.red
-                                  : (hasData ? p.orange : p.accent),
+                              color: hasData ? p.accent : p.text2,
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 1.0,
@@ -1123,11 +1115,11 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                       alignment: Alignment.centerLeft,
                       child: Text(
                         hasData
-                            ? '$wasted ${'Lost'.localized(context)}'
-                            : '0h ${'Lost'.localized(context)}',
+                            ? '$wasted ${'Untracked'.localized(context)}'
+                            : '0h ${'Untracked'.localized(context)}',
                         maxLines: 1,
                         style: TextStyle(
-                          color: isSevere ? p.red : p.text,
+                          color: p.text,
                           fontSize: 26,
                           fontWeight: FontWeight.w900,
                           letterSpacing: -0.8,
@@ -1144,9 +1136,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color:
-                            (hasData ? (isSevere ? p.red : p.orange) : p.accent)
-                                .withValues(alpha: 0.12),
+                        color: p.accent.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: FittedBox(
@@ -1154,13 +1144,11 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                         alignment: Alignment.center,
                         child: Text(
                           hasData
-                              ? '$wakingLost ${'waking days void'.localized(context)}'
+                              ? '$wakingLost ${'equivalent waking days'.localized(context)}'
                               : '0 Data Available'.localized(context),
                           maxLines: 1,
                           style: TextStyle(
-                            color: hasData
-                                ? (isSevere ? p.red : p.orange)
-                                : p.accent,
+                            color: p.accent,
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                           ),
@@ -1173,12 +1161,12 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
               const SizedBox(height: 8),
               Text(
                 hasData
-                    ? 'Based on your daily conscious window ($wasted unaccounted for). Tap to customize sleep, logistics, and explore multi-horizon mortality statistics.'
+                    ? 'Based on your estimated waking window. $wasted of untracked time is included in this summary. Tap to adjust your sleep and daily essentials estimates.'
                           .localized(context)
                     : (entries.isEmpty
                           ? 'No sessions logged yet. Tap to configure your daily conscious window and begin tracking.'
                                 .localized(context)
-                          : 'Awaiting ${summary.requiredDays} days of history (${summary.availableHistoryDays} recorded). Tap to inspect available ledger and multi-horizon audits.'
+                          : '${summary.availableHistoryDays} of ${summary.requiredDays} days currently have data. Tap to view the daily breakdown.'
                                 .localized(context)),
                 style: TextStyle(color: p.text2, fontSize: 12, height: 1.35),
               ),

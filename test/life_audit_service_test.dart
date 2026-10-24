@@ -332,10 +332,10 @@ void main() {
         expect(find.text('Year'), findsOneWidget);
 
         // Check Brutal Reality hero card for new user (0 Data Available)
-        expect(find.text('THE COST OF THE VOID'), findsOneWidget);
+        expect(find.text('YOUR TIME OVERVIEW'), findsOneWidget);
         expect(find.text('0 DATA AVAILABLE'), findsOneWidget);
-        expect(find.text('0h Lost'), findsOneWidget);
-        expect(find.text('Waking Days Lost'), findsOneWidget);
+        expect(find.text('0h Untracked'), findsOneWidget);
+        expect(find.text('Days with untracked time'), findsOneWidget);
         expect(find.text('Earth (24h) Days'), findsOneWidget);
 
         // Check empty ledger state
@@ -343,8 +343,11 @@ void main() {
         expect(find.text('0 Days Recorded'), findsNWidgets(2));
 
         // Check Seneca Stoic quote
-        expect(find.text('THE STOIC REALITY'), findsOneWidget);
-        expect(find.textContaining('Seneca'), findsOneWidget);
+        expect(find.text('A NOTE ON TRACKING'), findsOneWidget);
+        expect(
+          find.textContaining('Tracking is a tool for reflection'),
+          findsOneWidget,
+        );
       },
     );
 

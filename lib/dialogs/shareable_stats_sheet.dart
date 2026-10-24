@@ -154,7 +154,7 @@ class _ShareableStatsSheetState extends State<ShareableStatsSheet> {
       final shareContent =
           '⚡ $userName\'s ${widget.periodLabel} Focus Report\n'
           'Conscious Focus: $formattedTracked • $intentionality% Intentional\n'
-          'Void Reclaimed: $formattedWasted • ${widget.streakDays} Day Streak\n'
+          'Untracked time: $formattedWasted • ${widget.streakDays} Day Streak\n'
           '${widget.topCategory != null ? 'Obsession: ${widget.topCategory} (${widget.topCategoryPct ?? 0}%)\n' : ''}'
           'Logged with NoteKar — Deliberate Time & Life Horizon • 100% Private, Zero Cloud.';
 
@@ -385,7 +385,7 @@ class _ShareableStatsSheetState extends State<ShareableStatsSheet> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'DRIFT / VOID',
+                                'UNTRACKED TIME',
                                 style: TextStyle(
                                   color: Colors.white.withValues(alpha: 0.5),
                                   fontSize: 9.5,

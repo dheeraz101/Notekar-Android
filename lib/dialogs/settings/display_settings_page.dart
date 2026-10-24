@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,6 +19,7 @@ class DisplaySettingsPage extends StatelessWidget {
     required this.highlightSeconds,
     this.use24HourFormat = true,
     this.clockFont = 'BebasNeue',
+    this.previewModeLabel = 'Focus',
     this.onClockFontChanged,
     required this.buttonLabels,
     required this.showHistoryText,
@@ -49,6 +52,7 @@ class DisplaySettingsPage extends StatelessWidget {
   final bool highlightSeconds;
   final bool use24HourFormat;
   final String clockFont;
+  final String previewModeLabel;
   final bool buttonLabels;
   final bool showHistoryText;
   final bool largeControls;
@@ -87,6 +91,13 @@ class DisplaySettingsPage extends StatelessWidget {
           use24HourFormat: use24HourFormat,
           showSeconds: showSeconds,
           highlightSeconds: highlightSeconds,
+          previewModeLabel: previewModeLabel,
+          largeControls: largeControls,
+          buttonLabels: buttonLabels,
+          enableTranslucency: enableTranslucency,
+          showHistoryText: showHistoryText,
+          homeMenuPill: homeMenuPill,
+          showLastSavedHint: showLastSavedHint,
         ),
         const SizedBox(height: spacing12),
         SettingsGroup(
@@ -579,7 +590,7 @@ class DisplaySettingsPage extends StatelessWidget {
   }
 }
 
-class _DisplayLivePreview extends StatelessWidget {
+class _DisplayLivePreview extends StatefulWidget {
   const _DisplayLivePreview({
     required this.p,
     required this.theme,
@@ -587,6 +598,13 @@ class _DisplayLivePreview extends StatelessWidget {
     required this.use24HourFormat,
     required this.showSeconds,
     required this.highlightSeconds,
+    required this.previewModeLabel,
+    required this.largeControls,
+    required this.buttonLabels,
+    required this.enableTranslucency,
+    required this.showHistoryText,
+    required this.homeMenuPill,
+    required this.showLastSavedHint,
   });
 
   final Palette p;
@@ -595,154 +613,484 @@ class _DisplayLivePreview extends StatelessWidget {
   final bool use24HourFormat;
   final bool showSeconds;
   final bool highlightSeconds;
+  final String previewModeLabel;
+  final bool largeControls;
+  final bool buttonLabels;
+  final bool enableTranslucency;
+  final bool showHistoryText;
+  final bool homeMenuPill;
+  final bool showLastSavedHint;
+
+  @override
+  State<_DisplayLivePreview> createState() => _DisplayLivePreviewState();
+}
+
+class _DisplayLivePreviewState extends State<_DisplayLivePreview> {
+  late DateTime _now;
+  Timer? _clockTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _now = DateTime.now();
+    _startClockTimer();
+  }
+
+  @override
+  void didUpdateWidget(covariant _DisplayLivePreview oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.showSeconds != widget.showSeconds) _startClockTimer();
+  }
+
+  void _startClockTimer() {
+    _clockTimer?.cancel();
+    _clockTimer = Timer.periodic(
+      Duration(seconds: widget.showSeconds ? 1 : 30),
+      (_) => setState(() => _now = DateTime.now()),
+    );
+  }
+
+  @override
+  void dispose() {
+    _clockTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final timeStr = use24HourFormat ? '14:32' : '02:32';
-    final secondsStr = showSeconds ? ':48' : '';
-    final periodStr = use24HourFormat ? '' : ' PM';
+    final p = widget.p;
+    final theme = widget.theme;
+    final clockFont = widget.clockFont;
+    final use24HourFormat = widget.use24HourFormat;
+    final showSeconds = widget.showSeconds;
+    final highlightSeconds = widget.highlightSeconds;
+    final previewModeLabel = widget.previewModeLabel;
+    final largeControls = widget.largeControls;
+    final buttonLabels = widget.buttonLabels;
+    final enableTranslucency = widget.enableTranslucency;
+    final showHistoryText = widget.showHistoryText;
+    final homeMenuPill = widget.homeMenuPill;
+    final showLastSavedHint = widget.showLastSavedHint;
+
+    final timeOfDay = TimeOfDay.fromDateTime(_now);
+    final hour = use24HourFormat
+        ? _now.hour
+        : (timeOfDay.hourOfPeriod == 0 ? 12 : timeOfDay.hourOfPeriod);
+    final timeStr =
+        '${hour.toString().padLeft(2, '0')}:${_now.minute.toString().padLeft(2, '0')}';
+    final secondsStr = showSeconds
+        ? ':${_now.second.toString().padLeft(2, '0')}'
+        : '';
+    final periodStr = use24HourFormat
+        ? ''
+        : timeOfDay.period == DayPeriod.am
+        ? ' AM'
+        : ' PM';
+
+    final surfaceBg = enableTranslucency
+        ? p.surface2.withValues(alpha: 0.72)
+        : p.surface2;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 4),
-      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: p.surface2,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: p.border.withValues(alpha: 0.8)),
+        color: p.surface,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: p.border.withValues(alpha: 0.8), width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: p.surface3.withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(CupertinoIcons.eye_fill, size: 10, color: p.text3),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Live Display Preview'.localized(context),
-                      style: TextStyle(
-                        color: p.text2,
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Spacer(),
-              Text(
-                '${theme.toUpperCase()} • $clockFont',
-                style: TextStyle(
-                  color: p.text3,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          RichText(
-            text: TextSpan(
-              style: TextStyle(
-                fontFamily: clockFont,
-                fontSize: 34,
-                fontWeight: FontWeight.w800,
-                color: p.text,
-                letterSpacing: 0.5,
-              ),
+          // Header Bar
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                TextSpan(text: timeStr),
-                if (showSeconds)
-                  TextSpan(
-                    text: secondsStr,
-                    style: TextStyle(
-                      color: highlightSeconds ? p.accent : p.text3,
-                      fontSize: 26,
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3.5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: p.accent.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: p.accent.withValues(alpha: 0.28),
+                      width: 0.8,
                     ),
                   ),
-                if (!use24HourFormat)
-                  TextSpan(
-                    text: periodStr,
-                    style: TextStyle(
-                      color: p.text2,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: p.surface3,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: p.border),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: BoxDecoration(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        CupertinoIcons.device_phone_portrait,
+                        size: 10,
                         color: p.accent,
-                        shape: BoxShape.circle,
                       ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Deep Work Focus'.localized(context),
-                      style: TextStyle(
-                        color: p.text,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
+                      const SizedBox(width: 4),
+                      Text(
+                        'LIVE HOME PREVIEW'.localized(context),
+                        style: TextStyle(
+                          color: p.accent,
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.5,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: p.accent.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  'Check In'.localized(context),
+                Text(
+                  '${theme.toUpperCase()} • $clockFont',
                   style: TextStyle(
-                    color: p.accent,
-                    fontSize: 11,
+                    color: p.text3,
+                    fontSize: 10.5,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
+              ],
+            ),
+          ),
+
+          // Mini Home Phone Frame
+          Container(
+            margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+            decoration: BoxDecoration(
+              color: surfaceBg,
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(
+                color: enableTranslucency
+                    ? p.border.withValues(alpha: 0.4)
+                    : p.border.withValues(alpha: 0.7),
+                width: 0.8,
               ),
-            ],
+            ),
+            child: Column(
+              children: [
+                // Top Island / Pill row (if homeMenuPill enabled)
+                if (homeMenuPill) ...[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: p.surface3.withValues(alpha: 0.8),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: p.accent.withValues(alpha: 0.35),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: p.accent,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              previewModeLabel.localized(context),
+                              style: TextStyle(
+                                color: p.text,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                ],
+
+                // Live Clock Display
+                Center(
+                  child: RichText(
+                    text: TextSpan(
+                      style: TextStyle(
+                        fontFamily: clockFont,
+                        fontSize: 38,
+                        fontWeight: FontWeight.w800,
+                        color: p.text,
+                        letterSpacing: 0.5,
+                      ),
+                      children: [
+                        TextSpan(text: timeStr),
+                        if (showSeconds)
+                          TextSpan(
+                            text: secondsStr,
+                            style: TextStyle(
+                              color: highlightSeconds ? p.accent : p.text3,
+                              fontSize: 28,
+                            ),
+                          ),
+                        if (!use24HourFormat)
+                          TextSpan(
+                            text: periodStr,
+                            style: TextStyle(
+                              color: p.text2,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Mock Recent Moment Card (reflecting Translucency & Hint)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: enableTranslucency
+                        ? p.surface3.withValues(alpha: 0.60)
+                        : p.surface3,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: p.border.withValues(alpha: 0.35),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          color: p.accent.withValues(alpha: 0.16),
+                          borderRadius: BorderRadius.circular(9),
+                        ),
+                        child: Icon(
+                          CupertinoIcons.sparkles,
+                          size: 14,
+                          color: p.accent,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Deep Work Session Completed',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: p.text,
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Offline Sovereign Encrypted Note',
+                              style: TextStyle(color: p.text3, fontSize: 9.5),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (showLastSavedHint)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2.5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: p.green.withValues(alpha: 0.14),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.check, size: 9, color: p.green),
+                              const SizedBox(width: 2),
+                              Text(
+                                'Saved',
+                                style: TextStyle(
+                                  color: p.green,
+                                  fontSize: 8.5,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                // Home Screen Action Bar Preview (Large Controls & Button Labels)
+                Container(
+                  height: largeControls ? 64 : 48,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: enableTranslucency
+                        ? p.surface.withValues(alpha: 0.65)
+                        : p.surface,
+                    borderRadius: BorderRadius.circular(
+                      largeControls ? 18 : 14,
+                    ),
+                    border: Border.all(
+                      color: p.border.withValues(alpha: 0.4),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _previewControlItem(
+                        icon: CupertinoIcons.clock_fill,
+                        label: showHistoryText ? 'History' : 'Logs',
+                        showLabel: buttonLabels,
+                        large: largeControls,
+                        p: p,
+                      ),
+                      _previewControlItem(
+                        icon: CupertinoIcons.add,
+                        label: 'Log',
+                        showLabel: buttonLabels,
+                        large: largeControls,
+                        isPrimary: true,
+                        p: p,
+                      ),
+                      _previewControlItem(
+                        icon: CupertinoIcons.bell_fill,
+                        label: 'Remind',
+                        showLabel: buttonLabels,
+                        large: largeControls,
+                        p: p,
+                      ),
+                      _previewControlItem(
+                        icon: CupertinoIcons.ellipsis,
+                        label: 'Menu',
+                        showLabel: buttonLabels,
+                        large: largeControls,
+                        p: p,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Visual Settings Feature Pills
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+            child: Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                _featurePill('Translucency', enableTranslucency, p),
+                _featurePill('Large Controls', largeControls, p),
+                _featurePill('Button Labels', buttonLabels, p),
+                _featurePill('Seconds', showSeconds, p),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _previewControlItem({
+    required IconData icon,
+    required String label,
+    required bool showLabel,
+    required bool large,
+    required Palette p,
+    bool isPrimary = false,
+  }) {
+    final size = large ? 32.0 : 24.0;
+    final iconSize = large ? 16.0 : 13.0;
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: isPrimary ? p.accent : p.surface3.withValues(alpha: 0.7),
+          ),
+          child: Icon(
+            icon,
+            size: iconSize,
+            color: isPrimary ? Colors.white : p.text,
+          ),
+        ),
+        if (showLabel) ...[
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: TextStyle(
+              color: p.text3,
+              fontSize: 8.5,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _featurePill(String name, bool active, Palette p) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(
+        color: active
+            ? p.accent.withValues(alpha: 0.12)
+            : p.surface3.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: active
+              ? p.accent.withValues(alpha: 0.3)
+              : p.border.withValues(alpha: 0.3),
+          width: 0.7,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 4.5,
+            height: 4.5,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: active ? p.accent : p.text3,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            name,
+            style: TextStyle(
+              color: active ? p.accent : p.text3,
+              fontSize: 9,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ],
       ),

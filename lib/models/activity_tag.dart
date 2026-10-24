@@ -8,8 +8,8 @@ class ActivityTag {
     required this.id,
     required this.label,
     required this.iconCodePoint,
-    this.iconFontFamily = 'CupertinoIcons',
-    this.iconFontPackage = 'cupertino_icons',
+    this.iconFontFamily = 'MaterialIcons',
+    this.iconFontPackage,
     this.colorValue = 0xFF0A84FF,
     this.isCustom = false,
   });
@@ -34,6 +34,7 @@ class ActivityTag {
     Icons.explore_rounded.codePoint: Icons.explore_rounded,
     Icons.local_fire_department_rounded.codePoint:
         Icons.local_fire_department_rounded,
+    Icons.self_improvement_rounded.codePoint: Icons.self_improvement_rounded,
     Icons.menu_book_rounded.codePoint: Icons.menu_book_rounded,
     Icons.laptop_mac_rounded.codePoint: Icons.laptop_mac_rounded,
     Icons.water_drop_rounded.codePoint: Icons.water_drop_rounded,
@@ -81,6 +82,7 @@ class ActivityTag {
     int? iconCodePoint,
     String? iconFontFamily,
     String? iconFontPackage,
+    bool clearIconFontPackage = false,
     int? colorValue,
     bool? isCustom,
   }) {
@@ -89,7 +91,9 @@ class ActivityTag {
       label: label ?? this.label,
       iconCodePoint: iconCodePoint ?? this.iconCodePoint,
       iconFontFamily: iconFontFamily ?? this.iconFontFamily,
-      iconFontPackage: iconFontPackage ?? this.iconFontPackage,
+      iconFontPackage: clearIconFontPackage
+          ? null
+          : iconFontPackage ?? this.iconFontPackage,
       colorValue: colorValue ?? this.colorValue,
       isCustom: isCustom ?? this.isCustom,
     );
@@ -114,8 +118,8 @@ class ActivityTag {
       iconCodePoint:
           (json['iconCodePoint'] as num?)?.toInt() ??
           Icons.label_rounded.codePoint,
-      iconFontFamily: json['iconFontFamily'] as String? ?? 'CupertinoIcons',
-      iconFontPackage: json['iconFontPackage'] as String? ?? 'cupertino_icons',
+      iconFontFamily: json['iconFontFamily'] as String? ?? 'MaterialIcons',
+      iconFontPackage: json['iconFontPackage'] as String?,
       colorValue: (json['colorValue'] as num?)?.toInt() ?? 0xFF0A84FF,
       isCustom: json['isCustom'] as bool? ?? true,
     );

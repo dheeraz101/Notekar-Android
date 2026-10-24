@@ -32,7 +32,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Live preview'), findsOneWidget);
+    expect(find.text('Example home preview'), findsOneWidget);
     await tester.tap(find.byTooltip('coral'));
     await tester.pumpAndSettle();
 

@@ -94,7 +94,7 @@ class CheckpointService {
 
   bool get hideFromTimeline => _hideFromTimeline;
 
-  Future<void> init({SharedPreferences? prefs}) async {
+  Future<void> init([SharedPreferences? prefs]) async {
     if (_initialized && prefs == null) return;
     final sp = prefs ?? await SharedPreferences.getInstance();
 
@@ -196,9 +196,8 @@ class CheckpointService {
       category: preset.category,
       tags: ['checkpoint', 'checkpoint:${preset.id}'],
     );
-    await MomentRepository.instance.saveMoment(inMoment);
 
-    final endId = MomentRepository.instance.getNextId();
+    final endId = startId + 1;
     final outMoment = Moment(
       id: endId,
       timestamp: endTimestamp.millisecondsSinceEpoch,
@@ -208,7 +207,8 @@ class CheckpointService {
       category: preset.category,
       tags: ['checkpoint', 'checkpoint:${preset.id}'],
     );
-    await MomentRepository.instance.saveMoment(outMoment);
+    // P1: Save both endpoints atomically in one repository transaction
+    await MomentRepository.instance.saveMoments([inMoment, outMoment]);
 
     return [inMoment, outMoment];
   }
@@ -320,8 +320,11 @@ class CheckpointService {
     }
     final double stdDev = math.sqrt(varianceSum / minutesOfDayList.length);
 
-    // Score: 100 for stdDev <= 10 mins, scaling down to 0 for stdDev >= 120 mins
-    final int score = ((120 - stdDev).clamp(0, 120) / 120 * 100).round();
+    // P1: Require at least 3 logs to calculate timing variance and consistency score.
+    // Sparse data (< 3 logs) must never be presented as 100% or optimal consistency.
+    final int score = presetMoments.length < 3
+        ? 0
+        : ((120 - stdDev).clamp(0, 120) / 120 * 100).round();
 
     // Check last 7 days completions
     final now = DateTime.now();

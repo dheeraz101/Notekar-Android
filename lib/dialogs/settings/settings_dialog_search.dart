@@ -85,8 +85,9 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         status: 'View',
       ),
       item(
-        title: 'Floating Timer Pill',
-        subtitle: 'Draggable on-screen live timer during active session',
+        title: 'Floating Control Pill',
+        subtitle:
+            'Always-on floating pill with live timer, mode toggle, and quick controls',
         category: 'Targets & Projects',
         icon: CupertinoIcons.timer,
         keywords: [
