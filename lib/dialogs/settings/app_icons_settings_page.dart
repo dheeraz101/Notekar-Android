@@ -148,19 +148,19 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
   }
 
   void _scrollToSelectedIcon({bool animate = true}) {
-    final icons = _getAvailableIcons();
-    final index = icons.indexWhere((opt) => opt.key == widget.appIconStyle);
-    if (index == -1 || !_scrollController.hasClients) return;
-
-    final targetOffset = index * _dockItemWidth;
-    if (animate) {
-      _scrollController.animateTo(
-        targetOffset,
-        duration: const Duration(milliseconds: 280),
-        curve: Curves.easeOutCubic,
-      );
-    } else {
-      _scrollController.jumpTo(targetOffset);
+    if (!_scrollController.hasClients) return;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final targetOffset = _scrollController.offset.clamp(0.0, maxScroll);
+    if (_scrollController.offset != targetOffset) {
+      if (animate) {
+        _scrollController.animateTo(
+          targetOffset,
+          duration: const Duration(milliseconds: 280),
+          curve: Curves.easeOutCubic,
+        );
+      } else {
+        _scrollController.jumpTo(targetOffset);
+      }
     }
   }
 
@@ -220,7 +220,7 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
   }) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      height: 420,
+      height: 550,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(32),
         gradient: const LinearGradient(
@@ -543,152 +543,108 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
                     ),
                   ),
 
-                  // 4. Bottom Dock: Horizontally swipable NoteKar icon choices
-                  Container(
-                    margin: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-                    height: 74,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.14),
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.18),
-                        width: 0.8,
+                  // 4. Bottom Dock: Horizontally swipable NoteKar icon choices (excluding active selected icon)
+                  () {
+                    final dockIcons = availableIcons
+                        .where((opt) => opt.key != widget.appIconStyle)
+                        .toList();
+                    return Container(
+                      margin: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                      height: 74,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.25),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.14),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.18),
+                          width: 0.8,
                         ),
-                      ],
-                    ),
-                    child: NotificationListener<ScrollNotification>(
-                      onNotification: (notification) {
-                        if (notification is ScrollUpdateNotification &&
-                            _scrollController.hasClients) {
-                          final currentScroll = _scrollController.offset;
-                          final nearestIndex = (currentScroll / _dockItemWidth)
-                              .round()
-                              .clamp(0, availableIcons.length - 1);
-                          if (nearestIndex != _lastDockFocalIndex) {
-                            _lastDockFocalIndex = nearestIndex;
-                            HapticFeedback.selectionClick();
-                          }
-                        }
-                        return false;
-                      },
-                      child: SingleChildScrollView(
-                        controller: _scrollController,
-                        scrollDirection: Axis.horizontal,
-                        physics: const BouncingScrollPhysics(),
-                        child: Row(
-                          children: [
-                            for (
-                              int index = 0;
-                              index < availableIcons.length;
-                              index++
-                            ) ...[
-                              if (index > 0) const SizedBox(width: 10),
-                              () {
-                                final item = availableIcons[index];
-                                final isSelected =
-                                    item.key == widget.appIconStyle;
-                                return GestureDetector(
-                                  key: ValueKey('app_icon_${item.key}'),
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    NotekarHaptics.selection('standard');
-                                    widget.onAppIconStyleChanged(item.key);
-                                    _scrollToSelectedIcon();
-                                  },
-                                  child: Container(
-                                    width: 48,
-                                    height: 48,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(13),
-                                      border: isSelected
-                                          ? Border.all(
-                                              color:
-                                                  (widget.godModeUnlocked &&
-                                                      (item.key == 'gold' ||
-                                                          item.key ==
-                                                              'godmode'))
-                                                  ? const Color(0xFFFFD700)
-                                                  : Colors.white,
-                                              width: 2.2,
-                                            )
-                                          : null,
-                                      boxShadow: isSelected
-                                          ? [
-                                              BoxShadow(
-                                                color: item.themeColor
-                                                    .withValues(alpha: 0.5),
-                                                blurRadius: 10,
-                                                spreadRadius: 1,
-                                              ),
-                                            ]
-                                          : null,
-                                    ),
-                                    child: Stack(
-                                      children: [
-                                        Positioned.fill(
-                                          child: Opacity(
-                                            opacity: isSelected ? 1.0 : 0.65,
-                                            child: ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(
-                                                    isSelected ? 11 : 13,
-                                                  ),
-                                              child: Image.asset(
-                                                item.asset,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        if (isSelected)
-                                          Positioned(
-                                            bottom: 2,
-                                            right: 2,
-                                            child: Container(
-                                              width: 12,
-                                              height: 12,
-                                              decoration: BoxDecoration(
-                                                color:
-                                                    (widget.godModeUnlocked &&
-                                                        (item.key == 'gold' ||
-                                                            item.key ==
-                                                                'godmode'))
-                                                    ? const Color(0xFFFFD700)
-                                                    : p.accent,
-                                                shape: BoxShape.circle,
-                                                border: Border.all(
-                                                  color: Colors.white,
-                                                  width: 1.0,
-                                                ),
-                                              ),
-                                              child: const Icon(
-                                                Icons.check,
-                                                size: 8,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.25),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: NotificationListener<ScrollNotification>(
+                        onNotification: (notification) {
+                          if (notification is ScrollUpdateNotification &&
+                              _scrollController.hasClients) {
+                            final currentScroll = _scrollController.offset;
+                            final nearestIndex =
+                                (currentScroll / _dockItemWidth).round().clamp(
+                                  0,
+                                  dockIcons.isEmpty ? 0 : dockIcons.length - 1,
                                 );
-                              }(),
+                            if (nearestIndex != _lastDockFocalIndex) {
+                              _lastDockFocalIndex = nearestIndex;
+                              HapticFeedback.selectionClick();
+                            }
+                          }
+                          return false;
+                        },
+                        child: SingleChildScrollView(
+                          controller: _scrollController,
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          child: Row(
+                            children: [
+                              for (
+                                int index = 0;
+                                index < dockIcons.length;
+                                index++
+                              ) ...[
+                                if (index > 0) const SizedBox(width: 10),
+                                () {
+                                  final item = dockIcons[index];
+                                  return GestureDetector(
+                                    key: ValueKey('app_icon_${item.key}'),
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () {
+                                      NotekarHaptics.selection('standard');
+                                      widget.onAppIconStyleChanged(item.key);
+                                      _scrollToSelectedIcon();
+                                    },
+                                    child: Container(
+                                      width: 48,
+                                      height: 48,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(13),
+                                        border: Border.all(
+                                          color:
+                                              (widget.godModeUnlocked &&
+                                                  (item.key == 'gold' ||
+                                                      item.key == 'godmode'))
+                                              ? const Color(
+                                                  0xFFFFD700,
+                                                ).withValues(alpha: 0.5)
+                                              : Colors.white.withValues(
+                                                  alpha: 0.2,
+                                                ),
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: Image.asset(
+                                          item.asset,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }(),
+                              ],
                             ],
-                          ],
+                          ),
                         ),
                       ),
-                    ),
-                  ),
+                    );
+                  }(),
                   // On-stage zero-size ListView for backward-compatible widget queries
                   Opacity(
                     opacity: 0.0,

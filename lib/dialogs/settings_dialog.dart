@@ -325,19 +325,21 @@ class _SettingsDialogState extends State<SettingsDialog> {
   final Map<String, ScrollController> _scrollControllers = {};
 
   ScrollController _getScrollController(String key) {
-    return _scrollControllers.putIfAbsent(key, () {
+    var c = _scrollControllers[key];
+    if (c == null) {
       final initial = AppScrollState.get('settings_$key');
-      final c = ScrollController(
+      c = ScrollController(
         initialScrollOffset: initial,
         keepScrollOffset: true,
       );
       c.addListener(() {
-        if (c.hasClients) {
+        if (c!.hasClients) {
           AppScrollState.save('settings_$key', c.offset);
         }
       });
-      return c;
-    });
+      _scrollControllers[key] = c;
+    }
+    return c;
   }
 
   void update(VoidCallback fn) => setState(fn);

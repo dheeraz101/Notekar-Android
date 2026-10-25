@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/utils/scroll_state_preserver.dart';
 import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
@@ -46,27 +47,35 @@ class AppSheet extends StatefulWidget {
 
 class _AppSheetState extends State<AppSheet> {
   double _titleOpacity = 0.0;
+  double _leadingOpacity = 0.0;
 
   @override
   void initState() {
     super.initState();
     if (widget.controller != null && widget.showLargeTitle) {
       widget.controller!.addListener(_onScroll);
+      _onScroll();
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _onScroll();
+    });
   }
 
   @override
   void didUpdateWidget(AppSheet oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // If the controller changes (e.g. returning to root settings),
+    // If the controller or showLargeTitle changes (e.g. returning to root settings),
     // swap listeners and sync opacity immediately.
-    if (widget.controller != oldWidget.controller) {
+    if (widget.controller != oldWidget.controller ||
+        widget.showLargeTitle != oldWidget.showLargeTitle) {
       oldWidget.controller?.removeListener(_onScroll);
       if (widget.controller != null && widget.showLargeTitle) {
         widget.controller!.addListener(_onScroll);
-        // Instant sync prevents the "ghost/flicker" effect
-        _onScroll();
       }
+      _onScroll();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _onScroll();
+      });
     }
   }
 
@@ -78,14 +87,34 @@ class _AppSheetState extends State<AppSheet> {
 
   void _onScroll() {
     if (!mounted) return;
-    final offset = widget.controller?.hasClients == true
-        ? widget.controller!.offset
-        : 0.0;
+    double offset = 0.0;
+    if (widget.controller?.hasClients == true) {
+      offset = widget.controller!.offset;
+    } else {
+      offset = AppScrollState.get('settings_root');
+      if (offset == 0.0 && widget.controller != null) {
+        offset = widget.controller!.initialScrollOffset;
+      }
+    }
+    _updateWithOffset(offset);
+  }
+
+  void _updateWithOffset(double offset) {
     // Small title is invisible until we scroll past the large title area (~45px)
     // Then fades in rapidly over the next 20px.
-    final newOpacity = ((offset - 45) / 20).clamp(0.0, 1.0);
-    if (newOpacity != _titleOpacity) {
-      setState(() => _titleOpacity = newOpacity);
+    final newTitleOpacity = ((offset - 45) / 20).clamp(0.0, 1.0);
+    // Profile circle fades in only once the main profile card has scrolled completely away (>190px).
+    // When scrolled up and profile card is visible enough (offset <= 190), top circle is strictly 0.0 (hidden).
+    final newLeadingOpacity = offset <= 190.0
+        ? 0.0
+        : ((offset - 190.0) / 30.0).clamp(0.0, 1.0);
+
+    if (newTitleOpacity != _titleOpacity ||
+        newLeadingOpacity != _leadingOpacity) {
+      setState(() {
+        _titleOpacity = newTitleOpacity;
+        _leadingOpacity = newLeadingOpacity;
+      });
     }
   }
 
@@ -204,11 +233,16 @@ class _AppSheetState extends State<AppSheet> {
                       else if (widget.scrollLeadingAction != null)
                         Positioned(
                           left: 0,
-                          child: Opacity(
-                            opacity: widget.showLargeTitle
-                                ? _titleOpacity
-                                : 1.0,
-                            child: widget.scrollLeadingAction!,
+                          child: IgnorePointer(
+                            ignoring:
+                                widget.showLargeTitle &&
+                                _leadingOpacity <= 0.05,
+                            child: Opacity(
+                              opacity: widget.showLargeTitle
+                                  ? _leadingOpacity
+                                  : 1.0,
+                              child: widget.scrollLeadingAction!,
+                            ),
                           ),
                         ),
                       Positioned.fill(
@@ -270,7 +304,16 @@ class _AppSheetState extends State<AppSheet> {
                 );
               }(),
               const SizedBox(height: spacing20),
-              widget.child,
+              NotificationListener<ScrollNotification>(
+                onNotification: (notification) {
+                  if (widget.showLargeTitle &&
+                      notification.metrics.axis == Axis.vertical) {
+                    _updateWithOffset(notification.metrics.pixels);
+                  }
+                  return false;
+                },
+                child: widget.child,
+              ),
             ],
           ),
         ),
@@ -405,7 +448,9 @@ class AppSheetLargeTitle extends StatelessWidget {
           builder: (context, _) {
             final offset = scrollController?.hasClients == true
                 ? scrollController!.offset
-                : 0.0;
+                : (scrollController != null
+                      ? AppScrollState.get('settings_root')
+                      : 0.0);
             // Large title fades out slightly before the small title starts appearing
             final opacity = (1.0 - (offset / 40)).clamp(0.0, 1.0);
             return Opacity(

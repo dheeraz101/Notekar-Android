@@ -628,6 +628,19 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
         _buildDownloadInstallCard(p),
         const SizedBox(height: spacing16),
 
+        // Formal Page Description
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: SettingsPageDescription(
+            p: p,
+            showIcon: true,
+            text:
+                'Update Center provides verified, sovereign software releases and security advisories for your device. All distributions undergo cryptographic signature verification and SHA-256 checksum validation prior to installation, maintaining complete offline integrity without intermediary telemetry.'
+                    .localized(context),
+          ),
+        ),
+        const SizedBox(height: spacing16),
+
         // Cache cleaner card
         _buildCacheCard(p),
         const SizedBox(height: spacing48),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
@@ -9,6 +10,7 @@ import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 
 class PersonalizationSettingsPage extends StatelessWidget {
   const PersonalizationSettingsPage({
@@ -135,6 +137,38 @@ class AccentColorItem {
   });
 }
 
+class FluidDynamicsParams {
+  final double reservoirHeight;
+  final double waveAmplitude;
+  final double waveFrequency;
+  final double waveSpeed;
+  final double tiltResponse;
+
+  const FluidDynamicsParams({
+    this.reservoirHeight = 360.0,
+    this.waveAmplitude = 6.0,
+    this.waveFrequency = 1.8,
+    this.waveSpeed = 1.0,
+    this.tiltResponse = 22.0,
+  });
+
+  FluidDynamicsParams copyWith({
+    double? reservoirHeight,
+    double? waveAmplitude,
+    double? waveFrequency,
+    double? waveSpeed,
+    double? tiltResponse,
+  }) {
+    return FluidDynamicsParams(
+      reservoirHeight: reservoirHeight ?? this.reservoirHeight,
+      waveAmplitude: waveAmplitude ?? this.waveAmplitude,
+      waveFrequency: waveFrequency ?? this.waveFrequency,
+      waveSpeed: waveSpeed ?? this.waveSpeed,
+      tiltResponse: tiltResponse ?? this.tiltResponse,
+    );
+  }
+}
+
 const List<AccentColorItem> kAccentColorPalette = [
   AccentColorItem(key: 'blue', name: 'Sapphire', color: Color(0xFF007AFF)),
   AccentColorItem(key: 'green', name: 'Emerald', color: Color(0xFF34C759)),
@@ -178,13 +212,10 @@ class AccentSnappingScrollPhysics extends ScrollPhysics {
     Tolerance tolerance,
     double velocity,
   ) {
-    double page = position.pixels / itemExtent;
-    if (velocity < -tolerance.velocity) {
-      page -= 0.5;
-    } else if (velocity > tolerance.velocity) {
-      page += 0.5;
-    }
-    return page.roundToDouble() * itemExtent;
+    // Apple iOS UIPickerView momentum projection
+    final projectedPixels = position.pixels + velocity * 0.14;
+    final page = (projectedPixels / itemExtent).roundToDouble();
+    return page * itemExtent;
   }
 
   @override
@@ -206,7 +237,7 @@ class AccentSnappingScrollPhysics extends ScrollPhysics {
       return null;
     }
     return ScrollSpringSimulation(
-      spring,
+      const SpringDescription(mass: 1.0, stiffness: 160.0, damping: 20.0),
       position.pixels,
       target,
       velocity,
@@ -241,57 +272,72 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
     with TickerProviderStateMixin {
   late ScrollController _scrollController;
   late AnimationController _waveController;
-  late AnimationController _fillController;
-  late AnimationController _drainController;
+  late AnimationController _colorTransitionController;
+  StreamSubscription<AccelerometerEvent>? _motionSub;
 
   late String _currentColorKey;
   Color _currentColor = const Color(0xFF007AFF);
-  bool _isPouring = false;
+  Color _previousColor = const Color(0xFF007AFF);
+  double _tiltX = 0.0;
   int? _lastFocalHapticIndex;
 
-  final double _itemWidth = 78.0;
+  final double _itemWidth = 46.0;
 
   @override
   void initState() {
     super.initState();
     _currentColorKey = widget.accentColor.isEmpty ? 'blue' : widget.accentColor;
     _currentColor = _findColor(_currentColorKey);
+    _previousColor = _currentColor;
     final initialIndex = kAccentColorPalette.indexWhere(
       (c) => c.key == _currentColorKey,
     );
     _lastFocalHapticIndex = initialIndex != -1 ? initialIndex : 0;
 
     _scrollController = ScrollController();
-    final isLowEnd = AdaptiveEngine().isLowEnd;
-    final shouldThrottle = DeviceHealthManager.instance.shouldThrottle;
+    final isLowEnd =
+        AdaptiveEngine().isLowEnd ||
+        DeviceHealthManager.instance.shouldThrottle;
     _waveController = AnimationController(
       vsync: this,
       duration: isLowEnd
-          ? const Duration(seconds: 10)
-          : const Duration(milliseconds: 2200),
-      value: (isLowEnd || shouldThrottle) ? 0.5 : 0.0,
+          ? const Duration(seconds: 8)
+          : const Duration(milliseconds: 2400),
+      value: 0.0,
     );
-    if (!isLowEnd && !shouldThrottle) {
+    // Continuous natural water wave motion
+    if (!widget.reduceMotion) {
       _waveController.repeat();
     }
 
-    _fillController = AnimationController(
+    _colorTransitionController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 700),
+      duration: const Duration(milliseconds: 400),
       value: 1.0,
     );
 
-    _drainController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 320),
-      value: 0.0,
-    );
-
-    _fillController.addStatusListener((status) {
-      if (status == AnimationStatus.completed && mounted) {
-        setState(() => _isPouring = false);
-      }
-    });
+    // Responsive lateral fluid motion from phone tilt/movement
+    if (!widget.reduceMotion) {
+      try {
+        _motionSub =
+            accelerometerEventStream(
+              samplingPeriod: const Duration(milliseconds: 50),
+            ).listen(
+              (event) {
+                if (!mounted) return;
+                final targetX = (event.x / 9.8).clamp(-1.0, 1.0);
+                final nextTilt = _tiltX + (targetX - _tiltX) * 0.25;
+                if ((nextTilt - _tiltX).abs() > 0.005) {
+                  setState(() => _tiltX = nextTilt);
+                }
+              },
+              onError: (_) {
+                _motionSub?.cancel();
+                _motionSub = null;
+              },
+            );
+      } catch (_) {}
+    }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToColor(_currentColorKey, animate: false);
@@ -310,10 +356,11 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
 
   @override
   void dispose() {
+    _motionSub?.cancel();
+    _motionSub = null;
     _scrollController.dispose();
     _waveController.dispose();
-    _fillController.dispose();
-    _drainController.dispose();
+    _colorTransitionController.dispose();
     super.dispose();
   }
 
@@ -356,19 +403,18 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
 
     HapticFeedback.lightImpact();
     setState(() {
+      _previousColor =
+          Color.lerp(
+            _previousColor,
+            _currentColor,
+            _colorTransitionController.value,
+          ) ??
+          _currentColor;
       _currentColorKey = newKey;
       _currentColor = _findColor(newKey);
-      _isPouring = true;
     });
 
-    // 1. Drain previous fluid out bottom
-    _drainController.forward(from: 0.0).then((_) {
-      if (!mounted) return;
-      _drainController.reset();
-      // 2. Pour new fluid in from top spout
-      _fillController.forward(from: 0.0);
-    });
-
+    _colorTransitionController.forward(from: 0.0);
     widget.onAccentColorChanged(newKey);
     _scrollToColor(newKey);
   }
@@ -377,24 +423,28 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
   Widget build(BuildContext context) {
     final p = widget.p;
 
+    final screenH = MediaQuery.sizeOf(context).height;
+    final bottomReservoirHeight = (screenH - 340.0).clamp(380.0, 1000.0);
+
     return Stack(
       children: [
-        // 1. Full-page fluid bucket canvas (fluid drop stream from top + bottom reservoir fill)
+        // 1. Full-page fluid bucket canvas (continuous water waves + lateral phone tilt response)
         Positioned.fill(
           child: AnimatedBuilder(
             animation: Listenable.merge([
               _waveController,
-              _fillController,
-              _drainController,
+              _colorTransitionController,
             ]),
             builder: (context, _) {
               return CustomPaint(
                 painter: _FullPageFluidBucketPainter(
-                  fillLevel: _fillController.value,
                   wavePhase: _waveController.value,
                   fluidColor: _currentColor,
-                  drainLevel: _drainController.value,
-                  isPouring: _isPouring,
+                  previousColor: _previousColor,
+                  colorProgress: _colorTransitionController.value,
+                  tiltX: _tiltX,
+                  params: const FluidDynamicsParams(),
+                  surfaceTopOffset: 308.0,
                   isLowEnd: AdaptiveEngine().isLowEnd,
                   isThrottled: DeviceHealthManager.instance.shouldThrottle,
                 ),
@@ -508,9 +558,9 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
             ),
             const SizedBox(height: 14),
 
-            // Horizontal Color Carousel with Degraded Outward Sizing
+            // Horizontal Color Carousel with Natural Proportional Sizing
             SizedBox(
-              height: 110,
+              height: 126,
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final viewportWidth = constraints.maxWidth;
@@ -521,8 +571,8 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
                     children: [
                       // Center Stationary Target Indicator Rings (Apple HIG Glow & Outer Frame)
                       Container(
-                        width: 84,
-                        height: 84,
+                        width: 104,
+                        height: 104,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
@@ -532,8 +582,8 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
                         ),
                       ),
                       Container(
-                        width: 76,
-                        height: 76,
+                        width: 94,
+                        height: 94,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
@@ -542,15 +592,15 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: _currentColor.withValues(alpha: 0.25),
-                              blurRadius: 16,
+                              color: _currentColor.withValues(alpha: 0.28),
+                              blurRadius: 18,
                               spreadRadius: 2,
                             ),
                           ],
                         ),
                       ),
 
-                      // Horizontal List with Degraded Outward Sizing & Fluid Spring Snap
+                      // Horizontal List with Natural Focal Scale & Fluid Spring Snap
                       NotificationListener<ScrollNotification>(
                         onNotification: (notification) {
                           if (notification is ScrollUpdateNotification &&
@@ -603,34 +653,34 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
                                     (itemCenterOffset - currentScroll).abs();
                                 final step = distance / _itemWidth;
 
-                                // Degraded sizing outward from center
+                                // Natural sizing: Center is prominent (84), neighbors scale down cleanly (32, 22, 14)
                                 double circleDiameter;
                                 if (step <= 1.0) {
-                                  circleDiameter = 66.0 - (66.0 - 48.0) * step;
+                                  circleDiameter = 84.0 - (84.0 - 32.0) * step;
                                 } else if (step <= 2.0) {
                                   circleDiameter =
-                                      48.0 - (48.0 - 36.0) * (step - 1.0);
+                                      32.0 - (32.0 - 22.0) * (step - 1.0);
                                 } else {
                                   circleDiameter =
-                                      (36.0 -
-                                      (36.0 - 26.0) *
+                                      (22.0 -
+                                      (22.0 - 14.0) *
                                           ((step - 2.0).clamp(0.0, 1.0)));
                                 }
 
-                                // Degraded opacity outward from center
+                                // Natural opacity scale outward from focal center
                                 double opacity;
                                 if (step <= 0.25) {
                                   opacity = 1.0;
                                 } else if (step <= 1.0) {
                                   opacity =
                                       1.0 -
-                                      (1.0 - 0.72) * ((step - 0.25) / 0.75);
+                                      (1.0 - 0.70) * ((step - 0.25) / 0.75);
                                 } else {
                                   opacity =
-                                      (0.72 -
-                                              (0.72 - 0.28) *
+                                      (0.70 -
+                                              (0.70 - 0.25) *
                                                   ((step - 1.0) / 1.5))
-                                          .clamp(0.24, 0.72);
+                                          .clamp(0.22, 0.70);
                                 }
 
                                 final isSelected = item.key == _currentColorKey;
@@ -671,10 +721,10 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
                                               : null,
                                         ),
                                         child:
-                                            isSelected && circleDiameter >= 44
+                                            isSelected && circleDiameter >= 56
                                             ? const Icon(
                                                 Icons.check,
-                                                size: 18,
+                                                size: 24,
                                                 color: Colors.white,
                                               )
                                             : null,
@@ -693,7 +743,11 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
               ),
             ),
 
-            const SizedBox(height: 52),
+            // Move this bar slightly down from the circle group
+            const SizedBox(height: 22),
+
+            // Use the whole bottom as a filler for color fluid
+            SizedBox(height: bottomReservoirHeight),
           ],
         ),
       ],
@@ -702,22 +756,26 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
 }
 
 class _FullPageFluidBucketPainter extends CustomPainter {
-  final double fillLevel;
   final double wavePhase;
   final Color fluidColor;
-  final double drainLevel;
-  final bool isPouring;
+  final Color previousColor;
+  final double colorProgress;
+  final double tiltX;
+  final FluidDynamicsParams params;
   final bool isLowEnd;
   final bool isThrottled;
+  final double? surfaceTopOffset;
 
   _FullPageFluidBucketPainter({
-    required this.fillLevel,
     required this.wavePhase,
     required this.fluidColor,
-    required this.drainLevel,
-    required this.isPouring,
+    required this.previousColor,
+    required this.colorProgress,
+    this.tiltX = 0.0,
+    this.params = const FluidDynamicsParams(),
     this.isLowEnd = false,
     this.isThrottled = false,
+    this.surfaceTopOffset,
   });
 
   @override
@@ -725,132 +783,122 @@ class _FullPageFluidBucketPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
 
-    final effectiveFill = (fillLevel * (1.0 - drainLevel)).clamp(0.0, 1.0);
+    final effectiveColor =
+        Color.lerp(previousColor, fluidColor, colorProgress) ?? fluidColor;
 
     // Subtle page-wide tint
-    if (effectiveFill > 0.01) {
-      final bgTint = Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            fluidColor.withValues(alpha: 0.0),
-            fluidColor.withValues(alpha: 0.05 * effectiveFill),
-          ],
-        ).createShader(Rect.fromLTWH(0, 0, w, h));
-      canvas.drawRect(Rect.fromLTWH(0, 0, w, h), bgTint);
+    final bgTint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          effectiveColor.withValues(alpha: 0.0),
+          effectiveColor.withValues(alpha: 0.06),
+        ],
+      ).createShader(Rect.fromLTWH(0, 0, w, h));
+    canvas.drawRect(Rect.fromLTWH(0, 0, w, h), bgTint);
+
+    // Bottom reservoir: filling whole bottom area, moved slightly down from circles
+    final surfaceY = surfaceTopOffset != null
+        ? surfaceTopOffset!.clamp(0.0, h)
+        : (h - params.reservoirHeight).clamp(0.0, h);
+
+    final fluidPath = Path();
+    fluidPath.moveTo(0, h);
+    fluidPath.lineTo(0, surfaceY);
+
+    if (isLowEnd || isThrottled) {
+      fluidPath.lineTo(w, surfaceY);
+    } else {
+      for (double x = 0; x <= w; x += 3) {
+        final normX = x / w;
+        final tiltOffset = (normX - 0.5) * tiltX * params.tiltResponse;
+        final primaryWave =
+            math.sin(
+              (normX * params.waveFrequency * 2 * math.pi) +
+                  (wavePhase * 2 * math.pi),
+            ) *
+            params.waveAmplitude;
+        final secondaryHarmonic =
+            math.sin(
+              (normX * params.waveFrequency * 4 * math.pi) -
+                  (wavePhase * 3 * math.pi),
+            ) *
+            (params.waveAmplitude * 0.35);
+        final waveY = surfaceY + tiltOffset + primaryWave + secondaryHarmonic;
+        fluidPath.lineTo(x, waveY);
+      }
     }
+    fluidPath.lineTo(w, h);
+    fluidPath.close();
 
-    // Bottom reservoir: filling bottom portion exactly few pixels down from circles
-    const reservoirHeight = 52.0;
-    final surfaceY = h - (reservoirHeight * effectiveFill);
+    final fluidPaint = Paint()
+      ..shader =
+          LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              effectiveColor.withValues(alpha: 0.65),
+              effectiveColor.withValues(alpha: 0.35),
+            ],
+          ).createShader(
+            Rect.fromLTWH(0, surfaceY, w, math.max(1.0, h - surfaceY)),
+          );
+    canvas.drawPath(fluidPath, fluidPaint);
 
-    if (effectiveFill > 0.01) {
-      final fluidPath = Path();
-      fluidPath.moveTo(0, h);
-      fluidPath.lineTo(0, surfaceY);
-
-      if (isLowEnd || isThrottled) {
-        fluidPath.lineTo(w, surfaceY);
-      } else {
-        final waveAmp =
-            (3.5 * math.sin(effectiveFill * math.pi) * (isPouring ? 1.4 : 0.7))
-                .clamp(0.0, 5.0);
-        for (double x = 0; x <= w; x += 4) {
-          final normX = x / w;
-          final waveY =
-              surfaceY +
-              math.sin((normX * 2 * math.pi) + (wavePhase * 2 * math.pi)) *
-                  waveAmp;
-          fluidPath.lineTo(x, waveY);
-        }
-      }
-      fluidPath.lineTo(w, h);
-      fluidPath.close();
-
-      final fluidPaint = Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            fluidColor.withValues(alpha: 0.65),
-            fluidColor.withValues(alpha: 0.35),
-          ],
-        ).createShader(Rect.fromLTWH(0, surfaceY, w, h - surfaceY));
-      canvas.drawPath(fluidPath, fluidPaint);
-
-      // Subtle glow shader on top of fluid meniscus for Flagship / High-performance tier
-      if (!isLowEnd &&
-          !isThrottled &&
-          DeviceHealthManager.instance.enableGlowShader) {
-        final glowShaderPaint = Paint()
-          ..color = fluidColor.withValues(alpha: 0.35)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 4.0;
-        canvas.drawPath(fluidPath, glowShaderPaint);
-      }
-
-      // Meniscus crest highlight line
-      final crestPaint = Paint()
-        ..color = Colors.white.withValues(alpha: 0.35)
+    // Subtle glow shader on top of fluid meniscus
+    if (!isLowEnd &&
+        !isThrottled &&
+        DeviceHealthManager.instance.enableGlowShader) {
+      final glowShaderPaint = Paint()
+        ..color = effectiveColor.withValues(alpha: 0.35)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.8;
-      final crestPath = Path();
-      crestPath.moveTo(0, surfaceY);
-      if (isLowEnd || isThrottled) {
-        crestPath.lineTo(w, surfaceY);
-      } else {
-        final waveAmp =
-            (3.5 * math.sin(effectiveFill * math.pi) * (isPouring ? 1.4 : 0.7))
-                .clamp(0.0, 5.0);
-        for (double x = 0; x <= w; x += 4) {
-          final normX = x / w;
-          final waveY =
-              surfaceY +
-              math.sin((normX * 2 * math.pi) + (wavePhase * 2 * math.pi)) *
-                  waveAmp;
-          crestPath.lineTo(x, waveY);
-        }
+        ..strokeWidth = 4.0;
+      canvas.drawPath(fluidPath, glowShaderPaint);
+    }
+
+    // Meniscus crest highlight line
+    final crestPaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.40)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+    final crestPath = Path();
+    crestPath.moveTo(0, surfaceY);
+    if (isLowEnd || isThrottled) {
+      crestPath.lineTo(w, surfaceY);
+    } else {
+      for (double x = 0; x <= w; x += 3) {
+        final normX = x / w;
+        final tiltOffset = (normX - 0.5) * tiltX * params.tiltResponse;
+        final primaryWave =
+            math.sin(
+              (normX * params.waveFrequency * 2 * math.pi) +
+                  (wavePhase * 2 * math.pi),
+            ) *
+            params.waveAmplitude;
+        final secondaryHarmonic =
+            math.sin(
+              (normX * params.waveFrequency * 4 * math.pi) -
+                  (wavePhase * 3 * math.pi),
+            ) *
+            (params.waveAmplitude * 0.35);
+        final waveY = surfaceY + tiltOffset + primaryWave + secondaryHarmonic;
+        crestPath.lineTo(x, waveY);
       }
-      canvas.drawPath(crestPath, crestPaint);
     }
-
-    // Top to bottom fluid drop pouring stream
-    if (isPouring && fillLevel < 0.98) {
-      final dropY = (surfaceY * fillLevel).clamp(0.0, surfaceY);
-      final streamPaint = Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            fluidColor.withValues(alpha: 0.0),
-            fluidColor.withValues(alpha: 0.85),
-          ],
-        ).createShader(Rect.fromLTWH(w / 2 - 2, 0, 4, dropY))
-        ..strokeWidth = 3.0
-        ..strokeCap = StrokeCap.round;
-
-      canvas.drawLine(Offset(w / 2, 0), Offset(w / 2, dropY), streamPaint);
-
-      // Droplet head at dropY
-      final dropPaint = Paint()..color = fluidColor;
-      canvas.drawCircle(Offset(w / 2, dropY), 3.5, dropPaint);
-      canvas.drawCircle(
-        Offset(w / 2, dropY),
-        5.5,
-        Paint()..color = fluidColor.withValues(alpha: 0.35),
-      );
-    }
+    canvas.drawPath(crestPath, crestPaint);
   }
 
   @override
   bool shouldRepaint(covariant _FullPageFluidBucketPainter oldDelegate) {
-    return oldDelegate.fillLevel != fillLevel ||
-        oldDelegate.wavePhase != wavePhase ||
+    return oldDelegate.wavePhase != wavePhase ||
         oldDelegate.fluidColor != fluidColor ||
-        oldDelegate.drainLevel != drainLevel ||
-        oldDelegate.isPouring != isPouring ||
+        oldDelegate.previousColor != previousColor ||
+        oldDelegate.colorProgress != colorProgress ||
+        oldDelegate.tiltX != tiltX ||
+        oldDelegate.params != params ||
         oldDelegate.isLowEnd != isLowEnd ||
-        oldDelegate.isThrottled != isThrottled;
+        oldDelegate.isThrottled != isThrottled ||
+        oldDelegate.surfaceTopOffset != surfaceTopOffset;
   }
 }
