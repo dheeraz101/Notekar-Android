@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart' show CupertinoActivityIndicator;
@@ -7,9 +6,11 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/models/peer_profile.dart';
 import 'package:notekar/services/user_profile_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 /// Reusable Apple-aesthetic shareable profile identity card with NoteKar branding.
 class ShareableProfileCardSheet extends StatefulWidget {
@@ -103,6 +104,21 @@ class _ShareableProfileCardSheetState extends State<ShareableProfileCardSheet> {
     final displayName = profile.name.trim().isNotEmpty
         ? profile.name.trim()
         : 'NoteKar Explorer';
+
+    final myPeer = PeerProfile(
+      name: displayName,
+      dob: profile.dob?.toIso8601String() ?? '',
+      targetYears: horizon.targetYears,
+      ageYears: horizon.exactAgeYears > 0
+          ? horizon.exactAgeYears
+          : horizon.ageYears.toDouble(),
+      lifeClockFormatted: horizon.lifeClockFormatted,
+      lifeClockTimeOfDay: horizon.lifeClockTimeOfDay,
+      remainingWeeks: horizon.remainingWeeks,
+      livedPercentage: horizon.livedPercentage,
+      timestamp: DateTime.now().millisecondsSinceEpoch,
+    );
+    final qrPayload = myPeer.toQrPayload();
 
     return AppSheet(
       p: p,
@@ -246,7 +262,7 @@ class _ShareableProfileCardSheetState extends State<ShareableProfileCardSheet> {
                           ),
                           const SizedBox(height: 20),
 
-                          // Apple Watch Chronometer-Grade Life Clock & Horizon Section
+                          // Apple Wallet-Grade Sovereign QR Code Horizon Pass
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
@@ -266,15 +282,110 @@ class _ShareableProfileCardSheetState extends State<ShareableProfileCardSheet> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Top Row: Chronometer Dial + Primary Time & Hierarchy
+                                // Pass Row Header
                                 Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    // Circular Apple Activity Dial
-                                    _LifeClockChronometerDial(
-                                      fraction: horizon.livedPercentage,
-                                      accentColor: p.accent,
-                                      secondaryColor: p.orange,
+                                    Row(
+                                      children: [
+                                        Container(
+                                          width: 6,
+                                          height: 6,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: p.accent,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: p.accent.withValues(
+                                                  alpha: 0.6,
+                                                ),
+                                                blurRadius: 6,
+                                                spreadRadius: 1,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          'TEMPORAL HORIZON PASS',
+                                          style: TextStyle(
+                                            color: p.accent,
+                                            fontSize: 9.5,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: 0.8,
+                                            decoration: TextDecoration.none,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 7,
+                                        vertical: 2.5,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.08,
+                                        ),
+                                        borderRadius: BorderRadius.circular(
+                                          999,
+                                        ),
+                                        border: Border.all(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.1,
+                                          ),
+                                        ),
+                                      ),
+                                      child: const Text(
+                                        'OFFLINE PASS',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: 0.4,
+                                          decoration: TextDecoration.none,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 14),
+
+                                // Center Row: QR Code + Inspection Guidance
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(6),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(16),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(
+                                              alpha: 0.35,
+                                            ),
+                                            blurRadius: 10,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ],
+                                      ),
+                                      child: QrImageView(
+                                        data: qrPayload,
+                                        version: QrVersions.auto,
+                                        size: 106,
+                                        backgroundColor: Colors.white,
+                                        eyeStyle: const QrEyeStyle(
+                                          eyeShape: QrEyeShape.square,
+                                          color: Color(0xFF0C0E14),
+                                        ),
+                                        dataModuleStyle:
+                                            const QrDataModuleStyle(
+                                              dataModuleShape:
+                                                  QrDataModuleShape.square,
+                                              color: Color(0xFF0C0E14),
+                                            ),
+                                      ),
                                     ),
                                     const SizedBox(width: 14),
                                     Expanded(
@@ -282,95 +393,38 @@ class _ShareableProfileCardSheetState extends State<ShareableProfileCardSheet> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          Row(
-                                            children: [
-                                              Container(
-                                                width: 6,
-                                                height: 6,
-                                                decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  color: p.accent,
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                      color: p.accent
-                                                          .withValues(
-                                                            alpha: 0.6,
-                                                          ),
-                                                      blurRadius: 6,
-                                                      spreadRadius: 1,
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              const SizedBox(width: 6),
-                                              Text(
-                                                '24-HOUR LIFE CLOCK',
-                                                style: TextStyle(
-                                                  color: p.accent,
-                                                  fontSize: 9.5,
-                                                  fontWeight: FontWeight.w800,
-                                                  letterSpacing: 0.8,
-                                                  decoration:
-                                                      TextDecoration.none,
-                                                ),
-                                              ),
-                                              const Spacer(),
-                                              Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 7,
-                                                      vertical: 2.5,
-                                                    ),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.white
-                                                      .withValues(alpha: 0.08),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                        999,
-                                                      ),
-                                                  border: Border.all(
-                                                    color: Colors.white
-                                                        .withValues(alpha: 0.1),
-                                                  ),
-                                                ),
-                                                child: Text(
-                                                  horizon.lifeClockTimeOfDay,
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 9.5,
-                                                    fontWeight: FontWeight.w700,
-                                                    letterSpacing: 0.2,
-                                                    decoration:
-                                                        TextDecoration.none,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 3),
                                           Text(
-                                            horizon.lifeClockFormatted,
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 26,
-                                              fontWeight: FontWeight.w900,
-                                              letterSpacing: -0.5,
-                                              fontFeatures: [
-                                                FontFeature.tabularFigures(),
-                                              ],
+                                            'SCAN TO INSPECT',
+                                            style: TextStyle(
+                                              color: Colors.white.withValues(
+                                                alpha: 0.5,
+                                              ),
+                                              fontSize: 9.5,
+                                              fontWeight: FontWeight.w800,
+                                              letterSpacing: 0.6,
                                               decoration: TextDecoration.none,
                                             ),
                                           ),
+                                          const SizedBox(height: 3),
                                           Text(
-                                            horizon.hasDob
-                                                ? '${(horizon.livedPercentage * 100).toStringAsFixed(1)}% lived • ${horizon.targetYears}y Horizon'
-                                                : '${horizon.targetYears}y Life Horizon',
+                                            '24h Life Clock\n& Progress',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w800,
+                                              height: 1.25,
+                                              decoration: TextDecoration.none,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 5),
+                                          Text(
+                                            'Scan this pass in NoteKar to inspect full life clock and compare pacing side-by-side.',
                                             style: TextStyle(
                                               color: Colors.white.withValues(
-                                                alpha: 0.65,
+                                                alpha: 0.6,
                                               ),
-                                              fontSize: 11.5,
-                                              fontWeight: FontWeight.w600,
+                                              fontSize: 10.5,
+                                              height: 1.35,
                                               decoration: TextDecoration.none,
                                             ),
                                           ),
@@ -379,10 +433,9 @@ class _ShareableProfileCardSheetState extends State<ShareableProfileCardSheet> {
                                     ),
                                   ],
                                 ),
-
                                 const SizedBox(height: 14),
 
-                                // Secondary Metrics Pill Split
+                                // Summary metrics row
                                 Row(
                                   children: [
                                     Expanded(
@@ -423,22 +476,8 @@ class _ShareableProfileCardSheetState extends State<ShareableProfileCardSheet> {
                                               '${horizon.remainingWeeks} wks',
                                               style: const TextStyle(
                                                 color: Colors.white,
-                                                fontSize: 15,
+                                                fontSize: 13.5,
                                                 fontWeight: FontWeight.w800,
-                                                fontFeatures: [
-                                                  FontFeature.tabularFigures(),
-                                                ],
-                                                decoration: TextDecoration.none,
-                                              ),
-                                            ),
-                                            Text(
-                                              '${(horizon.remainingYears).toStringAsFixed(1)} yrs left',
-                                              style: TextStyle(
-                                                color: Colors.white.withValues(
-                                                  alpha: 0.55,
-                                                ),
-                                                fontSize: 10.5,
-                                                fontWeight: FontWeight.w600,
                                                 decoration: TextDecoration.none,
                                               ),
                                             ),
@@ -473,7 +512,7 @@ class _ShareableProfileCardSheetState extends State<ShareableProfileCardSheet> {
                                             Text(
                                               'CONSCIOUS TIME',
                                               style: TextStyle(
-                                                color: p.green,
+                                                color: p.accent,
                                                 fontSize: 9,
                                                 fontWeight: FontWeight.w800,
                                                 letterSpacing: 0.6,
@@ -482,25 +521,11 @@ class _ShareableProfileCardSheetState extends State<ShareableProfileCardSheet> {
                                             ),
                                             const SizedBox(height: 2),
                                             Text(
-                                              '${horizon.remainingConsciousWeeks} wks',
+                                              '${(horizon.livedPercentage * 100).toStringAsFixed(1)}% lived',
                                               style: const TextStyle(
                                                 color: Colors.white,
-                                                fontSize: 15,
+                                                fontSize: 13.5,
                                                 fontWeight: FontWeight.w800,
-                                                fontFeatures: [
-                                                  FontFeature.tabularFigures(),
-                                                ],
-                                                decoration: TextDecoration.none,
-                                              ),
-                                            ),
-                                            Text(
-                                              '14h active window',
-                                              style: TextStyle(
-                                                color: Colors.white.withValues(
-                                                  alpha: 0.55,
-                                                ),
-                                                fontSize: 10.5,
-                                                fontWeight: FontWeight.w600,
                                                 decoration: TextDecoration.none,
                                               ),
                                             ),
@@ -509,35 +534,6 @@ class _ShareableProfileCardSheetState extends State<ShareableProfileCardSheet> {
                                       ),
                                     ),
                                   ],
-                                ),
-
-                                const SizedBox(height: 12),
-
-                                // Horizon Progress Bar
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(999),
-                                  child: Container(
-                                    height: 6,
-                                    color: Colors.white.withValues(alpha: 0.1),
-                                    child: LayoutBuilder(
-                                      builder: (context, constraints) {
-                                        return Row(
-                                          children: [
-                                            Container(
-                                              width:
-                                                  constraints.maxWidth *
-                                                  horizon.livedPercentage,
-                                              decoration: BoxDecoration(
-                                                gradient: LinearGradient(
-                                                  colors: [p.accent, p.orange],
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    ),
-                                  ),
                                 ),
                               ],
                             ),
@@ -729,154 +725,5 @@ class _ShareableProfileCardSheetState extends State<ShareableProfileCardSheet> {
         ),
       ),
     );
-  }
-}
-
-class _LifeClockChronometerDial extends StatelessWidget {
-  const _LifeClockChronometerDial({
-    required this.fraction,
-    required this.accentColor,
-    required this.secondaryColor,
-  });
-
-  final double fraction;
-  final Color accentColor;
-  final Color secondaryColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 66,
-      height: 66,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.white.withValues(alpha: 0.03),
-        boxShadow: [
-          BoxShadow(
-            color: accentColor.withValues(alpha: 0.15),
-            blurRadius: 12,
-            spreadRadius: 1,
-          ),
-        ],
-      ),
-      child: CustomPaint(
-        painter: _LifeClockChronometerPainter(
-          fraction: fraction.clamp(0.0, 1.0),
-          accentColor: accentColor,
-          secondaryColor: secondaryColor,
-        ),
-        child: Center(
-          child: Container(
-            width: 14,
-            height: 14,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white.withValues(alpha: 0.12),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.3),
-                width: 1.5,
-              ),
-            ),
-            child: Center(
-              child: Container(
-                width: 4,
-                height: 4,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: accentColor,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _LifeClockChronometerPainter extends CustomPainter {
-  const _LifeClockChronometerPainter({
-    required this.fraction,
-    required this.accentColor,
-    required this.secondaryColor,
-  });
-
-  final double fraction;
-  final Color accentColor;
-  final Color secondaryColor;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = (size.width - 12) / 2;
-
-    // 1. Draw 12 subtle tick marks representing hours around clock face
-    final tickPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.22)
-      ..strokeWidth = 1.0
-      ..strokeCap = StrokeCap.round;
-
-    for (int i = 0; i < 12; i++) {
-      final angle = (i * 30.0) * (math.pi / 180.0) - (math.pi / 2);
-      final isMajor = i % 3 == 0;
-      final innerR = radius - (isMajor ? 4.5 : 2.5);
-      final outerR = radius;
-      final p1 = Offset(
-        center.dx + innerR * math.cos(angle),
-        center.dy + innerR * math.sin(angle),
-      );
-      final p2 = Offset(
-        center.dx + outerR * math.cos(angle),
-        center.dy + outerR * math.sin(angle),
-      );
-      tickPaint.color = Colors.white.withValues(alpha: isMajor ? 0.35 : 0.15);
-      canvas.drawLine(p1, p2, tickPaint);
-    }
-
-    // 2. Background track ring
-    final bgPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.08)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 4.5;
-    canvas.drawCircle(center, radius - 1.5, bgPaint);
-
-    // 3. Sweeping gradient active arc
-    if (fraction > 0.001) {
-      final sweepAngle = 2 * math.pi * fraction;
-      final rect = Rect.fromCircle(center: center, radius: radius - 1.5);
-      final sweepPaint = Paint()
-        ..shader = ui.Gradient.sweep(
-          center,
-          [accentColor, secondaryColor, accentColor],
-          [0.0, 0.7, 1.0],
-          TileMode.clamp,
-          -math.pi / 2,
-          -math.pi / 2 + sweepAngle,
-        )
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 4.8
-        ..strokeCap = StrokeCap.round;
-
-      canvas.drawArc(rect, -math.pi / 2, sweepAngle, false, sweepPaint);
-
-      // Glowing head indicator at the end of the arc
-      final endAngle = -math.pi / 2 + sweepAngle;
-      final headX = center.dx + (radius - 1.5) * math.cos(endAngle);
-      final headY = center.dy + (radius - 1.5) * math.sin(endAngle);
-      final glowPaint = Paint()
-        ..color = secondaryColor.withValues(alpha: 0.8)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
-      canvas.drawCircle(Offset(headX, headY), 3.2, glowPaint);
-
-      final dotPaint = Paint()..color = Colors.white;
-      canvas.drawCircle(Offset(headX, headY), 2.0, dotPaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _LifeClockChronometerPainter oldDelegate) {
-    return oldDelegate.fraction != fraction ||
-        oldDelegate.accentColor != accentColor ||
-        oldDelegate.secondaryColor != secondaryColor;
   }
 }

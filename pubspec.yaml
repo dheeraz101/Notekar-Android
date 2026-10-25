@@ -26,6 +26,8 @@ dependencies:
   workmanager: ^0.10.10
   isar: ^3.1.0+1
   isar_flutter_libs: ^3.1.0+1
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^7.4.2
 
 dev_dependencies:
   flutter_test:

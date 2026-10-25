@@ -5,8 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:notekar/dialogs/app_date_picker_sheet.dart';
+import 'package:notekar/dialogs/peer_comparison_sheet.dart';
+import 'package:notekar/dialogs/peer_profile_detail_sheet.dart';
+import 'package:notekar/dialogs/peer_profile_scanner_page.dart';
 import 'package:notekar/dialogs/shareable_profile_card_sheet.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/models/peer_profile.dart';
+import 'package:notekar/services/peer_profile_service.dart';
 import 'package:notekar/services/user_profile_service.dart';
 import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -41,6 +46,7 @@ class _PersonalProfileSettingsPageState
   int? _presetIndex;
   int _mementoMoriYears = UserProfileService.defaultMementoMoriYears;
   bool _isSaving = false;
+  PeerProfile? _savedPeer;
 
   Palette get p => widget.p;
 
@@ -53,6 +59,25 @@ class _PersonalProfileSettingsPageState
     _customAvatarBytes = profile.avatarBytes;
     _presetIndex = profile.presetAvatarIndex;
     _mementoMoriYears = profile.mementoMoriYears;
+    _loadSavedPeer();
+  }
+
+  Future<void> _loadSavedPeer() async {
+    final peer = await PeerProfileService.instance.getSavedPeerProfile();
+    if (mounted) setState(() => _savedPeer = peer);
+  }
+
+  Future<void> _openScanner() async {
+    HapticFeedback.selectionClick();
+    final scanned = await PeerProfileScannerPage.show(context, p: widget.p);
+    if (scanned != null && mounted) {
+      await PeerProfileDetailSheet.show(
+        context,
+        p: widget.p,
+        peer: scanned,
+        onSavedChanged: _loadSavedPeer,
+      );
+    }
   }
 
   @override
@@ -1151,6 +1176,89 @@ class _PersonalProfileSettingsPageState
             ),
           ],
         ),
+        const SizedBox(height: 12),
+
+        // Scan Peer Horizon Pass
+        NkButton.secondary(
+          p: p,
+          label: 'Scan Peer Horizon Pass'.localized(context),
+          icon: CupertinoIcons.qrcode_viewfinder,
+          onPressed: _openScanner,
+        ),
+
+        if (_savedPeer != null) ...[
+          const SizedBox(height: 16),
+          // Active Saved Peer Card
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: p.surface2,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: p.accent.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 18,
+                  backgroundColor: p.accent.withValues(alpha: 0.2),
+                  child: Text(
+                    _savedPeer!.name.substring(0, 1).toUpperCase(),
+                    style: TextStyle(
+                      color: p.accent,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _savedPeer!.name,
+                        style: TextStyle(
+                          color: p.text,
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Active Peer • ${_savedPeer!.targetYears}y Horizon (${_savedPeer!.remainingWeeks} wks left)',
+                        style: TextStyle(color: p.text3, fontSize: 11),
+                      ),
+                    ],
+                  ),
+                ),
+                CupertinoButton(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  color: p.accent.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                  onPressed: () {
+                    HapticFeedback.selectionClick();
+                    PeerComparisonSheet.show(
+                      context,
+                      p: p,
+                      peer: _savedPeer!,
+                      onPeerRemoved: _loadSavedPeer,
+                    );
+                  },
+                  child: Text(
+                    'Compare',
+                    style: TextStyle(
+                      color: p.accent,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
 
         if (widget.onLearnMoreBeta != null) ...[
           const SizedBox(height: 16),

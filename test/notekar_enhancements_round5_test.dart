@@ -137,6 +137,9 @@ void main() {
         expect(find.byKey(const ValueKey('app_icon_black')), findsOneWidget);
 
         // Tap 'black' in the dock
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('app_icon_black')),
+        );
         await tester.tap(find.byKey(const ValueKey('app_icon_black')));
         await tester.pumpAndSettle();
 

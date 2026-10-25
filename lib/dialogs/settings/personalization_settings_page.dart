@@ -642,65 +642,7 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
                       .localized(context),
             ),
           ),
-
-          const SizedBox(height: 16),
-
-          // 4. Living Aquarium Pond Canvas
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Container(
-              height: 740,
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: _currentColor.withValues(alpha: 0.25),
-                  width: 1.2,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: _currentColor.withValues(alpha: 0.12),
-                    blurRadius: 24,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(23),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final pondSize = Size(
-                      constraints.maxWidth,
-                      constraints.maxHeight,
-                    );
-                    return GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTapUp: (details) =>
-                          _handlePondTap(details.localPosition, pondSize),
-                      child: CustomPaint(
-                        size: pondSize,
-                        painter: _PondAquariumPainter(
-                          wavePhase: _waveController.value,
-                          fluidColor: _currentColor,
-                          previousColor: _previousColor,
-                          colorProgress: _colorTransitionController.value,
-                          tiltX: _tiltX,
-                          selectedKey: _currentColorKey,
-                          fishList: _fishList,
-                          ripples: _ripples,
-                          palette: p,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 14),
-
-          // 5. Riverbed Stones Explanatory Caption
+          const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: SettingsPageDescription(
@@ -711,7 +653,64 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
             ),
           ),
 
-          const SizedBox(height: spacing48),
+          const SizedBox(height: 16),
+
+          // 4. Living Aquarium Pond Canvas (Full side width & bottom space)
+          Container(
+            width: double.infinity,
+            height: 800,
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.22),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(28),
+              ),
+              border: Border(
+                top: BorderSide(
+                  color: _currentColor.withValues(alpha: 0.35),
+                  width: 1.5,
+                ),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: _currentColor.withValues(alpha: 0.15),
+                  blurRadius: 32,
+                  offset: const Offset(0, -4),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(27),
+              ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final pondSize = Size(
+                    constraints.maxWidth,
+                    constraints.maxHeight,
+                  );
+                  return GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTapUp: (details) =>
+                        _handlePondTap(details.localPosition, pondSize),
+                    child: CustomPaint(
+                      size: pondSize,
+                      painter: _PondAquariumPainter(
+                        wavePhase: _waveController.value,
+                        fluidColor: _currentColor,
+                        previousColor: _previousColor,
+                        colorProgress: _colorTransitionController.value,
+                        tiltX: _tiltX,
+                        selectedKey: _currentColorKey,
+                        fishList: _fishList,
+                        ripples: _ripples,
+                        palette: p,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -829,20 +828,6 @@ class _PondAquariumPainter extends CustomPainter {
         final isFacingRight = fish.speed >= 0;
         canvas.scale(isFacingRight ? fish.scale : -fish.scale, fish.scale);
 
-        // Active glowing aura ring for selected color
-        if (isSelected) {
-          final auraPaint = Paint()
-            ..color = fish.item.color.withValues(alpha: 0.35)
-            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
-          canvas.drawCircle(Offset.zero, 30, auraPaint);
-
-          final auraRing = Paint()
-            ..color = Colors.white.withValues(alpha: 0.75)
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 1.5;
-          canvas.drawCircle(Offset.zero, 28, auraRing);
-        }
-
         // Vector Tail Fin (Caudal) with Sinusoidal Waggle
         final waggle =
             math.sin(
@@ -929,87 +914,402 @@ class _PondAquariumPainter extends CustomPainter {
           hlPaint,
         );
 
-        // Floating checkmark badge if selected
+        // Golden Royal Crown atop fish head if selected
         if (isSelected) {
-          final badgeCenter = const Offset(0, -22);
-          final bgBadge = Paint()..color = Colors.white;
-          canvas.drawCircle(badgeCenter, 6.5, bgBadge);
+          canvas.save();
+          // Position crown precisely atop forehead
+          canvas.translate(14, -8);
+          canvas.rotate(-0.16);
 
-          final checkPaint = Paint()
-            ..color = fish.item.color
+          // Subtle warm golden ambient aura
+          final crownAura = Paint()
+            ..color = const Color(0xFFFFD700).withValues(alpha: 0.45)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
+          canvas.drawCircle(const Offset(0, -6), 9, crownAura);
+
+          // Faceted 3-point imperial royal crown
+          final crownPath = Path()
+            ..moveTo(-8, 0)
+            ..lineTo(8, 0)
+            ..lineTo(7, -9)
+            ..lineTo(3, -4)
+            ..lineTo(0, -12)
+            ..lineTo(-3, -4)
+            ..lineTo(-7, -9)
+            ..close();
+
+          final crownShader = const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFFFF7A1), // diamond gold crest
+              Color(0xFFFFD700), // imperial gold
+              Color(0xFFC7920A), // antique gold band
+            ],
+            stops: [0.0, 0.55, 1.0],
+          ).createShader(const Rect.fromLTWH(-8, -12, 16, 12));
+
+          canvas.drawPath(crownPath, Paint()..shader = crownShader);
+
+          // Crisp outline for Apple HIG sharpness
+          final crownOutline = Paint()
+            ..color = const Color(0xFF6B4D00)
             ..style = PaintingStyle.stroke
-            ..strokeWidth = 1.8
-            ..strokeCap = StrokeCap.round;
+            ..strokeWidth = 0.8;
+          canvas.drawPath(crownPath, crownOutline);
 
-          final cPath = Path()
-            ..moveTo(badgeCenter.dx - 3, badgeCenter.dy)
-            ..lineTo(badgeCenter.dx - 0.8, badgeCenter.dy + 2.4)
-            ..lineTo(badgeCenter.dx + 3.2, badgeCenter.dy - 2.2);
-          canvas.drawPath(cPath, checkPaint);
+          // Headband divider line
+          final bandPaint = Paint()
+            ..color = const Color(0xFF916A00)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.0;
+          canvas.drawLine(
+            const Offset(-7.5, -0.6),
+            const Offset(7.5, -0.6),
+            bandPaint,
+          );
+
+          // Royal Jewels on peak tips:
+          // Center diamond: brilliant sovereign white
+          canvas.drawCircle(
+            const Offset(0, -12),
+            1.5,
+            Paint()..color = Colors.white,
+          );
+          // Left ruby: crimson red
+          canvas.drawCircle(
+            const Offset(-7, -9),
+            1.25,
+            Paint()..color = const Color(0xFFFF2D55),
+          );
+          // Right emerald: vivid green
+          canvas.drawCircle(
+            const Offset(7, -9),
+            1.25,
+            Paint()..color = const Color(0xFF34C759),
+          );
+
+          // Headband center pearl
+          canvas.drawCircle(
+            const Offset(0, -2.0),
+            1.0,
+            Paint()..color = Colors.white.withValues(alpha: 0.9),
+          );
+
+          canvas.restore();
         }
       }
 
       canvas.restore();
     }
 
-    // 5. Riverbed Stones at the Pond Bottom (y = 675..725)
-    final riverbedY = h - 55.0;
+    // 5. Realistic Faceted Riverbed Stones at the Pond Bottom
+    final riverbedY = h - 60.0;
 
-    // Floor sediment layer
+    // Floor sediment layer with sandy gradient
     final sedimentPaint = Paint()
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
           Colors.black.withValues(alpha: 0.0),
-          Colors.black.withValues(alpha: 0.35),
+          Colors.black.withValues(alpha: 0.42),
         ],
-      ).createShader(Rect.fromLTWH(0, riverbedY - 20, w, 75));
-    canvas.drawRect(Rect.fromLTWH(0, riverbedY - 20, w, 75), sedimentPaint);
+      ).createShader(Rect.fromLTWH(0, riverbedY - 25, w, 85));
+    canvas.drawRect(Rect.fromLTWH(0, riverbedY - 25, w, 85), sedimentPaint);
 
-    // Decorative river pebbles with NoteKar's fixed invariant colors
-    final stones = [
-      (color: palette.red, width: 44.0, height: 24.0, offset: 0.14),
-      (color: palette.orange, width: 38.0, height: 21.0, offset: 0.32),
-      (color: palette.text3, width: 48.0, height: 26.0, offset: 0.50),
-      (color: const Color(0xFF1C1C1E), width: 42.0, height: 22.0, offset: 0.68),
-      (color: const Color(0xFFFFFFFF), width: 36.0, height: 20.0, offset: 0.84),
+    // Realistic faceted riverbed rocks using NoteKar's fixed invariant UI colors
+    // (destructive red, warning orange, sovereign green, system grey, dark ink, white, gold)
+    final fixedRocks = [
+      (
+        color: palette.red,
+        xRatio: 0.11,
+        width: 46.0,
+        height: 27.0,
+        polygon: [
+          const Offset(-0.85, 0.25),
+          const Offset(-0.65, -0.65),
+          const Offset(-0.15, -0.95),
+          const Offset(0.55, -0.75),
+          const Offset(0.92, -0.15),
+          const Offset(0.75, 0.85),
+          const Offset(-0.25, 0.95),
+          const Offset(-0.75, 0.70),
+        ],
+        topFacet: [
+          const Offset(-0.65, -0.65),
+          const Offset(-0.15, -0.95),
+          const Offset(0.55, -0.75),
+          const Offset(0.20, -0.20),
+          const Offset(-0.35, -0.25),
+        ],
+        ridge: [
+          const Offset(-0.35, -0.25),
+          const Offset(0.20, -0.20),
+          const Offset(0.75, 0.25),
+        ],
+      ),
+      (
+        color: palette.orange,
+        xRatio: 0.24,
+        width: 40.0,
+        height: 23.0,
+        polygon: [
+          const Offset(-0.90, 0.30),
+          const Offset(-0.55, -0.75),
+          const Offset(0.20, -0.90),
+          const Offset(0.85, -0.55),
+          const Offset(0.95, 0.35),
+          const Offset(0.45, 0.90),
+          const Offset(-0.40, 0.85),
+        ],
+        topFacet: [
+          const Offset(-0.55, -0.75),
+          const Offset(0.20, -0.90),
+          const Offset(0.85, -0.55),
+          const Offset(0.35, -0.15),
+          const Offset(-0.20, -0.20),
+        ],
+        ridge: [
+          const Offset(-0.20, -0.20),
+          const Offset(0.35, -0.15),
+          const Offset(0.80, 0.10),
+        ],
+      ),
+      (
+        color: palette.green,
+        xRatio: 0.37,
+        width: 38.0,
+        height: 22.0,
+        polygon: [
+          const Offset(-0.85, 0.20),
+          const Offset(-0.45, -0.85),
+          const Offset(0.35, -0.80),
+          const Offset(0.90, -0.20),
+          const Offset(0.80, 0.75),
+          const Offset(-0.15, 0.95),
+          const Offset(-0.75, 0.65),
+        ],
+        topFacet: [
+          const Offset(-0.45, -0.85),
+          const Offset(0.35, -0.80),
+          const Offset(0.90, -0.20),
+          const Offset(0.25, -0.10),
+          const Offset(-0.15, -0.20),
+        ],
+        ridge: [
+          const Offset(-0.15, -0.20),
+          const Offset(0.25, -0.10),
+          const Offset(0.65, 0.30),
+        ],
+      ),
+      (
+        color: palette.text3,
+        xRatio: 0.50,
+        width: 50.0,
+        height: 26.0,
+        polygon: [
+          const Offset(-0.95, 0.15),
+          const Offset(-0.70, -0.65),
+          const Offset(-0.10, -0.90),
+          const Offset(0.60, -0.70),
+          const Offset(0.95, -0.10),
+          const Offset(0.85, 0.70),
+          const Offset(0.10, 0.95),
+          const Offset(-0.60, 0.80),
+        ],
+        topFacet: [
+          const Offset(-0.70, -0.65),
+          const Offset(-0.10, -0.90),
+          const Offset(0.60, -0.70),
+          const Offset(0.15, -0.15),
+          const Offset(-0.35, -0.20),
+        ],
+        ridge: [
+          const Offset(-0.35, -0.20),
+          const Offset(0.15, -0.15),
+          const Offset(0.70, 0.20),
+        ],
+      ),
+      (
+        color: const Color(0xFF1C1C1E),
+        xRatio: 0.63,
+        width: 44.0,
+        height: 24.0,
+        polygon: [
+          const Offset(-0.90, 0.25),
+          const Offset(-0.50, -0.80),
+          const Offset(0.25, -0.85),
+          const Offset(0.85, -0.40),
+          const Offset(0.92, 0.45),
+          const Offset(0.35, 0.90),
+          const Offset(-0.45, 0.85),
+        ],
+        topFacet: [
+          const Offset(-0.50, -0.80),
+          const Offset(0.25, -0.85),
+          const Offset(0.85, -0.40),
+          const Offset(0.25, -0.15),
+          const Offset(-0.20, -0.25),
+        ],
+        ridge: [
+          const Offset(-0.20, -0.25),
+          const Offset(0.25, -0.15),
+          const Offset(0.70, 0.25),
+        ],
+      ),
+      (
+        color: const Color(0xFFFFFFFF),
+        xRatio: 0.76,
+        width: 36.0,
+        height: 21.0,
+        polygon: [
+          const Offset(-0.85, 0.20),
+          const Offset(-0.40, -0.85),
+          const Offset(0.30, -0.80),
+          const Offset(0.85, -0.15),
+          const Offset(0.75, 0.80),
+          const Offset(-0.20, 0.90),
+          const Offset(-0.70, 0.60),
+        ],
+        topFacet: [
+          const Offset(-0.40, -0.85),
+          const Offset(0.30, -0.80),
+          const Offset(0.85, -0.15),
+          const Offset(0.20, -0.10),
+          const Offset(-0.15, -0.25),
+        ],
+        ridge: [
+          const Offset(-0.15, -0.25),
+          const Offset(0.20, -0.10),
+          const Offset(0.60, 0.35),
+        ],
+      ),
+      (
+        color: const Color(0xFFFFD700),
+        xRatio: 0.89,
+        width: 40.0,
+        height: 23.0,
+        polygon: [
+          const Offset(-0.85, 0.30),
+          const Offset(-0.60, -0.70),
+          const Offset(0.00, -0.90),
+          const Offset(0.70, -0.65),
+          const Offset(0.90, 0.20),
+          const Offset(0.60, 0.85),
+          const Offset(-0.30, 0.90),
+        ],
+        topFacet: [
+          const Offset(-0.60, -0.70),
+          const Offset(0.00, -0.90),
+          const Offset(0.70, -0.65),
+          const Offset(0.25, -0.15),
+          const Offset(-0.25, -0.20),
+        ],
+        ridge: [
+          const Offset(-0.25, -0.20),
+          const Offset(0.25, -0.15),
+          const Offset(0.65, 0.25),
+        ],
+      ),
     ];
 
-    for (final stone in stones) {
-      final stoneX = stone.offset * w;
-      final stoneRect = Rect.fromCenter(
-        center: Offset(stoneX, riverbedY + 8),
-        width: stone.width,
-        height: stone.height,
-      );
+    for (final rock in fixedRocks) {
+      final stoneX = rock.xRatio * w;
+      final stoneY = riverbedY + 12.0;
+      final hw = rock.width / 2.0;
+      final hh = rock.height / 2.0;
 
-      // Stone drop shadow
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          stoneRect.translate(0, 3),
-          Radius.circular(stone.height / 2),
-        ),
-        Paint()..color = Colors.black.withValues(alpha: 0.45),
-      );
-
-      // Stone body
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(stoneRect, Radius.circular(stone.height / 2)),
-        Paint()..color = stone.color,
-      );
-
-      // Gentle glossy caustic highlight on stone top
-      final hlRect = Rect.fromLTWH(
-        stoneRect.left + 6,
-        stoneRect.top + 3,
-        stone.width - 12,
-        stone.height * 0.4,
-      );
+      // 1. Soft contact shadow on the bed
       canvas.drawOval(
-        hlRect,
-        Paint()..color = Colors.white.withValues(alpha: 0.28),
+        Rect.fromCenter(
+          center: Offset(stoneX, stoneY + hh * 0.6),
+          width: rock.width * 1.15,
+          height: rock.height * 0.45,
+        ),
+        Paint()
+          ..color = Colors.black.withValues(alpha: 0.45)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
       );
+
+      // 2. Main faceted body polygon
+      final bodyPath = Path();
+      for (int i = 0; i < rock.polygon.length; i++) {
+        final pt = Offset(
+          stoneX + rock.polygon[i].dx * hw,
+          stoneY + rock.polygon[i].dy * hh,
+        );
+        if (i == 0) {
+          bodyPath.moveTo(pt.dx, pt.dy);
+        } else {
+          bodyPath.lineTo(pt.dx, pt.dy);
+        }
+      }
+      bodyPath.close();
+
+      final bodyShader =
+          LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color.lerp(rock.color, Colors.white, 0.15) ?? rock.color,
+              Color.lerp(rock.color, Colors.black, 0.32) ?? rock.color,
+            ],
+          ).createShader(
+            Rect.fromCenter(
+              center: Offset(stoneX, stoneY),
+              width: rock.width,
+              height: rock.height,
+            ),
+          );
+
+      canvas.drawPath(bodyPath, Paint()..shader = bodyShader);
+
+      // 3. Top-lit beveled light facet
+      final facetPath = Path();
+      for (int i = 0; i < rock.topFacet.length; i++) {
+        final pt = Offset(
+          stoneX + rock.topFacet[i].dx * hw,
+          stoneY + rock.topFacet[i].dy * hh,
+        );
+        if (i == 0) {
+          facetPath.moveTo(pt.dx, pt.dy);
+        } else {
+          facetPath.lineTo(pt.dx, pt.dy);
+        }
+      }
+      facetPath.close();
+
+      final facetPaint = Paint()
+        ..color = Color.lerp(rock.color, Colors.white, 0.38) ?? rock.color
+        ..style = PaintingStyle.fill;
+      canvas.drawPath(facetPath, facetPaint);
+
+      // 4. Subtle faceted mineral ridge seam
+      final ridgePath = Path();
+      for (int i = 0; i < rock.ridge.length; i++) {
+        final pt = Offset(
+          stoneX + rock.ridge[i].dx * hw,
+          stoneY + rock.ridge[i].dy * hh,
+        );
+        if (i == 0) {
+          ridgePath.moveTo(pt.dx, pt.dy);
+        } else {
+          ridgePath.lineTo(pt.dx, pt.dy);
+        }
+      }
+      final ridgePaint = Paint()
+        ..color = Color.lerp(rock.color, Colors.black, 0.42) ?? Colors.black
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.9;
+      canvas.drawPath(ridgePath, ridgePaint);
+
+      // 5. Crisp stone facet perimeter outline
+      final edgePaint = Paint()
+        ..color = Colors.black.withValues(alpha: 0.32)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.85;
+      canvas.drawPath(bodyPath, edgePaint);
     }
   }
 

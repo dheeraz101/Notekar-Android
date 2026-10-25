@@ -178,36 +178,113 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
         widget.godModeUnlocked &&
         (currentIcon.key == 'gold' || currentIcon.key == 'godmode');
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const SizedBox(height: spacing8),
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: spacing8),
 
-        // 1. Phone Home Screen Preview Container
-        _buildHomePhoneScreen(
-          context: context,
-          currentIcon: currentIcon,
-          availableIcons: availableIcons,
-          isVipGold: isVipGold,
-          p: p,
-        ),
-
-        const SizedBox(height: spacing16),
-
-        // 2. Page Description
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: SettingsPageDescription(
-            p: p,
-            showIcon: true,
-            text:
-                'App icons update your Android launcher shortcut dynamically. Some home screen launchers may take a few moments to reload the cache.'
-                    .localized(context),
+          // 0. Instruction Card with Icon Count Badge
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: p.surface2,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: p.border),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            CupertinoIcons.app_badge_fill,
+                            color: p.accent,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'CHOOSE APP ICON'.localized(context),
+                            style: TextStyle(
+                              color: p.accent,
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: p.accent.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          '${availableIcons.length} Icons Available'.localized(
+                            context,
+                          ),
+                          style: TextStyle(
+                            color: p.accent,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Scroll through the dock below to preview handcrafted icon artwork on the simulated home screen. Tap any icon to immediately set it as your sovereign Android launcher shortcut.'
+                        .localized(context),
+                    style: TextStyle(
+                      color: p.text2,
+                      fontSize: 12.5,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
 
-        const SizedBox(height: spacing32),
-      ],
+          const SizedBox(height: spacing16),
+
+          // 1. Phone Home Screen Preview Container
+          _buildHomePhoneScreen(
+            context: context,
+            currentIcon: currentIcon,
+            availableIcons: availableIcons,
+            isVipGold: isVipGold,
+            p: p,
+          ),
+
+          const SizedBox(height: spacing16),
+
+          // 2. Page Description
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SettingsPageDescription(
+              p: p,
+              showIcon: true,
+              text:
+                  'App icons update your Android launcher shortcut dynamically. Some home screen launchers may take a few moments to reload the cache.'
+                      .localized(context),
+            ),
+          ),
+
+          const SizedBox(height: spacing32),
+        ],
+      ),
     );
   }
 

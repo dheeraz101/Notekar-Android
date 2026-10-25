@@ -628,9 +628,13 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
         _buildDownloadInstallCard(p),
         const SizedBox(height: spacing16),
 
-        // Formal Page Description
+        // Cache cleaner card
+        _buildCacheCard(p),
+        const SizedBox(height: spacing20),
+
+        // Formal Page Description at the bottom with wider margins
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           child: SettingsPageDescription(
             p: p,
             showIcon: true,
@@ -639,10 +643,6 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                     .localized(context),
           ),
         ),
-        const SizedBox(height: spacing16),
-
-        // Cache cleaner card
-        _buildCacheCard(p),
         const SizedBox(height: spacing48),
       ],
     );

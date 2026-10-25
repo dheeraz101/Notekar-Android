@@ -270,29 +270,28 @@ void main() {
     });
   });
 
-  group('6. Shareable Profile Card Chronometer Dial Redesign', () {
-    testWidgets(
-      'ShareableProfileCardSheet renders Chronometer dial & 24h clock',
-      (tester) async {
-        SharedPreferences.setMockInitialValues({
-          'user_name': 'Dheeraj',
-          'user_dob': '2000-01-01',
-          'user_target_years': 80,
-        });
+  group('6. Shareable Profile Card Sovereign QR Pass Redesign', () {
+    testWidgets('ShareableProfileCardSheet renders Temporal Horizon QR pass', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({
+        'user_name': 'Dheeraj',
+        'user_dob': '2000-01-01',
+        'user_target_years': 80,
+      });
 
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(body: ShareableProfileCardSheet(p: testPalette)),
-          ),
-        );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(body: ShareableProfileCardSheet(p: testPalette)),
+        ),
+      );
 
-        await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
-        expect(find.text('24-HOUR LIFE CLOCK'), findsOneWidget);
-        expect(find.text('WAKING WEEKS'), findsOneWidget);
-        expect(find.text('CONSCIOUS TIME'), findsOneWidget);
-        expect(find.byType(CustomPaint), findsWidgets);
-      },
-    );
+      expect(find.text('TEMPORAL HORIZON PASS'), findsOneWidget);
+      expect(find.text('WAKING WEEKS'), findsOneWidget);
+      expect(find.text('CONSCIOUS TIME'), findsOneWidget);
+      expect(find.byType(CustomPaint), findsWidgets);
+    });
   });
 }
