@@ -64,6 +64,16 @@ class MainActivity : FlutterActivity() {
         super.onCreate(savedInstanceState)
     }
 
+    override fun onStart() {
+        super.onStart()
+        FloatingTimerService.setAppInForeground(true)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        FloatingTimerService.setAppInForeground(false)
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)

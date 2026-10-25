@@ -231,8 +231,10 @@ class _FishState {
   _FishState({
     required this.item,
     required this.y,
+    required this.targetY,
     required this.speed,
     required this.scale,
+    required this.targetScale,
     required this.waggleSpeed,
     required this.wagglePhase,
     required this.bobPhase,
@@ -242,8 +244,10 @@ class _FishState {
   final AccentColorItem item;
   double x; // 0.0 to 1.0 (horizontal relative coordinate in pond)
   double y; // vertical depth in pixels
+  double targetY; // dynamic depth target (Queen swims at bottom floor)
   double speed; // normalized horizontal delta per second (signed)
   double scale;
+  double targetScale; // Queen fish scale 1.38, others varied smaller
   double waggleSpeed;
   double wagglePhase;
   double bobPhase;
@@ -339,39 +343,58 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
 
   List<_FishState> _initFish() {
     final list = <_FishState>[];
+    int unselectedCount = 0;
     for (int i = 0; i < kAccentColorPalette.length; i++) {
       final item = kAccentColorPalette[i];
       final isRight = i % 2 == 0;
-      final speedMagnitude = 0.050 + (i % 5) * 0.012;
+      final speedMagnitude = 0.046 + (i % 5) * 0.012;
       final speed = isRight ? speedMagnitude : -speedMagnitude;
       final startX = (0.08 + (i * 0.19) % 0.84).clamp(0.06, 0.94);
+      final isQueen = item.key == _currentColorKey;
 
-      double depth;
-      if (i < 6) {
-        // Surface shallows (0..5)
-        depth = 48.0 + (i * 20.0);
-      } else if (i < 14) {
-        // Mid-depth reservoir (6..13)
-        depth = 180.0 + ((i - 6) * 34.0);
+      final double initialY;
+      final double initialScale;
+      if (isQueen) {
+        initialY = 660.0;
+        initialScale = 1.38;
       } else {
-        // Deeper waters (14..19)
-        depth = 465.0 + ((i - 14) * 32.0);
+        initialY = 65.0 + (unselectedCount * 28.0);
+        initialScale = 0.72 + (unselectedCount % 5) * 0.05;
+        unselectedCount++;
       }
 
       list.add(
         _FishState(
           item: item,
           x: startX,
-          y: depth,
+          y: initialY,
+          targetY: initialY,
           speed: speed,
-          scale: 0.92 + (i % 4) * 0.08,
-          waggleSpeed: 1.2 + (i % 3) * 0.35,
+          scale: initialScale,
+          targetScale: initialScale,
+          waggleSpeed: 1.1 + (i % 3) * 0.35,
           wagglePhase: (i * 1.3) % (math.pi * 2),
           bobPhase: (i * 0.9) % (math.pi * 2),
         ),
       );
     }
     return list;
+  }
+
+  void _updateFishRoles() {
+    int unselectedCount = 0;
+    for (final fish in _fishList) {
+      if (fish.item.key == _currentColorKey) {
+        // Selected Queen Fish swims majestically at the bottom depth
+        fish.targetY = 660.0;
+        fish.targetScale = 1.38;
+      } else {
+        // Other fish float in the shallows above Queen fish with varied smaller sizes
+        fish.targetY = 65.0 + (unselectedCount * 28.0);
+        fish.targetScale = 0.72 + (unselectedCount % 5) * 0.05;
+        unselectedCount++;
+      }
+    }
   }
 
   void _onFrameTick() {
@@ -382,8 +405,12 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
         : ((now - _lastTickMs!) / 1000.0).clamp(0.005, 0.05);
     _lastTickMs = now;
 
-    // Update fish movement
+    // Update fish movement & natural depth/scale interpolation
     for (final fish in _fishList) {
+      fish.y += (fish.targetY - fish.y) * (dt * 3.2).clamp(0.0, 1.0);
+      fish.scale +=
+          (fish.targetScale - fish.scale) * (dt * 3.2).clamp(0.0, 1.0);
+
       if (fish.isDying) {
         fish.deathProgress += dt * 1.6;
         if (fish.deathProgress >= 1.0) {
@@ -469,6 +496,7 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
           _currentColor;
       _currentColorKey = newKey;
       _currentColor = _findColor(newKey);
+      _updateFishRoles();
     });
 
     _colorTransitionController.forward(from: 0.0);
@@ -606,109 +634,103 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
 
           const SizedBox(height: 16),
 
-          // 3. Section Title & Instruction
+          // 3. Section Title & Instruction (Full width, collision-proof)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'TAP ANY FISH TO HARMONIZE ACCENT'.localized(context),
-                  style: TextStyle(
-                    color: p.text3,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.8,
+                Expanded(
+                  child: Text(
+                    'TAP ANY FISH TO HARMONIZE ACCENT'.localized(context),
+                    style: TextStyle(
+                      color: p.text3,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.8,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                Text(
-                  '${kAccentColorPalette.length} Living Species',
-                  style: TextStyle(
-                    color: p.text3,
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w600,
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 9,
+                    vertical: 3.5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: p.surface2.withValues(alpha: 0.65),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: p.border.withValues(alpha: 0.4)),
+                  ),
+                  child: Text(
+                    '${kAccentColorPalette.length} Living Species',
+                    style: TextStyle(
+                      color: p.text3,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: SettingsPageDescription(
-              p: p,
-              text:
-                  'Surface fish glide across the shallows. Scroll down to dive deeper into the reservoir to discover rare shades and bottom riverbed stones.'
-                      .localized(context),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: SettingsPageDescription(
-              p: p,
-              text:
-                  'Riverbed stones retain their fixed hues for destructive actions, alerts, and system ink, ensuring sovereign contrast remains pristine across all accent choices.'
-                      .localized(context),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: p.surface.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: p.border.withValues(alpha: 0.35)),
+              ),
+              child: Text(
+                'Immerse yourself in NoteKar\'s oceanic sanctuary. Whichever color fish you crown becomes the Queen Fish reigning in the sovereign deep, while companion species glide through the surface shallows above. Riverbed stones retain their fixed hues for destructive actions, alerts, and system ink, ensuring sovereign contrast remains pristine across all accent choices.'
+                    .localized(context),
+                style: TextStyle(
+                  color: p.text2,
+                  fontSize: 12.5,
+                  height: 1.45,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
           ),
 
           const SizedBox(height: 16),
 
-          // 4. Living Aquarium Pond Canvas (Full side width & bottom space)
-          Container(
+          // 4. Living Oceanic Water Canvas (Edge-to-edge full width & depth, fluid flows into page)
+          SizedBox(
             width: double.infinity,
-            height: 800,
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.22),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(28),
-              ),
-              border: Border(
-                top: BorderSide(
-                  color: _currentColor.withValues(alpha: 0.35),
-                  width: 1.5,
-                ),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: _currentColor.withValues(alpha: 0.15),
-                  blurRadius: 32,
-                  offset: const Offset(0, -4),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(27),
-              ),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final pondSize = Size(
-                    constraints.maxWidth,
-                    constraints.maxHeight,
-                  );
-                  return GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTapUp: (details) =>
-                        _handlePondTap(details.localPosition, pondSize),
-                    child: CustomPaint(
-                      size: pondSize,
-                      painter: _PondAquariumPainter(
-                        wavePhase: _waveController.value,
-                        fluidColor: _currentColor,
-                        previousColor: _previousColor,
-                        colorProgress: _colorTransitionController.value,
-                        tiltX: _tiltX,
-                        selectedKey: _currentColorKey,
-                        fishList: _fishList,
-                        ripples: _ripples,
-                        palette: p,
-                      ),
+            height: 820,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final pondSize = Size(
+                  constraints.maxWidth,
+                  constraints.maxHeight,
+                );
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTapUp: (details) =>
+                      _handlePondTap(details.localPosition, pondSize),
+                  child: CustomPaint(
+                    size: pondSize,
+                    painter: _PondAquariumPainter(
+                      wavePhase: _waveController.value,
+                      fluidColor: _currentColor,
+                      previousColor: _previousColor,
+                      colorProgress: _colorTransitionController.value,
+                      tiltX: _tiltX,
+                      selectedKey: _currentColorKey,
+                      fishList: _fishList,
+                      ripples: _ripples,
+                      palette: p,
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -748,34 +770,124 @@ class _PondAquariumPainter extends CustomPainter {
     final effectiveColor =
         Color.lerp(previousColor, fluidColor, colorProgress) ?? fluidColor;
 
-    // 1. Water Fluid Background Gradient
-    final waterBg = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          effectiveColor.withValues(alpha: 0.16),
-          effectiveColor.withValues(alpha: 0.32),
-          effectiveColor.withValues(alpha: 0.52),
-        ],
-        stops: const [0.0, 0.45, 1.0],
-      ).createShader(Rect.fromLTWH(0, 0, w, h));
-    canvas.drawRect(Rect.fromLTWH(0, 0, w, h), waterBg);
+    final isDark = palette.isDark;
 
-    // 2. Surface Water Meniscus & Light Waves
-    final surfaceY = 22.0;
+    // 1. Surface Water Meniscus & Light Waves
+    final surfaceY = 24.0;
     final wavePath = Path()..moveTo(0, surfaceY);
     for (double x = 0; x <= w; x += 4) {
       final normX = x / w;
       final tilt = (normX - 0.5) * tiltX * 18.0;
       final wave =
-          math.sin((normX * 3.0 * math.pi) + (wavePhase * 2 * math.pi)) * 4.0;
+          math.sin((normX * 3.0 * math.pi) + (wavePhase * 2 * math.pi)) * 5.0;
       wavePath.lineTo(x, surfaceY + tilt + wave);
     }
-    final wavePaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.35)
+
+    final waterFillPath = Path.from(wavePath)
+      ..lineTo(w, h)
+      ..lineTo(0, h)
+      ..close();
+
+    // 2. Theme-Adaptive Water Background Gradient
+    final Paint waterBg;
+    if (isDark) {
+      waterBg = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            effectiveColor.withValues(alpha: 0.25),
+            effectiveColor.withValues(alpha: 0.42),
+            Color.lerp(
+              effectiveColor,
+              const Color(0xFF030712),
+              0.70,
+            )!.withValues(alpha: 0.88),
+          ],
+          stops: const [0.0, 0.40, 1.0],
+        ).createShader(Rect.fromLTWH(0, surfaceY, w, h - surfaceY));
+    } else {
+      waterBg = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            effectiveColor.withValues(alpha: 0.14),
+            effectiveColor.withValues(alpha: 0.28),
+            effectiveColor.withValues(alpha: 0.45),
+          ],
+          stops: const [0.0, 0.45, 1.0],
+        ).createShader(Rect.fromLTWH(0, surfaceY, w, h - surfaceY));
+    }
+    canvas.drawPath(waterFillPath, waterBg);
+
+    // 3. Dark Theme Oceanic Shadow Effects vs. Light Theme Sunlit Translucency
+    if (isDark) {
+      // Lateral Abyssal Depth Vignette Shadows
+      final leftShadow = LinearGradient(
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+        colors: [Colors.black.withValues(alpha: 0.42), Colors.transparent],
+      ).createShader(Rect.fromLTWH(0, surfaceY, w * 0.35, h));
+      canvas.drawPath(waterFillPath, Paint()..shader = leftShadow);
+
+      final rightShadow = LinearGradient(
+        begin: Alignment.centerRight,
+        end: Alignment.centerLeft,
+        colors: [Colors.black.withValues(alpha: 0.42), Colors.transparent],
+      ).createShader(Rect.fromLTWH(w * 0.65, surfaceY, w * 0.35, h));
+      canvas.drawPath(waterFillPath, Paint()..shader = rightShadow);
+
+      // Deep Volumetric Caustic Rays & Intervening Shadows
+      for (int r = 0; r < 4; r++) {
+        final rayX =
+            (w * 0.16) +
+            (r * w * 0.24) +
+            math.sin(wavePhase * 2 * math.pi + r) * 14.0;
+        final rayPath = Path()
+          ..moveTo(rayX - 12, surfaceY)
+          ..lineTo(rayX + 32 + (r * 12), h * 0.78)
+          ..lineTo(rayX + 68 + (r * 12), h * 0.78)
+          ..lineTo(rayX + 16, surfaceY)
+          ..close();
+        final rayPaint = Paint()
+          ..shader = LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.white.withValues(alpha: 0.07), Colors.transparent],
+          ).createShader(Rect.fromLTWH(0, surfaceY, w, h * 0.78));
+        canvas.drawPath(rayPath, rayPaint);
+      }
+
+      // Rising bottom abyssal depth shadow
+      final floorShadow = LinearGradient(
+        begin: Alignment.bottomCenter,
+        end: Alignment.topCenter,
+        colors: [Colors.black.withValues(alpha: 0.58), Colors.transparent],
+      ).createShader(Rect.fromLTWH(0, h * 0.45, w, h * 0.55));
+      canvas.drawPath(waterFillPath, Paint()..shader = floorShadow);
+    } else {
+      // Light Theme Sunlit Refraction Sheen
+      final sunSheen = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Colors.white.withValues(alpha: 0.22), Colors.transparent],
+      ).createShader(Rect.fromLTWH(0, surfaceY, w, 120));
+      canvas.drawPath(waterFillPath, Paint()..shader = sunSheen);
+    }
+
+    // 4. Dynamic Wave Crest Surface Meniscus Highlight & Glow
+    final meniscusGlow = Paint()
+      ..color = effectiveColor.withValues(alpha: 0.35)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
+      ..strokeWidth = 4.0
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
+    canvas.drawPath(wavePath, meniscusGlow);
+
+    final wavePaint = Paint()
+      ..color = Colors.white.withValues(alpha: isDark ? 0.45 : 0.65)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
     canvas.drawPath(wavePath, wavePaint);
 
     // 3. Draw Water Shockwave Ripples
@@ -914,28 +1026,28 @@ class _PondAquariumPainter extends CustomPainter {
           hlPaint,
         );
 
-        // Golden Royal Crown atop fish head if selected
+        // Golden Royal Crown atop Queen fish forehead
         if (isSelected) {
           canvas.save();
-          // Position crown precisely atop forehead
-          canvas.translate(14, -8);
-          canvas.rotate(-0.16);
+          // Position crown precisely atop Queen's forehead tangent slope
+          canvas.translate(15.5, -6.5);
+          canvas.rotate(0.40);
 
           // Subtle warm golden ambient aura
           final crownAura = Paint()
-            ..color = const Color(0xFFFFD700).withValues(alpha: 0.45)
-            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
-          canvas.drawCircle(const Offset(0, -6), 9, crownAura);
+            ..color = const Color(0xFFFFD700).withValues(alpha: 0.50)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 7);
+          canvas.drawCircle(const Offset(0, -6), 10, crownAura);
 
-          // Faceted 3-point imperial royal crown
+          // Curving crown base hugging forehead contour
           final crownPath = Path()
-            ..moveTo(-8, 0)
-            ..lineTo(8, 0)
-            ..lineTo(7, -9)
-            ..lineTo(3, -4)
-            ..lineTo(0, -12)
-            ..lineTo(-3, -4)
-            ..lineTo(-7, -9)
+            ..moveTo(-7.5, 0.4)
+            ..quadraticBezierTo(0, 1.1, 7.5, 0.1)
+            ..lineTo(6.8, -8.5)
+            ..lineTo(2.8, -3.8)
+            ..lineTo(0, -11.5)
+            ..lineTo(-2.8, -3.8)
+            ..lineTo(-6.8, -8.5)
             ..close();
 
           final crownShader = const LinearGradient(
@@ -958,42 +1070,41 @@ class _PondAquariumPainter extends CustomPainter {
             ..strokeWidth = 0.8;
           canvas.drawPath(crownPath, crownOutline);
 
-          // Headband divider line
+          // Headband divider line following base curvature
           final bandPaint = Paint()
             ..color = const Color(0xFF916A00)
             ..style = PaintingStyle.stroke
             ..strokeWidth = 1.0;
-          canvas.drawLine(
-            const Offset(-7.5, -0.6),
-            const Offset(7.5, -0.6),
-            bandPaint,
-          );
+          final bandPath = Path()
+            ..moveTo(-7.0, -0.1)
+            ..quadraticBezierTo(0, 0.6, 7.0, -0.4);
+          canvas.drawPath(bandPath, bandPaint);
 
           // Royal Jewels on peak tips:
           // Center diamond: brilliant sovereign white
           canvas.drawCircle(
-            const Offset(0, -12),
+            const Offset(0, -11.5),
             1.5,
             Paint()..color = Colors.white,
           );
           // Left ruby: crimson red
           canvas.drawCircle(
-            const Offset(-7, -9),
+            const Offset(-6.8, -8.5),
             1.25,
             Paint()..color = const Color(0xFFFF2D55),
           );
           // Right emerald: vivid green
           canvas.drawCircle(
-            const Offset(7, -9),
+            const Offset(6.8, -8.5),
             1.25,
             Paint()..color = const Color(0xFF34C759),
           );
 
           // Headband center pearl
           canvas.drawCircle(
-            const Offset(0, -2.0),
+            const Offset(0, -1.8),
             1.0,
-            Paint()..color = Colors.white.withValues(alpha: 0.9),
+            Paint()..color = Colors.white.withValues(alpha: 0.95),
           );
 
           canvas.restore();

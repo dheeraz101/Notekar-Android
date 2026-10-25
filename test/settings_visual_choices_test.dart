@@ -72,6 +72,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('app_icon_black')), findsOneWidget);
+    await tester.ensureVisible(find.byKey(const ValueKey('app_icon_black')));
     await tester.tap(find.byKey(const ValueKey('app_icon_black')));
     await tester.pumpAndSettle();
 

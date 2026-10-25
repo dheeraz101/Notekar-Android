@@ -188,71 +188,80 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
           // 0. Instruction Card with Icon Count Badge
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: p.surface2,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: p.border),
+            child: MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                textScaler: TextScaler.linear(
+                  MediaQuery.textScalerOf(context).scale(1.0).clamp(0.85, 1.25),
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            CupertinoIcons.app_badge_fill,
-                            color: p.accent,
-                            size: 16,
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: p.surface2,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: p.border),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      alignment: WrapAlignment.spaceBetween,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      runSpacing: 6,
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              CupertinoIcons.app_badge_fill,
+                              color: p.accent,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'CHOOSE APP ICON'.localized(context),
+                              style: TextStyle(
+                                color: p.accent,
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
                           ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'CHOOSE APP ICON'.localized(context),
+                          decoration: BoxDecoration(
+                            color: p.accent.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            '${availableIcons.length} Icons Available'
+                                .localized(context),
                             style: TextStyle(
                               color: p.accent,
                               fontSize: 10.5,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.8,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ],
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
                         ),
-                        decoration: BoxDecoration(
-                          color: p.accent.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Text(
-                          '${availableIcons.length} Icons Available'.localized(
-                            context,
-                          ),
-                          style: TextStyle(
-                            color: p.accent,
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Scroll through the dock below to preview handcrafted icon artwork on the simulated home screen. Tap any icon to immediately set it as your sovereign Android launcher shortcut.'
-                        .localized(context),
-                    style: TextStyle(
-                      color: p.text2,
-                      fontSize: 12.5,
-                      height: 1.4,
+                      ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    Text(
+                      'Scroll through the dock below to preview handcrafted icon artwork on the simulated home screen. Tap any icon to immediately set it as your sovereign Android launcher shortcut.'
+                          .localized(context),
+                      style: TextStyle(
+                        color: p.text2,
+                        fontSize: 12.5,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

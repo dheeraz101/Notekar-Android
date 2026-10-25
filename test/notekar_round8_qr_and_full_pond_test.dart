@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/peer_comparison_sheet.dart';
 import 'package:notekar/dialogs/peer_profile_detail_sheet.dart';
+import 'package:notekar/dialogs/peer_profile_scanner_page.dart';
 import 'package:notekar/dialogs/settings/app_icons_settings_page.dart';
 import 'package:notekar/dialogs/settings/personalization_settings_page.dart';
 import 'package:notekar/dialogs/settings/update_center_page.dart';
@@ -137,23 +138,25 @@ void main() {
     );
   });
 
-  group('Round 8: Shareable Profile Card Sheet QR Pass', () {
-    testWidgets('Renders QR pass and eliminates morning pill overflow', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(body: ShareableProfileCardSheet(p: testPalette)),
-        ),
-      );
+  group('Round 8: Shareable Profile Card Sheet Minimal QR Pass', () {
+    testWidgets(
+      'Renders minimal Apple HIG QR pass without extraneous pass text',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(body: ShareableProfileCardSheet(p: testPalette)),
+          ),
+        );
 
-      await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
 
-      // Verify QR Code is present
-      expect(find.byType(QrImageView), findsOneWidget);
-      expect(find.text('TEMPORAL HORIZON PASS'), findsOneWidget);
-      expect(find.text('OFFLINE PASS'), findsOneWidget);
-    });
+        // Verify QR Code is present
+        expect(find.byType(QrImageView), findsOneWidget);
+        // Verify extraneous pass text is removed for minimal Apple HIG aesthetics
+        expect(find.text('TEMPORAL HORIZON PASS'), findsNothing);
+        expect(find.text('OFFLINE PASS'), findsNothing);
+      },
+    );
   });
 
   group('Round 8: Accent Color Full-Width Pond Sanctuary & Royal Crown', () {
@@ -318,5 +321,28 @@ void main() {
       expect(find.text('Jordan'), findsWidgets);
       expect(find.text('Remove Peer'), findsOneWidget);
     });
+  });
+
+  group('Round 8: Peer Profile Scanner Page Fullscreen Apple HIG', () {
+    testWidgets(
+      'Renders scanner reticle, instruction text, and laser builder',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(body: PeerProfileScannerPage(p: testPalette)),
+          ),
+        );
+
+        await tester.pump(const Duration(milliseconds: 200));
+
+        expect(find.text('Scan Horizon Pass'), findsOneWidget);
+        expect(
+          find.text('Align NoteKar Horizon QR code within the frame'),
+          findsOneWidget,
+        );
+        expect(find.text('Photo Library'), findsOneWidget);
+        expect(find.byType(CustomPaint), findsWidgets);
+      },
+    );
   });
 }

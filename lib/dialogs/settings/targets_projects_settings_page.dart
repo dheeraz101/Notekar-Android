@@ -329,7 +329,7 @@ class _TargetsProjectsSettingsPageState
               p: p,
               title: 'Floating Control Pill'.localized(context),
               subtitle:
-                  'Always-on floating control pill like iOS AssistiveTouch to start, stop, switch modes, and log moments from any screen without opening notifications.'
+                  'Always-on floating control pill like iOS AssistiveTouch to start, stop, switch modes, and log moments from any screen without opening notifications. Automatically hides while NoteKar is open and docks into a slim edge line when hidden.'
                       .localized(context),
               value: _floatingTimerEnabled,
               color: p.green,

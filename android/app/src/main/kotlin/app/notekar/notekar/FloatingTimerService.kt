@@ -8,7 +8,9 @@ import android.graphics.PixelFormat
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.os.SystemClock
 import android.provider.Settings
 import android.view.Gravity
@@ -16,6 +18,8 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.OvershootInterpolator
 import android.widget.Chronometer
 import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
@@ -25,8 +29,19 @@ import java.util.Locale
 
 class FloatingTimerService : Service() {
 
+    enum class DockSide { LEFT, RIGHT }
+
     private var windowManager: WindowManager? = null
     private var floatingView: View? = null
+    private var windowLayoutParams: WindowManager.LayoutParams? = null
+
+    // Edge Line Dock components (slim vertical line handle)
+    private var isDocked = false
+    private var dockSide = DockSide.RIGHT
+    private var edgeLineTouchWrapper: LinearLayout? = null
+    private var edgeLineBar: LinearLayout? = null
+    private var edgeLineBg: GradientDrawable? = null
+    private var edgeLineGrip: View? = null
 
     // Medium Circle components
     private var circleContainer: LinearLayout? = null
@@ -114,17 +129,132 @@ class FloatingTimerService : Service() {
             x = (20 * density).toInt()
             y = (140 * density).toInt()
         }
+        windowLayoutParams = params
 
-        // Root container holds both the Medium Circle and the expandable Apple HIG Card
+        // Root container holds the Edge Line Dock, the Medium Circle, and the expandable Apple HIG Card
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.START
         }
 
         // -------------------------------------------------------------
+        // 0. Slim Vertical Edge Line Dock (Hidden until "Hide" tapped)
+        // -------------------------------------------------------------
+        val edgeTouchWidth = (32 * density).toInt()
+        val edgeBarWidth = (5 * density).toInt()
+        val edgeLineHeight = (68 * density).toInt()
+        val circleSize = (62 * density).toInt()
+
+        edgeLineTouchWrapper = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL or Gravity.END
+            layoutParams = LinearLayout.LayoutParams(edgeTouchWidth, edgeLineHeight)
+            visibility = View.GONE
+            isClickable = true
+            isFocusable = true
+        }
+
+        edgeLineBg = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            setColor(Color.parseColor("#E6121418"))
+            setStroke((1.2 * density).toInt(), Color.parseColor("#4DFFFFFF"))
+        }
+
+        edgeLineBar = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(edgeBarWidth, ViewGroup.LayoutParams.MATCH_PARENT)
+            background = edgeLineBg
+            elevation = 10 * density
+        }
+
+        edgeLineGrip = View(this).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                (1.5 * density).toInt(),
+                (22 * density).toInt()
+            )
+            background = GradientDrawable().apply {
+                setColor(Color.parseColor("#80FFFFFF"))
+                cornerRadius = 2 * density
+            }
+        }
+        edgeLineBar?.addView(edgeLineGrip)
+        edgeLineTouchWrapper?.addView(edgeLineBar)
+        root.addView(edgeLineTouchWrapper)
+
+        var edgeStartX = 0f
+        var edgeStartY = 0f
+        var isDraggingEdge = false
+
+        edgeLineTouchWrapper?.setOnTouchListener { v, event ->
+            val p = windowLayoutParams ?: return@setOnTouchListener false
+            val screenWidth = resources.displayMetrics.widthPixels
+            val screenHeight = resources.displayMetrics.heightPixels
+
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    edgeStartX = event.rawX
+                    edgeStartY = event.rawY
+                    isDraggingEdge = false
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val deltaX = event.rawX - edgeStartX
+                    val deltaY = event.rawY - edgeStartY
+                    val isSwipingInward = if (dockSide == DockSide.RIGHT) {
+                        deltaX < -(12 * density)
+                    } else {
+                        deltaX > (12 * density)
+                    }
+
+                    if (isSwipingInward && !isDraggingEdge) {
+                        isDraggingEdge = true
+                        v.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP)
+                        undockToCircle(animate = false)
+                        p.x = (event.rawX - circleSize / 2).toInt().coerceIn(0, screenWidth - circleSize)
+                        p.y = (event.rawY - circleSize / 2).toInt().coerceIn(0, screenHeight - circleSize)
+                        windowManager?.updateViewLayout(floatingView, p)
+                    } else if (isDraggingEdge) {
+                        p.x = (event.rawX - circleSize / 2).toInt().coerceIn(0, screenWidth - circleSize)
+                        p.y = (event.rawY - circleSize / 2).toInt().coerceIn(0, screenHeight - circleSize)
+                        windowManager?.updateViewLayout(floatingView, p)
+                    }
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    if (isDraggingEdge) {
+                        isDraggingEdge = false
+                        val targetX = if (p.x + circleSize / 2 < screenWidth / 2) {
+                            (12 * density).toInt()
+                        } else {
+                            (screenWidth - circleSize - (12 * density).toInt()).coerceAtLeast((12 * density).toInt())
+                        }
+                        android.animation.ValueAnimator.ofInt(p.x, targetX).apply {
+                            duration = 200
+                            interpolator = DecelerateInterpolator()
+                            addUpdateListener { va ->
+                                p.x = va.animatedValue as Int
+                                windowManager?.updateViewLayout(floatingView, p)
+                            }
+                            start()
+                        }
+                    } else {
+                        val dx = Math.abs(event.rawX - edgeStartX)
+                        val dy = Math.abs(event.rawY - edgeStartY)
+                        if (dx < 16 && dy < 16) {
+                            v.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP)
+                            undockToCircle(animate = true)
+                        }
+                    }
+                    true
+                }
+                else -> false
+            }
+        }
+
+        // -------------------------------------------------------------
         // 1. Medium Circle (Compact Floating Orb)
         // -------------------------------------------------------------
-        val circleSize = (62 * density).toInt()
         circleBg = GradientDrawable().apply {
             shape = GradientDrawable.OVAL
             setColor(Color.parseColor("#F2101114"))
@@ -580,10 +710,9 @@ class FloatingTimerService : Service() {
                 cornerRadius = 12 * density
             }
             layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 0.9f)
-            setOnClickListener {
-                val flutterPrefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-                flutterPrefs.edit().putBoolean("flutter.floating_timer_enabled", false).apply()
-                stopSelf()
+            setOnClickListener { v ->
+                v.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP)
+                dockToEdgeLine(animate = true)
             }
         }
         footerRow.addView(btnCloseOverlay)
@@ -681,7 +810,7 @@ class FloatingTimerService : Service() {
                                 }
                                 windowManager?.updateViewLayout(floatingView, params)
                             }
-                            pendingSingleTap?.let { tapHandler.postDelayed(it, 240) }
+                            tapHandler.postDelayed(pendingSingleTap, 240)
                         }
                     } else {
                         // Magnetic edge snapping
@@ -713,6 +842,122 @@ class FloatingTimerService : Service() {
             windowManager?.addView(floatingView, params)
         } catch (_: Exception) {
             stopSelf()
+            return
+        }
+
+        val flutterPrefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+        val wasDocked = flutterPrefs.getBoolean("flutter.floating_timer_docked", false)
+        if (wasDocked) {
+            dockToEdgeLine(animate = false)
+        }
+
+        updateVisibilityForAppState()
+    }
+
+    private fun updateDockSide(side: DockSide) {
+        dockSide = side
+        val density = resources.displayMetrics.density
+        val r = 8 * density
+        val radii = if (side == DockSide.RIGHT) {
+            floatArrayOf(r, r, 0f, 0f, 0f, 0f, r, r)
+        } else {
+            floatArrayOf(0f, 0f, r, r, r, r, 0f, 0f)
+        }
+        edgeLineBg?.cornerRadii = radii
+        edgeLineTouchWrapper?.gravity = if (side == DockSide.RIGHT) {
+            Gravity.CENTER_VERTICAL or Gravity.END
+        } else {
+            Gravity.CENTER_VERTICAL or Gravity.START
+        }
+    }
+
+    fun dockToEdgeLine(animate: Boolean = true) {
+        val params = windowLayoutParams ?: return
+        val screenWidth = resources.displayMetrics.widthPixels
+        val density = resources.displayMetrics.density
+        val edgeTouchWidth = (32 * density).toInt()
+        val circleSize = (62 * density).toInt()
+
+        isExpanded = false
+        cardContainer?.visibility = View.GONE
+        circleContainer?.visibility = View.GONE
+
+        val side = if (params.x + circleSize / 2 < screenWidth / 2) DockSide.LEFT else DockSide.RIGHT
+        updateDockSide(side)
+
+        val targetX = if (side == DockSide.LEFT) 0 else screenWidth - edgeTouchWidth
+
+        isDocked = true
+        val flutterPrefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+        flutterPrefs.edit().putBoolean("flutter.floating_timer_docked", true).apply()
+
+        edgeLineTouchWrapper?.visibility = View.VISIBLE
+
+        if (animate) {
+            android.animation.ValueAnimator.ofInt(params.x, targetX).apply {
+                duration = 200
+                interpolator = DecelerateInterpolator()
+                addUpdateListener { va ->
+                    params.x = va.animatedValue as Int
+                    windowManager?.updateViewLayout(floatingView, params)
+                }
+                start()
+            }
+        } else {
+            params.x = targetX
+            windowManager?.updateViewLayout(floatingView, params)
+        }
+    }
+
+    fun undockToCircle(animate: Boolean = true) {
+        val params = windowLayoutParams ?: return
+        val screenWidth = resources.displayMetrics.widthPixels
+        val density = resources.displayMetrics.density
+        val circleSize = (62 * density).toInt()
+
+        isDocked = false
+        val flutterPrefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+        flutterPrefs.edit().putBoolean("flutter.floating_timer_docked", false).apply()
+
+        edgeLineTouchWrapper?.visibility = View.GONE
+        circleContainer?.visibility = View.VISIBLE
+
+        val targetX = if (dockSide == DockSide.LEFT) {
+            (12 * density).toInt()
+        } else {
+            (screenWidth - circleSize - (12 * density).toInt()).coerceAtLeast((12 * density).toInt())
+        }
+
+        if (animate) {
+            android.animation.ValueAnimator.ofInt(params.x, targetX).apply {
+                duration = 220
+                interpolator = OvershootInterpolator(1.2f)
+                addUpdateListener { va ->
+                    params.x = va.animatedValue as Int
+                    windowManager?.updateViewLayout(floatingView, params)
+                }
+                start()
+            }
+        } else {
+            params.x = targetX
+            windowManager?.updateViewLayout(floatingView, params)
+        }
+        refreshView()
+    }
+
+    fun updateVisibilityForAppState() {
+        val root = floatingView ?: return
+        if (isAppInForeground) {
+            root.visibility = View.GONE
+        } else {
+            val flutterPrefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+            val enabled = flutterPrefs.getBoolean("flutter.floating_timer_enabled", false)
+            if (enabled) {
+                root.visibility = View.VISIBLE
+                refreshView()
+            } else {
+                root.visibility = View.GONE
+            }
         }
     }
 
@@ -867,6 +1112,12 @@ class FloatingTimerService : Service() {
                 circleSubText?.text = "PAUSED"
                 circleSubText?.setTextColor(Color.parseColor("#FFFF9F0A"))
 
+                // Edge line styling - Paused (Amber)
+                edgeLineBg?.setColor(Color.parseColor("#E618150A"))
+                edgeLineBg?.setStroke((1.5 * density).toInt(), Color.parseColor("#FFFF9F0A"))
+                updateDockSide(dockSide)
+                edgeLineGrip?.setBackgroundColor(Color.parseColor("#CCFF9F0A"))
+
                 // Card UI - Paused State
                 cardChronometer?.stop()
                 cardChronometer?.visibility = View.GONE
@@ -887,6 +1138,12 @@ class FloatingTimerService : Service() {
                 circleChronometer?.setTextColor(Color.WHITE)
                 circleSubText?.text = activeCategory.uppercase(Locale.ROOT)
                 circleSubText?.setTextColor(Color.parseColor("#B3FFFFFF"))
+
+                // Edge line styling - Active (Emerald Green)
+                edgeLineBg?.setColor(Color.parseColor("#E60B130E"))
+                edgeLineBg?.setStroke((1.5 * density).toInt(), Color.parseColor("#FF30D158"))
+                updateDockSide(dockSide)
+                edgeLineGrip?.setBackgroundColor(Color.parseColor("#CC30D158"))
 
                 // Card UI - Active Running State
                 cardStaticTime?.visibility = View.GONE
@@ -913,6 +1170,12 @@ class FloatingTimerService : Service() {
             circleTimeText?.setTextColor(Color.parseColor("#FFFF9F0A"))
             circleSubText?.text = "IDLE"
             circleSubText?.setTextColor(Color.parseColor("#FFFF453A"))
+
+            // Edge line styling - Idle (Subtle Slate / White)
+            edgeLineBg?.setColor(Color.parseColor("#E6121418"))
+            edgeLineBg?.setStroke((1.2 * density).toInt(), Color.parseColor("#4DFFFFFF"))
+            updateDockSide(dockSide)
+            edgeLineGrip?.setBackgroundColor(Color.parseColor("#80FFFFFF"))
 
             // Card UI - Idle State
             cardChronometer?.stop()
@@ -949,6 +1212,16 @@ class FloatingTimerService : Service() {
     companion object {
         const val ACTION_STOP = "app.notekar.notekar.STOP_FLOATING_TIMER"
         var instance: FloatingTimerService? = null
+        var isAppInForeground: Boolean = false
+            private set
+
+        fun setAppInForeground(inForeground: Boolean) {
+            isAppInForeground = inForeground
+            val current = instance ?: return
+            Handler(Looper.getMainLooper()).post {
+                current.updateVisibilityForAppState()
+            }
+        }
 
         fun start(context: Context) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(context)) {
@@ -979,7 +1252,7 @@ class FloatingTimerService : Service() {
                 return
             }
             if (instance != null) {
-                instance?.refreshView()
+                instance?.updateVisibilityForAppState()
             } else {
                 start(context)
             }

@@ -12,6 +12,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/media_storage_service.dart';
 import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -288,9 +289,10 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.text('TEMPORAL HORIZON PASS'), findsOneWidget);
-      expect(find.text('WAKING WEEKS'), findsOneWidget);
-      expect(find.text('CONSCIOUS TIME'), findsOneWidget);
+      // Minimal Apple HIG Pass: QR Code only, zero extraneous text in inner pass card
+      expect(find.byType(QrImageView), findsOneWidget);
+      expect(find.text('TEMPORAL HORIZON PASS'), findsNothing);
+      expect(find.text('WAKING WEEKS'), findsNothing);
       expect(find.byType(CustomPaint), findsWidgets);
     });
   });

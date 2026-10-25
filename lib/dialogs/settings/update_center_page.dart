@@ -632,18 +632,16 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
         _buildCacheCard(p),
         const SizedBox(height: spacing20),
 
-        // Formal Page Description at the bottom with wider margins
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: SettingsPageDescription(
-            p: p,
-            showIcon: true,
-            text:
-                'Update Center provides verified, sovereign software releases and security advisories for your device. All distributions undergo cryptographic signature verification and SHA-256 checksum validation prior to installation, maintaining complete offline integrity without intermediary telemetry.'
-                    .localized(context),
-          ),
+        // Formal Page Description at the bottom spanning full width
+        SettingsPageDescription(
+          p: p,
+          showIcon: true,
+          bottomPadding: 32,
+          text:
+              'Update Center provides verified, sovereign software releases and security advisories for your device. All distributions undergo cryptographic signature verification and SHA-256 checksum validation prior to installation, maintaining complete offline integrity without intermediary telemetry.'
+                  .localized(context),
         ),
-        const SizedBox(height: spacing48),
+        const SizedBox(height: spacing32),
       ],
     );
   }

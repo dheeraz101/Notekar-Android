@@ -28,12 +28,15 @@ class PeerProfileScannerPage extends StatefulWidget {
   State<PeerProfileScannerPage> createState() => _PeerProfileScannerPageState();
 }
 
+enum _ScanFeedback { none, success, failed }
+
 class _PeerProfileScannerPageState extends State<PeerProfileScannerPage>
     with SingleTickerProviderStateMixin {
   late MobileScannerController _scannerController;
   late AnimationController _laserController;
   bool _hasScanned = false;
   bool _torchEnabled = false;
+  _ScanFeedback _feedback = _ScanFeedback.none;
 
   @override
   void initState() {
@@ -58,7 +61,7 @@ class _PeerProfileScannerPageState extends State<PeerProfileScannerPage>
   }
 
   void _onDetect(BarcodeCapture capture) {
-    if (_hasScanned) return;
+    if (_hasScanned || _feedback != _ScanFeedback.none) return;
     for (final barcode in capture.barcodes) {
       final rawValue = barcode.rawValue;
       if (rawValue != null && rawValue.isNotEmpty) {
@@ -66,15 +69,28 @@ class _PeerProfileScannerPageState extends State<PeerProfileScannerPage>
         if (profile != null) {
           _hasScanned = true;
           HapticFeedback.heavyImpact();
-          Navigator.of(context).pop(profile);
+          setState(() => _feedback = _ScanFeedback.success);
+          Future.delayed(const Duration(milliseconds: 650), () {
+            if (mounted) {
+              Navigator.of(context).pop(profile);
+            }
+          });
           return;
         }
       }
     }
 
-    // If barcodes detected but none valid
-    if (capture.barcodes.isNotEmpty && !_hasScanned) {
-      _showInvalidCodeDialog();
+    // If barcodes detected but none valid NoteKar QR
+    if (capture.barcodes.isNotEmpty &&
+        !_hasScanned &&
+        _feedback == _ScanFeedback.none) {
+      HapticFeedback.mediumImpact();
+      setState(() => _feedback = _ScanFeedback.failed);
+      Future.delayed(const Duration(milliseconds: 1400), () {
+        if (mounted) {
+          setState(() => _feedback = _ScanFeedback.none);
+        }
+      });
     }
   }
 
@@ -129,16 +145,30 @@ class _PeerProfileScannerPageState extends State<PeerProfileScannerPage>
             if (profile != null) {
               if (mounted) {
                 HapticFeedback.heavyImpact();
-                Navigator.of(context).pop(profile);
-                return;
+                setState(() => _feedback = _ScanFeedback.success);
+                await Future.delayed(const Duration(milliseconds: 650));
+                if (mounted) {
+                  Navigator.of(context).pop(profile);
+                  return;
+                }
               }
             }
           }
         }
       }
-      if (mounted) _showInvalidCodeDialog();
+      if (mounted) {
+        HapticFeedback.mediumImpact();
+        setState(() => _feedback = _ScanFeedback.failed);
+        await Future.delayed(const Duration(milliseconds: 1400));
+        if (mounted) setState(() => _feedback = _ScanFeedback.none);
+      }
     } catch (_) {
-      if (mounted) _showInvalidCodeDialog();
+      if (mounted) {
+        HapticFeedback.mediumImpact();
+        setState(() => _feedback = _ScanFeedback.failed);
+        await Future.delayed(const Duration(milliseconds: 1400));
+        if (mounted) setState(() => _feedback = _ScanFeedback.none);
+      }
     }
   }
 
@@ -235,20 +265,131 @@ class _PeerProfileScannerPageState extends State<PeerProfileScannerPage>
             },
           ),
 
-          // 2. Apple Vignette Mask Overlay
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final reticleSize = math.min(constraints.maxWidth * 0.72, 280.0);
-              return CustomPaint(
-                size: Size(constraints.maxWidth, constraints.maxHeight),
-                painter: _ReticleOverlayPainter(
-                  reticleSize: reticleSize,
-                  accentColor: p.accent,
-                  laserProgress: _laserController.value,
-                ),
+          // 2. Apple Vignette Mask Overlay with Animated Moving Laser Line
+          AnimatedBuilder(
+            animation: _laserController,
+            builder: (context, _) {
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  final reticleSize = math.min(
+                    constraints.maxWidth * 0.72,
+                    280.0,
+                  );
+                  return CustomPaint(
+                    size: Size(constraints.maxWidth, constraints.maxHeight),
+                    painter: _ReticleOverlayPainter(
+                      reticleSize: reticleSize,
+                      accentColor: const Color(
+                        0xFF34C759,
+                      ), // Vibrant laser green
+                      laserProgress: _laserController.value,
+                    ),
+                  );
+                },
               );
             },
           ),
+
+          // 2b. Visual Scan Feedback Indicator (Checkmark on success / Red X on failed)
+          if (_feedback != _ScanFeedback.none)
+            Center(
+              child: Transform.translate(
+                offset: const Offset(0, -24),
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.65, end: 1.0),
+                  duration: const Duration(milliseconds: 240),
+                  curve: Curves.elasticOut,
+                  builder: (context, scale, child) {
+                    return Transform.scale(scale: scale, child: child);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 26,
+                      vertical: 20,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _feedback == _ScanFeedback.success
+                          ? const Color(0xFF152A1C).withValues(alpha: 0.94)
+                          : const Color(0xFF2E1515).withValues(alpha: 0.94),
+                      borderRadius: BorderRadius.circular(26),
+                      border: Border.all(
+                        color: _feedback == _ScanFeedback.success
+                            ? const Color(0xFF34C759).withValues(alpha: 0.8)
+                            : const Color(0xFFFF3B30).withValues(alpha: 0.8),
+                        width: 1.8,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color:
+                              (_feedback == _ScanFeedback.success
+                                      ? const Color(0xFF34C759)
+                                      : const Color(0xFFFF3B30))
+                                  .withValues(alpha: 0.45),
+                          blurRadius: 36,
+                          spreadRadius: 4,
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 58,
+                          height: 58,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _feedback == _ScanFeedback.success
+                                ? const Color(0xFF34C759)
+                                : const Color(0xFFFF3B30),
+                            boxShadow: [
+                              BoxShadow(
+                                color:
+                                    (_feedback == _ScanFeedback.success
+                                            ? const Color(0xFF34C759)
+                                            : const Color(0xFFFF3B30))
+                                        .withValues(alpha: 0.6),
+                                blurRadius: 18,
+                                spreadRadius: 2,
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            _feedback == _ScanFeedback.success
+                                ? CupertinoIcons.checkmark_alt
+                                : CupertinoIcons.xmark,
+                            color: Colors.white,
+                            size: 34,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          _feedback == _ScanFeedback.success
+                              ? 'Pass Verified'
+                              : 'Scan Failed',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 15.5,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                        if (_feedback == _ScanFeedback.failed) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            'Unrecognized QR Code',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.75),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
 
           // 3. Top Navigation & Torch Controls
           Positioned(

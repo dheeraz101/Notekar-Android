@@ -262,280 +262,40 @@ class _ShareableProfileCardSheetState extends State<ShareableProfileCardSheet> {
                           ),
                           const SizedBox(height: 20),
 
-                          // Apple Wallet-Grade Sovereign QR Code Horizon Pass
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.05),
-                              borderRadius: BorderRadius.circular(22),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.09),
+                          // Apple Wallet-Grade Minimal Sovereign QR Pass (QR Code Only)
+                          Center(
+                            child: Container(
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(24),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.28),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 6),
+                                  ),
+                                  BoxShadow(
+                                    color: p.accent.withValues(alpha: 0.18),
+                                    blurRadius: 18,
+                                    spreadRadius: 1,
+                                  ),
+                                ],
                               ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.2),
-                                  blurRadius: 16,
-                                  offset: const Offset(0, 4),
+                              child: QrImageView(
+                                data: qrPayload,
+                                version: QrVersions.auto,
+                                size: 160,
+                                backgroundColor: Colors.white,
+                                eyeStyle: const QrEyeStyle(
+                                  eyeShape: QrEyeShape.square,
+                                  color: Color(0xFF0C0E14),
                                 ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Pass Row Header
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Container(
-                                          width: 6,
-                                          height: 6,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: p.accent,
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: p.accent.withValues(
-                                                  alpha: 0.6,
-                                                ),
-                                                blurRadius: 6,
-                                                spreadRadius: 1,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          'TEMPORAL HORIZON PASS',
-                                          style: TextStyle(
-                                            color: p.accent,
-                                            fontSize: 9.5,
-                                            fontWeight: FontWeight.w800,
-                                            letterSpacing: 0.8,
-                                            decoration: TextDecoration.none,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 7,
-                                        vertical: 2.5,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withValues(
-                                          alpha: 0.08,
-                                        ),
-                                        borderRadius: BorderRadius.circular(
-                                          999,
-                                        ),
-                                        border: Border.all(
-                                          color: Colors.white.withValues(
-                                            alpha: 0.1,
-                                          ),
-                                        ),
-                                      ),
-                                      child: const Text(
-                                        'OFFLINE PASS',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 9,
-                                          fontWeight: FontWeight.w700,
-                                          letterSpacing: 0.4,
-                                          decoration: TextDecoration.none,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                dataModuleStyle: const QrDataModuleStyle(
+                                  dataModuleShape: QrDataModuleShape.square,
+                                  color: Color(0xFF0C0E14),
                                 ),
-                                const SizedBox(height: 14),
-
-                                // Center Row: QR Code + Inspection Guidance
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(6),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(16),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withValues(
-                                              alpha: 0.35,
-                                            ),
-                                            blurRadius: 10,
-                                            offset: const Offset(0, 4),
-                                          ),
-                                        ],
-                                      ),
-                                      child: QrImageView(
-                                        data: qrPayload,
-                                        version: QrVersions.auto,
-                                        size: 106,
-                                        backgroundColor: Colors.white,
-                                        eyeStyle: const QrEyeStyle(
-                                          eyeShape: QrEyeShape.square,
-                                          color: Color(0xFF0C0E14),
-                                        ),
-                                        dataModuleStyle:
-                                            const QrDataModuleStyle(
-                                              dataModuleShape:
-                                                  QrDataModuleShape.square,
-                                              color: Color(0xFF0C0E14),
-                                            ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 14),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'SCAN TO INSPECT',
-                                            style: TextStyle(
-                                              color: Colors.white.withValues(
-                                                alpha: 0.5,
-                                              ),
-                                              fontSize: 9.5,
-                                              fontWeight: FontWeight.w800,
-                                              letterSpacing: 0.6,
-                                              decoration: TextDecoration.none,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 3),
-                                          Text(
-                                            '24h Life Clock\n& Progress',
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.w800,
-                                              height: 1.25,
-                                              decoration: TextDecoration.none,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 5),
-                                          Text(
-                                            'Scan this pass in NoteKar to inspect full life clock and compare pacing side-by-side.',
-                                            style: TextStyle(
-                                              color: Colors.white.withValues(
-                                                alpha: 0.6,
-                                              ),
-                                              fontSize: 10.5,
-                                              height: 1.35,
-                                              decoration: TextDecoration.none,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 14),
-
-                                // Summary metrics row
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 10,
-                                          vertical: 8,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white.withValues(
-                                            alpha: 0.04,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                          border: Border.all(
-                                            color: Colors.white.withValues(
-                                              alpha: 0.06,
-                                            ),
-                                          ),
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'WAKING WEEKS',
-                                              style: TextStyle(
-                                                color: p.orange,
-                                                fontSize: 9,
-                                                fontWeight: FontWeight.w800,
-                                                letterSpacing: 0.6,
-                                                decoration: TextDecoration.none,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              '${horizon.remainingWeeks} wks',
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 13.5,
-                                                fontWeight: FontWeight.w800,
-                                                decoration: TextDecoration.none,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 10,
-                                          vertical: 8,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white.withValues(
-                                            alpha: 0.04,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                          border: Border.all(
-                                            color: Colors.white.withValues(
-                                              alpha: 0.06,
-                                            ),
-                                          ),
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'CONSCIOUS TIME',
-                                              style: TextStyle(
-                                                color: p.accent,
-                                                fontSize: 9,
-                                                fontWeight: FontWeight.w800,
-                                                letterSpacing: 0.6,
-                                                decoration: TextDecoration.none,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              '${(horizon.livedPercentage * 100).toStringAsFixed(1)}% lived',
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 13.5,
-                                                fontWeight: FontWeight.w800,
-                                                decoration: TextDecoration.none,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                              ),
                             ),
                           ),
                           const SizedBox(height: 18),

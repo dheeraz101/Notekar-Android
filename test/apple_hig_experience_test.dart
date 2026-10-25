@@ -147,5 +147,28 @@ void main() {
         );
       },
     );
+
+    testWidgets(
+      'TargetsProjectsSettingsPage describes auto-hide when open and slim edge line docking',
+      (tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(body: TargetsProjectsSettingsPage(p: testPalette)),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.textContaining(
+            'Automatically hides while NoteKar is open and docks into a slim edge line when hidden.',
+          ),
+          findsOneWidget,
+        );
+      },
+    );
   });
 }
