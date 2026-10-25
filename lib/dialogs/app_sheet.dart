@@ -304,15 +304,17 @@ class _AppSheetState extends State<AppSheet> {
                 );
               }(),
               const SizedBox(height: spacing20),
-              NotificationListener<ScrollNotification>(
-                onNotification: (notification) {
-                  if (widget.showLargeTitle &&
-                      notification.metrics.axis == Axis.vertical) {
-                    _updateWithOffset(notification.metrics.pixels);
-                  }
-                  return false;
-                },
-                child: widget.child,
+              Flexible(
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: (notification) {
+                    if (widget.showLargeTitle &&
+                        notification.metrics.axis == Axis.vertical) {
+                      _updateWithOffset(notification.metrics.pixels);
+                    }
+                    return false;
+                  },
+                  child: widget.child,
+                ),
               ),
             ],
           ),

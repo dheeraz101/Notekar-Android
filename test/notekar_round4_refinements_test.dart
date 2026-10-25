@@ -34,9 +34,9 @@ void main() {
     AppScrollState.resetAll();
   });
 
-  group('1. Accent Color Carousel & Full-Bottom Fluid Reservoir', () {
+  group('1. Accent Color Living Aquarium Pond & 20 Living Fish', () {
     testWidgets(
-      'PersonalizationSettingsPage renders optical carousel with center indicator rings',
+      'PersonalizationSettingsPage renders living fish sanctuary with 20 species and canvas',
       (tester) async {
         String selectedKey = 'blue';
 
@@ -64,16 +64,16 @@ void main() {
 
         await tester.pump(const Duration(milliseconds: 600));
 
-        expect(find.text('SWIPE OR TAP TO APPLY ACCENT'), findsOneWidget);
-        expect(find.byType(ListView), findsWidgets);
+        expect(find.text('TAP ANY FISH TO HARMONIZE ACCENT'), findsOneWidget);
+        expect(find.text('20 Living Species'), findsOneWidget);
         expect(find.byType(CustomPaint), findsWidgets);
       },
     );
 
-    test('AccentSnappingScrollPhysics momentum and spring simulation', () {
-      const physics = AccentSnappingScrollPhysics(itemExtent: 46.0);
-      expect(physics.itemExtent, equals(46.0));
-      expect(physics.allowImplicitScrolling, isFalse);
+    test('kAccentColorPalette contains exactly 20 distinct accent shades', () {
+      expect(kAccentColorPalette.length, equals(20));
+      final keys = kAccentColorPalette.map((c) => c.key).toSet();
+      expect(keys.length, equals(20));
     });
   });
 

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -1719,4 +1721,127 @@ class _GithubPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Sovereign Apple HIG Hero Header with concentric pulsing rings and icon.
+class SettingsHeroHeader extends StatefulWidget {
+  const SettingsHeroHeader({
+    super.key,
+    required this.p,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    this.accentColor,
+  });
+
+  final Palette p;
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color? accentColor;
+
+  @override
+  State<SettingsHeroHeader> createState() => _SettingsHeroHeaderState();
+}
+
+class _SettingsHeroHeaderState extends State<SettingsHeroHeader>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _pulseController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2400),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = widget.p;
+    final accent = widget.accentColor ?? p.accent;
+
+    return AnimatedBuilder(
+      animation: _pulseController,
+      builder: (context, _) {
+        final t = _pulseController.value;
+        final pulse = 0.5 + 0.5 * math.sin(t * 2 * math.pi);
+        return Padding(
+          padding: const EdgeInsets.only(top: 8, bottom: 20),
+          child: Column(
+            children: [
+              Center(
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Container(
+                      width: 76,
+                      height: 76,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: accent.withValues(alpha: 0.08 + 0.08 * pulse),
+                      ),
+                    ),
+                    Container(
+                      width: 58,
+                      height: 58,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: accent.withValues(alpha: 0.16),
+                        border: Border.all(
+                          color: accent.withValues(alpha: 0.35 + 0.35 * pulse),
+                          width: 1.5,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: accent.withValues(
+                              alpha: 0.18 + 0.12 * pulse,
+                            ),
+                            blurRadius: 16,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                      child: Icon(widget.icon, size: 30, color: accent),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                widget.title.localized(context),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: p.text,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.3,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Text(
+                  widget.subtitle.localized(context),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: p.text2,
+                    fontSize: 12.5,
+                    height: 1.38,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }

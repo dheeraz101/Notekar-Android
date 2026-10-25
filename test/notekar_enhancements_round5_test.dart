@@ -75,25 +75,16 @@ void main() {
 
         await tester.pump(const Duration(milliseconds: 300));
 
-        expect(find.text('SWIPE OR TAP TO APPLY ACCENT'), findsOneWidget);
-        expect(find.text('14 Shades'), findsOneWidget);
+        expect(find.text('TAP ANY FISH TO HARMONIZE ACCENT'), findsOneWidget);
+        expect(find.text('20 Living Species'), findsOneWidget);
         expect(find.byType(CustomPaint), findsWidgets);
 
-        // Verify stationary center indicator rings
-        final ringFinders = find.byWidgetPredicate((widget) {
-          if (widget is Container &&
-              widget.decoration is BoxDecoration &&
-              (widget.decoration as BoxDecoration).shape == BoxShape.circle) {
-            final box = widget.decoration as BoxDecoration;
-            final border = box.border;
-            if (border is Border) {
-              final w = widget.constraints?.maxWidth ?? 0;
-              return w == 104 || w == 94;
-            }
-          }
-          return false;
-        });
-        expect(ringFinders, findsWidgets);
+        // Verify living pond aquarium and riverbed stones caption
+        expect(find.byType(CustomPaint), findsWidgets);
+        expect(
+          find.textContaining('Riverbed stones retain their fixed hues'),
+          findsOneWidget,
+        );
       },
     );
   });

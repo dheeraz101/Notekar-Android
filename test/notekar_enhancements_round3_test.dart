@@ -186,9 +186,8 @@ void main() {
 
         await tester.pump(const Duration(milliseconds: 600));
 
-        expect(find.text('SWIPE OR TAP TO APPLY ACCENT'), findsOneWidget);
+        expect(find.text('TAP ANY FISH TO HARMONIZE ACCENT'), findsOneWidget);
         expect(find.text('FLUID MENISCUS RESERVOIR'), findsNothing);
-        expect(find.byType(ListView), findsWidgets);
         expect(find.byType(CustomPaint), findsWidgets);
       },
     );

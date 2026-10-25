@@ -237,7 +237,14 @@ class _LoggingSettingsPageState extends State<LoggingSettingsPage> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const SizedBox(height: spacing8),
+        SettingsHeroHeader(
+          p: p,
+          icon: CupertinoIcons.waveform_path_ecg,
+          title: 'Logging & Metrics',
+          subtitle:
+              'Track conscious time expenditure, life audits, and deliberate moments with zero-friction capture.',
+          accentColor: p.accent,
+        ),
         SettingsGroup(
           p: p,
           insetDividers: true,

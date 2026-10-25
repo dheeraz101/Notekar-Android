@@ -1665,8 +1665,10 @@ class BuildTrackSelectPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              title: 'Stable Build',
-              subtitle: 'Recommended for standard users.'.localized(context),
+              title: 'Stable Channel',
+              subtitle:
+                  'Engineered for maximum daily reliability and verified performance.'
+                      .localized(context),
               trailing: _activeChannel == 'stable'
                   ? Icon(CupertinoIcons.checkmark, color: p.accent, size: 18)
                   : const SizedBox.shrink(),
@@ -1674,9 +1676,9 @@ class BuildTrackSelectPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
-              title: 'Beta Build',
+              title: 'Beta Channel',
               subtitle:
-                  'Priority updates and early access to active development features.'
+                  'Experience upcoming innovations and refined capabilities before public release.'
                       .localized(context),
               trailing: _activeChannel == 'beta'
                   ? Icon(CupertinoIcons.checkmark, color: p.accent, size: 18)
@@ -1685,9 +1687,10 @@ class BuildTrackSelectPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
-              title: 'Experiment Channel',
-              subtitle: 'Preview new features first. May be unstable.'
-                  .localized(context),
+              title: 'Developer Experiments',
+              subtitle:
+                  'Immediate access to cutting-edge features. Intended for early testing.'
+                      .localized(context),
               trailing: _activeChannel == 'experiment'
                   ? Icon(CupertinoIcons.checkmark, color: p.red, size: 18)
                   : const SizedBox.shrink(),
@@ -1701,7 +1704,7 @@ class BuildTrackSelectPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Stable track offers maximum everyday reliability. Beta track lets you preview upcoming features before release. Experiment channel gives you immediate access to brand-new features as they are built.'
+                'Choose how NoteKar receives software updates. Stable ensures maximum continuous reliability, while Beta and Developer channels provide early access to evolving capabilities and UI refinements.'
                     .localized(context),
                 style: TextStyle(
                   color: p.text3,
@@ -1714,43 +1717,43 @@ class BuildTrackSelectPage extends StatelessWidget {
               _buildNumberingRow(
                 context,
                 '1.',
-                'Switching to the Stable Build track will fetch the last released stable build and show the update.',
+                'Enrolling in Stable delivers thoroughly validated releases optimized for everyday dependability.',
               ),
               const SizedBox(height: 8),
               _buildNumberingRow(
                 context,
                 '2.',
-                'Switching to the Beta Build track gives you priority access to the latest compiled pre-release features and direct engine updates.',
+                'Enrolling in Beta provides priority access to pre-release features and direct framework enhancements.',
               ),
               const SizedBox(height: 8),
               _buildNumberingRow(
                 context,
                 '3.',
-                'Beta users will receive stable updates as well whenever a stable release is published.',
+                'Beta installations automatically receive all published Stable updates alongside preview builds.',
               ),
               const SizedBox(height: 8),
               _buildNumberingRow(
                 context,
                 '4.',
-                'If in a Beta build and switched to Stable now, you will only receive Stable releases when a higher version is published.',
+                'When moving from Beta to Stable, your device remains on its current build until a higher Stable version is published.',
               ),
               const SizedBox(height: 8),
               _buildNumberingRow(
                 context,
                 '5.',
-                'If in a Stable build and switched to Beta now, you will receive upcoming Priority & Beta releases immediately as they are published.',
+                'When moving from Stable to Beta, any newer active pre-release builds become available for immediate installation.',
               ),
               const SizedBox(height: 8),
               _buildNumberingRow(
                 context,
                 '6.',
-                'Experiment builds let you test cutting-edge features and new design updates first.',
+                'Developer Experiments introduce prototype interfaces and architecture tests before general consolidation.',
               ),
               const SizedBox(height: 8),
               _buildNumberingRow(
                 context,
                 '7.',
-                'You will automatically receive all updates across every release channel as soon as they become available.',
+                'You may switch release channels at any time without impacting your local encrypted database or notes.',
               ),
             ],
           ),

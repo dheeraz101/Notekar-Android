@@ -25,40 +25,43 @@ void main() {
   final lightPalette = paletteFor('light');
 
   group('Experiment Channel User Copy Tests', () {
-    testWidgets(
-      'BuildTrackSelectPage displays user-centric subtitle and copy',
-      (tester) async {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: SingleChildScrollView(
-                child: BuildTrackSelectPage(
-                  p: darkPalette,
-                  betaTrack: false,
-                  currentChannel: 'stable',
-                  onSaveTrackPreference: (_) {},
-                  onLearnMoreBeta: () {},
-                ),
+    testWidgets('BuildTrackSelectPage displays user-centric subtitle and copy', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: BuildTrackSelectPage(
+                p: darkPalette,
+                betaTrack: false,
+                currentChannel: 'stable',
+                onSaveTrackPreference: (_) {},
+                onLearnMoreBeta: () {},
               ),
             ),
           ),
-        );
+        ),
+      );
 
-        // Verify user-centric copy
-        expect(
-          find.text('Preview new features first. May be unstable.'),
-          findsOneWidget,
-        );
-        expect(
-          find.textContaining('Experiment channel gives you immediate access'),
-          findsOneWidget,
-        );
-        expect(
-          find.textContaining('cutting-edge features and new design updates'),
-          findsOneWidget,
-        );
-      },
-    );
+      // Verify user-centric copy
+      expect(
+        find.text(
+          'Experience upcoming innovations and refined capabilities before public release.',
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('Choose how NoteKar receives software updates'),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining(
+          'Immediate access to cutting-edge features. Intended for early testing.',
+        ),
+        findsOneWidget,
+      );
+    });
 
     testWidgets(
       'ExperimentChannelWarningScreen renders user-friendly warning cards',

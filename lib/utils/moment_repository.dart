@@ -36,6 +36,7 @@ class MomentRepository {
   bool get isInitialized => _isInitialized;
   bool get isIsarAvailable => _isar != null && _isar!.isOpen;
 
+  String? _currentDataDirPath;
   List<Moment>? _cachedMoments;
   List<Moment>? _cachedTrashMoments;
   Map<int, Moment>? _momentIdIndex;
@@ -72,6 +73,7 @@ class MomentRepository {
       } catch (_) {}
     }
     dataDirPath ??= Directory.systemTemp.path;
+    _currentDataDirPath = dataDirPath;
 
     try {
       _isar =
@@ -93,12 +95,15 @@ class MomentRepository {
       );
     } catch (e, stack) {
       _logger.warning(
-        'Isar native core could not be opened in current environment ($e). Operating in robust in-memory/snapshot mode.',
+        'Isar native database open failure ($e). Attempting auto-quarantine and snapshot recovery...',
         e,
         stack,
       );
-      _isar = null;
-      _trashIsar = null;
+      await quarantineAndRecoverDatabase(
+        directoryPath: dataDirPath,
+        originalError: e,
+        stackTrace: stack,
+      );
     }
 
     final existingCount = _isar?.moments.countSync() ?? 0;
@@ -396,6 +401,140 @@ class MomentRepository {
     }
   }
 
+  void resetForTesting() {
+    try {
+      _isar?.close();
+    } catch (_) {}
+    try {
+      _trashIsar?.close();
+    } catch (_) {}
+    _isar = null;
+    _trashIsar = null;
+    _isInitialized = false;
+    _cachedMoments = null;
+    _cachedTrashMoments = null;
+    _momentIdIndex = null;
+    _currentDataDirPath = null;
+  }
+
+  Future<void> quarantineAndRecoverDatabase({
+    String? directoryPath,
+    Object? originalError,
+    StackTrace? stackTrace,
+  }) async {
+    final dataDirPath =
+        directoryPath ?? _currentDataDirPath ?? Directory.systemTemp.path;
+    try {
+      await _isar?.close();
+    } catch (_) {}
+    try {
+      await _trashIsar?.close();
+    } catch (_) {}
+    _isar = null;
+    _trashIsar = null;
+    await _prefs.setBool(keyCorruptedFlag, true);
+
+    try {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      // 1. Move corrupt database files to isolated quarantine location
+      final entriesFile = File('$dataDirPath/notekar_entries_v1.isar');
+      if (entriesFile.existsSync()) {
+        final quarantinePath =
+            '$dataDirPath/notekar_entries_v1.isar.corrupt.$now';
+        try {
+          await entriesFile.rename(quarantinePath);
+        } catch (_) {
+          try {
+            await entriesFile.copy(quarantinePath);
+            await entriesFile.delete();
+          } catch (_) {}
+        }
+        _logger.warn('Quarantined corrupt database to $quarantinePath');
+      }
+      final trashFile = File('$dataDirPath/notekar_trash_v1.isar');
+      if (trashFile.existsSync()) {
+        final quarantineTrashPath =
+            '$dataDirPath/notekar_trash_v1.isar.corrupt.$now';
+        try {
+          await trashFile.rename(quarantineTrashPath);
+        } catch (_) {
+          try {
+            await trashFile.copy(quarantineTrashPath);
+            await trashFile.delete();
+          } catch (_) {}
+        }
+        _logger.warn(
+          'Quarantined corrupt trash database to $quarantineTrashPath',
+        );
+      }
+
+      // 2. Re-attempt opening a fresh database instance
+      try {
+        _isar = await Isar.open(
+          [MomentSchema],
+          name: 'notekar_entries_v1',
+          directory: dataDirPath,
+        );
+        _trashIsar = await Isar.open(
+          [MomentSchema],
+          name: 'notekar_trash_v1',
+          directory: dataDirPath,
+        );
+      } catch (e) {
+        _logger.warn('Could not re-open Isar instance after quarantine: $e');
+      }
+
+      // 3. Restore data from auto-snapshot if available
+      final snapshot = _prefs.getString(_autoSnapshotKey);
+      List<Moment> recovered = [];
+      if (snapshot != null && snapshot.isNotEmpty) {
+        try {
+          final list = (jsonDecode(snapshot) as List)
+              .map((e) => Moment.fromJson(Map<String, dynamic>.from(e as Map)))
+              .toList();
+          recovered = list;
+        } catch (_) {}
+      }
+
+      // Fallback: check atomic disk snapshot
+      if (recovered.isEmpty) {
+        final diskSnapshot = File('$dataDirPath/notekar_vault_snapshot.json');
+        if (diskSnapshot.existsSync()) {
+          try {
+            final content = await diskSnapshot.readAsString();
+            final list = (jsonDecode(content) as List)
+                .map(
+                  (e) => Moment.fromJson(Map<String, dynamic>.from(e as Map)),
+                )
+                .toList();
+            recovered = list;
+          } catch (_) {}
+        }
+      }
+
+      if (_isar != null && recovered.isNotEmpty) {
+        await _isar!.writeTxn(() async {
+          await _isar!.moments.putAll(recovered);
+        });
+        await _prefs.setBool(keyRecoveredFromSnapshot, true);
+        _logger.info(
+          'Corrupt database recovered successfully: restored ${recovered.length} moments from snapshot',
+        );
+      } else if (recovered.isNotEmpty) {
+        _cachedMoments = List<Moment>.from(recovered);
+        await _prefs.setBool(keyRecoveredFromSnapshot, true);
+      }
+    } catch (e, st) {
+      _logger.error(
+        'Secondary error during database quarantine recovery ($e)',
+        e,
+        st,
+      );
+      _isar = null;
+      _trashIsar = null;
+    }
+  }
+
   Future<void> triggerAutoSnapshotIfNeeded({bool force = false}) async {
     try {
       final now = DateTime.now().millisecondsSinceEpoch;
@@ -408,8 +547,24 @@ class MomentRepository {
       if (moments.isEmpty) return;
 
       final jsonList = moments.map((m) => m.toJson()).toList();
-      await _prefs.setString(_autoSnapshotKey, jsonEncode(jsonList));
+      final jsonStr = jsonEncode(jsonList);
+      await _prefs.setString(_autoSnapshotKey, jsonStr);
       await _prefs.setInt(_lastSnapshotTimeKey, now);
+
+      // Atomic disk write for multi-tier redundancy
+      try {
+        final dirPath = _isar?.directory ?? Directory.systemTemp.path;
+        final targetFile = File('$dirPath/notekar_vault_snapshot.json');
+        final tmpFile = File('$dirPath/notekar_vault_snapshot.json.tmp');
+        await tmpFile.writeAsString(jsonStr, flush: true);
+        if (targetFile.existsSync()) {
+          await targetFile.delete();
+        }
+        await tmpFile.rename(targetFile.path);
+      } catch (err) {
+        _logger.warn('Disk snapshot write fallback: $err');
+      }
+
       _logger.info('Auto-snapshot updated with ${moments.length} moments');
     } catch (e, stack) {
       _logger.error('Failed generating auto-snapshot', e, stack);

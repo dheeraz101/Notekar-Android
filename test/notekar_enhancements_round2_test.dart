@@ -556,9 +556,9 @@ void main() {
         );
 
         expect(find.text('FLUID MENISCUS RESERVOIR'), findsNothing);
-        expect(find.text('SWIPE OR TAP TO APPLY ACCENT'), findsOneWidget);
+        expect(find.text('TAP ANY FISH TO HARMONIZE ACCENT'), findsOneWidget);
         expect(
-          find.text('${kAccentColorPalette.length} Shades'),
+          find.text('${kAccentColorPalette.length} Living Species'),
           findsOneWidget,
         );
       },

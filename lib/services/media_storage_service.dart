@@ -52,6 +52,18 @@ class MediaStorageService {
     return voiceDir;
   }
 
+  /// Eagerly initializes persistent storage paths on app launch.
+  Future<void> initialize() async {
+    try {
+      final appData = await _fileChannel.invokeMethod<String>('appDataDir');
+      if (appData != null && appData.isNotEmpty) {
+        _cachedRootPath = appData;
+      }
+    } catch (e) {
+      _logger.warn('Early appDataDir lookup encountered fallback: $e');
+    }
+  }
+
   Future<String> _getRootPath() async {
     if (testRootPath != null) return testRootPath!;
     if (_cachedRootPath != null) return _cachedRootPath!;
@@ -64,23 +76,52 @@ class MediaStorageService {
       }
     } catch (_) {}
 
-    _cachedRootPath = Directory.systemTemp.path;
-    return _cachedRootPath!;
+    // Notice: Do NOT cache systemTemp permanently into _cachedRootPath so future
+    // calls can retrieve the genuine persistent files directory once channels bind.
+    return Directory.systemTemp.path;
   }
 
   /// Resolves a stored relative or absolute path to a concrete [File].
+  ///
+  /// Searches primary persistent storage first, then fallback directories
+  /// (temporary cache, legacy sandbox shifts, and filename matches).
+  /// If a valid asset is found in an alternate or temporary location, it is
+  /// automatically migrated (copied) to the persistent storage directory.
   Future<File> resolveFile(String? relativeOrAbsolutePath) async {
     if (relativeOrAbsolutePath == null || relativeOrAbsolutePath.isEmpty) {
       return File('');
     }
 
-    final file = File(relativeOrAbsolutePath);
-    if (file.isAbsolute && file.existsSync()) {
-      return file;
+    final originalFile = File(relativeOrAbsolutePath);
+    final mediaDir = await getMediaDirectory();
+
+    // 1. If absolute path exists
+    if (originalFile.isAbsolute && originalFile.existsSync()) {
+      // If residing in a volatile temp/cache directory, auto-migrate to persistent
+      final isTemp =
+          originalFile.path.contains('/cache/') ||
+          originalFile.path.contains('\\cache\\') ||
+          originalFile.path.startsWith(Directory.systemTemp.path);
+      if (isTemp) {
+        try {
+          final fileName = originalFile.path.split(RegExp(r'[/\\]')).last;
+          final target = File('${mediaDir.path}/images/$fileName');
+          if (!target.existsSync()) {
+            await target.parent.create(recursive: true);
+            await originalFile.copy(target.path);
+            _logger.info(
+              'Auto-migrated temp image to persistent: ${target.path}',
+            );
+            return target;
+          }
+        } catch (e) {
+          _logger.warn('Failed auto-migrating absolute temp file: $e');
+        }
+      }
+      return originalFile;
     }
 
-    final mediaDir = await getMediaDirectory();
-    // Normalize path separators and remove redundant prefix
+    // Normalize path separators and remove redundant prefixes
     var clean = relativeOrAbsolutePath.replaceAll('\\', '/');
     if (clean.startsWith('notekar_media/')) {
       clean = clean.substring('notekar_media/'.length);
@@ -89,17 +130,56 @@ class MediaStorageService {
       clean = clean.substring(1);
     }
 
-    return File('${mediaDir.path}/$clean');
+    // 2. Primary target file in persistent media directory
+    final primaryFile = File('${mediaDir.path}/$clean');
+    if (primaryFile.existsSync()) {
+      return primaryFile;
+    }
+
+    // 3. Fallback: Search alternative directories & self-heal
+    final fileName = clean.split('/').last;
+    final candidates = <File>[
+      File('${Directory.systemTemp.path}/notekar_media/$clean'),
+      File('${Directory.systemTemp.path}/notekar_media/images/$fileName'),
+      File('${Directory.systemTemp.path}/$fileName'),
+      File('${Directory.systemTemp.path}/images/$fileName'),
+      File('/data/user/0/app.notekar.notekar/cache/notekar_media/$clean'),
+      File('/data/user/0/app.notekar.notekar/files/notekar_media/$clean'),
+      File('/data/data/app.notekar.notekar/cache/notekar_media/$clean'),
+      File('/data/data/app.notekar.notekar/files/notekar_media/$clean'),
+      // Also check if stored with 'images/' prefix in media root
+      File('${mediaDir.path}/images/$fileName'),
+    ];
+
+    for (final candidate in candidates) {
+      if (candidate.existsSync()) {
+        try {
+          // Auto-migrate to the expected primary location for permanent durability
+          await primaryFile.parent.create(recursive: true);
+          await candidate.copy(primaryFile.path);
+          _logger.info(
+            'Self-healed & auto-migrated media asset from ${candidate.path} to ${primaryFile.path}',
+          );
+          return primaryFile;
+        } catch (e) {
+          _logger.warn('Auto-migration copy failed for ${candidate.path}: $e');
+          return candidate;
+        }
+      }
+    }
+
+    return primaryFile;
   }
 
   /// Synchronously resolve if root path has already been cached.
+  /// Includes multi-path existence fallback.
   File resolveFileSync(String? relativeOrAbsolutePath) {
     if (relativeOrAbsolutePath == null || relativeOrAbsolutePath.isEmpty) {
       return File('');
     }
-    final file = File(relativeOrAbsolutePath);
-    if (file.isAbsolute && file.existsSync()) {
-      return file;
+    final originalFile = File(relativeOrAbsolutePath);
+    if (originalFile.isAbsolute && originalFile.existsSync()) {
+      return originalFile;
     }
     final root = testRootPath ?? _cachedRootPath ?? Directory.systemTemp.path;
     var clean = relativeOrAbsolutePath.replaceAll('\\', '/');
@@ -109,7 +189,27 @@ class MediaStorageService {
     if (clean.startsWith('/')) {
       clean = clean.substring(1);
     }
-    return File('$root/notekar_media/$clean');
+
+    final primary = File('$root/notekar_media/$clean');
+    if (primary.existsSync()) {
+      return primary;
+    }
+
+    final fileName = clean.split('/').last;
+    final fallbackCandidates = [
+      File('${Directory.systemTemp.path}/notekar_media/$clean'),
+      File('${Directory.systemTemp.path}/notekar_media/images/$fileName'),
+      File('${Directory.systemTemp.path}/$fileName'),
+      File('$root/notekar_media/images/$fileName'),
+    ];
+
+    for (final fallback in fallbackCandidates) {
+      if (fallback.existsSync()) {
+        return fallback;
+      }
+    }
+
+    return primary;
   }
 
   /// Copies an image file/XFile/bytes to internal storage and returns the relative path.

@@ -69,7 +69,14 @@ class DataBackupSettingsPage extends StatelessWidget {
   Widget _buildMain(BuildContext context) {
     return Column(
       children: [
-        const SizedBox(height: spacing8),
+        SettingsHeroHeader(
+          p: p,
+          icon: CupertinoIcons.lock_shield_fill,
+          title: 'Sovereign Vault & Backups',
+          subtitle:
+              'Your moments and private reflections are kept strictly offline on this device. Create encrypted exports or snapshot backups.',
+          accentColor: p.green,
+        ),
         SettingsGroup(
           p: p,
           insetDividers: true,

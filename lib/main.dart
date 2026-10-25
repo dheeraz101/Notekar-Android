@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:notekar/l10n/app_localizations.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/screens/note_kar_home.dart';
+import 'package:notekar/services/media_storage_service.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/utils/update_service.dart';
@@ -106,6 +107,7 @@ void main() async {
   CircuitBreakerService.instance.init(prefs);
   unawaited(AdaptiveEngine().initialize(prefs: prefs));
   unawaited(DeviceHealthManager.instance.initialize());
+  unawaited(MediaStorageService.instance.initialize());
   unawaited(
     MomentRepository()
         .ensureInitialized(preloadedPrefs: prefs)

@@ -192,62 +192,21 @@ const List<AccentColorItem> kAccentColorPalette = [
     name: 'Onyx Slate',
     color: Color(0xFF8E8E93),
   ),
+  AccentColorItem(
+    key: 'lavender',
+    name: 'Lavender Mist',
+    color: Color(0xFFBF9AF7),
+  ),
+  AccentColorItem(key: 'rose', name: 'Velvet Rose', color: Color(0xFFFF375F)),
+  AccentColorItem(key: 'sage', name: 'Sage Meadow', color: Color(0xFF8BC69B)),
+  AccentColorItem(key: 'olive', name: 'Olive Grove', color: Color(0xFFA6C750)),
+  AccentColorItem(
+    key: 'slate',
+    name: 'Glacier Slate',
+    color: Color(0xFFA5B7CA),
+  ),
+  AccentColorItem(key: 'brown', name: 'Cedar Wood', color: Color(0xFFC69C89)),
 ];
-
-class AccentSnappingScrollPhysics extends ScrollPhysics {
-  final double itemExtent;
-
-  const AccentSnappingScrollPhysics({required this.itemExtent, super.parent});
-
-  @override
-  AccentSnappingScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return AccentSnappingScrollPhysics(
-      itemExtent: itemExtent,
-      parent: buildParent(ancestor),
-    );
-  }
-
-  double _getTargetPixels(
-    ScrollMetrics position,
-    Tolerance tolerance,
-    double velocity,
-  ) {
-    // Apple iOS UIPickerView momentum projection
-    final projectedPixels = position.pixels + velocity * 0.14;
-    final page = (projectedPixels / itemExtent).roundToDouble();
-    return page * itemExtent;
-  }
-
-  @override
-  Simulation? createBallisticSimulation(
-    ScrollMetrics position,
-    double velocity,
-  ) {
-    final tolerance = toleranceFor(position);
-    if ((velocity <= 0.0 && position.pixels <= position.minScrollExtent) ||
-        (velocity >= 0.0 && position.pixels >= position.maxScrollExtent)) {
-      return super.createBallisticSimulation(position, velocity);
-    }
-    final target = _getTargetPixels(
-      position,
-      tolerance,
-      velocity,
-    ).clamp(position.minScrollExtent, position.maxScrollExtent);
-    if ((target - position.pixels).abs() < tolerance.distance) {
-      return null;
-    }
-    return ScrollSpringSimulation(
-      const SpringDescription(mass: 1.0, stiffness: 160.0, damping: 20.0),
-      position.pixels,
-      target,
-      velocity,
-      tolerance: tolerance,
-    );
-  }
-
-  @override
-  bool get allowImplicitScrolling => false;
-}
 
 class _AccentColorExperience extends StatefulWidget {
   const _AccentColorExperience({
@@ -268,9 +227,45 @@ class _AccentColorExperience extends StatefulWidget {
   State<_AccentColorExperience> createState() => _AccentColorExperienceState();
 }
 
+class _FishState {
+  _FishState({
+    required this.item,
+    required this.y,
+    required this.speed,
+    required this.scale,
+    required this.waggleSpeed,
+    required this.wagglePhase,
+    required this.bobPhase,
+    this.x = 0.5,
+  });
+
+  final AccentColorItem item;
+  double x; // 0.0 to 1.0 (horizontal relative coordinate in pond)
+  double y; // vertical depth in pixels
+  double speed; // normalized horizontal delta per second (signed)
+  double scale;
+  double waggleSpeed;
+  double wagglePhase;
+  double bobPhase;
+
+  bool isDying = false;
+  double deathProgress = 0.0;
+}
+
+class _WaterRipple {
+  _WaterRipple({
+    required this.origin,
+    required this.color,
+    this.progress = 0.0,
+  });
+
+  final Offset origin;
+  final Color color;
+  double progress;
+}
+
 class _AccentColorExperienceState extends State<_AccentColorExperience>
     with TickerProviderStateMixin {
-  late ScrollController _scrollController;
   late AnimationController _waveController;
   late AnimationController _colorTransitionController;
   StreamSubscription<AccelerometerEvent>? _motionSub;
@@ -279,9 +274,10 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
   Color _currentColor = const Color(0xFF007AFF);
   Color _previousColor = const Color(0xFF007AFF);
   double _tiltX = 0.0;
-  int? _lastFocalHapticIndex;
 
-  final double _itemWidth = 46.0;
+  late List<_FishState> _fishList;
+  final List<_WaterRipple> _ripples = [];
+  int? _lastTickMs;
 
   @override
   void initState() {
@@ -289,15 +285,13 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
     _currentColorKey = widget.accentColor.isEmpty ? 'blue' : widget.accentColor;
     _currentColor = _findColor(_currentColorKey);
     _previousColor = _currentColor;
-    final initialIndex = kAccentColorPalette.indexWhere(
-      (c) => c.key == _currentColorKey,
-    );
-    _lastFocalHapticIndex = initialIndex != -1 ? initialIndex : 0;
 
-    _scrollController = ScrollController();
+    _fishList = _initFish();
+
     final isLowEnd =
         AdaptiveEngine().isLowEnd ||
         DeviceHealthManager.instance.shouldThrottle;
+
     _waveController = AnimationController(
       vsync: this,
       duration: isLowEnd
@@ -305,7 +299,10 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
           : const Duration(milliseconds: 2400),
       value: 0.0,
     );
-    // Continuous natural water wave motion
+
+    _waveController.addListener(_onFrameTick);
+
+    // Continuous natural water wave & fish swimming motion
     if (!widget.reduceMotion) {
       _waveController.repeat();
     }
@@ -338,10 +335,86 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
             );
       } catch (_) {}
     }
+  }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToColor(_currentColorKey, animate: false);
-    });
+  List<_FishState> _initFish() {
+    final list = <_FishState>[];
+    for (int i = 0; i < kAccentColorPalette.length; i++) {
+      final item = kAccentColorPalette[i];
+      final isRight = i % 2 == 0;
+      final speedMagnitude = 0.050 + (i % 5) * 0.012;
+      final speed = isRight ? speedMagnitude : -speedMagnitude;
+      final startX = (0.08 + (i * 0.19) % 0.84).clamp(0.06, 0.94);
+
+      double depth;
+      if (i < 6) {
+        // Surface shallows (0..5)
+        depth = 48.0 + (i * 20.0);
+      } else if (i < 14) {
+        // Mid-depth reservoir (6..13)
+        depth = 180.0 + ((i - 6) * 34.0);
+      } else {
+        // Deeper waters (14..19)
+        depth = 465.0 + ((i - 14) * 32.0);
+      }
+
+      list.add(
+        _FishState(
+          item: item,
+          x: startX,
+          y: depth,
+          speed: speed,
+          scale: 0.92 + (i % 4) * 0.08,
+          waggleSpeed: 1.2 + (i % 3) * 0.35,
+          wagglePhase: (i * 1.3) % (math.pi * 2),
+          bobPhase: (i * 0.9) % (math.pi * 2),
+        ),
+      );
+    }
+    return list;
+  }
+
+  void _onFrameTick() {
+    if (!mounted) return;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final dt = _lastTickMs == null
+        ? 0.016
+        : ((now - _lastTickMs!) / 1000.0).clamp(0.005, 0.05);
+    _lastTickMs = now;
+
+    // Update fish movement
+    for (final fish in _fishList) {
+      if (fish.isDying) {
+        fish.deathProgress += dt * 1.6;
+        if (fish.deathProgress >= 1.0) {
+          // Reincarnate fish from the screen boundary
+          fish.isDying = false;
+          fish.deathProgress = 0.0;
+          fish.x = fish.speed > 0 ? -0.15 : 1.15;
+        }
+        continue;
+      }
+
+      final tiltBonus = _tiltX * 0.035;
+      fish.x += (fish.speed + tiltBonus) * dt;
+
+      // Wrap-around naturally
+      if (fish.speed > 0 && fish.x > 1.18) {
+        fish.x = -0.18;
+      } else if (fish.speed < 0 && fish.x < -0.18) {
+        fish.x = 1.18;
+      }
+    }
+
+    // Update ripples
+    for (int i = _ripples.length - 1; i >= 0; i--) {
+      _ripples[i].progress += dt * 1.8;
+      if (_ripples[i].progress >= 1.0) {
+        _ripples.removeAt(i);
+      }
+    }
+
+    setState(() {});
   }
 
   @override
@@ -358,7 +431,7 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
   void dispose() {
     _motionSub?.cancel();
     _motionSub = null;
-    _scrollController.dispose();
+    _waveController.removeListener(_onFrameTick);
     _waveController.dispose();
     _colorTransitionController.dispose();
     super.dispose();
@@ -382,22 +455,6 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
         .name;
   }
 
-  void _scrollToColor(String key, {bool animate = true}) {
-    final index = kAccentColorPalette.indexWhere((c) => c.key == key);
-    if (index == -1 || !_scrollController.hasClients) return;
-
-    final targetOffset = index * _itemWidth;
-    if (animate) {
-      _scrollController.animateTo(
-        targetOffset,
-        duration: const Duration(milliseconds: 280),
-        curve: Curves.easeOutCubic,
-      );
-    } else {
-      _scrollController.jumpTo(targetOffset);
-    }
-  }
-
   void _triggerColorTransition(String newKey) {
     if (newKey == _currentColorKey) return;
 
@@ -416,367 +473,273 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
 
     _colorTransitionController.forward(from: 0.0);
     widget.onAccentColorChanged(newKey);
-    _scrollToColor(newKey);
+  }
+
+  void _handlePondTap(Offset localPos, Size pondSize) {
+    final tappedX = localPos.dx;
+    final tappedY = localPos.dy;
+
+    _FishState? hitFish;
+    double minDistance = 52.0;
+
+    for (final fish in _fishList) {
+      if (fish.isDying) continue;
+      final fishPixelX = fish.x * pondSize.width;
+      final fishPixelY =
+          fish.y +
+          math.sin(_waveController.value * 2 * math.pi + fish.bobPhase) * 4.0;
+      final dist =
+          (Offset(fishPixelX, fishPixelY) - Offset(tappedX, tappedY)).distance;
+      if (dist < minDistance) {
+        minDistance = dist;
+        hitFish = fish;
+      }
+    }
+
+    if (hitFish != null) {
+      HapticFeedback.mediumImpact();
+      hitFish.isDying = true;
+      hitFish.deathProgress = 0.0;
+
+      final fishPixelX = hitFish.x * pondSize.width;
+      final fishPixelY =
+          hitFish.y +
+          math.sin(_waveController.value * 2 * math.pi + hitFish.bobPhase) *
+              4.0;
+
+      _ripples.add(
+        _WaterRipple(
+          origin: Offset(fishPixelX, fishPixelY),
+          color: hitFish.item.color,
+          progress: 0.0,
+        ),
+      );
+
+      _triggerColorTransition(hitFish.item.key);
+    } else {
+      HapticFeedback.selectionClick();
+      _ripples.add(
+        _WaterRipple(
+          origin: localPos,
+          color: _currentColor.withValues(alpha: 0.6),
+          progress: 0.0,
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final p = widget.p;
 
-    final screenH = MediaQuery.sizeOf(context).height;
-    final bottomReservoirHeight = (screenH - 340.0).clamp(380.0, 1000.0);
-
-    return Stack(
-      children: [
-        // 1. Full-page fluid bucket canvas (continuous water waves + lateral phone tilt response)
-        Positioned.fill(
-          child: AnimatedBuilder(
-            animation: Listenable.merge([
-              _waveController,
-              _colorTransitionController,
-            ]),
-            builder: (context, _) {
-              return CustomPaint(
-                painter: _FullPageFluidBucketPainter(
-                  wavePhase: _waveController.value,
-                  fluidColor: _currentColor,
-                  previousColor: _previousColor,
-                  colorProgress: _colorTransitionController.value,
-                  tiltX: _tiltX,
-                  params: const FluidDynamicsParams(),
-                  surfaceTopOffset: 308.0,
-                  isLowEnd: AdaptiveEngine().isLowEnd,
-                  isThrottled: DeviceHealthManager.instance.shouldThrottle,
-                ),
-              );
-            },
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: Column(
+        children: [
+          // 1. Apple HIG Hero Top Page Header
+          SettingsHeroHeader(
+            p: p,
+            icon: CupertinoIcons.drop_fill,
+            title: 'Liquid Accent Sanctuary',
+            subtitle:
+                'Immerse yourself in NoteKar\'s living color pond. Tap any swimming fish to morph the fluid theme across your entire device experience.',
+            accentColor: _currentColor,
           ),
-        ),
 
-        // 2. Foreground content
-        Column(
-          children: [
-            const SizedBox(height: spacing12),
+          // 2. Active Color Pill Badge & Name
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: p.surface2.withValues(alpha: 0.8),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: p.border.withValues(alpha: 0.5)),
+              boxShadow: [
+                BoxShadow(
+                  color: _currentColor.withValues(alpha: 0.14),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 14,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _currentColor,
+                    boxShadow: [
+                      BoxShadow(
+                        color: _currentColor.withValues(alpha: 0.6),
+                        blurRadius: 8,
+                        spreadRadius: 1,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  _findName(_currentColorKey).localized(context),
+                  style: TextStyle(
+                    color: p.text,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text('•', style: TextStyle(color: p.text3, fontSize: 12)),
+                const SizedBox(width: 8),
+                Text(
+                  'Active'.localized(context),
+                  style: TextStyle(
+                    color: p.text2,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
 
-            // Active Color Pill Badge & Name
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          const SizedBox(height: 16),
+
+          // 3. Section Title & Instruction
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'TAP ANY FISH TO HARMONIZE ACCENT'.localized(context),
+                  style: TextStyle(
+                    color: p.text3,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+                Text(
+                  '${kAccentColorPalette.length} Living Species',
+                  style: TextStyle(
+                    color: p.text3,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: SettingsPageDescription(
+              p: p,
+              text:
+                  'Surface fish glide across the shallows. Scroll down to dive deeper into the reservoir to discover rare shades and bottom riverbed stones.'
+                      .localized(context),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // 4. Living Aquarium Pond Canvas
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Container(
+              height: 740,
               decoration: BoxDecoration(
-                color: p.surface2.withValues(alpha: 0.8),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: p.border.withValues(alpha: 0.5)),
+                color: Colors.black.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: _currentColor.withValues(alpha: 0.25),
+                  width: 1.2,
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: _currentColor.withValues(alpha: 0.12),
-                    blurRadius: 16,
-                    offset: const Offset(0, 4),
+                    blurRadius: 24,
+                    offset: const Offset(0, 6),
                   ),
                 ],
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 14,
-                    height: 14,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: _currentColor,
-                      boxShadow: [
-                        BoxShadow(
-                          color: _currentColor.withValues(alpha: 0.6),
-                          blurRadius: 8,
-                          spreadRadius: 1,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    _findName(_currentColorKey).localized(context),
-                    style: TextStyle(
-                      color: p.text,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.2,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text('•', style: TextStyle(color: p.text3, fontSize: 12)),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Active'.localized(context),
-                    style: TextStyle(
-                      color: p.text2,
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 14),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: SettingsPageDescription(
-                p: p,
-                text:
-                    'Swipe horizontally to select an accent color. Fluid tint dynamically reflects across all dials, pills, and sovereign moments.'
-                        .localized(context),
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Section Header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'SWIPE OR TAP TO APPLY ACCENT'.localized(context),
-                    style: TextStyle(
-                      color: p.text3,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                  Text(
-                    '${kAccentColorPalette.length} Shades',
-                    style: TextStyle(
-                      color: p.text3,
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 14),
-
-            // Horizontal Color Carousel with Natural Proportional Sizing
-            SizedBox(
-              height: 126,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final viewportWidth = constraints.maxWidth;
-                  final halfViewport = viewportWidth / 2;
-
-                  return Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Center Stationary Target Indicator Rings (Apple HIG Glow & Outer Frame)
-                      Container(
-                        width: 104,
-                        height: 104,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: _currentColor.withValues(alpha: 0.18),
-                            width: 1.0,
-                          ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(23),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final pondSize = Size(
+                      constraints.maxWidth,
+                      constraints.maxHeight,
+                    );
+                    return GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTapUp: (details) =>
+                          _handlePondTap(details.localPosition, pondSize),
+                      child: CustomPaint(
+                        size: pondSize,
+                        painter: _PondAquariumPainter(
+                          wavePhase: _waveController.value,
+                          fluidColor: _currentColor,
+                          previousColor: _previousColor,
+                          colorProgress: _colorTransitionController.value,
+                          tiltX: _tiltX,
+                          selectedKey: _currentColorKey,
+                          fishList: _fishList,
+                          ripples: _ripples,
+                          palette: p,
                         ),
                       ),
-                      Container(
-                        width: 94,
-                        height: 94,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: _currentColor.withValues(alpha: 0.5),
-                            width: 2.4,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: _currentColor.withValues(alpha: 0.28),
-                              blurRadius: 18,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Horizontal List with Natural Focal Scale & Fluid Spring Snap
-                      NotificationListener<ScrollNotification>(
-                        onNotification: (notification) {
-                          if (notification is ScrollUpdateNotification &&
-                              _scrollController.hasClients) {
-                            final currentScroll = _scrollController.offset;
-                            final nearestIndex = (currentScroll / _itemWidth)
-                                .round()
-                                .clamp(0, kAccentColorPalette.length - 1);
-                            if (nearestIndex != _lastFocalHapticIndex) {
-                              _lastFocalHapticIndex = nearestIndex;
-                              HapticFeedback.selectionClick();
-                            }
-                          }
-                          if (notification is ScrollEndNotification &&
-                              _scrollController.hasClients) {
-                            final currentScroll = _scrollController.offset;
-                            final nearestIndex = (currentScroll / _itemWidth)
-                                .round()
-                                .clamp(0, kAccentColorPalette.length - 1);
-                            final newKey =
-                                kAccentColorPalette[nearestIndex].key;
-                            if (newKey != _currentColorKey) {
-                              _triggerColorTransition(newKey);
-                            }
-                          }
-                          return false;
-                        },
-                        child: AnimatedBuilder(
-                          animation: _scrollController,
-                          builder: (context, _) {
-                            return ListView.builder(
-                              controller: _scrollController,
-                              scrollDirection: Axis.horizontal,
-                              physics: AccentSnappingScrollPhysics(
-                                itemExtent: _itemWidth,
-                                parent: const BouncingScrollPhysics(),
-                              ),
-                              padding: EdgeInsets.symmetric(
-                                horizontal: halfViewport - (_itemWidth / 2),
-                              ),
-                              itemCount: kAccentColorPalette.length,
-                              itemBuilder: (context, index) {
-                                final item = kAccentColorPalette[index];
-                                final itemCenterOffset = index * _itemWidth;
-                                final currentScroll =
-                                    _scrollController.hasClients
-                                    ? _scrollController.offset
-                                    : 0.0;
-                                final distance =
-                                    (itemCenterOffset - currentScroll).abs();
-                                final step = distance / _itemWidth;
-
-                                // Natural sizing: Center is prominent (84), neighbors scale down cleanly (32, 22, 14)
-                                double circleDiameter;
-                                if (step <= 1.0) {
-                                  circleDiameter = 84.0 - (84.0 - 32.0) * step;
-                                } else if (step <= 2.0) {
-                                  circleDiameter =
-                                      32.0 - (32.0 - 22.0) * (step - 1.0);
-                                } else {
-                                  circleDiameter =
-                                      (22.0 -
-                                      (22.0 - 14.0) *
-                                          ((step - 2.0).clamp(0.0, 1.0)));
-                                }
-
-                                // Natural opacity scale outward from focal center
-                                double opacity;
-                                if (step <= 0.25) {
-                                  opacity = 1.0;
-                                } else if (step <= 1.0) {
-                                  opacity =
-                                      1.0 -
-                                      (1.0 - 0.70) * ((step - 0.25) / 0.75);
-                                } else {
-                                  opacity =
-                                      (0.70 -
-                                              (0.70 - 0.25) *
-                                                  ((step - 1.0) / 1.5))
-                                          .clamp(0.22, 0.70);
-                                }
-
-                                final isSelected = item.key == _currentColorKey;
-
-                                return GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    _triggerColorTransition(item.key);
-                                  },
-                                  child: Container(
-                                    width: _itemWidth,
-                                    alignment: Alignment.center,
-                                    child: Opacity(
-                                      opacity: opacity,
-                                      child: Container(
-                                        width: circleDiameter,
-                                        height: circleDiameter,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: item.color,
-                                          border: isSelected
-                                              ? Border.all(
-                                                  color: Colors.white,
-                                                  width: 2.5,
-                                                )
-                                              : null,
-                                          boxShadow: isSelected
-                                              ? [
-                                                  BoxShadow(
-                                                    color: item.color
-                                                        .withValues(
-                                                          alpha: 0.55,
-                                                        ),
-                                                    blurRadius: 14,
-                                                    spreadRadius: 2,
-                                                  ),
-                                                ]
-                                              : null,
-                                        ),
-                                        child:
-                                            isSelected && circleDiameter >= 56
-                                            ? const Icon(
-                                                Icons.check,
-                                                size: 24,
-                                                color: Colors.white,
-                                              )
-                                            : null,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
+          ),
 
-            // Move this bar slightly down from the circle group
-            const SizedBox(height: 22),
+          const SizedBox(height: 14),
 
-            // Use the whole bottom as a filler for color fluid
-            SizedBox(height: bottomReservoirHeight),
-          ],
-        ),
-      ],
+          // 5. Riverbed Stones Explanatory Caption
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: SettingsPageDescription(
+              p: p,
+              text:
+                  'Riverbed stones retain their fixed hues for destructive actions, alerts, and system ink, ensuring sovereign contrast remains pristine across all accent choices.'
+                      .localized(context),
+            ),
+          ),
+
+          const SizedBox(height: spacing48),
+        ],
+      ),
     );
   }
 }
 
-class _FullPageFluidBucketPainter extends CustomPainter {
+class _PondAquariumPainter extends CustomPainter {
+  _PondAquariumPainter({
+    required this.wavePhase,
+    required this.fluidColor,
+    required this.previousColor,
+    required this.colorProgress,
+    required this.tiltX,
+    required this.selectedKey,
+    required this.fishList,
+    required this.ripples,
+    required this.palette,
+  });
+
   final double wavePhase;
   final Color fluidColor;
   final Color previousColor;
   final double colorProgress;
   final double tiltX;
-  final FluidDynamicsParams params;
-  final bool isLowEnd;
-  final bool isThrottled;
-  final double? surfaceTopOffset;
-
-  _FullPageFluidBucketPainter({
-    required this.wavePhase,
-    required this.fluidColor,
-    required this.previousColor,
-    required this.colorProgress,
-    this.tiltX = 0.0,
-    this.params = const FluidDynamicsParams(),
-    this.isLowEnd = false,
-    this.isThrottled = false,
-    this.surfaceTopOffset,
-  });
+  final String selectedKey;
+  final List<_FishState> fishList;
+  final List<_WaterRipple> ripples;
+  final Palette palette;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -786,119 +749,272 @@ class _FullPageFluidBucketPainter extends CustomPainter {
     final effectiveColor =
         Color.lerp(previousColor, fluidColor, colorProgress) ?? fluidColor;
 
-    // Subtle page-wide tint
-    final bgTint = Paint()
+    // 1. Water Fluid Background Gradient
+    final waterBg = Paint()
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
-          effectiveColor.withValues(alpha: 0.0),
-          effectiveColor.withValues(alpha: 0.06),
+          effectiveColor.withValues(alpha: 0.16),
+          effectiveColor.withValues(alpha: 0.32),
+          effectiveColor.withValues(alpha: 0.52),
         ],
+        stops: const [0.0, 0.45, 1.0],
       ).createShader(Rect.fromLTWH(0, 0, w, h));
-    canvas.drawRect(Rect.fromLTWH(0, 0, w, h), bgTint);
+    canvas.drawRect(Rect.fromLTWH(0, 0, w, h), waterBg);
 
-    // Bottom reservoir: filling whole bottom area, moved slightly down from circles
-    final surfaceY = surfaceTopOffset != null
-        ? surfaceTopOffset!.clamp(0.0, h)
-        : (h - params.reservoirHeight).clamp(0.0, h);
-
-    final fluidPath = Path();
-    fluidPath.moveTo(0, h);
-    fluidPath.lineTo(0, surfaceY);
-
-    if (isLowEnd || isThrottled) {
-      fluidPath.lineTo(w, surfaceY);
-    } else {
-      for (double x = 0; x <= w; x += 3) {
-        final normX = x / w;
-        final tiltOffset = (normX - 0.5) * tiltX * params.tiltResponse;
-        final primaryWave =
-            math.sin(
-              (normX * params.waveFrequency * 2 * math.pi) +
-                  (wavePhase * 2 * math.pi),
-            ) *
-            params.waveAmplitude;
-        final secondaryHarmonic =
-            math.sin(
-              (normX * params.waveFrequency * 4 * math.pi) -
-                  (wavePhase * 3 * math.pi),
-            ) *
-            (params.waveAmplitude * 0.35);
-        final waveY = surfaceY + tiltOffset + primaryWave + secondaryHarmonic;
-        fluidPath.lineTo(x, waveY);
-      }
+    // 2. Surface Water Meniscus & Light Waves
+    final surfaceY = 22.0;
+    final wavePath = Path()..moveTo(0, surfaceY);
+    for (double x = 0; x <= w; x += 4) {
+      final normX = x / w;
+      final tilt = (normX - 0.5) * tiltX * 18.0;
+      final wave =
+          math.sin((normX * 3.0 * math.pi) + (wavePhase * 2 * math.pi)) * 4.0;
+      wavePath.lineTo(x, surfaceY + tilt + wave);
     }
-    fluidPath.lineTo(w, h);
-    fluidPath.close();
+    final wavePaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.35)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    canvas.drawPath(wavePath, wavePaint);
 
-    final fluidPaint = Paint()
-      ..shader =
-          LinearGradient(
+    // 3. Draw Water Shockwave Ripples
+    for (final ripple in ripples) {
+      final rippleRadius = ripple.progress * 48.0;
+      final alpha = (1.0 - ripple.progress).clamp(0.0, 1.0);
+      final rPaint = Paint()
+        ..color = ripple.color.withValues(alpha: alpha * 0.7)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = (1.0 - ripple.progress) * 2.8;
+      canvas.drawCircle(ripple.origin, rippleRadius, rPaint);
+      canvas.drawCircle(
+        ripple.origin,
+        rippleRadius * 0.55,
+        rPaint..strokeWidth = 1.2,
+      );
+    }
+
+    // 4. Draw Swimming Fish
+    for (final fish in fishList) {
+      final isSelected = fish.item.key == selectedKey;
+      final fishPixelX = fish.x * w;
+      final bob = math.sin(wavePhase * 2 * math.pi + fish.bobPhase) * 4.0;
+      final fishPixelY = fish.y + bob;
+
+      canvas.save();
+      canvas.translate(fishPixelX, fishPixelY);
+
+      if (fish.isDying) {
+        // Draw burst bubble particles
+        final pProgress = fish.deathProgress;
+        final fade = (1.0 - pProgress).clamp(0.0, 1.0);
+        final bubblePaint = Paint()
+          ..color = fish.item.color.withValues(alpha: fade * 0.8)
+          ..style = PaintingStyle.fill;
+
+        for (int b = 0; b < 6; b++) {
+          final bAngle = (b * (math.pi / 3)) + (pProgress * 2);
+          final bDist = pProgress * 28.0;
+          final bx = math.cos(bAngle) * bDist;
+          final by = math.sin(bAngle) * bDist;
+          canvas.drawCircle(
+            Offset(bx, by),
+            (1.0 - pProgress) * 4.0,
+            bubblePaint,
+          );
+        }
+      } else {
+        // Direction & scale
+        final isFacingRight = fish.speed >= 0;
+        canvas.scale(isFacingRight ? fish.scale : -fish.scale, fish.scale);
+
+        // Active glowing aura ring for selected color
+        if (isSelected) {
+          final auraPaint = Paint()
+            ..color = fish.item.color.withValues(alpha: 0.35)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
+          canvas.drawCircle(Offset.zero, 30, auraPaint);
+
+          final auraRing = Paint()
+            ..color = Colors.white.withValues(alpha: 0.75)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.5;
+          canvas.drawCircle(Offset.zero, 28, auraRing);
+        }
+
+        // Vector Tail Fin (Caudal) with Sinusoidal Waggle
+        final waggle =
+            math.sin(
+              (wavePhase * 2 * math.pi * fish.waggleSpeed) + fish.wagglePhase,
+            ) *
+            0.36;
+
+        canvas.save();
+        canvas.translate(-20, 0);
+        canvas.rotate(waggle);
+
+        final tailPath = Path()
+          ..moveTo(0, 0)
+          ..cubicTo(-8, -11, -18, -14, -22, -11)
+          ..cubicTo(-17, -4, -17, 4, -22, 11)
+          ..cubicTo(-18, 14, -8, 11, 0, 0)
+          ..close();
+
+        final tailPaint = Paint()
+          ..color = fish.item.color.withValues(alpha: 0.78)
+          ..style = PaintingStyle.fill;
+        canvas.drawPath(tailPath, tailPaint);
+        canvas.restore();
+
+        // Vector Dorsal Fin (Top)
+        final dorsalPath = Path()
+          ..moveTo(-6, -6)
+          ..cubicTo(0, -14, 8, -13, 12, -5)
+          ..close();
+        final dorsalPaint = Paint()
+          ..color = fish.item.color.withValues(alpha: 0.7)
+          ..style = PaintingStyle.fill;
+        canvas.drawPath(dorsalPath, dorsalPaint);
+
+        // Vector Pectoral Fin (Belly)
+        final pectoralPath = Path()
+          ..moveTo(2, 4)
+          ..cubicTo(6, 11, 10, 10, 12, 4)
+          ..close();
+        canvas.drawPath(pectoralPath, dorsalPaint);
+
+        // Vector Body (Smooth Koi / Betta Spindle)
+        final bodyPath = Path()
+          ..moveTo(22, 0) // Mouth / Head
+          ..cubicTo(12, -9, -10, -9, -20, -3) // Dorsal curve
+          ..lineTo(-22, 0) // Tail base
+          ..cubicTo(-10, 9, 12, 9, 22, 0) // Belly curve
+          ..close();
+
+        final bodyPaint = Paint()
+          ..shader = LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              effectiveColor.withValues(alpha: 0.65),
-              effectiveColor.withValues(alpha: 0.35),
+              fish.item.color,
+              Color.lerp(fish.item.color, Colors.black, 0.18) ??
+                  fish.item.color,
             ],
-          ).createShader(
-            Rect.fromLTWH(0, surfaceY, w, math.max(1.0, h - surfaceY)),
-          );
-    canvas.drawPath(fluidPath, fluidPaint);
+          ).createShader(const Rect.fromLTWH(-22, -9, 44, 18));
+        canvas.drawPath(bodyPath, bodyPaint);
 
-    // Subtle glow shader on top of fluid meniscus
-    if (!isLowEnd &&
-        !isThrottled &&
-        DeviceHealthManager.instance.enableGlowShader) {
-      final glowShaderPaint = Paint()
-        ..color = effectiveColor.withValues(alpha: 0.35)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 4.0;
-      canvas.drawPath(fluidPath, glowShaderPaint);
-    }
+        // Eye
+        canvas.drawCircle(
+          const Offset(13, -3),
+          2.2,
+          Paint()..color = Colors.white,
+        );
+        canvas.drawCircle(
+          const Offset(14, -3),
+          1.1,
+          Paint()..color = Colors.black,
+        );
 
-    // Meniscus crest highlight line
-    final crestPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.40)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
-    final crestPath = Path();
-    crestPath.moveTo(0, surfaceY);
-    if (isLowEnd || isThrottled) {
-      crestPath.lineTo(w, surfaceY);
-    } else {
-      for (double x = 0; x <= w; x += 3) {
-        final normX = x / w;
-        final tiltOffset = (normX - 0.5) * tiltX * params.tiltResponse;
-        final primaryWave =
-            math.sin(
-              (normX * params.waveFrequency * 2 * math.pi) +
-                  (wavePhase * 2 * math.pi),
-            ) *
-            params.waveAmplitude;
-        final secondaryHarmonic =
-            math.sin(
-              (normX * params.waveFrequency * 4 * math.pi) -
-                  (wavePhase * 3 * math.pi),
-            ) *
-            (params.waveAmplitude * 0.35);
-        final waveY = surfaceY + tiltOffset + primaryWave + secondaryHarmonic;
-        crestPath.lineTo(x, waveY);
+        // Subtle Dorsal Highlight
+        final hlPaint = Paint()
+          ..color = Colors.white.withValues(alpha: 0.35)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.0;
+        canvas.drawArc(
+          const Rect.fromLTWH(-14, -7, 28, 14),
+          math.pi * 1.15,
+          math.pi * 0.7,
+          false,
+          hlPaint,
+        );
+
+        // Floating checkmark badge if selected
+        if (isSelected) {
+          final badgeCenter = const Offset(0, -22);
+          final bgBadge = Paint()..color = Colors.white;
+          canvas.drawCircle(badgeCenter, 6.5, bgBadge);
+
+          final checkPaint = Paint()
+            ..color = fish.item.color
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.8
+            ..strokeCap = StrokeCap.round;
+
+          final cPath = Path()
+            ..moveTo(badgeCenter.dx - 3, badgeCenter.dy)
+            ..lineTo(badgeCenter.dx - 0.8, badgeCenter.dy + 2.4)
+            ..lineTo(badgeCenter.dx + 3.2, badgeCenter.dy - 2.2);
+          canvas.drawPath(cPath, checkPaint);
+        }
       }
+
+      canvas.restore();
     }
-    canvas.drawPath(crestPath, crestPaint);
+
+    // 5. Riverbed Stones at the Pond Bottom (y = 675..725)
+    final riverbedY = h - 55.0;
+
+    // Floor sediment layer
+    final sedimentPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Colors.black.withValues(alpha: 0.0),
+          Colors.black.withValues(alpha: 0.35),
+        ],
+      ).createShader(Rect.fromLTWH(0, riverbedY - 20, w, 75));
+    canvas.drawRect(Rect.fromLTWH(0, riverbedY - 20, w, 75), sedimentPaint);
+
+    // Decorative river pebbles with NoteKar's fixed invariant colors
+    final stones = [
+      (color: palette.red, width: 44.0, height: 24.0, offset: 0.14),
+      (color: palette.orange, width: 38.0, height: 21.0, offset: 0.32),
+      (color: palette.text3, width: 48.0, height: 26.0, offset: 0.50),
+      (color: const Color(0xFF1C1C1E), width: 42.0, height: 22.0, offset: 0.68),
+      (color: const Color(0xFFFFFFFF), width: 36.0, height: 20.0, offset: 0.84),
+    ];
+
+    for (final stone in stones) {
+      final stoneX = stone.offset * w;
+      final stoneRect = Rect.fromCenter(
+        center: Offset(stoneX, riverbedY + 8),
+        width: stone.width,
+        height: stone.height,
+      );
+
+      // Stone drop shadow
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          stoneRect.translate(0, 3),
+          Radius.circular(stone.height / 2),
+        ),
+        Paint()..color = Colors.black.withValues(alpha: 0.45),
+      );
+
+      // Stone body
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(stoneRect, Radius.circular(stone.height / 2)),
+        Paint()..color = stone.color,
+      );
+
+      // Gentle glossy caustic highlight on stone top
+      final hlRect = Rect.fromLTWH(
+        stoneRect.left + 6,
+        stoneRect.top + 3,
+        stone.width - 12,
+        stone.height * 0.4,
+      );
+      canvas.drawOval(
+        hlRect,
+        Paint()..color = Colors.white.withValues(alpha: 0.28),
+      );
+    }
   }
 
   @override
-  bool shouldRepaint(covariant _FullPageFluidBucketPainter oldDelegate) {
-    return oldDelegate.wavePhase != wavePhase ||
-        oldDelegate.fluidColor != fluidColor ||
-        oldDelegate.previousColor != previousColor ||
-        oldDelegate.colorProgress != colorProgress ||
-        oldDelegate.tiltX != tiltX ||
-        oldDelegate.params != params ||
-        oldDelegate.isLowEnd != isLowEnd ||
-        oldDelegate.isThrottled != isThrottled ||
-        oldDelegate.surfaceTopOffset != surfaceTopOffset;
+  bool shouldRepaint(covariant _PondAquariumPainter oldDelegate) {
+    return true;
   }
 }

@@ -94,7 +94,14 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
 
     return Column(
       children: [
-        const SizedBox(height: spacing8),
+        SettingsHeroHeader(
+          p: p,
+          icon: CupertinoIcons.slider_horizontal_3,
+          title: 'Advanced & System',
+          subtitle:
+              'Fine-tune accessibility curves, diagnostic circuit breakers, internationalization, and device resilience.',
+          accentColor: p.orange,
+        ),
         SettingsGroup(
           p: p,
           insetDividers: true,

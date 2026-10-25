@@ -83,7 +83,13 @@ class DisplaySettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const SizedBox(height: spacing8),
+        SettingsHeroHeader(
+          p: p,
+          icon: CupertinoIcons.sun_max_fill,
+          title: 'Display & Visuals',
+          subtitle:
+              'Calibrate typography, theme contrast, frame pacing, and home clock dials for seamless clarity.',
+        ),
         _DisplayLivePreview(
           p: p,
           theme: theme,
