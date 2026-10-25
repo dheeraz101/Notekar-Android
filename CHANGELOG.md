@@ -6,6 +6,35 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [7.5.11] - 2026-10-25 (versionCode 26BR1025) [BR]
+
+> *App-Aware Floating Control Pill, Edge Line Handle Docking, Oceanic Fluid Sanctuary, Peer Horizon QR Pass & Camera Scanner.*
+
+### What's New
+- **App-Aware Floating Control Pill**: Overlay automatically hides while inside NoteKar and reappears seamlessly when the app is minimized or backgrounded.
+- **Slim 5dp Vertical Edge Handle Docking**: Tapping "✕ Hide" docks the pill into a slim 5dp vertical handle touching the screen bezel (32dp touch area) with session-harmonized glow.
+- **Tactile Gesture Restoration**: Tap edge line to spring back with overshoot bounce, or swipe inward (>12dp) to drag-out the circular orb with magnetic edge snapping.
+- **Living Oceanic Fluid Sanctuary**: Borderless edge-to-edge wave flow transitioning directly from page background into water.
+- **Crowned Queen Fish**: Selected accent is crowned Queen Fish at deep waters (1.38x scale) with a dorsal-aligned 3-pointed golden crown.
+- **19 Companion Fish**: Varied depths, natural wave propulsion, theme-adaptive abyssal shadows, and 7 fixed-color riverbed rocks.
+- **Minimal Sovereign QR Pass**: Redesigned Share Identity Card to present a clean, high-contrast Apple HIG QR pass with zero extraneous chronometer text.
+- **Fullscreen Laser Scanner**: Continuous 60fps emerald laser sweep, dynamic reticle, and central success/failure checkmark HUD.
+- **Peer Comparison Engine**: Side-by-side life clock benchmarking with single-peer persistence and replace safeguards.
+
+### Improvements & Polish
+- **Update Center Layout**: Cryptographic description now occupies full card width below build cache metrics for comfortable reading.
+- **App Icons Page**: Added responsive Wrap header layout and launcher instructions, eliminating text clipping on small screens and large text scales.
+- **Sandboxed Media Storage**: Captured photos in timeline are persisted to sandboxed app directory, fixing missing thumbnails in history sheet.
+- **Resilient Database Healing**: Automated database self-healing checks to detect, recover, and safeguard against data corruption.
+
+### Bug Fixes
+- Fixed floating overlay flashing over NoteKar on startup.
+- Fixed species counter collision on narrow viewports with ellipsis handling.
+- Resolved history sheet photo thumbnail loading issue.
+- Fixed `scripts/update-version.ps1` prerelease parsing and universal version string replacement.
+
+---
+
 ## [7.5.10E1] - 2026-10-24 (versionCode 26ER1024) [ER]
 
 > *Experimental Architecture, Hospital-Grade ECG Oscilloscope, Apple HIG Optical Previews & Performance Governor.*

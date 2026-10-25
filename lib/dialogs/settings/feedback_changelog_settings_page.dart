@@ -23,95 +23,94 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.5.10E1',
-    date: 'October 24, 2026',
-    edition: 'Experimental Architecture & Sensory Refinements',
-    badgeColor: Color(0xFFFF3B30),
+    version: '7.5.11',
+    date: 'October 25, 2026',
+    edition: 'Sovereign QR Pass & Oceanic Sanctuary Beta',
+    badgeColor: Color(0xFFFF9F0A),
     innovations: [
       (
-        title: 'Hospital-Grade ECG Oscilloscope',
-        category: 'CONNECTIVITY & TELEMETRY',
-        headline: 'Dynamic Pulse Waveform. Flatline Disconnect.',
+        title: 'App-Aware Floating Control Pill',
+        category: 'SYSTEM OVERLAY & ERGONOMICS',
+        headline: 'Auto-Hiding When Open. Slim Edge Handle Docking.',
         desc:
-            'Organic medical ECG oscilloscope waveform dynamically monitoring live connection status with harmonic sinusoids and realistic flatline animations upon network disconnection.',
-        icon: CupertinoIcons.waveform_path_ecg,
-        badgeColor: Color(0xFFFF3B30),
-        specs:
-            'Continuous Waveform Canvas · Dynamic Heartbeat Pulse · Flatline Disconnect · Battery-Friendly Governor',
-      ),
-      (
-        title: 'Apple HIG Live Previews & Optical Carousels',
-        category: 'DISPLAY & INTERFACE CRAFT',
-        headline: 'Interactive Miniature Previews. Optical Center Zooming.',
-        desc:
-            'Redesigned display preview as an interactive miniature live card. Rebuilt Accent Color and App Icon pickers with touch-centered optical selection carousels featuring distance scaling and peripheral dimming.',
-        icon: CupertinoIcons.sparkles,
-        badgeColor: Color(0xFF007AFF),
-        specs:
-            'Miniature Live Card · Optical Scale Transform · Peripheral Luminance Dimming · Centered Snapping',
-      ),
-      (
-        title: 'Universal Title Tap-to-Scroll',
-        category: 'NAVIGATION & ERGONOMICS',
-        headline: 'Effortless Top Navigation Across Entire App.',
-        desc:
-            'Tapping any header title in pages, sheets, modals, or dialogs anywhere in NoteKar instantly and smoothly glides the viewport back to the top with tactile feedback.',
-        icon: CupertinoIcons.arrow_up_circle,
+            'The floating timer automatically hides while NoteKar is open on screen, seamlessly reappearing when minimized. Tapping "✕ Hide" docks the pill into a slim 5dp vertical handle touching the screen bezel, restorable via single tap or inward swipe.',
+        icon: CupertinoIcons.slider_horizontal_below_rectangle,
         badgeColor: Color(0xFF34C759),
         specs:
-            'Universal Title Controller · Smooth Spring Scroll · Tactile Haptic Response · Comprehensive Screen Coverage',
+            'App Foreground Auto-Hide · 5dp Slim Edge Handle · Inward Swipe Drag-Out · Overshoot Bounce Animation',
       ),
       (
-        title: 'External Link HTTPS Verification',
-        category: 'SECURITY & SOVEREIGNTY',
-        headline: 'Intelligent Protocol Inspection. HTTP Warnings.',
+        title: 'Living Oceanic Fluid Sanctuary',
+        category: 'COLOR HARMONY & NATURAL FLUIDS',
+        headline: 'Edge-to-Edge Natural Waves. Crowned Queen Fish.',
         desc:
-            'Departure confirmation modal now evaluates protocol security, certifying verified HTTPS destinations while actively warning users before navigating to unencrypted HTTP links.',
-        icon: CupertinoIcons.shield_lefthalf_fill,
+            'The accent color picker is reimagined as an immersive living ocean without card boundaries. Selected accent is crowned Queen Fish at deep waters with an enlarged scale, while 19 companion fish swim above through dynamic light rays, abyssal shadows, and fixed riverbed rocks.',
+        icon: CupertinoIcons.drop_fill,
+        badgeColor: Color(0xFF007AFF),
+        specs:
+            'Borderless Fluid Wave · Queen Fish & 19 Companions · 3-Pointed Golden Crown · Theme-Adaptive Abyssal Lighting',
+      ),
+      (
+        title: 'Peer Horizon QR Pass & Camera Scanner',
+        category: 'PEER EXCHANGE & SOVEREIGN IDENTITY',
+        headline: 'Minimal Apple Wallet Pass. 60fps Laser Scanner.',
+        desc:
+            'Share Identity Card now displays a minimal, high-contrast Apple HIG QR pass with zero extraneous chronometer clutter. A fullscreen camera scanner with continuous moving emerald laser and instant checkmark/error visual feedback provides seamless peer data scanning.',
+        icon: CupertinoIcons.qrcode_viewfinder,
         badgeColor: Color(0xFFAF52DE),
         specs:
-            'HTTPS Certificate Check · Insecure HTTP Alert · Domain Highlight · External Link Confirmation',
+            'Minimal QR Pass · 60fps Moving Laser Viewfinder · Visual Checkmark HUD · Torch & Photo Library Fallbacks',
       ),
       (
-        title: 'Low-End Adaptive Performance Governor',
-        category: 'HARDWARE & OPTIMIZATION',
-        headline: 'Intelligent Frame Throttling. Zero Stutter.',
+        title: 'Peer Horizon Comparison Engine',
+        category: 'INSIGHTS & BENCHMARKING',
+        headline: 'Side-by-Side Habit Progress. Single-Peer Security.',
         desc:
-            'Adaptive hardware governor automatically switches complex waveform canvases, blur layers, and continuous matrix transforms to lightweight static variants on entry-level devices.',
-        icon: CupertinoIcons.speedometer,
+            'Compare conscious time, waking weeks, sobriety streaks, and 24-hour life balance side-by-side against a peer. Enforces a single active saved peer policy with prompt-driven replace, view-only, or cancel resolution.',
+        icon: CupertinoIcons.chart_bar_alt_fill,
         badgeColor: Color(0xFFFF9500),
         specs:
-            'RAM & Core Telemetry · Real-Time Canvas Throttling · Low-End Mode Fallback · Battery Preservation',
+            'Side-by-Side Comparison Sheet · 24-Hour Life Clock Benchmarking · Single-Peer Persistence · Conflict Guard',
       ),
       (
-        title: 'Habit Routine Checkpoints & Session Handover',
-        category: 'HABITS & TIME TRACKING',
-        headline: 'Consolidated Two-Way Sessions. Milestone Checkpoints.',
+        title: 'Apple HIG Settings & Layout Polish',
+        category: 'INTERFACE ARCHITECTURE & DESIGN',
+        headline: 'Responsive Headers. Broader Typography Margins.',
         desc:
-            'Bundle multi-phase daily habits into unified Two-Way chronometer sessions with dedicated milestone checkpoint action sheets and linear note preview navigation.',
-        icon: CupertinoIcons.checkmark_circle,
+            'Refined Update Center cryptographic descriptions with full-width margins below the cache card. App Icon headers now utilize responsive wrapping with guidance badges to eliminate overflows on small screens and high text scales.',
+        icon: CupertinoIcons.sparkles,
+        badgeColor: Color(0xFF5856D6),
+        specs:
+            'Full-Width Cryptographic Description · Responsive Icon Header Wrap · Clamped Text Scaler · Zero Overflow',
+      ),
+      (
+        title: 'Sandboxed Media & Resilient Recovery',
+        category: 'STORAGE INTEGRITY & FAULT TOLERANCE',
+        headline: 'Isolated Photo Storage. Auto Database Healing.',
+        desc:
+            'Captured timeline photos are securely copied to isolated app storage with persistent sandbox paths, resolving history sheet viewing. Self-healing database integrity guards automatically repair and safeguard logs against corruption.',
+        icon: CupertinoIcons.shield_lefthalf_fill,
         badgeColor: Color(0xFFFF2D55),
         specs:
-            'Two-Way Session Sheet · Routine Checkpoints · Consolidated History · Linear Swipe Navigation',
+            'Sandboxed Media Persistence · History Photo Recovery · Automatic Database Self-Healing · Corruption Rollback',
       ),
     ],
     items: [
-      '• Experimental Architecture, Hospital-Grade Oscilloscope, Apple HIG Optical Previews, and Performance Tuning.',
-      '+ Hospital-Grade ECG Oscilloscope: Real-time organic heartbeat pulse waveform in Network Monitor that transitions smoothly and flatlines upon disconnection',
-      '+ Apple HIG Display Preview: Interactive miniature live card previewing blur, typography, and contrast changes in real time',
-      '+ Optical Center Carousels: Focus-zooming carousels for Accent Colors and App Icons with distance-based scaling and peripheral dimming',
-      '+ Universal Title Tap-to-Scroll: Tap any page or sheet header title to smoothly glide back to the top',
-      '+ External Link HTTPS Verification: Intelligent departure confirmation modal validating HTTPS security certificates and warning on HTTP links',
-      '+ Adaptive Performance Governor: Automatically disables complex canvas animations and optical transformations on lower-end devices',
-      '+ Habit Routine Checkpoints: Two-Way session sheet with interval checkpoint logging and entry consolidation',
-      '+ Sobriety Companion Overhaul: Apple HIG glass capsule streak card, instant #relapse reset engine, and home widget sync',
-      '+ Telegram-Style Writing Suite: Keyboard-docked formatting toolbar with live word count telemetry and tactile undo/redo',
-      '+ Headless Silent Share Intake: Background ingestion of text, URLs, and photos without window interruption',
-      '+ Sandboxed Media Storage: Shared photos stored safely in isolated app storage with automatic timeline linking',
-      '+ End of Support Safeguard: 365-day offline sovereignty card and 7-tap developer quest diagnostics easter egg',
-      '+ Acoustic Feedback: Single tactile haptic click and acoustic sound on live session undo',
-      '+ Departure Security Alerts: Native Apple HIG confirmation modal guarding external web destinations',
-      '* All 313 unit and widget tests passing with 0 lint warnings and 100% offline privacy preservation',
+      '• Sovereign QR Pass, Oceanic Fluid Sanctuary, App-Aware Floating Pill Docking, and Resilient Storage.',
+      '+ App-Aware Floating Pill: Overlay automatically hides while inside NoteKar and reappears when app is minimized',
+      '+ Slim Edge Handle Docking: Tapping "✕ Hide" docks pill into a slim 5dp vertical handle flush against the screen corner',
+      '+ Elastic Orb Restoration: Single-tap springs orb back with overshoot bounce; inward swipe (>12dp) morphs handle into circle',
+      '+ Living Oceanic Fluid: Borderless edge-to-edge wave flow transitioning directly from page background into water',
+      '+ Crowned Queen Fish: Active accent is crowned Queen Fish at deep waters (1.38x scale) with dorsal-aligned golden crown',
+      '+ 19 Companion Fish: Distinct species scales (0.72x–0.92x), natural wave propulsion, and theme-adaptive abyssal shadows',
+      '+ Riverbed Invariant Rocks: 7 organic faceted stones reflecting immutable UI colors unaffected by accent selections',
+      '+ Minimal QR Pass: Share Identity Card presents a clean, sovereign Apple HIG QR pass with zero extraneous chronometer text',
+      '+ Fullscreen Laser Scanner: Continuous 60fps emerald laser sweep with animated checkmark success and error HUD feedback',
+      '+ Peer Comparison Engine: Deep side-by-side life clock benchmarking with single-peer conflict resolution',
+      '+ Sandboxed Media Storage: Timeline captured photos safely persisted in app directory, preventing missing history thumbnails',
+      '+ Resilient Database Healing: Self-healing integrity engine automatically verifies and repairs corrupted entries',
+      '+ Update Center Refinement: Full-width cryptographic copy layout and responsive App Icon header wrap',
+      '* All unit and widget tests passing with 0 lint warnings and 100% offline privacy preservation',
     ],
   );
 

@@ -1,5 +1,68 @@
 [
   {
+    "version": "7.5.11",
+    "buildNumber": "26BR1025",
+    "releaseDate": "2026-10-25",
+    "channel": "beta",
+    "channelTag": "[Beta]",
+    "isBeta": true,
+    "edition": "Sovereign QR Pass & Oceanic Sanctuary Beta",
+    "badgeColor": "#FF9F0A",
+    "isLatest": true,
+    "highlights": [
+      {
+        "title": "App-Aware Floating Control Pill",
+        "description": "Auto-hides while NoteKar is open on screen; restores on minimize. Tapping '✕ Hide' docks into a slim 5dp vertical edge handle.",
+        "icon": "auto_awesome_rounded"
+      },
+      {
+        "title": "Living Oceanic Fluid Sanctuary & Queen Fish",
+        "description": "Borderless edge-to-edge wave flow, crowned Queen Fish at deep waters with 3-pointed golden crown, and 19 companion fish.",
+        "icon": "water_drop_rounded"
+      },
+      {
+        "title": "Peer Horizon QR Pass & Camera Scanner",
+        "description": "Minimal sovereign Apple HIG QR pass on Share Identity Card, paired with a fullscreen 60fps moving laser scanner.",
+        "icon": "qr_code_scanner_rounded"
+      },
+      {
+        "title": "Peer Horizon Comparison Engine",
+        "description": "Side-by-side life clock benchmarking against peers with single-peer security and conflict management.",
+        "icon": "compare_arrows_rounded"
+      },
+      {
+        "title": "Apple HIG Settings & Layout Polish",
+        "description": "Full-width cryptographic description in Update Center and responsive Wrap headers on App Icons page.",
+        "icon": "sparkles"
+      },
+      {
+        "title": "Sandboxed Media & Resilient Recovery",
+        "description": "Isolated photo persistence resolving history preview loading, coupled with automatic database self-healing.",
+        "icon": "shield_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "App-Aware Floating Control Pill: Overlay automatically hides while inside NoteKar and reappears when app is minimized",
+      "Slim Edge Handle Docking: Tapping '✕ Hide' docks pill into a slim 5dp vertical handle flush against the screen corner",
+      "Elastic Orb Restoration: Single-tap springs orb back with overshoot bounce; inward swipe (>12dp) morphs handle into circle",
+      "Living Oceanic Fluid: Borderless edge-to-edge wave flow transitioning directly from page background into water",
+      "Crowned Queen Fish: Active accent is crowned Queen Fish at deep waters (1.38x scale) with dorsal-aligned golden crown",
+      "19 Companion Fish: Distinct species scales (0.72x–0.92x), natural wave propulsion, and theme-adaptive abyssal shadows",
+      "Riverbed Invariant Rocks: 7 organic faceted stones reflecting immutable UI colors unaffected by accent selections",
+      "Minimal QR Pass: Share Identity Card presents a clean, sovereign Apple HIG QR pass with zero extraneous chronometer text",
+      "Fullscreen Laser Scanner: Continuous 60fps emerald laser sweep with animated checkmark success and error HUD feedback",
+      "Peer Comparison Engine: Deep side-by-side life clock benchmarking with single-peer conflict resolution",
+      "Sandboxed Media Storage: Timeline captured photos safely persisted in app directory, preventing missing history thumbnails",
+      "Resilient Database Healing: Self-healing integrity engine automatically verifies and repairs corrupted entries",
+      "Update Center Refinement: Full-width cryptographic copy layout and responsive App Icon header wrap",
+      "Build Automation: Updated scripts/update-version.ps1 to parse and replace all prerelease and beta version patterns"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.5.11/NoteKar-v7.5.11-universal-release.apk",
+      "arm64Apk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.5.11/NoteKar-v7.5.11-arm64-v8a-release.apk"
+    }
+  },
+  {
     "version": "7.5.10E1",
     "buildNumber": "26ER1024",
     "releaseDate": "2026-10-24",
@@ -9,7 +72,7 @@
     "isExperiment": true,
     "edition": "Experimental Architecture & Sensory Refinements",
     "badgeColor": "#FF3B30",
-    "isLatest": true,
+    "isLatest": false,
     "highlights": [
       {
         "title": "Hospital-Grade ECG Oscilloscope",

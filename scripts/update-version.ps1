@@ -72,7 +72,7 @@ if (-not (Test-Path -LiteralPath $appUtilsPath))
 
 # Read and parse current version from pubspec.yaml
 $pubspecText = Get-Content -LiteralPath $pubspecPath -Raw
-$versionMatch = [regex]::Match($pubspecText, '(?m)^version:\s*(\d+)\.(\d+)\.(\d+)(?:E(\d+))?(?:\+([A-Za-z0-9\.\-]+))?\s*$')
+$versionMatch = [regex]::Match($pubspecText, '(?m)^version:\s*(\d+)\.(\d+)\.(\d+)(?:-?[Ee](\d+)|-[A-Za-z0-9\.\-]+)?(?:\+([A-Za-z0-9\.\-]+))?\s*$')
 if (-not $versionMatch.Success)
 {
     throw "Could not parse current version from pubspec.yaml."
@@ -81,7 +81,7 @@ if (-not $versionMatch.Success)
 $currentMajor = [int]$versionMatch.Groups[1].Value
 $currentMinor = [int]$versionMatch.Groups[2].Value
 $currentPatch = [int]$versionMatch.Groups[3].Value
-$currentExp = if ($versionMatch.Groups[4].Success) { [int]$versionMatch.Groups[4].Value } else { $null }
+$currentExp = if ($versionMatch.Groups[4].Success -and $versionMatch.Groups[4].Value) { [int]$versionMatch.Groups[4].Value } else { $null }
 $currentBuild = $versionMatch.Groups[5].Value
 
 $appUtilsText = Get-Content -LiteralPath $appUtilsPath -Raw
@@ -362,7 +362,7 @@ $fastlaneCommits = $fastlaneBullets -join "`r`n"
 # 1. Update version across core config files
 Update-TextFile -Path $pubspecPath -Update {
     param($text)
-    [regex]::Replace($text, '(?m)^version:\s*\d+\.\d+\.\d+(?:\+[A-Za-z0-9\.\-]+)?\s*$', "version: $Version+$androidVersionCode")
+    [regex]::Replace($text, '(?m)^version:\s*.*$', "version: $Version+$androidVersionCode")
 }
 
 Update-TextFile -Path $localPropertiesPath -Update {

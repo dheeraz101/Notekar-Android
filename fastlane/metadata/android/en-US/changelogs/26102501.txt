@@ -1,0 +1,8 @@
+Update to 7.5.11 (build 26BR1025):
+- App-Aware Floating Pill: Auto-hides while NoteKar is open; restores on minimize
+- Slim Edge Handle Docking: Taps into 5dp edge line handle on Hide; tap or swipe to restore
+- Living Oceanic Sanctuary: Edge-to-edge wave flow, Queen Fish bottom depth & golden crown
+- Peer Horizon QR Pass: Minimal Apple HIG QR pass & 60fps moving laser camera scanner
+- Peer Comparison Engine: Side-by-side life clock benchmarking with single-peer security
+- Sandboxed Media Storage: Fixed photo history sheet loading & added database self-healing
+- Settings Polish: Full-width Update Center copy & responsive App Icon header wrapping
