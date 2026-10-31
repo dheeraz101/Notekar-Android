@@ -187,6 +187,7 @@ void main() {
 
         final networkCard = find.text('Network Use');
         expect(networkCard, findsOneWidget);
+        await tester.ensureVisible(networkCard);
         await tester.tap(networkCard);
         await tester.pumpAndSettle();
 

@@ -1947,12 +1947,14 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         status: _dataHealthStatus,
       ),
       item(
-        title: 'Privacy & Security',
-        subtitle: 'Local storage, network use, and data safety',
-        category: 'Privacy & Security',
+        title: 'Data safety',
+        subtitle:
+            'Local storage, network use, and Google Play safety disclosures',
+        category: 'Data safety',
         icon: CupertinoIcons.checkmark_shield_fill,
         keywords: [
           'private',
+          'privacy',
           'security',
           'safe',
           'secure',
@@ -1963,6 +1965,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
           'policy',
           'drive',
           'google',
+          'safety',
           'lock',
           'biometric',
           'password',
@@ -1979,6 +1982,56 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         boolValue: null,
         onBoolChanged: null,
         status: privacyLock ? 'On' : 'Off',
+      ),
+      item(
+        title: 'App Permissions',
+        subtitle: 'Microphone, camera, notifications, background access',
+        category: 'App Permissions',
+        icon: CupertinoIcons.square_stack_3d_up_fill,
+        keywords: [
+          'permission',
+          'permissions',
+          'microphone',
+          'audio',
+          'camera',
+          'photo',
+          'notifications',
+          'overlay',
+          'bubble',
+          'floating',
+          'alarm',
+          'exact',
+          'battery',
+          'usage',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: null,
+      ),
+      item(
+        title: 'Content Rating',
+        subtitle: 'Official IARC Everyone, PEGI 3, ESRB E certification',
+        category: 'Content Rating',
+        icon: CupertinoIcons.shield_fill,
+        keywords: [
+          'content',
+          'rating',
+          'iarc',
+          'esrb',
+          'pegi',
+          'usk',
+          'age',
+          'everyone',
+          'violence',
+          'safety',
+          'kids',
+          'family',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'Everyone / 3+',
       ),
       item(
         title: 'App Lock',
@@ -3081,6 +3134,23 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
     }
     if (result.title == 'Local Backups') {
       _openCategory('Local Backups', parent: 'Data & Backup');
+      return;
+    }
+    if (result.title == 'Data safety' ||
+        result.title == 'Privacy & Security' ||
+        result.category == 'Data safety' ||
+        result.category == 'Privacy & Security') {
+      _openCategory('Data safety');
+      return;
+    }
+    if (result.title == 'App Permissions' ||
+        result.category == 'App Permissions') {
+      _openCategory('App Permissions', parent: 'Data safety');
+      return;
+    }
+    if (result.title == 'Content Rating' ||
+        result.category == 'Content Rating') {
+      _openCategory('Content Rating', parent: 'Data safety');
       return;
     }
     if (result.title == 'Configure Lock') {

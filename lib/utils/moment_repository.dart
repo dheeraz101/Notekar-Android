@@ -983,7 +983,7 @@ class MomentRepository {
         _cachedTrashMoments!.addAll(_cachedMoments!);
       }
 
-      await _prefs.remove(_nextIdKey);
+      // Do not reset _nextIdKey to prevent ID collisions with moments preserved in trash
       _cachedMoments = [];
       _momentIdIndex = {};
       _cachedTrashMoments = null;

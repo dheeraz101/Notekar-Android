@@ -22,8 +22,8 @@ void showSecurityDetailsSheet({
       onBack: () => Navigator.pop(context),
       blur:
           !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
-      child: SizedBox(
-        width: 410,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 410),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -128,8 +128,8 @@ void showPrivacyDetailsSheet({
       onBack: () => Navigator.pop(context),
       blur:
           !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
-      child: SizedBox(
-        width: 410,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 410),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(

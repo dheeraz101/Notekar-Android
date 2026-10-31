@@ -41,6 +41,7 @@ class MainActivity : FlutterActivity() {
     private var pendingLaunchPayload: Map<String, Any?>? = null
     private var pendingNotificationResult: MethodChannel.Result? = null
     private var pendingAudioResult: MethodChannel.Result? = null
+    private var pendingCameraResult: MethodChannel.Result? = null
     private var soundPool: SoundPool? = null
     private var clickSoundId: Int = 0
     private var shhhSoundId: Int = 0
@@ -188,6 +189,40 @@ class MainActivity : FlutterActivity() {
                     )
                 }
 
+                "checkCameraPermission" -> {
+                    val granted = checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+                    result.success(granted)
+                }
+
+                "requestCameraPermission" -> {
+                    if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                        result.success(true)
+                        return@setMethodCallHandler
+                    }
+                    if (pendingCameraResult != null) {
+                        result.error("PERMISSION_BUSY", "A camera permission request is already pending", null)
+                        return@setMethodCallHandler
+                    }
+                    pendingCameraResult = result
+                    requestPermissions(
+                        arrayOf(Manifest.permission.CAMERA),
+                        CAMERA_PERMISSION_REQUEST
+                    )
+                }
+
+                "openAppSettings" -> {
+                    try {
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.parse("package:$packageName")
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        startActivity(intent)
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.error("APP_SETTINGS_FAILED", e.message, null)
+                    }
+                }
+
                 "startAudioRecording" -> {
                     try {
                         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
@@ -241,11 +276,16 @@ class MainActivity : FlutterActivity() {
                         }
                         activeRecordingFile = null
                         if (file != null && file.exists()) {
-                            result.success(mapOf(
-                                "filePath" to "voice/${file.name}",
-                                "absolutePath" to file.absolutePath,
-                                "durationMs" to durationMs
-                            ))
+                            if (file.length() < 256 || durationMs < 400) {
+                                try { file.delete() } catch (_: Exception) {}
+                                result.error("RECORDING_TOO_SHORT", "Recording was too short to capture audio", null)
+                            } else {
+                                result.success(mapOf(
+                                    "filePath" to "voice/${file.name}",
+                                    "absolutePath" to file.absolutePath,
+                                    "durationMs" to durationMs
+                                ))
+                            }
                         } else {
                             result.error("RECORDING_FAILED", "Recorded file not found", null)
                         }
@@ -311,6 +351,11 @@ class MainActivity : FlutterActivity() {
                         player.setOnCompletionListener {
                             try {
                                 it.seekTo(0)
+                            } catch (_: Exception) {}
+                            try {
+                                runOnUiThread {
+                                    activeChannel?.invokeMethod("onPlaybackComplete", mapOf("path" to pathArg))
+                                }
                             } catch (_: Exception) {}
                         }
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -923,16 +968,22 @@ class MainActivity : FlutterActivity() {
                 "getDailyUsageStats" -> {
                     val startMs = call.argument<Number>("startTimeMs")?.toLong()
                     val endMs = call.argument<Number>("endTimeMs")?.toLong()
-                    try {
-                        val stats = DigitalWellbeingManager.getDailyUsageStats(
-                            applicationContext,
-                            startMs,
-                            endMs
-                        )
-                        result.success(stats)
-                    } catch (e: Exception) {
-                        result.error("USAGE_STATS_ERROR", e.message, null)
-                    }
+                    Thread {
+                        try {
+                            val stats = DigitalWellbeingManager.getDailyUsageStats(
+                                applicationContext,
+                                startMs,
+                                endMs
+                            )
+                            runOnUiThread {
+                                result.success(stats)
+                            }
+                        } catch (e: Exception) {
+                            runOnUiThread {
+                                result.error("USAGE_STATS_ERROR", e.message, null)
+                            }
+                        }
+                    }.start()
                 }
 
                 "canDrawOverlays" -> {
@@ -1039,6 +1090,12 @@ class MainActivity : FlutterActivity() {
         super.onDestroy()
     }
 
+    override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
+        activeChannel?.setMethodCallHandler(null)
+        activeChannel = null
+        super.cleanUpFlutterEngine(flutterEngine)
+    }
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -1053,6 +1110,18 @@ class MainActivity : FlutterActivity() {
         if (requestCode == AUDIO_PERMISSION_REQUEST) {
             val result = pendingAudioResult
             pendingAudioResult = null
+
+            val granted =
+                grantResults.isNotEmpty() &&
+                        grantResults[0] == PackageManager.PERMISSION_GRANTED
+
+            result?.success(granted)
+            return
+        }
+
+        if (requestCode == CAMERA_PERMISSION_REQUEST) {
+            val result = pendingCameraResult
+            pendingCameraResult = null
 
             val granted =
                 grantResults.isNotEmpty() &&
@@ -1699,12 +1768,16 @@ class MainActivity : FlutterActivity() {
 
         fun updatePersistentControlPanel(context: Context) {
             showPersistentControlPanel(context)
+            try {
+                FloatingBubbleTileService.requestTileUpdate(context)
+            } catch (_: Exception) {}
         }
 
         private const val OPEN_TEXT_FILE_REQUEST = 4021
         private const val NOTIFICATION_PERMISSION_REQUEST = 4022
         private const val PRIVACY_LOCK_REQUEST = 4023
         private const val AUDIO_PERMISSION_REQUEST = 4024
+        private const val CAMERA_PERMISSION_REQUEST = 4025
         private const val UPDATE_NOTIFICATION_ID = 3100
         private const val PERSISTENT_NOTIFICATION_ID = 3105
         private const val UPDATE_CHANNEL_ID =
@@ -1978,6 +2051,17 @@ class MainActivity : FlutterActivity() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
+            val isBubbleEnabled = flutterPrefs.getBoolean("flutter.floating_timer_enabled", false)
+            val bubbleIntent = Intent(context, FloatingBubbleReceiver::class.java).apply {
+                action = FloatingBubbleReceiver.ACTION_TOGGLE_BUBBLE
+            }
+            val bubblePending = PendingIntent.getBroadcast(
+                context,
+                1010,
+                bubbleIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
             if (isTwoWay) {
                 if (isCurrentlyIn) {
                     builder.addAction(R.drawable.ic_stat_notekar, "Log OUT", outPending)
@@ -1989,12 +2073,20 @@ class MainActivity : FlutterActivity() {
                     builder.addAction(R.drawable.ic_stat_notekar, "🏷️ Modes", modesPending)
                 } else {
                     builder.addAction(R.drawable.ic_stat_notekar, "📝 Log", singleLogActionPending)
-                    builder.addAction(R.drawable.ic_stat_notekar, "🏷️ Modes", modesPending)
+                    builder.addAction(
+                        R.drawable.ic_stat_notekar,
+                        if (isBubbleEnabled) "🫧 Bubble ON" else "🫧 Bubble OFF",
+                        bubblePending
+                    )
                     builder.addAction(R.drawable.ic_stat_notekar, "⇄ Single", togglePending)
                 }
             } else {
                 builder.addAction(R.drawable.ic_stat_notekar, "⚡ Log", singleLogActionPending)
-                builder.addAction(R.drawable.ic_stat_notekar, "🏷️ Modes", modesPending)
+                builder.addAction(
+                    R.drawable.ic_stat_notekar,
+                    if (isBubbleEnabled) "🫧 Bubble ON" else "🫧 Bubble OFF",
+                    bubblePending
+                )
                 builder.addAction(R.drawable.ic_stat_notekar, "⇄ 2-Way", togglePending)
             }
 

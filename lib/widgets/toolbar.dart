@@ -126,8 +126,8 @@ class _ToolbarState extends State<Toolbar> with SingleTickerProviderStateMixin {
 
   static String _clampTitle(String raw) {
     final t = raw.trim();
-    if (t.length <= 9) return t;
-    return t.substring(0, 9);
+    if (t.characters.length <= 9) return t;
+    return '${t.characters.take(8)}…';
   }
 
   @override

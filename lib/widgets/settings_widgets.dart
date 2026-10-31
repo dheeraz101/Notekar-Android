@@ -39,23 +39,23 @@ class SettingsGroup extends StatelessWidget {
       children: [
         if (title != null)
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 16, 8),
+            padding: const EdgeInsets.fromLTRB(20, 24, 16, 10),
             child: Text(
               title!.localized(context).toUpperCase(),
               style: TextStyle(
                 color: p.text3,
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.8,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.2,
               ),
             ),
           ),
         if (description != null)
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
             child: Text(
               description!.localized(context),
-              style: TextStyle(color: p.text2, fontSize: 13, height: 1.4),
+              style: TextStyle(color: p.text2, fontSize: 13.5, height: 1.45),
             ),
           ),
         Container(
@@ -85,7 +85,7 @@ class SettingsGroup extends StatelessWidget {
                 }
               }
               final effectiveIndent = (insetDividers && hasAnyIcon)
-                  ? 57.0
+                  ? 66.0
                   : 0.0;
 
               return Column(
@@ -106,10 +106,10 @@ class SettingsGroup extends StatelessWidget {
         ),
         if (footer != null)
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
             child: Text(
               footer!.localized(context),
-              style: TextStyle(color: p.text3, fontSize: 12.5, height: 1.35),
+              style: TextStyle(color: p.text3, fontSize: 13.5, height: 1.4),
             ),
           ),
       ],
@@ -132,6 +132,7 @@ class SettingsRow extends StatelessWidget {
     this.highlight,
     this.trailing,
     this.rowKind = 'nav', // 'nav' | 'link' | 'popup'
+    this.softIcon = false,
   });
 
   final Palette p;
@@ -145,6 +146,7 @@ class SettingsRow extends StatelessWidget {
   final bool active;
   final String? highlight;
   final Widget? trailing;
+  final bool softIcon;
 
   /// 'nav'   → chevron_right (default internal navigation)
   /// 'link'  → open_in_new  (opens an external URL)
@@ -179,7 +181,7 @@ class SettingsRow extends StatelessWidget {
           trailingIndicator = Icon(
             CupertinoIcons.chevron_forward,
             color: p.text3,
-            size: 15,
+            size: 17,
           );
       }
     }
@@ -193,7 +195,7 @@ class SettingsRow extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(
           horizontal: hasIcon ? 16 : 20,
-          vertical: 12,
+          vertical: 14.5,
         ),
         decoration: BoxDecoration(
           color: active ? rowColor.withValues(alpha: 0.1) : Colors.transparent,
@@ -209,28 +211,41 @@ class SettingsRow extends StatelessWidget {
                 final isNearWhite =
                     color != null &&
                     (color == Colors.white || color!.toARGB32() == 0xFFFFFFFF);
-                final bgColor = color != null
-                    ? (isNearWhite ? p.surface3 : color!)
-                    : rowColor.withValues(alpha: 0.16);
-                final glyphColor = color != null
-                    ? (isNearWhite
-                          ? p.text
-                          : (isLightColor ? Colors.black87 : Colors.white))
-                    : rowColor;
+                final bgColor = softIcon
+                    ? rowColor.withValues(alpha: 0.14)
+                    : (color != null
+                          ? (isNearWhite ? p.surface3 : color!)
+                          : rowColor.withValues(alpha: 0.16));
+                final glyphColor = softIcon
+                    ? rowColor
+                    : (color != null
+                          ? (isNearWhite
+                                ? p.text
+                                : (isLightColor
+                                      ? Colors.black87
+                                      : Colors.white))
+                          : rowColor);
 
                 return Container(
-                  width: 30,
-                  height: 30,
+                  width: 36,
+                  height: 36,
                   decoration: BoxDecoration(
                     color: bgColor,
-                    borderRadius: BorderRadius.circular(8),
-                    border: isNearWhite ? Border.all(color: p.border) : null,
+                    borderRadius: BorderRadius.circular(10),
+                    border: (isNearWhite || softIcon)
+                        ? Border.all(
+                            color: softIcon
+                                ? rowColor.withValues(alpha: 0.25)
+                                : p.border,
+                            width: 0.8,
+                          )
+                        : null,
                   ),
                   alignment: Alignment.center,
-                  child: customIcon ?? Icon(icon!, color: glyphColor, size: 17),
+                  child: customIcon ?? Icon(icon!, color: glyphColor, size: 20),
                 );
               }()),
-              const SizedBox(width: 12),
+              const SizedBox(width: 14),
             ],
             Expanded(
               child: Column(
@@ -244,25 +259,28 @@ class SettingsRow extends StatelessWidget {
                       color: p.text,
                       fontWeight: FontWeight.w600,
                       fontVariations: const [FontVariation('wght', 600)],
-                      fontSize: hasSubtitle ? 14 : 15,
+                      fontSize: hasSubtitle ? 16 : 16.5,
+                      letterSpacing: -0.3,
                     ),
                     highlightStyle: TextStyle(
                       color: rowColor,
                       fontWeight: FontWeight.w700,
                       fontVariations: const [FontVariation('wght', 700)],
                       backgroundColor: rowColor.withValues(alpha: 0.12),
+                      fontSize: hasSubtitle ? 16 : 16.5,
+                      letterSpacing: -0.3,
                     ),
                   ),
                   if (hasSubtitle) ...[
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 3),
                     IosEmojiText(
                       subtitle!.localized(context),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: p.text2,
-                        fontSize: 12,
-                        height: 1.3,
+                        fontSize: 13.5,
+                        height: 1.35,
                       ),
                     ),
                   ],
@@ -274,9 +292,10 @@ class SettingsRow extends StatelessWidget {
               Text(
                 status!.localized(context),
                 style: TextStyle(
-                  color: p.text2,
-                  fontSize: hasSubtitle ? 14 : 15,
-                  fontWeight: FontWeight.w400,
+                  color: p.text3,
+                  fontSize: hasSubtitle ? 13.5 : 14.5,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: -0.2,
                 ),
               ),
             ],
@@ -518,7 +537,7 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
           child: Container(
             padding: EdgeInsets.symmetric(
               horizontal: hasIcon ? 16 : 20,
-              vertical: 12,
+              vertical: 14,
             ),
             decoration: const BoxDecoration(color: Colors.transparent),
             child: Row(
@@ -528,35 +547,36 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
               children: [
                 if (hasIcon) ...[
                   Container(
-                    width: 29,
-                    height: 29,
-                    margin: hasSubtitle ? const EdgeInsets.only(top: 9) : null,
+                    width: 36,
+                    height: 36,
+                    margin: hasSubtitle ? const EdgeInsets.only(top: 6) : null,
                     decoration: BoxDecoration(
                       color: (enabled && value ? switchColor : p.text3)
-                          .withValues(alpha: 0.10),
-                      borderRadius: BorderRadius.circular(8),
+                          .withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(
                       widget.icon,
                       color: enabled && value ? switchColor : p.text2,
-                      size: 18,
+                      size: 20,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 14),
                 ],
                 Expanded(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (hasSubtitle) const SizedBox(height: 3),
+                      if (hasSubtitle) const SizedBox(height: 2),
                       Text(
                         widget.title.localized(context),
                         style: TextStyle(
                           color: enabled ? p.text : p.text2,
                           fontWeight: FontWeight.w600,
                           fontVariations: const [FontVariation('wght', 600)],
-                          fontSize: hasSubtitle ? 14 : 15,
+                          fontSize: hasSubtitle ? 16 : 16.5,
+                          letterSpacing: -0.3,
                         ),
                       ),
                       if (hasSubtitle) ...[
@@ -565,8 +585,8 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
                           widget.subtitle!.localized(context),
                           style: TextStyle(
                             color: enabled ? p.text2 : p.text3,
-                            fontSize: 12,
-                            height: 1.3,
+                            fontSize: 13.5,
+                            height: 1.35,
                           ),
                         ),
                       ],
@@ -1207,27 +1227,27 @@ class SettingsPageDescription extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(20, 5, 20, bottomPadding),
+      padding: EdgeInsets.fromLTRB(20, 10, 20, bottomPadding),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (showIcon) ...[
             Padding(
-              padding: const EdgeInsets.only(top: 3.5),
+              padding: const EdgeInsets.only(top: 2.5),
               child: Icon(
                 icon ?? CupertinoIcons.info_circle,
-                color: iconColor ?? p.text3.withValues(alpha: 0.6),
-                size: 13,
+                color: iconColor ?? p.text3.withValues(alpha: 0.8),
+                size: 16,
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 10),
           ],
           Expanded(
             child: Text(
               text.localized(context),
               style: TextStyle(
-                color: p.text3,
-                fontSize: 13,
+                color: p.text2.withValues(alpha: 0.88),
+                fontSize: 13.5,
                 height: 1.45,
                 fontWeight: FontWeight.w400,
                 fontVariations: const [FontVariation('wght', 400)],

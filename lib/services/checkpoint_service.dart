@@ -90,6 +90,17 @@ class CheckpointService {
     ),
   ];
 
+  static const Set<String> defaultPresetIds = {
+    'wake_up',
+    'bath',
+    'breakfast',
+    'lunch',
+    'gym',
+    'prayer',
+    'dinner',
+    'bedtime',
+  };
+
   List<CheckpointPreset> get presets => List.unmodifiable(_presets);
 
   bool get hideFromTimeline => _hideFromTimeline;

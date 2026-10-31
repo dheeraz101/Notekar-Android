@@ -46,8 +46,8 @@ class ChipButton extends StatelessWidget {
           onLongPress: onLongPress,
           child: Container(
             padding: EdgeInsets.symmetric(
-              horizontal: (hasIcon && !hasLabel) ? 11 : 14,
-              vertical: 9,
+              horizontal: (hasIcon && !hasLabel) ? 12 : 15,
+              vertical: 9.5,
             ),
             decoration: BoxDecoration(
               color: active ? p.surface3 : p.surface2,
@@ -62,7 +62,7 @@ class ChipButton extends StatelessWidget {
                   Icon(
                     icon,
                     color: active ? p.text : p.text2,
-                    size: 16,
+                    size: 17,
                     semanticLabel: semanticLabel,
                   ),
                   if (hasLabel) const SizedBox(width: 6),
@@ -72,8 +72,9 @@ class ChipButton extends StatelessWidget {
                     label!.localized(context),
                     style: TextStyle(
                       color: active ? p.text : p.text2,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13.5,
+                      letterSpacing: -0.2,
                     ),
                   ),
               ],
@@ -104,9 +105,9 @@ class SectionLabel extends StatelessWidget {
         text.localized(context),
         style: TextStyle(
           color: p.text3,
-          fontSize: 12,
-          fontWeight: FontWeight.w900,
-          letterSpacing: 0.5,
+          fontSize: 13,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.4,
         ),
       ),
     );
@@ -175,7 +176,7 @@ class SettingsStatusPill extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.13),
         borderRadius: BorderRadius.circular(999),
@@ -185,15 +186,15 @@ class SettingsStatusPill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (typeIcon != null) ...[
-            Icon(typeIcon, color: color, size: 12),
-            const SizedBox(width: 4),
+            Icon(typeIcon, color: color, size: 13),
+            const SizedBox(width: 4.5),
           ],
           Text(
             label,
             style: TextStyle(
               color: color,
-              fontSize: 11,
-              fontWeight: FontWeight.w900,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ],

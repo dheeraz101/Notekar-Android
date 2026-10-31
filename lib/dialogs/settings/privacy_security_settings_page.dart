@@ -6,8 +6,8 @@ import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
-class PrivacySecuritySettingsPage extends StatelessWidget {
-  const PrivacySecuritySettingsPage({
+class DataSafetySettingsPage extends StatelessWidget {
+  const DataSafetySettingsPage({
     super.key,
     required this.p,
     required this.vtRatio,
@@ -37,8 +37,168 @@ class PrivacySecuritySettingsPage extends StatelessWidget {
     return Column(
       children: [
         const SizedBox(height: spacing8),
+
+        // 1. Google Play Data Safety Breakdown Card
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: p.surface2.withValues(alpha: 0.65),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: p.border.withValues(alpha: 0.45)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: p.green.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(11),
+                        border: Border.all(
+                          color: p.green.withValues(alpha: 0.28),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Center(
+                        child: Icon(
+                          CupertinoIcons.checkmark_shield_fill,
+                          color: p.green,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'DATA SAFETY SOVEREIGNTY'.localized(context),
+                            style: TextStyle(
+                              color: p.green,
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.3,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Google Play & Store Disclosures'.localized(
+                              context,
+                            ),
+                            style: TextStyle(
+                              color: p.text,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 9,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: p.green.withValues(alpha: 0.14),
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                          color: p.green.withValues(alpha: 0.35),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Text(
+                        '100% On-Device',
+                        style: TextStyle(
+                          color: p.green,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Divider(height: 1, color: p.border.withValues(alpha: 0.35)),
+                const SizedBox(height: 14),
+                _buildSafetyMetricRow(
+                  context: context,
+                  title: 'Data Collected',
+                  value: '0 KB (None)',
+                  description:
+                      'No personal info, identity, or financial details logged',
+                  isSafe: true,
+                ),
+                const SizedBox(height: 12),
+                _buildSafetyMetricRow(
+                  context: context,
+                  title: 'Data Shared',
+                  value: 'None',
+                  description:
+                      'Zero third-party trackers, advertisers, or cloud brokers',
+                  isSafe: true,
+                ),
+                const SizedBox(height: 12),
+                _buildSafetyMetricRow(
+                  context: context,
+                  title: 'Security Practices',
+                  value: 'Local Isar Encrypted',
+                  description:
+                      'Encrypted at rest on device with 1-tap complete data wipe',
+                  isSafe: true,
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 16),
+
+        // 2. Regulatory & Hardware Compliance Links
         SettingsGroup(
           p: p,
+          title: 'Standards & Permissions'.localized(context),
+          insetDividers: true,
+          children: [
+            SettingsRow(
+              p: p,
+              icon: CupertinoIcons.square_stack_3d_up_fill,
+              title: 'App Permissions'.localized(context),
+              subtitle: 'Microphone, camera, alerts & background tasks',
+              color: p.accent,
+              softIcon: true,
+              onTap: () =>
+                  onOpenCategory('App Permissions', parent: 'Data safety'),
+            ),
+            SettingsRow(
+              p: p,
+              icon: CupertinoIcons.checkmark_shield_fill,
+              title: 'Content Rating'.localized(context),
+              subtitle: 'Certified clean for all ages (IARC 3+, ESRB E)',
+              color: p.green,
+              status: '3+',
+              softIcon: true,
+              onTap: () =>
+                  onOpenCategory('Content Rating', parent: 'Data safety'),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 16),
+
+        // 3. VirusTotal & Release Hashes Verification
+        SettingsGroup(
+          p: p,
+          title: 'Integrity Verification'.localized(context),
           children: [
             SettingsRow(
               p: p,
@@ -140,7 +300,10 @@ class PrivacySecuritySettingsPage extends StatelessWidget {
             ],
           ),
         ),
+
         const SizedBox(height: 16),
+
+        // 4. Telemetry & Network Policies
         SettingsGroup(
           p: p,
           title: 'Data & Privacy',
@@ -178,6 +341,7 @@ class PrivacySecuritySettingsPage extends StatelessWidget {
                   .localized(context),
         ),
 
+        // 5. Biometric Lock
         SettingsGroup(
           p: p,
           children: [
@@ -187,8 +351,7 @@ class PrivacySecuritySettingsPage extends StatelessWidget {
               title: 'App Lock',
               color: p.orange,
               status: privacyLock ? 'On' : 'Off',
-              onTap: () =>
-                  onOpenCategory('App Lock', parent: 'Privacy & Security'),
+              onTap: () => onOpenCategory('App Lock', parent: 'Data safety'),
             ),
           ],
         ),
@@ -199,6 +362,7 @@ class PrivacySecuritySettingsPage extends StatelessWidget {
                   .localized(context),
         ),
 
+        // 6. Recents Screen Obfuscation
         SettingsGroup(
           p: p,
           children: [
@@ -223,4 +387,72 @@ class PrivacySecuritySettingsPage extends StatelessWidget {
       ],
     );
   }
+
+  Widget _buildSafetyMetricRow({
+    required BuildContext context,
+    required String title,
+    required String value,
+    required String description,
+    required bool isSafe,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: const EdgeInsets.only(top: 1.5),
+          width: 20,
+          height: 20,
+          decoration: BoxDecoration(
+            color: isSafe ? p.green.withValues(alpha: 0.15) : p.surface3,
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Icon(
+              isSafe ? CupertinoIcons.checkmark_alt : CupertinoIcons.info,
+              color: isSafe ? p.green : p.text3,
+              size: 12,
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    title.localized(context),
+                    style: TextStyle(
+                      color: p.text,
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                  Text(
+                    value,
+                    style: TextStyle(
+                      color: isSafe ? p.green : p.text2,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 2),
+              Text(
+                description.localized(context),
+                style: TextStyle(color: p.text3, fontSize: 12, height: 1.35),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 }
+
+/// Backwards compatibility alias for existing routes and test suites
+typedef PrivacySecuritySettingsPage = DataSafetySettingsPage;

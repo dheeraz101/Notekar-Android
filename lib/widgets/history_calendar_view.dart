@@ -1129,22 +1129,58 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
       );
     }
 
-    final dayNoteTimelineItems = filteredItems
-        .where((item) => item.note.trim().isNotEmpty)
-        .toList();
+    final dayNoteTimelineItems = filteredItems.where((item) {
+      if (item is TimelineSessionItem) {
+        return item.note.isNotEmpty ||
+            item.voicePaths.isNotEmpty ||
+            (item.imagePath != null && item.imagePath!.trim().isNotEmpty);
+      }
+      if (item is TimelineSingleItem) {
+        return item.moment.note.isNotEmpty ||
+            item.moment.voicePaths.isNotEmpty ||
+            (item.moment.imagePath != null &&
+                item.moment.imagePath!.trim().isNotEmpty);
+      }
+      return item.note.trim().isNotEmpty;
+    }).toList();
     final dayPreviewItems = dayNoteTimelineItems.map((item) {
       final moment = (item is TimelineSessionItem)
           ? item.noteMoment
           : (item is TimelineSingleItem ? item.moment : null);
+      final isSession = item is TimelineSessionItem;
+      final defaultTitle = isSession
+          ? (item.note.isNotEmpty
+                ? 'Session Note'.localized(context)
+                : (item.voicePaths.isNotEmpty
+                      ? 'Voice Session'.localized(context)
+                      : 'Photo Session'.localized(context)))
+          : (item.note.isNotEmpty
+                ? 'Moment Note'.localized(context)
+                : (moment != null && moment.voicePaths.isNotEmpty
+                      ? 'Voice Memo'.localized(context)
+                      : 'Photo Note'.localized(context)));
+      final imagePath = item is TimelineSessionItem
+          ? item.imagePath
+          : moment?.imagePath;
+      final voicePath = item is TimelineSessionItem
+          ? item.voicePath
+          : moment?.voicePath;
+      final voicePaths = item is TimelineSessionItem
+          ? item.voicePaths
+          : moment?.voicePaths;
+      final voiceDurationMs = item is TimelineSessionItem
+          ? item.voiceDurationMs
+          : moment?.voiceDurationMs;
+
       return NotePreviewItem(
         note: item.note,
-        title:
-            item.category ??
-            (item is TimelineSessionItem
-                ? 'Session Note'.localized(context)
-                : 'Moment Note'.localized(context)),
+        title: item.category ?? defaultTitle,
         category: item.category,
-        dateStr: datePretty(item.primaryTimestamp),
+        dateStr: formatMomentDateTime(item.primaryTimestamp),
+        imagePath: imagePath,
+        voicePath: voicePath,
+        voiceDurationMs: voiceDurationMs,
+        voicePaths: voicePaths,
         onEdit: (widget.onEditNote != null && moment != null)
             ? () => widget.onEditNote!(moment)
             : null,
@@ -1410,7 +1446,14 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                                       it.category ??
                                       'Session Note'.localized(context),
                                   category: it.category,
-                                  dateStr: datePretty(it.startTimestamp),
+                                  dateStr: formatMomentDateTime(
+                                    it.startTimestamp,
+                                  ),
+                                  imagePath: it.noteMoment.imagePath,
+                                  voicePath: it.noteMoment.voicePath,
+                                  voiceDurationMs:
+                                      it.noteMoment.voiceDurationMs,
+                                  voicePaths: it.noteMoment.voicePaths,
                                   items: dayPreviewItems,
                                   initialIndex: noteIdx >= 0 ? noteIdx : 0,
                                   onEdit: widget.onEditNote != null
@@ -1772,9 +1815,14 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                                                   context,
                                                 ),
                                             category: it.category,
-                                            dateStr: datePretty(
+                                            dateStr: formatMomentDateTime(
                                               it.primaryTimestamp,
                                             ),
+                                            imagePath: it.moment.imagePath,
+                                            voicePath: it.moment.voicePath,
+                                            voiceDurationMs:
+                                                it.moment.voiceDurationMs,
+                                            voicePaths: it.moment.voicePaths,
                                             items: dayPreviewItems,
                                             initialIndex: noteIdx >= 0
                                                 ? noteIdx

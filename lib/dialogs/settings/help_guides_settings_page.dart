@@ -112,6 +112,33 @@ class HelpGuidesSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
+              icon: CupertinoIcons.shield_fill,
+              title: 'Data safety'.localized(context),
+              color: p.green,
+              status: '100% On-Device'.localized(context),
+              onTap: () =>
+                  onOpenCategory('Data safety', parent: 'Help & Guides'),
+            ),
+            SettingsRow(
+              p: p,
+              icon: CupertinoIcons.checkmark_shield_fill,
+              title: 'Content Rating'.localized(context),
+              color: p.green,
+              status: 'Everyone / 3+'.localized(context),
+              onTap: () =>
+                  onOpenCategory('Content Rating', parent: 'Help & Guides'),
+            ),
+            SettingsRow(
+              p: p,
+              icon: CupertinoIcons.square_stack_3d_up_fill,
+              title: 'App Permissions'.localized(context),
+              color: p.accent,
+              status: 'Inspect'.localized(context),
+              onTap: () =>
+                  onOpenCategory('App Permissions', parent: 'Help & Guides'),
+            ),
+            SettingsRow(
+              p: p,
               icon: CupertinoIcons.doc_text,
               title: 'Licenses'.localized(context),
               color: p.accent,

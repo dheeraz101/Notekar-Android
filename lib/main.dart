@@ -105,14 +105,26 @@ void main() async {
 
   final prefs = await SharedPreferences.getInstance();
   CircuitBreakerService.instance.init(prefs);
+
+  // Initialize critical data and storage before UI mounting to avoid race conditions
+  await MomentRepository().ensureInitialized(preloadedPrefs: prefs);
+  unawaited(MomentRepository().performDailyMaintenance());
+  await MediaStorageService.instance.initialize();
+
   unawaited(AdaptiveEngine().initialize(prefs: prefs));
   unawaited(DeviceHealthManager.instance.initialize());
-  unawaited(MediaStorageService.instance.initialize());
-  unawaited(
-    MomentRepository()
-        .ensureInitialized(preloadedPrefs: prefs)
-        .then((_) => MomentRepository().performDailyMaintenance()),
-  );
+
+  try {
+    await Workmanager().initialize(callbackDispatcher);
+    await Workmanager().registerPeriodicTask(
+      "midnight-job",
+      "midnight_analytics_backup",
+      frequency: const Duration(hours: 24),
+      constraints: Constraints(requiresBatteryNotLow: true),
+    );
+  } catch (e) {
+    debugPrint('Workmanager init ignored or unsupported in test/desktop: $e');
+  }
 
   if (prefs.getBool('auto_delete_update_cache') ?? false) {
     unawaited(UpdateService().clearCachedBuilds());
@@ -337,7 +349,7 @@ class NoteKarAppState extends State<NoteKarApp> {
         final media = MediaQuery.of(context);
         final clampedScaler = media.textScaler.clamp(
           minScaleFactor: 0.85,
-          maxScaleFactor: 1.20,
+          maxScaleFactor: 1.45,
         );
 
         return MediaQuery(

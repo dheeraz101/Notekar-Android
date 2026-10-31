@@ -1373,7 +1373,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
               (_sessionStart ?? now.millisecondsSinceEpoch) + pausedTurnMs;
           final inMoment = _entries.where((e) => e.type == 'in').firstOrNull;
           if (inMoment != null) {
-            final updatedIn = inMoment.copyWith(timestamp: adjustedStart);
+            final updatedIn = inMoment.copyWith(
+              timestamp: adjustedStart,
+              date: dateKey(DateTime.fromMillisecondsSinceEpoch(adjustedStart)),
+            );
+            _entries = _entries
+                .map((e) => e.id == inMoment.id ? updatedIn : e)
+                .toList();
             unawaited(_repository.saveMoment(updatedIn));
           }
         }
@@ -1399,7 +1405,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
               (_sessionStart ?? now.millisecondsSinceEpoch) + pausedTurnMs;
           final inMoment = _entries.where((e) => e.type == 'in').firstOrNull;
           if (inMoment != null) {
-            final updatedIn = inMoment.copyWith(timestamp: adjustedStart);
+            final updatedIn = inMoment.copyWith(
+              timestamp: adjustedStart,
+              date: dateKey(DateTime.fromMillisecondsSinceEpoch(adjustedStart)),
+            );
+            _entries = _entries
+                .map((e) => e.id == inMoment.id ? updatedIn : e)
+                .toList();
             unawaited(_repository.saveMoment(updatedIn));
           }
         }
@@ -1873,42 +1885,45 @@ class _NoteKarHomeState extends State<NoteKarHome>
                         children: [
                           for (final col in CategoryService.appleHigColors) ...[
                             GestureDetector(
+                              behavior: HitTestBehavior.opaque,
                               onTap: () {
                                 HapticFeedback.selectionClick();
                                 setDialogState(() => selectedColor = col);
                               },
                               child: Container(
-                                width: 28,
-                                height: 28,
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 3,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: col,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: selectedColor == col
-                                        ? Colors.white
-                                        : Colors.transparent,
-                                    width: 2.5,
+                                width: 44,
+                                height: 44,
+                                alignment: Alignment.center,
+                                child: Container(
+                                  width: 28,
+                                  height: 28,
+                                  decoration: BoxDecoration(
+                                    color: col,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: selectedColor == col
+                                          ? Colors.white
+                                          : Colors.transparent,
+                                      width: 2.5,
+                                    ),
+                                    boxShadow: selectedColor == col
+                                        ? [
+                                            BoxShadow(
+                                              color: col.withValues(alpha: 0.5),
+                                              blurRadius: 6,
+                                              spreadRadius: 1,
+                                            ),
+                                          ]
+                                        : null,
                                   ),
-                                  boxShadow: selectedColor == col
-                                      ? [
-                                          BoxShadow(
-                                            color: col.withValues(alpha: 0.5),
-                                            blurRadius: 6,
-                                            spreadRadius: 1,
-                                          ),
-                                        ]
+                                  child: selectedColor == col
+                                      ? const Icon(
+                                          Icons.check_rounded,
+                                          size: 15,
+                                          color: Colors.white,
+                                        )
                                       : null,
                                 ),
-                                child: selectedColor == col
-                                    ? const Icon(
-                                        Icons.check_rounded,
-                                        size: 15,
-                                        color: Colors.white,
-                                      )
-                                    : null,
                               ),
                             ),
                           ],
@@ -2095,6 +2110,15 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _entries = _entries.where((item) => item.id != id).toList();
       _lastDeletedPreview = null;
       if (_lastId == id) _lastId = null;
+      if (_mode == 'two-way') {
+        if (_entries.isEmpty || _entries.first.type != 'in') {
+          _inout = 'in';
+          _sessionStart = null;
+        } else {
+          _inout = 'out';
+          _sessionStart = _entries.first.timestamp;
+        }
+      }
     });
     await _deleteStoredEntry(id);
     unawaited(TagService.instance.pruneUnusedTags(_entries));
@@ -2353,11 +2377,26 @@ class _NoteKarHomeState extends State<NoteKarHome>
       }
     }
 
-    // Clear SharedPreferences queue keys
+    // Clear consumed log keys
     for (int i = 0; i < pendingCount; i++) {
       await prefs.remove('log_$i');
     }
-    await prefs.remove('pending_count');
+    // Safely reconcile pending_count if new logs arrived from widget during sync
+    await prefs.reload();
+    final latestTotal = prefs.getInt('pending_count') ?? 0;
+    if (latestTotal > pendingCount) {
+      for (int i = pendingCount; i < latestTotal; i++) {
+        final shiftedLog = prefs.getString('log_$i');
+        final targetIndex = i - pendingCount;
+        if (shiftedLog != null) {
+          await prefs.setString('log_$targetIndex', shiftedLog);
+        }
+        await prefs.remove('log_$i');
+      }
+      await prefs.setInt('pending_count', latestTotal - pendingCount);
+    } else {
+      await prefs.remove('pending_count');
+    }
 
     // Reload the full list from storage to refresh states
     final updatedEntries = _repository.getAllMoments();
@@ -2488,14 +2527,25 @@ class _NoteKarHomeState extends State<NoteKarHome>
     if (_mode != 'two-way' || _sessionStart == null || _inout != 'out') return;
     if (_cachedGoals.isEmpty) return;
 
-    for (final goal in _cachedGoals) {
-      if (_celebratedGoalIds.contains(goal.id)) continue;
-      if (_activeGoalId != null && goal.id != _activeGoalId) continue;
+    // Filter strictly to goals that can be advanced by this active session
+    final activeCat = _activeCategory.trim().toLowerCase();
+    final candidateGoals = _cachedGoals.where((goal) {
+      if (_celebratedGoalIds.contains(goal.id)) return false;
+      if (_activeGoalId != null) return goal.id == _activeGoalId;
+      if (activeCat != 'all' && activeCat.isNotEmpty) {
+        return (goal.category?.trim().toLowerCase() ?? '') == activeCat;
+      }
+      return false;
+    }).toList();
 
+    if (candidateGoals.isEmpty) return;
+
+    final now = DateTime.now();
+    for (final goal in candidateGoals) {
       final progress = GoalsService.instance.calculateProgress(
         goal,
         _entries,
-        referenceNow: DateTime.now(),
+        referenceNow: now,
       );
 
       if (progress.isCompleted) {
@@ -5257,20 +5307,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
               icon: _factoryResetIcon,
               onStart: _finishFactoryResetOverlay,
             ),
-          if (_privacyLock && !_privacyUnlocked)
-            PrivacyLockOverlay(
-              p: palette,
-              onUnlock: () => unawaited(_unlockPrivacyLock()),
-              isSystemLockAvailable:
-                  _systemLockAvailable && _privacyLockType == 'system',
-              customPin: _prefs?.getString('m-custom-pin'),
-              failedAttempts: _prefs?.getInt('m-failed-attempts') ?? 0,
-              lockoutUntil: _prefs?.getInt('m-lockout-until') ?? 0,
-              onUnlockSuccess: _handleUnlockSuccess,
-              onUnlockFailed: _handleUnlockFailed,
-              enableTranslucency: _enableTranslucency,
-              reduceMotion: _reduceMotion,
-            ),
+
           if (!_splashDismissed)
             Positioned.fill(
               child: ZenDoodleSplash(

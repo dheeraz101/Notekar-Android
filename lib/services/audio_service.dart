@@ -288,7 +288,7 @@ class AudioService extends ChangeNotifier {
 
   void _startPlaybackPoll() {
     _playbackPollTimer?.cancel();
-    _playbackPollTimer = Timer.periodic(const Duration(milliseconds: 60), (
+    _playbackPollTimer = Timer.periodic(const Duration(milliseconds: 120), (
       _,
     ) async {
       try {
@@ -326,7 +326,7 @@ class AudioService extends ChangeNotifier {
 
       // In simulation mode (e.g. tests or unsupported platform)
       if (_isPlaying) {
-        final stepMs = (60 * _playbackSpeed).toInt();
+        final stepMs = (120 * _playbackSpeed).toInt();
         final newPos = _currentPosition + Duration(milliseconds: stepMs);
         if (newPos >= _totalDuration) {
           _isPlaying = false;

@@ -67,27 +67,58 @@ class _TimelineConsolidatedCardState extends State<TimelineConsolidatedCard> {
 
     // Collect all preview items for this consolidated card for seamless note browsing
     final noteItems = item.items.where((it) {
-      if (it is TimelineSessionItem) return it.note.isNotEmpty;
-      if (it is TimelineSingleItem) return it.moment.note.isNotEmpty;
+      if (it is TimelineSessionItem) {
+        return it.note.isNotEmpty ||
+            it.voicePaths.isNotEmpty ||
+            (it.imagePath != null && it.imagePath!.trim().isNotEmpty);
+      }
+      if (it is TimelineSingleItem) {
+        return it.moment.note.isNotEmpty ||
+            it.moment.voicePaths.isNotEmpty ||
+            (it.moment.imagePath != null &&
+                it.moment.imagePath!.trim().isNotEmpty);
+      }
       return false;
     }).toList();
 
     final previewItems = noteItems.map((it) {
       if (it is TimelineSessionItem) {
+        final title =
+            it.category ??
+            (it.note.isNotEmpty
+                ? 'Session Note'
+                : (it.voicePaths.isNotEmpty
+                      ? 'Voice Session'
+                      : 'Photo Session'));
         return NotePreviewItem(
           note: it.note,
-          title: it.category ?? 'Session Note',
+          title: title,
           category: it.category,
-          dateStr: datePretty(it.startTimestamp),
+          dateStr: formatMomentDateTime(it.startTimestamp),
+          imagePath: it.imagePath,
+          voicePath: it.voicePath,
+          voiceDurationMs: it.voiceDurationMs,
+          voicePaths: it.voicePaths,
           onEdit: () => widget.onEditNote(it.noteMoment),
         );
       } else {
         final s = it as TimelineSingleItem;
+        final title =
+            s.moment.category ??
+            (s.moment.note.isNotEmpty
+                ? 'Moment Note'
+                : (s.moment.voicePaths.isNotEmpty
+                      ? 'Voice Memo'
+                      : 'Photo Note'));
         return NotePreviewItem(
           note: s.moment.note,
-          title: s.moment.category ?? 'Moment Note',
+          title: title,
           category: s.moment.category,
-          dateStr: datePretty(s.moment.timestamp),
+          dateStr: formatMomentDateTime(s.moment.timestamp),
+          imagePath: s.moment.imagePath,
+          voicePath: s.moment.voicePath,
+          voiceDurationMs: s.moment.voiceDurationMs,
+          voicePaths: s.moment.voicePaths,
           onEdit: () => widget.onEditNote(s.moment),
         );
       }
@@ -139,11 +170,12 @@ class _TimelineConsolidatedCardState extends State<TimelineConsolidatedCard> {
                                 cat,
                                 style: TextStyle(
                                   color: p.text,
-                                  fontSize: 14,
+                                  fontSize: 16,
                                   fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.3,
                                 ),
                               ),
-                              const SizedBox(width: 6),
+                              const SizedBox(width: 8),
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 6,
@@ -161,7 +193,7 @@ class _TimelineConsolidatedCardState extends State<TimelineConsolidatedCard> {
                                   '$count logs',
                                   style: TextStyle(
                                     color: p.text2,
-                                    fontSize: 10,
+                                    fontSize: 11.5,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -177,7 +209,7 @@ class _TimelineConsolidatedCardState extends State<TimelineConsolidatedCard> {
                               color: tracked > Duration.zero
                                   ? p.green
                                   : p.text3,
-                              fontSize: 11.5,
+                              fontSize: 13.0,
                               fontWeight: FontWeight.w600,
                               fontFeatures: const [
                                 FontFeature.tabularFigures(),
@@ -189,8 +221,8 @@ class _TimelineConsolidatedCardState extends State<TimelineConsolidatedCard> {
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 7,
-                        vertical: 3,
+                        horizontal: 8,
+                        vertical: 3.5,
                       ),
                       decoration: BoxDecoration(
                         color: meta.color.withValues(alpha: 0.12),
@@ -200,7 +232,7 @@ class _TimelineConsolidatedCardState extends State<TimelineConsolidatedCard> {
                         'GROUP'.localized(context),
                         style: TextStyle(
                           color: meta.color,
-                          fontSize: 10,
+                          fontSize: 11,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -293,7 +325,7 @@ class _TimelineConsolidatedCardState extends State<TimelineConsolidatedCard> {
                         range,
                         style: TextStyle(
                           color: p.text,
-                          fontSize: 12,
+                          fontSize: 13.5,
                           fontWeight: FontWeight.w700,
                           fontFeatures: const [FontFeature.tabularFigures()],
                         ),
@@ -303,7 +335,7 @@ class _TimelineConsolidatedCardState extends State<TimelineConsolidatedCard> {
                         _formatDuration(entry.duration),
                         style: TextStyle(
                           color: p.green,
-                          fontSize: 11.5,
+                          fontSize: 12.5,
                           fontWeight: FontWeight.w800,
                           fontFeatures: const [FontFeature.tabularFigures()],
                         ),
@@ -311,7 +343,7 @@ class _TimelineConsolidatedCardState extends State<TimelineConsolidatedCard> {
                     ],
                   ),
                   if (entry.note.isNotEmpty) ...[
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 4),
                     PressableScale(
                       onTap: () {
                         NotePreviewSheet.show(
@@ -320,7 +352,11 @@ class _TimelineConsolidatedCardState extends State<TimelineConsolidatedCard> {
                           note: entry.note,
                           title: entry.category ?? 'Session Note',
                           category: entry.category,
-                          dateStr: datePretty(entry.startTimestamp),
+                          dateStr: formatMomentDateTime(entry.startTimestamp),
+                          imagePath: entry.noteMoment.imagePath,
+                          voicePath: entry.noteMoment.voicePath,
+                          voiceDurationMs: entry.noteMoment.voiceDurationMs,
+                          voicePaths: entry.noteMoment.voicePaths,
                           items: previewItems,
                           initialIndex: noteIdx >= 0 ? noteIdx : 0,
                           onEdit: () => widget.onEditNote(entry.noteMoment),
@@ -332,8 +368,8 @@ class _TimelineConsolidatedCardState extends State<TimelineConsolidatedCard> {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: p.text2,
-                          fontSize: 11.5,
-                          height: 1.3,
+                          fontSize: 14.0,
+                          height: 1.4,
                         ),
                       ),
                     ),
@@ -373,7 +409,7 @@ class _TimelineConsolidatedCardState extends State<TimelineConsolidatedCard> {
                         timeOnly(m.timestamp),
                         style: TextStyle(
                           color: p.text,
-                          fontSize: 12,
+                          fontSize: 13.5,
                           fontWeight: FontWeight.w700,
                           fontFeatures: const [FontFeature.tabularFigures()],
                         ),
@@ -383,14 +419,14 @@ class _TimelineConsolidatedCardState extends State<TimelineConsolidatedCard> {
                         'SINGLE',
                         style: TextStyle(
                           color: p.text3,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 11.0,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ],
                   ),
                   if (m.note.isNotEmpty) ...[
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 4),
                     PressableScale(
                       onTap: () {
                         NotePreviewSheet.show(
@@ -399,7 +435,11 @@ class _TimelineConsolidatedCardState extends State<TimelineConsolidatedCard> {
                           note: m.note,
                           title: m.category ?? 'Moment Note',
                           category: m.category,
-                          dateStr: datePretty(m.timestamp),
+                          dateStr: formatMomentDateTime(m.timestamp),
+                          imagePath: m.imagePath,
+                          voicePath: m.voicePath,
+                          voiceDurationMs: m.voiceDurationMs,
+                          voicePaths: m.voicePaths,
                           items: previewItems,
                           initialIndex: noteIdx >= 0 ? noteIdx : 0,
                           onEdit: () => widget.onEditNote(m),
@@ -411,8 +451,8 @@ class _TimelineConsolidatedCardState extends State<TimelineConsolidatedCard> {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: p.text2,
-                          fontSize: 11.5,
-                          height: 1.3,
+                          fontSize: 14.0,
+                          height: 1.4,
                         ),
                       ),
                     ),

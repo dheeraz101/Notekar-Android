@@ -208,15 +208,24 @@ class StreakGuardianService {
         ? now
         : now.subtract(const Duration(days: 1));
 
-    while (true) {
+    // Guard against all weekdays marked as rest days causing an infinite loop
+    final effectiveRestDays = restDays.length >= 7 ? const <int>[] : restDays;
+    const maxIterations = 3650; // Safe 10-year scan cap
+
+    for (int i = 0; i < maxIterations; i++) {
       final key = dateKey(checkDate);
-      final isRestDay = restDays.contains(checkDate.weekday);
+      final isRestDay = effectiveRestDays.contains(checkDate.weekday);
 
       if (activeDates.contains(key) ||
           (protectedGraceDate != null && key == protectedGraceDate) ||
           isRestDay) {
         streak++;
-        checkDate = checkDate.subtract(const Duration(days: 1));
+        checkDate = DateTime(
+          checkDate.year,
+          checkDate.month,
+          checkDate.day - 1,
+          12,
+        );
       } else {
         break;
       }

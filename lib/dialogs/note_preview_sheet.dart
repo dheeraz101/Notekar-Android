@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +10,8 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/apple_hig_action_sheet.dart';
 import 'package:notekar/widgets/common_elements.dart';
+import 'package:notekar/widgets/timeline_media_attachment_card.dart';
+import 'package:notekar/widgets/timeline_voice_player_pill.dart';
 
 /// Item representing a note for linear navigation in [NotePreviewSheet].
 class NotePreviewItem {
@@ -16,6 +21,10 @@ class NotePreviewItem {
     this.category,
     this.dateStr,
     this.onEdit,
+    this.imagePath,
+    this.voicePath,
+    this.voiceDurationMs,
+    this.voicePaths,
   });
 
   final String note;
@@ -23,6 +32,10 @@ class NotePreviewItem {
   final String? category;
   final String? dateStr;
   final VoidCallback? onEdit;
+  final String? imagePath;
+  final String? voicePath;
+  final int? voiceDurationMs;
+  final List<String>? voicePaths;
 }
 
 /// Read-only note preview bottom sheet with full text viewing, interactive links,
@@ -36,6 +49,10 @@ class NotePreviewSheet extends StatefulWidget {
     this.category,
     this.onEdit,
     this.dateStr,
+    this.imagePath,
+    this.voicePath,
+    this.voiceDurationMs,
+    this.voicePaths,
     this.items,
     this.initialIndex = 0,
     this.onIndexChanged,
@@ -47,6 +64,10 @@ class NotePreviewSheet extends StatefulWidget {
   final String? category;
   final VoidCallback? onEdit;
   final String? dateStr;
+  final String? imagePath;
+  final String? voicePath;
+  final int? voiceDurationMs;
+  final List<String>? voicePaths;
   final List<NotePreviewItem>? items;
   final int initialIndex;
   final ValueChanged<int>? onIndexChanged;
@@ -59,6 +80,10 @@ class NotePreviewSheet extends StatefulWidget {
     String? category,
     VoidCallback? onEdit,
     String? dateStr,
+    String? imagePath,
+    String? voicePath,
+    int? voiceDurationMs,
+    List<String>? voicePaths,
     List<NotePreviewItem>? items,
     int initialIndex = 0,
     ValueChanged<int>? onIndexChanged,
@@ -78,6 +103,10 @@ class NotePreviewSheet extends StatefulWidget {
         category: category,
         onEdit: onEdit,
         dateStr: dateStr,
+        imagePath: imagePath,
+        voicePath: voicePath,
+        voiceDurationMs: voiceDurationMs,
+        voicePaths: voicePaths,
         items: items,
         initialIndex: initialIndex,
         onIndexChanged: onIndexChanged,
@@ -93,6 +122,8 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
   final List<TapGestureRecognizer> _recognizers = [];
   late int _currentIndex;
   double _dragDelta = 0;
+  bool _isCopied = false;
+  Timer? _copyTimer;
 
   @override
   void initState() {
@@ -127,6 +158,7 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
 
   @override
   void dispose() {
+    _copyTimer?.cancel();
     for (final r in _recognizers) {
       r.dispose();
     }
@@ -356,22 +388,25 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
     final List<Widget> children = [];
 
     final headingStyle1 = baseStyle.copyWith(
-      fontSize: 18,
+      fontSize: 21,
       fontWeight: FontWeight.w800,
       color: p.text,
       height: 1.35,
+      letterSpacing: -0.5,
     );
     final headingStyle2 = baseStyle.copyWith(
-      fontSize: 16,
+      fontSize: 18.5,
       fontWeight: FontWeight.w700,
       color: p.text,
       height: 1.35,
+      letterSpacing: -0.4,
     );
     final headingStyle3 = baseStyle.copyWith(
-      fontSize: 14.5,
+      fontSize: 16.5,
       fontWeight: FontWeight.w700,
       color: p.text,
       height: 1.35,
+      letterSpacing: -0.3,
     );
     final checkedStyle = baseStyle.copyWith(
       decoration: TextDecoration.lineThrough,
@@ -650,6 +685,10 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
             category: widget.category,
             dateStr: widget.dateStr,
             onEdit: widget.onEdit,
+            imagePath: widget.imagePath,
+            voicePath: widget.voicePath,
+            voiceDurationMs: widget.voiceDurationMs,
+            voicePaths: widget.voicePaths,
           );
 
     final cleanNote = currentItem.note.trim();
@@ -664,11 +703,40 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
         ? cleanBody
         : (cleanNote.isEmpty ? 'No text in note.' : cleanNote);
 
+    final voiceList = <String>[];
+    if (currentItem.voicePaths != null && currentItem.voicePaths!.isNotEmpty) {
+      voiceList.addAll(currentItem.voicePaths!);
+    } else if (currentItem.voicePath != null &&
+        currentItem.voicePath!.trim().isNotEmpty) {
+      voiceList.addAll(
+        currentItem.voicePath!
+            .split('|')
+            .map((s) => s.trim())
+            .where((s) => s.isNotEmpty),
+      );
+    }
+
+    final imageList = <String>[];
+    if (currentItem.imagePath != null &&
+        currentItem.imagePath!.trim().isNotEmpty) {
+      imageList.addAll(
+        currentItem.imagePath!
+            .split('|')
+            .map((s) => s.trim())
+            .where((s) => s.isNotEmpty),
+      );
+    }
+
+    final hasText = cleanNote.isNotEmpty;
+    final hasVoice = voiceList.isNotEmpty;
+    final hasPhotos = imageList.isNotEmpty;
+
     final baseStyle = TextStyle(
       color: p.text,
-      fontSize: 15,
-      height: 1.45,
+      fontSize: 17,
+      height: 1.5,
       fontWeight: FontWeight.w500,
+      letterSpacing: -0.3,
     );
 
     final bool hasMultiple = widget.items != null && widget.items!.length > 1;
@@ -696,44 +764,234 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
           children: [
             if (currentItem.category != null ||
                 currentItem.dateStr != null ||
-                tags.isNotEmpty) ...[
+                tags.isNotEmpty ||
+                hasVoice ||
+                hasPhotos ||
+                hasMultiple) ...[
               Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  if (currentItem.category != null &&
-                      currentItem.category!.trim().isNotEmpty) ...[
+                  Expanded(
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        if (currentItem.category != null &&
+                            currentItem.category!.trim().isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: p.accent.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: p.accent.withValues(alpha: 0.3),
+                                width: 0.8,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.sell_rounded,
+                                  size: 13,
+                                  color: p.accent,
+                                ),
+                                const SizedBox(width: 5),
+                                Text(
+                                  currentItem.category!,
+                                  style: TextStyle(
+                                    color: p.accent,
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (hasVoice)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 9,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: p.green.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: p.green.withValues(alpha: 0.3),
+                                width: 0.8,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  CupertinoIcons.mic_fill,
+                                  size: 12.5,
+                                  color: p.green,
+                                ),
+                                const SizedBox(width: 4.5),
+                                Text(
+                                  voiceList.length > 1
+                                      ? '${voiceList.length} Voices'
+                                      : 'Voice Memo',
+                                  style: TextStyle(
+                                    color: p.green,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (hasPhotos)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 9,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: p.blue.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: p.blue.withValues(alpha: 0.3),
+                                width: 0.8,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  CupertinoIcons.photo_fill,
+                                  size: 12.5,
+                                  color: p.blue,
+                                ),
+                                const SizedBox(width: 4.5),
+                                Text(
+                                  imageList.length > 1
+                                      ? '${imageList.length} Photos'
+                                      : 'Photo',
+                                  style: TextStyle(
+                                    color: p.blue,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (currentItem.dateStr != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 9,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: p.surface3.withValues(alpha: 0.65),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: p.border.withValues(alpha: 0.4),
+                                width: 0.8,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  CupertinoIcons.calendar,
+                                  size: 13,
+                                  color: p.text3,
+                                ),
+                                const SizedBox(width: 5),
+                                Text(
+                                  currentItem.dateStr!,
+                                  style: TextStyle(
+                                    color: p.text2,
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: -0.2,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  if (hasMultiple) ...[
+                    const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
                       decoration: BoxDecoration(
-                        color: p.accent.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(8),
+                        color: p.surface2,
+                        borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: p.accent.withValues(alpha: 0.3),
+                          color: p.border.withValues(alpha: 0.6),
                           width: 0.8,
                         ),
                       ),
-                      child: Text(
-                        currentItem.category!,
-                        style: TextStyle(
-                          color: p.accent,
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w700,
-                        ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 2,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            visualDensity: VisualDensity.compact,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(
+                              minWidth: 28,
+                              minHeight: 28,
+                            ),
+                            icon: Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              size: 13,
+                              color: _currentIndex > 0
+                                  ? p.text
+                                  : p.text3.withValues(alpha: 0.35),
+                            ),
+                            onPressed: _currentIndex > 0 ? _prevNote : null,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
+                            child: Text(
+                              '${_currentIndex + 1} of ${widget.items!.length}',
+                              style: TextStyle(
+                                color: p.text,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            visualDensity: VisualDensity.compact,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(
+                              minWidth: 28,
+                              minHeight: 28,
+                            ),
+                            icon: Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              size: 13,
+                              color: _currentIndex < widget.items!.length - 1
+                                  ? p.text
+                                  : p.text3.withValues(alpha: 0.35),
+                            ),
+                            onPressed: _currentIndex < widget.items!.length - 1
+                                ? _nextNote
+                                : null,
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 8),
                   ],
-                  if (currentItem.dateStr != null)
-                    Text(
-                      currentItem.dateStr!,
-                      style: TextStyle(
-                        color: p.text3,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
                 ],
               ),
               if (tags.isNotEmpty) ...[
@@ -782,21 +1040,76 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
               const SizedBox(height: spacing12),
             ],
 
-            // Note text card with rich markdown formatting, interactive links, safe departure dialog & horizontal swipe
-            Container(
-              width: double.infinity,
-              constraints: const BoxConstraints(maxHeight: 340),
-              padding: const EdgeInsets.all(spacing16),
-              decoration: BoxDecoration(
-                color: p.surface2,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: p.border.withValues(alpha: 0.6)),
+            if (hasText)
+              Container(
+                width: double.infinity,
+                constraints: BoxConstraints(
+                  maxHeight: (hasVoice || hasPhotos) ? 240 : 340,
+                ),
+                padding: const EdgeInsets.all(spacing16),
+                decoration: BoxDecoration(
+                  color: p.surface2,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: p.border.withValues(alpha: 0.6),
+                    width: 1.0,
+                  ),
+                ),
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: _buildFormattedContent(displayText, baseStyle, p),
+                ),
+              )
+            else if (!hasVoice && !hasPhotos)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(spacing16),
+                decoration: BoxDecoration(
+                  color: p.surface2,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: p.border.withValues(alpha: 0.6),
+                    width: 1.0,
+                  ),
+                ),
+                child: Text(
+                  'No text in note.',
+                  style: baseStyle.copyWith(
+                    color: p.text3,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
               ),
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: _buildFormattedContent(displayText, baseStyle, p),
-              ),
-            ),
+
+            // Voice recordings if present
+            if (hasVoice) ...[
+              const SizedBox(height: spacing12),
+              for (final vp in voiceList) ...[
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: TimelineVoicePlayerPill(
+                    p: p,
+                    voicePath: vp,
+                    durationMs: currentItem.voiceDurationMs ?? 0,
+                  ),
+                ),
+              ],
+            ],
+
+            // Photo attachments if present
+            if (hasPhotos) ...[
+              const SizedBox(height: spacing12),
+              for (final ip in imageList) ...[
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: TimelineMediaAttachmentCard(
+                    p: p,
+                    imagePath: ip,
+                    isCollapsed: false,
+                  ),
+                ),
+              ],
+            ],
 
             const SizedBox(height: spacing16),
 
@@ -806,20 +1119,51 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
                 Expanded(
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: p.text2,
-                      side: BorderSide(color: p.border),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      foregroundColor: _isCopied ? p.green : p.text2,
+                      backgroundColor: _isCopied
+                          ? p.green.withValues(alpha: 0.12)
+                          : p.surface2,
+                      side: BorderSide(
+                        color: _isCopied
+                            ? p.green.withValues(alpha: 0.6)
+                            : p.border.withValues(alpha: 0.7),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(14),
                       ),
                     ),
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: cleanNote));
                       HapticFeedback.lightImpact();
-                      Navigator.pop(context);
+                      setState(() => _isCopied = true);
+                      _copyTimer?.cancel();
+                      _copyTimer = Timer(
+                        const Duration(milliseconds: 1800),
+                        () {
+                          if (mounted) setState(() => _isCopied = false);
+                        },
+                      );
                     },
-                    icon: const Icon(Icons.content_paste_rounded, size: 16),
-                    label: const Text('Copy Note'),
+                    icon: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      child: Icon(
+                        _isCopied
+                            ? Icons.check_circle_rounded
+                            : Icons.content_paste_rounded,
+                        key: ValueKey<bool>(_isCopied),
+                        size: 18,
+                        color: _isCopied ? p.green : p.text2,
+                      ),
+                    ),
+                    label: Text(
+                      _isCopied ? 'Copied!' : 'Copy Note',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: _isCopied ? p.green : p.text2,
+                      ),
+                    ),
                   ),
                 ),
                 if (currentItem.onEdit != null) ...[
@@ -829,126 +1173,28 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
                       style: FilledButton.styleFrom(
                         backgroundColor: p.accent,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(14),
                         ),
                       ),
                       onPressed: () {
                         Navigator.pop(context);
                         currentItem.onEdit!();
                       },
-                      icon: const Icon(Icons.edit_rounded, size: 16),
+                      icon: const Icon(Icons.edit_rounded, size: 18),
                       label: const Text(
                         'Edit Note',
-                        style: TextStyle(fontWeight: FontWeight.w800),
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
                   ),
                 ],
               ],
             ),
-
-            // Daily Review Linear Navigation Bar (< [ N of Total ] >)
-            if (hasMultiple) ...[
-              const SizedBox(height: spacing12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: _currentIndex > 0 ? _prevNote : null,
-                      borderRadius: BorderRadius.circular(14),
-                      child: Container(
-                        width: 46,
-                        height: 38,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: _currentIndex > 0
-                              ? p.surface3
-                              : p.surface2.withValues(alpha: 0.4),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: p.border.withValues(
-                              alpha: _currentIndex > 0 ? 0.75 : 0.25,
-                            ),
-                            width: 1,
-                          ),
-                        ),
-                        child: Icon(
-                          Icons.arrow_back_ios_new_rounded,
-                          size: 16,
-                          color: _currentIndex > 0
-                              ? p.text
-                              : p.text3.withValues(alpha: 0.35),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: p.surface2,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: p.border.withValues(alpha: 0.55),
-                        width: 0.8,
-                      ),
-                    ),
-                    child: Text(
-                      '${_currentIndex + 1} of ${widget.items!.length}',
-                      style: TextStyle(
-                        color: p.text2,
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w700,
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: _currentIndex < widget.items!.length - 1
-                          ? _nextNote
-                          : null,
-                      borderRadius: BorderRadius.circular(14),
-                      child: Container(
-                        width: 46,
-                        height: 38,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: _currentIndex < widget.items!.length - 1
-                              ? p.surface3
-                              : p.surface2.withValues(alpha: 0.4),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: p.border.withValues(
-                              alpha: _currentIndex < widget.items!.length - 1
-                                  ? 0.75
-                                  : 0.25,
-                            ),
-                            width: 1,
-                          ),
-                        ),
-                        child: Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          size: 16,
-                          color: _currentIndex < widget.items!.length - 1
-                              ? p.text
-                              : p.text3.withValues(alpha: 0.35),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
           ],
         ),
       ),

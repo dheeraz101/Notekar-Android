@@ -285,8 +285,9 @@ class GoalsContentViewState extends State<GoalsContentView>
       }
       final endDt = DateTime.fromMillisecondsSinceEpoch(endMs);
 
+      final inId = repo.getNextId();
       final inMoment = Moment(
-        id: repo.getNextId(),
+        id: inId,
         timestamp: startMs,
         type: 'in',
         date: dateKey(result.startDateTime),
@@ -296,7 +297,7 @@ class GoalsContentViewState extends State<GoalsContentView>
         goalId: goalId,
       );
       final outMoment = Moment(
-        id: repo.getNextId(),
+        id: inId + 1,
         timestamp: endMs,
         type: 'out',
         date: dateKey(endDt),

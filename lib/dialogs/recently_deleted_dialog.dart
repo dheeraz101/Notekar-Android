@@ -100,8 +100,8 @@ class _RecentlyDeletedDialogState extends State<RecentlyDeletedDialog> {
       controller: _scrollController,
       showLargeTitle: false,
       removeBottomPadding: true,
-      child: SizedBox(
-        width: 410,
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 410),
         height: math.min(MediaQuery.sizeOf(context).height * 0.75, 680),
         child: CustomScrollView(
           controller: _scrollController,

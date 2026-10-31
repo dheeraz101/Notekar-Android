@@ -545,7 +545,7 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
 
       _triggerColorTransition(hitFish.item.key);
     } else {
-      HapticFeedback.selectionClick();
+      HapticFeedback.lightImpact();
       _ripples.add(
         _WaterRipple(
           origin: localPos,
@@ -890,19 +890,24 @@ class _PondAquariumPainter extends CustomPainter {
       ..strokeWidth = 2.0;
     canvas.drawPath(wavePath, wavePaint);
 
-    // 3. Draw Water Shockwave Ripples
+    // 3. Draw Water Shockwave Ripples (Concentric liquid splash rings)
     for (final ripple in ripples) {
-      final rippleRadius = ripple.progress * 48.0;
+      final rippleRadius = ripple.progress * 56.0;
       final alpha = (1.0 - ripple.progress).clamp(0.0, 1.0);
       final rPaint = Paint()
-        ..color = ripple.color.withValues(alpha: alpha * 0.7)
+        ..color = ripple.color.withValues(alpha: alpha * 0.75)
         ..style = PaintingStyle.stroke
         ..strokeWidth = (1.0 - ripple.progress) * 2.8;
       canvas.drawCircle(ripple.origin, rippleRadius, rPaint);
       canvas.drawCircle(
         ripple.origin,
-        rippleRadius * 0.55,
-        rPaint..strokeWidth = 1.2,
+        rippleRadius * 0.65,
+        rPaint..strokeWidth = 1.4,
+      );
+      canvas.drawCircle(
+        ripple.origin,
+        rippleRadius * 0.32,
+        rPaint..strokeWidth = 0.9,
       );
     }
 
@@ -939,6 +944,22 @@ class _PondAquariumPainter extends CustomPainter {
         // Direction & scale
         final isFacingRight = fish.speed >= 0;
         canvas.scale(isFacingRight ? fish.scale : -fish.scale, fish.scale);
+
+        // Bioluminescent Sovereign Aura around the reigning Queen fish
+        if (isSelected) {
+          final auraShader = RadialGradient(
+            colors: [
+              fish.item.color.withValues(alpha: isDark ? 0.44 : 0.28),
+              fish.item.color.withValues(alpha: isDark ? 0.16 : 0.08),
+              Colors.transparent,
+            ],
+            stops: const [0.0, 0.52, 1.0],
+          ).createShader(const Rect.fromLTWH(-55, -45, 110, 90));
+          canvas.drawOval(
+            const Rect.fromLTWH(-55, -45, 110, 90),
+            Paint()..shader = auraShader,
+          );
+        }
 
         // Vector Tail Fin (Caudal) with Sinusoidal Waggle
         final waggle =

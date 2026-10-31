@@ -137,16 +137,16 @@ class MediaStorageService {
     }
 
     // 3. Fallback: Search alternative directories & self-heal
+    final root = await _getRootPath();
+    final parentDir = Directory(root).parent.path;
     final fileName = clean.split('/').last;
     final candidates = <File>[
       File('${Directory.systemTemp.path}/notekar_media/$clean'),
       File('${Directory.systemTemp.path}/notekar_media/images/$fileName'),
       File('${Directory.systemTemp.path}/$fileName'),
       File('${Directory.systemTemp.path}/images/$fileName'),
-      File('/data/user/0/app.notekar.notekar/cache/notekar_media/$clean'),
-      File('/data/user/0/app.notekar.notekar/files/notekar_media/$clean'),
-      File('/data/data/app.notekar.notekar/cache/notekar_media/$clean'),
-      File('/data/data/app.notekar.notekar/files/notekar_media/$clean'),
+      File('$parentDir/cache/notekar_media/$clean'),
+      File('$parentDir/files/notekar_media/$clean'),
       // Also check if stored with 'images/' prefix in media root
       File('${mediaDir.path}/images/$fileName'),
     ];

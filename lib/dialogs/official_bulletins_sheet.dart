@@ -57,8 +57,8 @@ class OfficialBulletinsSheet extends StatelessWidget {
       title: 'Official Bulletins'.localized(context),
       docked: true,
       onBack: onBack ?? () => Navigator.of(context).pop(),
-      child: SizedBox(
-        width: 410,
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 410),
         height: math.min(MediaQuery.sizeOf(context).height * 0.78, 680),
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),

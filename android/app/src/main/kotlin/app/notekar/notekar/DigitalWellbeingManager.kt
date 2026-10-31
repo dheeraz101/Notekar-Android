@@ -14,6 +14,9 @@ import java.util.Locale
 
 object DigitalWellbeingManager {
 
+    private val labelCache = java.util.concurrent.ConcurrentHashMap<String, String>()
+    private val categoryCache = java.util.concurrent.ConcurrentHashMap<String, String>()
+
     fun hasUsagePermission(context: Context): Boolean {
         return try {
             val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
@@ -132,11 +135,11 @@ object DigitalWellbeingManager {
         )
 
         val aggregatedByPackage = mutableMapOf<String, Long>()
-        for (stat in stats) {
+        for (stat in (stats ?: emptyList())) {
             val fgTime = stat.totalTimeInForeground
             if (fgTime > 0) {
-                aggregatedByPackage[stat.packageName] =
-                    (aggregatedByPackage[stat.packageName] ?: 0L) + fgTime
+                val current = aggregatedByPackage[stat.packageName] ?: 0L
+                aggregatedByPackage[stat.packageName] = Math.max(current, fgTime)
             }
         }
 
@@ -148,43 +151,47 @@ object DigitalWellbeingManager {
 
             totalScreenTimeMs += duration
 
-            val categoryBucket = try {
-                val appInfo = pm.getApplicationInfo(pkg, 0)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    when (appInfo.category) {
-                        ApplicationInfo.CATEGORY_PRODUCTIVITY,
-                        ApplicationInfo.CATEGORY_MAPS,
-                        ApplicationInfo.CATEGORY_ACCESSIBILITY -> "Productivity"
+            val categoryBucket = categoryCache.getOrPut(pkg) {
+                try {
+                    val appInfo = pm.getApplicationInfo(pkg, 0)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        when (appInfo.category) {
+                            ApplicationInfo.CATEGORY_PRODUCTIVITY,
+                            ApplicationInfo.CATEGORY_MAPS,
+                            ApplicationInfo.CATEGORY_ACCESSIBILITY -> "Productivity"
 
-                        ApplicationInfo.CATEGORY_SOCIAL,
-                        ApplicationInfo.CATEGORY_NEWS -> "Social"
+                            ApplicationInfo.CATEGORY_SOCIAL,
+                            ApplicationInfo.CATEGORY_NEWS -> "Social"
 
-                        ApplicationInfo.CATEGORY_GAME,
-                        ApplicationInfo.CATEGORY_AUDIO,
-                        ApplicationInfo.CATEGORY_VIDEO,
-                        ApplicationInfo.CATEGORY_IMAGE -> "Entertainment"
+                            ApplicationInfo.CATEGORY_GAME,
+                            ApplicationInfo.CATEGORY_AUDIO,
+                            ApplicationInfo.CATEGORY_VIDEO,
+                            ApplicationInfo.CATEGORY_IMAGE -> "Entertainment"
 
-                        else -> {
-                            if ((appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0) {
-                                "System"
-                            } else {
-                                guessCategoryFromPackage(pkg)
+                            else -> {
+                                if ((appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0) {
+                                    "System"
+                                } else {
+                                    guessCategoryFromPackage(pkg)
+                                }
                             }
                         }
+                    } else {
+                        if ((appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0) "System" else guessCategoryFromPackage(pkg)
                     }
-                } else {
-                    if ((appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0) "System" else guessCategoryFromPackage(pkg)
+                } catch (_: Exception) {
+                    "System"
                 }
-            } catch (_: Exception) {
-                "System"
             }
 
             categoryBuckets[categoryBucket] = (categoryBuckets[categoryBucket] ?: 0L) + duration
 
-            val appName = try {
-                pm.getApplicationLabel(pm.getApplicationInfo(pkg, 0)).toString()
-            } catch (_: Exception) {
-                pkg.substringAfterLast('.')
+            val appName = labelCache.getOrPut(pkg) {
+                try {
+                    pm.getApplicationLabel(pm.getApplicationInfo(pkg, 0)).toString()
+                } catch (_: Exception) {
+                    pkg.substringAfterLast('.')
+                }
             }
 
             topApps.add(

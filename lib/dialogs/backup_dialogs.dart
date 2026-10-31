@@ -30,8 +30,8 @@ class BackupImportPreviewDialog extends StatelessWidget {
       title: 'Review Backup',
       blur: blur,
       largeText: largeText,
-      child: SizedBox(
-        width: 410,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 410),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

@@ -442,40 +442,42 @@ class AppSheetLargeTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Widget titleWidget(double opacity) => Opacity(
+      opacity: opacity,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: spacing16),
+        child: PressableScale(
+          onTap: () => _handleTap(context),
+          child: Text(
+            title,
+            style: TextStyle(
+              color: p.text,
+              fontSize: 34,
+              fontWeight: FontWeight.w900,
+              letterSpacing: -1.4,
+              fontFamily: 'Inter',
+            ),
+          ),
+        ),
+      ),
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AnimatedBuilder(
-          animation: scrollController ?? ScrollController(),
-          builder: (context, _) {
-            final offset = scrollController?.hasClients == true
-                ? scrollController!.offset
-                : (scrollController != null
-                      ? AppScrollState.get('settings_root')
-                      : 0.0);
-            // Large title fades out slightly before the small title starts appearing
-            final opacity = (1.0 - (offset / 40)).clamp(0.0, 1.0);
-            return Opacity(
-              opacity: opacity,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: spacing16),
-                child: PressableScale(
-                  onTap: () => _handleTap(context),
-                  child: Text(
-                    title,
-                    style: TextStyle(
-                      color: p.text,
-                      fontSize: 34,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -1.4,
-                      fontFamily: 'Inter',
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
+        if (scrollController != null)
+          AnimatedBuilder(
+            animation: scrollController!,
+            builder: (context, _) {
+              final offset = scrollController!.hasClients
+                  ? scrollController!.offset
+                  : AppScrollState.get('settings_root');
+              final opacity = (1.0 - (offset / 40)).clamp(0.0, 1.0);
+              return titleWidget(opacity);
+            },
+          )
+        else
+          titleWidget(1.0),
         if (extra != null) ...[extra!, const SizedBox(height: spacing16)],
       ],
     );

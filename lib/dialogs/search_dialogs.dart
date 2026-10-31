@@ -53,8 +53,8 @@ class _NoteSearchDialogState extends State<NoteSearchDialog> {
       controller: _scrollController,
       showLargeTitle: false,
       removeBottomPadding: true,
-      child: SizedBox(
-        width: 410,
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 410),
         height: math.min(MediaQuery.sizeOf(context).height * 0.68, 590),
         child: NoteSearchContent(
           p: widget.p,

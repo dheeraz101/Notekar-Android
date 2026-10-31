@@ -234,16 +234,32 @@ class MarkdownTextEditingController extends TextEditingController {
           ),
         );
       } else if (matchedText.startsWith('#')) {
-        // Hashtag: #tag
-        spans.add(
-          TextSpan(
-            text: matchedText,
-            style: baseStyle.copyWith(
-              color: palette.accent,
-              fontWeight: FontWeight.w700,
+        final tagBody = matchedText.substring(1);
+        final isHexColor = RegExp(
+          r'^(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$',
+        ).hasMatch(tagBody);
+        if (isHexColor) {
+          spans.add(
+            TextSpan(
+              text: matchedText,
+              style: baseStyle.copyWith(
+                fontFamily: 'monospace',
+                color: palette.subtext,
+              ),
             ),
-          ),
-        );
+          );
+        } else {
+          // Hashtag: #tag
+          spans.add(
+            TextSpan(
+              text: matchedText,
+              style: baseStyle.copyWith(
+                color: palette.accent,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          );
+        }
       } else {
         spans.add(TextSpan(text: matchedText, style: baseStyle));
       }

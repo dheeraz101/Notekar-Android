@@ -197,9 +197,12 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: p.surface2,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: p.border),
+                  color: p.surface2.withValues(alpha: 0.65),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: p.border.withValues(alpha: 0.45),
+                    width: 0.8,
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,7 +210,8 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
                     Wrap(
                       alignment: WrapAlignment.spaceBetween,
                       crossAxisAlignment: WrapCrossAlignment.center,
-                      runSpacing: 6,
+                      spacing: 8,
+                      runSpacing: 8,
                       children: [
                         Row(
                           mainAxisSize: MainAxisSize.min,
@@ -217,26 +221,30 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
                               color: p.accent,
                               size: 16,
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 7),
                             Text(
                               'CHOOSE APP ICON'.localized(context),
                               style: TextStyle(
                                 color: p.accent,
                                 fontSize: 10.5,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.8,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 1.0,
                               ),
                             ),
                           ],
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
+                            horizontal: 9,
+                            vertical: 3.5,
                           ),
                           decoration: BoxDecoration(
-                            color: p.accent.withValues(alpha: 0.15),
+                            color: p.accent.withValues(alpha: 0.14),
                             borderRadius: BorderRadius.circular(999),
+                            border: Border.all(
+                              color: p.accent.withValues(alpha: 0.35),
+                              width: 0.8,
+                            ),
                           ),
                           child: Text(
                             '${availableIcons.length} Icons Available'
@@ -244,20 +252,21 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
                             style: TextStyle(
                               color: p.accent,
                               fontSize: 10.5,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.2,
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     Text(
                       'Scroll through the dock below to preview handcrafted icon artwork on the simulated home screen. Tap any icon to immediately set it as your sovereign Android launcher shortcut.'
                           .localized(context),
                       style: TextStyle(
                         color: p.text2,
-                        fontSize: 12.5,
-                        height: 1.4,
+                        fontSize: 13,
+                        height: 1.42,
                       ),
                     ),
                   ],

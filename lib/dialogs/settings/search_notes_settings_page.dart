@@ -390,6 +390,10 @@ class SearchNotesSettingsPage {
                         title: n.category ?? 'Note',
                         category: n.category,
                         dateStr: datePretty(n.timestamp),
+                        imagePath: n.imagePath,
+                        voicePath: n.voicePath,
+                        voiceDurationMs: n.voiceDurationMs,
+                        voicePaths: n.voicePaths,
                         onEdit: onEditNote != null ? () => onEditNote(n) : null,
                       );
                     }).toList();
@@ -400,6 +404,10 @@ class SearchNotesSettingsPage {
                       title: entry.category ?? 'Note',
                       category: entry.category,
                       dateStr: datePretty(startTs ?? entry.timestamp),
+                      imagePath: entry.imagePath,
+                      voicePath: entry.voicePath,
+                      voiceDurationMs: entry.voiceDurationMs,
+                      voicePaths: entry.voicePaths,
                       items: previewItems,
                       initialIndex: index,
                       onEdit: onEditNote != null

@@ -346,7 +346,7 @@ class TagService {
       caseSensitive: false,
     );
 
-    int updatedCount = 0;
+    final toUpdate = <Moment>[];
     for (final moment in moments) {
       bool changed = false;
       var note = moment.note;
@@ -366,11 +366,14 @@ class TagService {
       }
 
       if (changed) {
-        final updated = moment.copyWith(note: note, tags: tags);
-        await repo.saveMoment(updated);
-        updatedCount++;
+        toUpdate.add(moment.copyWith(note: note, tags: tags));
       }
     }
+
+    if (toUpdate.isNotEmpty) {
+      await repo.saveMoments(toUpdate);
+    }
+    final updatedCount = toUpdate.length;
 
     _recentTags = _recentTags.map((t) {
       if (stripHash(t).toLowerCase() == oldClean) {
@@ -398,7 +401,7 @@ class TagService {
       caseSensitive: false,
     );
 
-    int updatedCount = 0;
+    final toUpdate = <Moment>[];
     for (final moment in moments) {
       bool changed = false;
       var note = moment.note;
@@ -418,11 +421,14 @@ class TagService {
       }
 
       if (changed) {
-        final updated = moment.copyWith(note: note, tags: tags);
-        await repo.saveMoment(updated);
-        updatedCount++;
+        toUpdate.add(moment.copyWith(note: note, tags: tags));
       }
     }
+
+    if (toUpdate.isNotEmpty) {
+      await repo.saveMoments(toUpdate);
+    }
+    final updatedCount = toUpdate.length;
 
     _recentTags.removeWhere((t) => stripHash(t).toLowerCase() == clean);
     final prefs = await SharedPreferences.getInstance();

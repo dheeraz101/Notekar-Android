@@ -45,8 +45,8 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
       p: widget.p,
       title: 'Select Date',
       removeBottomPadding: true,
-      child: SizedBox(
-        width: 410,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 410),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

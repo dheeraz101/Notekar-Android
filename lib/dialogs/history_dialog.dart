@@ -381,28 +381,59 @@ class _HistoryDialogState extends State<HistoryDialog> {
           : sec.items;
 
       final dayNoteItems = sec.items.where((it) {
-        if (it is TimelineSessionItem) return it.note.isNotEmpty;
-        if (it is TimelineSingleItem) return it.moment.note.isNotEmpty;
+        if (it is TimelineSessionItem) {
+          return it.note.isNotEmpty ||
+              it.voicePaths.isNotEmpty ||
+              (it.imagePath != null && it.imagePath!.trim().isNotEmpty);
+        }
+        if (it is TimelineSingleItem) {
+          return it.moment.note.isNotEmpty ||
+              it.moment.voicePaths.isNotEmpty ||
+              (it.moment.imagePath != null &&
+                  it.moment.imagePath!.trim().isNotEmpty);
+        }
         return false;
       }).toList();
 
       final dayPreviewItems = dayNoteItems.map((it) {
         if (it is TimelineSessionItem) {
+          final title =
+              it.category ??
+              (it.note.isNotEmpty
+                  ? 'Session Note'
+                  : (it.voicePaths.isNotEmpty
+                        ? 'Voice Session'
+                        : 'Photo Session'));
           return NotePreviewItem(
             note: it.note,
-            title: it.category ?? 'Session Note',
+            title: title,
             category: it.category,
-            dateStr: datePretty(it.startTimestamp),
+            dateStr: formatMomentDateTime(it.startTimestamp),
             onEdit: () => _openDirectNoteEditor(it.noteMoment),
+            imagePath: it.imagePath,
+            voicePath: it.voicePath,
+            voiceDurationMs: it.voiceDurationMs,
+            voicePaths: it.voicePaths,
           );
         } else {
           final s = it as TimelineSingleItem;
+          final title =
+              s.moment.category ??
+              (s.moment.note.isNotEmpty
+                  ? 'Moment Note'
+                  : (s.moment.voicePaths.isNotEmpty
+                        ? 'Voice Memo'
+                        : 'Photo Note'));
           return NotePreviewItem(
             note: s.moment.note,
-            title: s.moment.category ?? 'Moment Note',
+            title: title,
             category: s.moment.category,
-            dateStr: datePretty(s.moment.timestamp),
+            dateStr: formatMomentDateTime(s.moment.timestamp),
             onEdit: () => _openDirectNoteEditor(s.moment),
+            imagePath: s.moment.imagePath,
+            voicePath: s.moment.voicePath,
+            voiceDurationMs: s.moment.voiceDurationMs,
+            voicePaths: s.moment.voicePaths,
           );
         }
       }).toList();

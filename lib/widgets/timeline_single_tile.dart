@@ -64,11 +64,35 @@ class TimelineSingleTile extends StatelessWidget {
         moment.note.contains('#godmode') ||
         moment.note.toLowerCase().contains('sovereign access granted');
     final hasNote = moment.note.trim().isNotEmpty;
+    final hasMedia =
+        moment.voicePaths.isNotEmpty ||
+        (moment.imagePath != null && moment.imagePath!.trim().isNotEmpty);
     final color = momentColor(p, moment.type);
     final cat = moment.category ?? 'Moment';
     final meta = getCategoryMeta(cat, p);
 
     final tileRadius = BorderRadius.circular(compact ? 12 : 20);
+
+    void openSinglePreview() {
+      final defaultTitle = moment.note.isNotEmpty
+          ? 'Moment Note'
+          : (moment.voicePaths.isNotEmpty ? 'Voice Memo' : 'Photo Note');
+      NotePreviewSheet.show(
+        context,
+        p: p,
+        note: moment.note,
+        title: moment.category ?? defaultTitle,
+        category: moment.category,
+        dateStr: formatMomentDateTime(moment.timestamp),
+        imagePath: moment.imagePath,
+        voicePath: moment.voicePath,
+        voiceDurationMs: moment.voiceDurationMs,
+        voicePaths: moment.voicePaths,
+        items: previewItems,
+        initialIndex: initialPreviewIndex ?? 0,
+        onEdit: onEditNote,
+      );
+    }
 
     final nodeSize = isGodMode
         ? (compact ? 18.0 : 22.0)
@@ -117,7 +141,7 @@ class TimelineSingleTile extends StatelessWidget {
                           'D',
                           style: TextStyle(
                             color: Colors.black,
-                            fontSize: compact ? 9.5 : 10.5,
+                            fontSize: compact ? 10.5 : 12.0,
                             fontWeight: FontWeight.w900,
                           ),
                         )
@@ -126,7 +150,7 @@ class TimelineSingleTile extends StatelessWidget {
                                 singleNumber!.localizedDigits(context),
                                 style: TextStyle(
                                   color: color,
-                                  fontSize: compact ? 8.5 : 9.5,
+                                  fontSize: compact ? 10.0 : 11.5,
                                   fontWeight: FontWeight.w900,
                                   fontFeatures: const [
                                     FontFeature.tabularFigures(),
@@ -176,7 +200,9 @@ class TimelineSingleTile extends StatelessWidget {
                 onDelete: onDelete,
                 onEdit: onEditNote,
                 child: PressableScale(
-                  onTap: onTap ?? onEditNote,
+                  onTap:
+                      onTap ??
+                      ((hasNote || hasMedia) ? openSinglePreview : onEditNote),
                   onLongPress: onLongPress,
                   child: Container(
                     padding: EdgeInsets.symmetric(
@@ -247,7 +273,7 @@ class TimelineSingleTile extends StatelessWidget {
                                     timeOnly(moment.timestamp),
                                     style: TextStyle(
                                       color: p.text,
-                                      fontSize: compact ? 11.5 : 12.5,
+                                      fontSize: compact ? 12.0 : 13.5,
                                       fontWeight: FontWeight.w700,
                                       fontFeatures: const [
                                         FontFeature.tabularFigures(),
@@ -259,7 +285,7 @@ class TimelineSingleTile extends StatelessWidget {
                                     '•',
                                     style: TextStyle(
                                       color: p.text3,
-                                      fontSize: compact ? 10 : 12,
+                                      fontSize: compact ? 11 : 13,
                                     ),
                                   ),
                                   SizedBox(width: compact ? 6 : 8),
@@ -290,19 +316,7 @@ class TimelineSingleTile extends StatelessWidget {
                               if (hasNote) ...[
                                 const SizedBox(height: 5),
                                 GestureDetector(
-                                  onTap: () {
-                                    NotePreviewSheet.show(
-                                      context,
-                                      p: p,
-                                      note: moment.note,
-                                      title: moment.category ?? 'Moment Note',
-                                      category: moment.category,
-                                      dateStr: datePretty(moment.timestamp),
-                                      items: previewItems,
-                                      initialIndex: initialPreviewIndex ?? 0,
-                                      onEdit: onEditNote,
-                                    );
-                                  },
+                                  onTap: openSinglePreview,
                                   behavior: HitTestBehavior.opaque,
                                   child: Builder(
                                     builder: (ctx) {
@@ -339,15 +353,15 @@ class TimelineSingleTile extends StatelessWidget {
                                               overflow: TextOverflow.ellipsis,
                                               style: TextStyle(
                                                 color: p.text2,
-                                                fontSize: compact ? 11.5 : 12.5,
-                                                height: 1.3,
+                                                fontSize: compact ? 13.5 : 15.5,
+                                                height: 1.42,
                                               ),
                                             ),
                                           if (tags.isNotEmpty) ...[
                                             if (clean.isNotEmpty)
-                                              const SizedBox(height: 3),
+                                              const SizedBox(height: 5),
                                             Wrap(
-                                              spacing: 4,
+                                              spacing: 5,
                                               runSpacing: 4,
                                               children: tags.map((t) {
                                                 final actTag = TagService
@@ -356,14 +370,14 @@ class TimelineSingleTile extends StatelessWidget {
                                                 return Container(
                                                   padding:
                                                       const EdgeInsets.symmetric(
-                                                        horizontal: 5.5,
-                                                        vertical: 1.5,
+                                                        horizontal: 7.0,
+                                                        vertical: 2.5,
                                                       ),
                                                   decoration: BoxDecoration(
                                                     color: p.surface3,
                                                     borderRadius:
                                                         BorderRadius.circular(
-                                                          6,
+                                                          7,
                                                         ),
                                                     border: Border.all(
                                                       color: p.border
@@ -381,10 +395,10 @@ class TimelineSingleTile extends StatelessWidget {
                                                         actTag?.icon ??
                                                             CupertinoIcons
                                                                 .tag_fill,
-                                                        size: 9.5,
+                                                        size: 11.5,
                                                         color: p.accent,
                                                       ),
-                                                      const SizedBox(width: 3),
+                                                      const SizedBox(width: 4),
                                                       Text(
                                                         actTag?.label ??
                                                             TagService.stripHash(
@@ -392,7 +406,7 @@ class TimelineSingleTile extends StatelessWidget {
                                                             ),
                                                         style: TextStyle(
                                                           color: p.text2,
-                                                          fontSize: 9.5,
+                                                          fontSize: 11.5,
                                                           fontWeight:
                                                               FontWeight.w600,
                                                         ),
@@ -597,13 +611,13 @@ class _SingleCategoryBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(meta.icon, size: compact ? 9.5 : 11, color: meta.color),
-          const SizedBox(width: 3.5),
+          Icon(meta.icon, size: compact ? 11.5 : 13.0, color: meta.color),
+          const SizedBox(width: 4.5),
           Text(
             category,
             style: TextStyle(
               color: meta.color,
-              fontSize: compact ? 9.5 : 10.5,
+              fontSize: compact ? 11.5 : 12.5,
               fontWeight: FontWeight.w700,
             ),
           ),

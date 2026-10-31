@@ -295,6 +295,45 @@ String datePretty(int timestamp) {
       '${d.month.toString().padLeft(2, '0')}/${d.year}';
 }
 
+String formatMomentDateTime(int timestamp, {bool? use24Hour}) {
+  final d = DateTime.fromMillisecondsSinceEpoch(timestamp);
+  final now = DateTime.now();
+  final isToday =
+      d.year == now.year && d.month == now.month && d.day == now.day;
+  final yesterday = now.subtract(const Duration(days: 1));
+  final isYesterday =
+      d.year == yesterday.year &&
+      d.month == yesterday.month &&
+      d.day == yesterday.day;
+
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  final monthStr = months[d.month - 1];
+  final timeStr = formatTimeShort(timestamp, use24Hour: use24Hour);
+
+  if (isToday) {
+    return 'Today • $timeStr';
+  } else if (isYesterday) {
+    return 'Yesterday • $timeStr';
+  } else if (d.year == now.year) {
+    return '$monthStr ${d.day} • $timeStr';
+  } else {
+    return '$monthStr ${d.day}, ${d.year} • $timeStr';
+  }
+}
+
 String historySectionLabel(int timestamp) {
   final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
   final today = DateTime.now();

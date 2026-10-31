@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:notekar/dialogs/add_edit_habit_sheet.dart';
 import 'package:notekar/models/checkpoint.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
@@ -123,6 +124,19 @@ class _CheckpointsDashboardScreenState
             fontWeight: FontWeight.w700,
           ),
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Add Habit'.localized(context),
+            onPressed: () async {
+              HapticFeedback.selectionClick();
+              final res = await AddEditHabitSheet.show(context, p: p);
+              if (res == true && mounted) {
+                setState(() {});
+              }
+            },
+            icon: Icon(Icons.add_rounded, size: 24, color: p.accent),
+          ),
+        ],
       ),
       body: SafeArea(
         top: false,

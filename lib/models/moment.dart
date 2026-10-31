@@ -5,20 +5,28 @@ part 'moment.g.dart';
 
 String? extractHashtagCategory(String? text) {
   if (text == null || text.trim().isEmpty) return null;
-  final match = RegExp(r'#([a-zA-Z0-9_-]+)').firstMatch(text);
-  if (match == null) return null;
-  final tag = match.group(1);
-  if (tag == null || tag.isEmpty) return null;
-  final lower = tag.toLowerCase();
-  if (lower == 'work') return 'Work';
-  if (lower == 'deepfocus' || lower == 'focus') return 'Deep Focus';
-  if (lower == 'study') return 'Study';
-  if (lower == 'fitness' || lower == 'health' || lower == 'gym') {
-    return 'Health';
+  final matches = RegExp(r'#([a-zA-Z0-9_-]+)').allMatches(text);
+  for (final match in matches) {
+    final tag = match.group(1);
+    if (tag == null || tag.isEmpty) continue;
+    // Exclude pure 3-digit, 6-digit, or 8-digit hex color codes (e.g. #FFF, #FFFFFF, #1C1C1E)
+    if (RegExp(
+      r'^(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$',
+    ).hasMatch(tag)) {
+      continue;
+    }
+    final lower = tag.toLowerCase();
+    if (lower == 'work') return 'Work';
+    if (lower == 'deepfocus' || lower == 'focus') return 'Deep Focus';
+    if (lower == 'study') return 'Study';
+    if (lower == 'fitness' || lower == 'health' || lower == 'gym') {
+      return 'Health';
+    }
+    if (lower == 'play') return 'Play';
+    if (lower == 'routine') return 'Routine';
+    return tag[0].toUpperCase() + tag.substring(1);
   }
-  if (lower == 'play') return 'Play';
-  if (lower == 'routine') return 'Routine';
-  return tag[0].toUpperCase() + tag.substring(1);
+  return null;
 }
 
 @collection
@@ -150,9 +158,9 @@ class Moment {
   bool get isValid {
     if (id <= 0) return false;
     if (timestamp <= 0) return false;
-    // Prevent future timestamps (allow 5 min drift)
+    // Prevent future timestamps (allow 24-hour timezone / clock drift)
     if (timestamp >
-        DateTime.now().add(const Duration(minutes: 5)).millisecondsSinceEpoch) {
+        DateTime.now().add(const Duration(hours: 24)).millisecondsSinceEpoch) {
       return false;
     }
     return true;

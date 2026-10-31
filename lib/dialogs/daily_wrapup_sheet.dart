@@ -117,7 +117,7 @@ class _DailyWrapupPageState extends State<DailyWrapupPage> {
     final todayMoments = widget.moments
         .where((m) => m.date == todayKey)
         .toList();
-    if (todayMoments.isNotEmpty && todayMoments.last.type == 'in') {
+    if (todayMoments.isNotEmpty && todayMoments.first.type == 'in') {
       _hasActiveSession = true;
     }
   }
@@ -197,7 +197,7 @@ class _DailyWrapupPageState extends State<DailyWrapupPage> {
     try {
       final repo = MomentRepository();
       final all = repo.getAllMoments();
-      if (all.isNotEmpty && all.last.type == 'in') {
+      if (all.isNotEmpty && all.first.type == 'in') {
         final now = DateTime.now();
         final outMoment = Moment(
           id: repo.getNextId(),
@@ -205,7 +205,7 @@ class _DailyWrapupPageState extends State<DailyWrapupPage> {
           type: 'out',
           date: dateKey(now),
           note: 'Session concluded via Daily Wrap-up',
-          category: all.last.category,
+          category: all.first.category,
         );
         await repo.saveMoment(outMoment);
       }

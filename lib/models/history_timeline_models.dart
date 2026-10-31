@@ -50,7 +50,11 @@ class TimelineSessionItem extends TimelineItem {
     }
     if (isOngoing) {
       final diff = DateTime.now().millisecondsSinceEpoch - start;
-      return Duration(milliseconds: diff > 0 ? diff : 0);
+      final cappedLive = math.min(
+        diff,
+        const Duration(hours: 24).inMilliseconds,
+      );
+      return Duration(milliseconds: cappedLive > 0 ? cappedLive : 0);
     }
     final inDt = DateTime.fromMillisecondsSinceEpoch(start);
     final endOfDay = DateTime(
@@ -70,10 +74,14 @@ class TimelineSessionItem extends TimelineItem {
 
   @override
   String get note {
-    if (inMoment.note.trim().isNotEmpty) return inMoment.note.trim();
-    if (outMoment != null && outMoment!.note.trim().isNotEmpty) {
-      return outMoment!.note.trim();
+    final inN = inMoment.note.trim();
+    final outN = outMoment?.note.trim() ?? '';
+    if (inN.isNotEmpty && outN.isNotEmpty) {
+      if (inN == outN) return inN;
+      return '$inN\n\n$outN';
     }
+    if (inN.isNotEmpty) return inN;
+    if (outN.isNotEmpty) return outN;
     return '';
   }
 
@@ -96,12 +104,40 @@ class TimelineSessionItem extends TimelineItem {
     return outMoment ?? inMoment;
   }
 
-  String? get imagePath => noteMoment.imagePath;
-  List<String> get imagePaths => noteMoment.imagePaths;
-  String? get voicePath => noteMoment.voicePath;
-  List<String> get voicePaths => noteMoment.voicePaths;
-  int? get voiceDurationMs => noteMoment.voiceDurationMs;
-  List<int> get voiceDurations => noteMoment.voiceDurations;
+  String? get imagePath => inMoment.imagePath ?? outMoment?.imagePath;
+  List<String> get imagePaths {
+    final list = <String>[];
+    list.addAll(inMoment.imagePaths);
+    if (outMoment != null) {
+      for (final p in outMoment!.imagePaths) {
+        if (!list.contains(p)) list.add(p);
+      }
+    }
+    return list;
+  }
+
+  String? get voicePath => inMoment.voicePath ?? outMoment?.voicePath;
+  List<String> get voicePaths {
+    final list = <String>[];
+    list.addAll(inMoment.voicePaths);
+    if (outMoment != null) {
+      for (final p in outMoment!.voicePaths) {
+        if (!list.contains(p)) list.add(p);
+      }
+    }
+    return list;
+  }
+
+  int? get voiceDurationMs =>
+      inMoment.voiceDurationMs ?? outMoment?.voiceDurationMs;
+  List<int> get voiceDurations {
+    final list = <int>[];
+    list.addAll(inMoment.voiceDurations);
+    if (outMoment != null) {
+      list.addAll(outMoment!.voiceDurations);
+    }
+    return list;
+  }
 
   @override
   String? get category {
@@ -531,8 +567,6 @@ List<TimelineDaySection> buildTimelineDaySections(
   }
 
   // 5. Any remaining active IN moments
-  final now = DateTime.now();
-  final todayKey = dateKey(now);
   for (final inMoment in activeInTracks.values) {
     final cat = canonicalCategory(inMoment);
     final isRest = cat == 'rest';
@@ -548,6 +582,8 @@ List<TimelineDaySection> buildTimelineDaySections(
   // 2. Group timeline items by day based on the item's anchor date
   // For a session, its anchor date is when it started (inMoment.date).
   // For a single/out, its anchor date is moment.date.
+  final now = DateTime.now();
+  final todayKey = dateKey(now);
   final Map<String, List<TimelineItem>> groupedByDate = {};
   for (final item in allItems) {
     final dKey = switch (item) {

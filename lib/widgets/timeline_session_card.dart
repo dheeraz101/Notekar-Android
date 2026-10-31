@@ -190,7 +190,7 @@ class TimelineSessionCard extends StatelessWidget {
                         timeOnly(session.startTimestamp),
                         style: TextStyle(
                           color: p.text,
-                          fontSize: compact ? 12 : 13,
+                          fontSize: compact ? 12.5 : 14.0,
                           fontWeight: FontWeight.w700,
                           fontFeatures: const [FontFeature.tabularFigures()],
                         ),
@@ -236,7 +236,7 @@ class TimelineSessionCard extends StatelessWidget {
                               'LIVE $durationStr',
                               style: TextStyle(
                                 color: p.green,
-                                fontSize: compact ? 10 : 11,
+                                fontSize: compact ? 11.5 : 12.5,
                                 fontWeight: FontWeight.w800,
                                 fontFeatures: const [
                                   FontFeature.tabularFigures(),
@@ -346,7 +346,7 @@ class TimelineSessionCard extends StatelessWidget {
                           ),
                           style: TextStyle(
                             color: p.text,
-                            fontSize: compact ? 12 : 13,
+                            fontSize: compact ? 12.5 : 14.0,
                             fontWeight: FontWeight.w700,
                             fontFeatures: const [FontFeature.tabularFigures()],
                           ),
@@ -374,14 +374,23 @@ class TimelineSessionCard extends StatelessWidget {
                   SizedBox(height: compact ? 6 : 10),
                   GestureDetector(
                     onTap: () {
-                      if (hasNote) {
+                      if (hasNote || hasMedia) {
+                        final defaultTitle = session.note.isNotEmpty
+                            ? 'Session Note'
+                            : (session.voicePaths.isNotEmpty
+                                  ? 'Voice Session'
+                                  : 'Photo Session');
                         NotePreviewSheet.show(
                           context,
                           p: p,
                           note: session.note,
-                          title: session.category ?? 'Session Note',
+                          title: session.category ?? defaultTitle,
                           category: session.category,
                           dateStr: datePretty(session.startTimestamp),
+                          imagePath: session.imagePath,
+                          voicePath: session.voicePath,
+                          voiceDurationMs: session.voiceDurationMs,
+                          voicePaths: session.voicePaths,
                           items: previewItems,
                           initialIndex: initialPreviewIndex ?? 0,
                           onEdit: onEditNote,
@@ -492,8 +501,8 @@ class TimelineSessionCard extends StatelessWidget {
                                               overflow: TextOverflow.ellipsis,
                                               style: TextStyle(
                                                 color: p.text,
-                                                fontSize: compact ? 11.5 : 12.5,
-                                                height: 1.3,
+                                                fontSize: compact ? 13.5 : 15.5,
+                                                height: 1.42,
                                               ),
                                             ),
                                           if (tags.isNotEmpty) ...[
@@ -754,8 +763,8 @@ class _SessionCategoryBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(meta.icon, size: compact ? 9 : 11, color: meta.color),
-          const SizedBox(width: 3.5),
+          Icon(meta.icon, size: compact ? 11.0 : 13.0, color: meta.color),
+          const SizedBox(width: 4.5),
           Flexible(
             child: Text(
               category,
@@ -763,7 +772,7 @@ class _SessionCategoryBadge extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: meta.color,
-                fontSize: compact ? 9.5 : 10.5,
+                fontSize: compact ? 11.5 : 12.5,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -801,10 +810,10 @@ class _SessionGoalBadge extends StatelessWidget {
     }
 
     return Container(
-      constraints: BoxConstraints(maxWidth: compact ? 110 : 140),
+      constraints: BoxConstraints(maxWidth: compact ? 120 : 160),
       padding: EdgeInsets.symmetric(
-        horizontal: compact ? 5 : 6.5,
-        vertical: compact ? 1.5 : 2.5,
+        horizontal: compact ? 6 : 8.0,
+        vertical: compact ? 2.5 : 3.5,
       ),
       decoration: BoxDecoration(
         color: badgeColor.withValues(alpha: 0.12),
@@ -819,10 +828,10 @@ class _SessionGoalBadge extends StatelessWidget {
         children: [
           Icon(
             hasMilestones ? Icons.rocket_launch_rounded : Icons.flag_rounded,
-            size: compact ? 9.5 : 11,
+            size: compact ? 11.0 : 12.5,
             color: badgeColor,
           ),
-          const SizedBox(width: 3.5),
+          const SizedBox(width: 4.5),
           Flexible(
             child: Text(
               '$goalTitle • $durationStr',
@@ -830,7 +839,7 @@ class _SessionGoalBadge extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: badgeColor,
-                fontSize: compact ? 9.5 : 10.5,
+                fontSize: compact ? 11.0 : 12.0,
                 fontWeight: FontWeight.w700,
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),

@@ -63,6 +63,7 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
     }
 
     companion object {
+        private val queueLock = Any()
         const val ACTION_LOG_BG = "app.notekar.notekar.ACTION_LOG_BG"
         const val ACTION_PAUSE_RESUME_BG = "app.notekar.notekar.ACTION_PAUSE_RESUME_BG"
         const val EXTRA_LOG_TYPE = "log_type"
@@ -205,13 +206,15 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
             }
             val logString = json.toString()
 
-            val bgPrefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-            val currentPendingCount = bgPrefs.getInt("flutter.pending_count", 0)
+            synchronized(queueLock) {
+                val bgPrefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+                val currentPendingCount = bgPrefs.getInt("flutter.pending_count", 0)
 
-            bgPrefs.edit()
-                .putString("flutter.log_$currentPendingCount", logString)
-                .putInt("flutter.pending_count", currentPendingCount + 1)
-                .commit()
+                bgPrefs.edit()
+                    .putString("flutter.log_$currentPendingCount", logString)
+                    .putInt("flutter.pending_count", currentPendingCount + 1)
+                    .commit()
+            }
 
             // Update widget preferences instantly so home screen widget state & chronometer reflect immediately
             val widgetPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

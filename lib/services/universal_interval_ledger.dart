@@ -100,161 +100,190 @@ class UniversalIntervalLedger {
     final nowMs = (referenceNow ?? DateTime.now()).millisecondsSinceEpoch;
 
     // 1. Sort all moments chronologically ascending
+    // When timestamps match, OUT precedes IN so a closing session closes
+    // before a new session on the same track begins.
     final sorted = List<Moment>.from(rawMoments)
       ..sort((a, b) {
         final cmp = a.timestamp.compareTo(b.timestamp);
         if (cmp != 0) return cmp;
-        if (a.type == 'in' && b.type != 'in') return -1;
-        if (b.type == 'in' && a.type != 'in') return 1;
+        if (a.type == 'out' && b.type != 'out') return -1;
+        if (b.type == 'out' && a.type != 'out') return 1;
         return a.id.compareTo(b.id);
       });
 
-    // 2. Multi-track pairing by category & goal key
-    final Map<String, List<Moment>> streams = {};
-    final List<Moment> singles = [];
+    final rawIntervals = <CanonicalInterval>[];
+    final Map<String, Moment> activeInTracks = {};
+
+    String canonicalCategory(Moment m) {
+      final cat = m.category?.trim().toLowerCase() ?? '';
+      if (cat == 'rest' ||
+          cat == 'recovery' ||
+          cat == 'rest & recovery' ||
+          cat.contains('rest & recovery')) {
+        return 'rest';
+      }
+      if (m.tags.any((t) {
+        final lower = t.toLowerCase();
+        return lower == 'rest' || lower == '#rest' || lower == 'recovery';
+      })) {
+        return 'rest';
+      }
+      final note = m.note.trim().toLowerCase();
+      if (note.contains('rest & recovery') ||
+          note == 'rest' ||
+          note == '#rest') {
+        return 'rest';
+      }
+      if (cat.isNotEmpty) return cat;
+      final tagCat = extractHashtagCategory(m.note);
+      if (tagCat != null) return tagCat.trim().toLowerCase();
+      return '';
+    }
+
+    String trackKey(Moment m) =>
+        '${canonicalCategory(m)}|${m.effectiveGoalId ?? ''}';
 
     for (final m in sorted) {
       if (m.type == 'single') {
-        singles.add(m);
-      } else {
-        // P1: Multi-track pairing respects both category and goal identity,
-        // mirroring the canonical History timeline session pairing rules.
-        final cat = m.category?.trim().toLowerCase() ?? 'default';
-        final goal = m.effectiveGoalId ?? '';
-        final trackKey = '$cat|$goal';
-        streams.putIfAbsent(trackKey, () => []).add(m);
-      }
-    }
-
-    final rawIntervals = <CanonicalInterval>[];
-
-    // Process single moments
-    for (final s in singles) {
-      rawIntervals.add(
-        CanonicalInterval(
-          id: 'single_${s.id}',
-          startMs: s.timestamp,
-          endMs: s.timestamp,
-          dateKey: s.date,
-          category: s.category ?? 'General',
-          goalId: s.effectiveGoalId,
-          isSession: false,
-          note: s.note,
-          tags: s.tags,
-          inMomentId: s.id,
-        ),
-      );
-    }
-
-    // Process multi-track session streams
-    for (final entry in streams.entries) {
-      final streamMoments = entry.value;
-      Moment? activeIn;
-
-      for (final m in streamMoments) {
-        if (m.type == 'in') {
-          if (activeIn != null) {
-            // Auto-close preceding session at start of new IN
-            final endTs = m.timestamp > activeIn.timestamp
-                ? m.timestamp
-                : activeIn.timestamp + 1000;
-            rawIntervals.add(
-              CanonicalInterval(
-                id: 'sess_${activeIn.id}_${m.id}',
-                startMs: activeIn.timestamp,
-                endMs: endTs,
-                dateKey: activeIn.date,
-                category: activeIn.category ?? 'General',
-                goalId: activeIn.effectiveGoalId,
-                isSession: true,
-                note: activeIn.note,
-                tags: activeIn.tags,
-                inMomentId: activeIn.id,
-                outMomentId: m.id,
-                isOngoing: false,
-              ),
-            );
-          }
-          activeIn = m;
-        } else if (m.type == 'out') {
-          if (activeIn != null) {
-            final endTs = m.timestamp > activeIn.timestamp
-                ? m.timestamp
-                : activeIn.timestamp + 1000;
-            rawIntervals.add(
-              CanonicalInterval(
-                id: 'sess_${activeIn.id}_${m.id}',
-                startMs: activeIn.timestamp,
-                endMs: endTs,
-                dateKey: activeIn.date,
-                category: activeIn.category ?? m.category ?? 'General',
-                goalId: activeIn.effectiveGoalId ?? m.effectiveGoalId,
-                isSession: true,
-                note: activeIn.note.isNotEmpty ? activeIn.note : m.note,
-                tags: activeIn.tags.isNotEmpty ? activeIn.tags : m.tags,
-                inMomentId: activeIn.id,
-                outMomentId: m.id,
-                isOngoing: false,
-              ),
-            );
-            activeIn = null;
-          } else {
-            // Standalone OUT without preceding IN: emit 0-duration reference
-            rawIntervals.add(
-              CanonicalInterval(
-                id: 'orphan_out_${m.id}',
-                startMs: m.timestamp,
-                endMs: m.timestamp,
-                dateKey: m.date,
-                category: m.category ?? 'General',
-                goalId: m.effectiveGoalId,
-                isSession: false,
-                note: m.note,
-                tags: m.tags,
-                outMomentId: m.id,
-              ),
-            );
-          }
-        }
-      }
-
-      if (activeIn != null) {
-        // If the unclosed IN moment is from a past date, it was abandoned.
-        // Cap it to end-of-day or 2 hours max, mirroring TimelineSessionItem.
-        final inDt = DateTime.fromMillisecondsSinceEpoch(activeIn.timestamp);
-        final inDateKey = activeIn.date;
-        final nowDateKey = dateKey(DateTime.fromMillisecondsSinceEpoch(nowMs));
-        final isToday = inDateKey == nowDateKey;
-        final endTs = isToday
-            ? math.max(activeIn.timestamp + 1000, nowMs)
-            : math.min(
-                DateTime(
-                  inDt.year,
-                  inDt.month,
-                  inDt.day,
-                  23,
-                  59,
-                  59,
-                  999,
-                ).millisecondsSinceEpoch,
-                activeIn.timestamp + const Duration(hours: 2).inMilliseconds,
-              );
         rawIntervals.add(
           CanonicalInterval(
-            id: 'ongoing_${activeIn.id}',
-            startMs: activeIn.timestamp,
-            endMs: endTs,
-            dateKey: activeIn.date,
-            category: activeIn.category ?? 'General',
-            goalId: activeIn.effectiveGoalId,
-            isSession: true,
-            note: activeIn.note,
-            tags: activeIn.tags,
-            inMomentId: activeIn.id,
-            isOngoing: isToday,
+            id: 'single_${m.id}',
+            startMs: m.timestamp,
+            endMs: m.timestamp,
+            dateKey: m.date,
+            category: m.category ?? 'General',
+            goalId: m.effectiveGoalId,
+            isSession: false,
+            note: m.note,
+            tags: m.tags,
+            inMomentId: m.id,
           ),
         );
+      } else if (m.type == 'in') {
+        final exactKey = trackKey(m);
+        if (activeInTracks.containsKey(exactKey)) {
+          // Auto-close preceding session on the same track at start of new IN
+          final prevIn = activeInTracks.remove(exactKey)!;
+          final endTs = m.timestamp > prevIn.timestamp
+              ? m.timestamp
+              : prevIn.timestamp + 1000;
+          rawIntervals.add(
+            CanonicalInterval(
+              id: 'sess_${prevIn.id}_${m.id}',
+              startMs: prevIn.timestamp,
+              endMs: endTs,
+              dateKey: prevIn.date,
+              category: prevIn.category ?? 'General',
+              goalId: prevIn.effectiveGoalId,
+              isSession: true,
+              note: prevIn.note,
+              tags: prevIn.tags,
+              inMomentId: prevIn.id,
+              outMomentId: m.id,
+              isOngoing: false,
+            ),
+          );
+        }
+        activeInTracks[exactKey] = m;
+      } else if (m.type == 'out') {
+        // Multi-track pairing: exact match -> category match -> oldest open track
+        final exactKey = trackKey(m);
+        String? matchedKey;
+
+        if (activeInTracks.containsKey(exactKey)) {
+          matchedKey = exactKey;
+        } else {
+          final cat = canonicalCategory(m);
+          final matchingCatKey = activeInTracks.keys
+              .where(
+                (k) =>
+                    k.startsWith('$cat|') ||
+                    (cat.isNotEmpty && k.split('|').first == cat),
+              )
+              .firstOrNull;
+          if (matchingCatKey != null) {
+            matchedKey = matchingCatKey;
+          } else if (activeInTracks.isNotEmpty) {
+            matchedKey = activeInTracks.keys.first;
+          }
+        }
+
+        if (matchedKey != null) {
+          final activeIn = activeInTracks.remove(matchedKey)!;
+          final endTs = m.timestamp > activeIn.timestamp
+              ? m.timestamp
+              : activeIn.timestamp + 1000;
+          rawIntervals.add(
+            CanonicalInterval(
+              id: 'sess_${activeIn.id}_${m.id}',
+              startMs: activeIn.timestamp,
+              endMs: endTs,
+              dateKey: activeIn.date,
+              category: activeIn.category ?? m.category ?? 'General',
+              goalId: activeIn.effectiveGoalId ?? m.effectiveGoalId,
+              isSession: true,
+              note: activeIn.note.isNotEmpty ? activeIn.note : m.note,
+              tags: activeIn.tags.isNotEmpty ? activeIn.tags : m.tags,
+              inMomentId: activeIn.id,
+              outMomentId: m.id,
+              isOngoing: false,
+            ),
+          );
+        } else {
+          // Standalone OUT without preceding IN: emit 0-duration reference
+          rawIntervals.add(
+            CanonicalInterval(
+              id: 'orphan_out_${m.id}',
+              startMs: m.timestamp,
+              endMs: m.timestamp,
+              dateKey: m.date,
+              category: m.category ?? 'General',
+              goalId: m.effectiveGoalId,
+              isSession: false,
+              note: m.note,
+              tags: m.tags,
+              outMomentId: m.id,
+            ),
+          );
+        }
       }
+    }
+
+    // Process unclosed IN moments
+    for (final activeIn in activeInTracks.values) {
+      final inDt = DateTime.fromMillisecondsSinceEpoch(activeIn.timestamp);
+      final inDateKey = activeIn.date;
+      final nowDateKey = dateKey(DateTime.fromMillisecondsSinceEpoch(nowMs));
+      final isToday = inDateKey == nowDateKey;
+      final endTs = isToday
+          ? math.max(activeIn.timestamp + 1000, nowMs)
+          : math.min(
+              DateTime(
+                inDt.year,
+                inDt.month,
+                inDt.day,
+                23,
+                59,
+                59,
+                999,
+              ).millisecondsSinceEpoch,
+              activeIn.timestamp + const Duration(hours: 2).inMilliseconds,
+            );
+      rawIntervals.add(
+        CanonicalInterval(
+          id: 'ongoing_${activeIn.id}',
+          startMs: activeIn.timestamp,
+          endMs: endTs,
+          dateKey: activeIn.date,
+          category: activeIn.category ?? 'General',
+          goalId: activeIn.effectiveGoalId,
+          isSession: true,
+          note: activeIn.note,
+          tags: activeIn.tags,
+          inMomentId: activeIn.id,
+          isOngoing: isToday,
+        ),
+      );
     }
 
     // 3. Slice all intervals crossing midnight boundaries

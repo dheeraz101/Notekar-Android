@@ -1,8 +1,12 @@
 package app.notekar.notekar
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.Typeface
@@ -50,6 +54,13 @@ class FloatingTimerService : Service() {
     private var circleTimeText: TextView? = null
     private var circleSubText: TextView? = null
 
+    // Bottom "✕" Dismiss Target components
+    private var dismissTargetWrapper: LinearLayout? = null
+    private var dismissTargetCircle: LinearLayout? = null
+    private var dismissTargetIcon: TextView? = null
+    private var dismissTargetLabel: TextView? = null
+    private var isOverDismissTarget = false
+
     // Apple HIG Card components
     private var cardContainer: LinearLayout? = null
     private var cardCategoryBadge: TextView? = null
@@ -74,6 +85,7 @@ class FloatingTimerService : Service() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+        startSilentForeground()
         try {
             UnlockReceiver.updateUnlockReceiver(this)
         } catch (_: Exception) {}
@@ -82,6 +94,51 @@ class FloatingTimerService : Service() {
             return
         }
         createFloatingView()
+    }
+
+    private fun startSilentForeground() {
+        try {
+            val channelId = "floating_bubble_service"
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val nm = getSystemService(NotificationManager::class.java)
+                val channel = NotificationChannel(
+                    channelId,
+                    "Floating Bubble Service",
+                    NotificationManager.IMPORTANCE_MIN
+                ).apply {
+                    description = "Maintains NoteKar floating bubble overlay"
+                    setShowBadge(false)
+                    enableVibration(false)
+                    setSound(null, null)
+                }
+                nm?.createNotificationChannel(channel)
+            }
+
+            val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                Notification.Builder(this, channelId)
+            } else {
+                @Suppress("DEPRECATION")
+                Notification.Builder(this)
+            }
+
+            val notification = builder
+                .setContentTitle("NoteKar Bubble Active")
+                .setContentText("Tap bubble or QS tile to manage")
+                .setSmallIcon(R.drawable.ic_stat_notekar)
+                .setOngoing(true)
+                .setPriority(Notification.PRIORITY_MIN)
+                .build()
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                startForeground(
+                    1099,
+                    notification,
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+                )
+            } else {
+                startForeground(1099, notification)
+            }
+        } catch (_: Exception) {}
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -728,6 +785,7 @@ class FloatingTimerService : Service() {
         var initialY = 0
         var initialTouchX = 0f
         var initialTouchY = 0f
+        var isDraggingCircle = false
         var lastTapTime = 0L
         val tapHandler = android.os.Handler(android.os.Looper.getMainLooper())
         var pendingSingleTap: Runnable? = null
@@ -739,15 +797,65 @@ class FloatingTimerService : Service() {
                     initialY = params.y
                     initialTouchX = event.rawX
                     initialTouchY = event.rawY
+                    isDraggingCircle = false
                     true
                 }
                 MotionEvent.ACTION_MOVE -> {
+                    val moveDistance = Math.hypot(
+                        (event.rawX - initialTouchX).toDouble(),
+                        (event.rawY - initialTouchY).toDouble()
+                    )
+                    if (moveDistance > 14 * density) {
+                        isDraggingCircle = true
+                        if (dismissTargetWrapper == null && !isExpanded) {
+                            showDismissTarget()
+                        }
+                    }
+
                     params.x = initialX + (event.rawX - initialTouchX).toInt()
                     params.y = initialY + (event.rawY - initialTouchY).toInt()
                     windowManager?.updateViewLayout(floatingView, params)
+
+                    if (isDraggingCircle && dismissTargetWrapper != null) {
+                        val screenWidth = resources.displayMetrics.widthPixels
+                        val screenHeight = resources.displayMetrics.heightPixels
+                        val targetCenterX = screenWidth / 2f
+                        val targetCenterY = screenHeight - (42 + 32) * density
+                        val dist = Math.hypot(
+                            (event.rawX - targetCenterX).toDouble(),
+                            (event.rawY - targetCenterY).toDouble()
+                        )
+                        val isNearTarget = dist < 75 * density
+                        if (isNearTarget != isOverDismissTarget) {
+                            v.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP)
+                        }
+                        updateDismissTargetHover(isNearTarget)
+                    }
+                    true
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    hideDismissTarget()
                     true
                 }
                 MotionEvent.ACTION_UP -> {
+                    val wasOverDismiss = isOverDismissTarget
+                    hideDismissTarget()
+
+                    if (wasOverDismiss) {
+                        v.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP)
+                        val flutterPrefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+                        flutterPrefs.edit().putBoolean("flutter.floating_timer_enabled", false).apply()
+                        circleContainer?.animate()
+                            ?.scaleX(0f)?.scaleY(0f)?.alpha(0f)
+                            ?.setDuration(180)
+                            ?.withEndAction {
+                                stopSelf()
+                                MainActivity.updatePersistentControlPanel(this@FloatingTimerService)
+                                FloatingBubbleTileService.requestTileUpdate(this@FloatingTimerService)
+                            }?.start()
+                        return@setOnTouchListener true
+                    }
+
                     val dx = Math.abs(event.rawX - initialTouchX)
                     val dy = Math.abs(event.rawY - initialTouchY)
                     if (dx < 12 && dy < 12) {
@@ -852,6 +960,159 @@ class FloatingTimerService : Service() {
         }
 
         updateVisibilityForAppState()
+    }
+
+    private fun showDismissTarget() {
+        if (dismissTargetWrapper != null) return
+        val wm = windowManager ?: return
+        val density = resources.displayMetrics.density
+
+        val layoutType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        } else {
+            @Suppress("DEPRECATION")
+            WindowManager.LayoutParams.TYPE_PHONE
+        }
+
+        val targetParams = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            layoutType,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            PixelFormat.TRANSLUCENT
+        ).apply {
+            gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
+            y = (42 * density).toInt()
+        }
+
+        val wrapper = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        val circleSize = (64 * density).toInt()
+        val circle = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(circleSize, circleSize)
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(Color.parseColor("#E618191D"))
+                setStroke((1.5 * density).toInt(), Color.parseColor("#33FFFFFF"))
+            }
+            elevation = 18 * density
+        }
+
+        val icon = TextView(this).apply {
+            text = "✕"
+            textSize = 20f
+            typeface = Typeface.DEFAULT_BOLD
+            setTextColor(Color.WHITE)
+            gravity = Gravity.CENTER
+        }
+        circle.addView(icon)
+
+        val label = TextView(this).apply {
+            text = "Drag here to hide"
+            textSize = 10f
+            typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
+            setTextColor(Color.parseColor("#99FFFFFF"))
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin = (5 * density).toInt()
+            }
+        }
+
+        wrapper.addView(circle)
+        wrapper.addView(label)
+
+        wrapper.alpha = 0f
+        wrapper.scaleX = 0.7f
+        wrapper.scaleY = 0.7f
+        wrapper.animate()
+            .alpha(1f)
+            .scaleX(1f)
+            .scaleY(1f)
+            .setDuration(180)
+            .setInterpolator(OvershootInterpolator(1.2f))
+            .start()
+
+        dismissTargetWrapper = wrapper
+        dismissTargetCircle = circle
+        dismissTargetIcon = icon
+        dismissTargetLabel = label
+        isOverDismissTarget = false
+
+        try {
+            wm.addView(wrapper, targetParams)
+        } catch (_: Exception) {}
+    }
+
+    private fun updateDismissTargetHover(isHovered: Boolean) {
+        if (isOverDismissTarget == isHovered) return
+        isOverDismissTarget = isHovered
+        val density = resources.displayMetrics.density
+
+        if (isHovered) {
+            dismissTargetCircle?.let { c ->
+                c.background = GradientDrawable().apply {
+                    shape = GradientDrawable.OVAL
+                    setColor(Color.parseColor("#E6FF3B30"))
+                    setStroke((2 * density).toInt(), Color.WHITE)
+                }
+                c.animate().scaleX(1.22f).scaleY(1.22f).setDuration(140).start()
+            }
+            dismissTargetLabel?.text = "Release to dismiss"
+            dismissTargetLabel?.setTextColor(Color.parseColor("#FFFF6961"))
+            circleContainer?.animate()?.scaleX(0.72f)?.scaleY(0.72f)?.alpha(0.85f)?.setDuration(120)?.start()
+        } else {
+            dismissTargetCircle?.let { c ->
+                c.background = GradientDrawable().apply {
+                    shape = GradientDrawable.OVAL
+                    setColor(Color.parseColor("#E618191D"))
+                    setStroke((1.5 * density).toInt(), Color.parseColor("#33FFFFFF"))
+                }
+                c.animate().scaleX(1.0f).scaleY(1.0f).setDuration(140).start()
+            }
+            dismissTargetLabel?.text = "Drag here to hide"
+            dismissTargetLabel?.setTextColor(Color.parseColor("#99FFFFFF"))
+            circleContainer?.animate()?.scaleX(1.0f)?.scaleY(1.0f)?.alpha(1.0f)?.setDuration(120)?.start()
+        }
+    }
+
+    private fun hideDismissTarget() {
+        val wrapper = dismissTargetWrapper ?: return
+        dismissTargetWrapper = null
+        dismissTargetCircle = null
+        dismissTargetIcon = null
+        dismissTargetLabel = null
+        isOverDismissTarget = false
+
+        try {
+            wrapper.animate()
+                .alpha(0f)
+                .scaleX(0.7f)
+                .scaleY(0.7f)
+                .setDuration(150)
+                .withEndAction {
+                    try {
+                        windowManager?.removeView(wrapper)
+                    } catch (_: Exception) {}
+                }
+                .start()
+        } catch (_: Exception) {
+            try {
+                windowManager?.removeView(wrapper)
+            } catch (_: Exception) {}
+        }
     }
 
     private fun updateDockSide(side: DockSide) {
@@ -1199,6 +1460,15 @@ class FloatingTimerService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         instance = null
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                stopForeground(STOP_FOREGROUND_REMOVE)
+            } else {
+                @Suppress("DEPRECATION")
+                stopForeground(true)
+            }
+        } catch (_: Exception) {}
+        hideDismissTarget()
         circleChronometer?.stop()
         cardChronometer?.stop()
         if (floatingView != null) {
@@ -1229,7 +1499,11 @@ class FloatingTimerService : Service() {
             }
             try {
                 val intent = Intent(context, FloatingTimerService::class.java)
-                context.startService(intent)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(intent)
+                } else {
+                    context.startService(intent)
+                }
             } catch (_: Exception) {}
         }
 

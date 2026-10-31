@@ -16,9 +16,11 @@ import 'package:notekar/dialogs/settings/activity_tags_settings_page.dart';
 import 'package:notekar/dialogs/settings/advanced_settings_page.dart';
 import 'package:notekar/dialogs/settings/app_icons_settings_page.dart';
 import 'package:notekar/dialogs/settings/app_lock_settings_page.dart';
+import 'package:notekar/dialogs/settings/app_permissions_settings_page.dart';
 import 'package:notekar/dialogs/settings/app_philosophy_settings_page.dart';
 import 'package:notekar/dialogs/settings/capture_settings_page.dart';
 import 'package:notekar/dialogs/settings/commits_settings_page.dart';
+import 'package:notekar/dialogs/settings/content_rating_settings_page.dart';
 import 'package:notekar/dialogs/settings/data_backup_settings_page.dart';
 import 'package:notekar/dialogs/settings/diagnostics_settings_page.dart';
 import 'package:notekar/dialogs/settings/display_settings_page.dart';
@@ -2416,6 +2418,14 @@ $cleanStack
       if (category == name) return true;
       if (name == 'App Icons' && category == 'App Icon') return true;
       if (name == 'App Icon' && category == 'App Icons') return true;
+      if (name == 'Data safety' &&
+          (category == 'Data safety' || category == 'Privacy & Security')) {
+        return true;
+      }
+      if (name == 'Privacy & Security' &&
+          (category == 'Data safety' || category == 'Privacy & Security')) {
+        return true;
+      }
       return false;
     }
 
@@ -2482,8 +2492,8 @@ $cleanStack
             return PredictiveBackPeek(
               enabled: category != null,
               onPop: _popCategory,
-              child: SizedBox(
-                width: 410,
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 410),
                 height: math.max(260.0, targetHeight),
                 child: AnimatedSwitcher(
                   duration: Duration(milliseconds: engine.isLowEnd ? 120 : 180),
@@ -2655,12 +2665,11 @@ $cleanStack
                                         SettingsRow(
                                           p: p,
                                           icon: CupertinoIcons.shield,
-                                          title: 'Privacy & Security',
+                                          title: 'Data safety',
                                           status: privacyLock ? 'On' : 'Off',
                                           color: p.green,
-                                          onTap: () => _openCategory(
-                                            'Privacy & Security',
-                                          ),
+                                          onTap: () =>
+                                              _openCategory('Data safety'),
                                         ),
                                         SettingsRow(
                                           p: p,
@@ -4356,9 +4365,10 @@ $cleanStack
                                         widget.onSaveQuickBackup,
                                   ),
                                 ),
-                              if (show('Privacy & Security'))
+                              if (show('Data safety') ||
+                                  show('Privacy & Security'))
                                 SliverToBoxAdapter(
-                                  child: PrivacySecuritySettingsPage(
+                                  child: DataSafetySettingsPage(
                                     p: p,
                                     vtRatio: _vtRatio,
                                     vtStatus: _vtStatus,
@@ -4394,6 +4404,14 @@ $cleanStack
                                     onLearnMoreBeta: () =>
                                         _showBetaInfoPopup(p),
                                   ),
+                                ),
+                              if (show('App Permissions'))
+                                SliverToBoxAdapter(
+                                  child: AppPermissionsSettingsPage(p: p),
+                                ),
+                              if (show('Content Rating'))
+                                SliverToBoxAdapter(
+                                  child: ContentRatingSettingsPage(p: p),
                                 ),
                               if (show('App Lock'))
                                 SliverToBoxAdapter(
