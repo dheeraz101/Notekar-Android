@@ -28,69 +28,80 @@ class ChangelogDialog extends StatefulWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.5.11',
-    date: 'October 25, 2026',
-    edition: 'Sovereign QR Pass & Oceanic Sanctuary Beta',
+    version: '7.5.12',
+    date: 'November 01, 2026',
+    edition: 'Quick Settings Tile, Canvas Habits & Apple HIG Surgery',
     badgeColor: Color(0xFFFF9F0A),
     highlights: [
       (
-        title: 'App-Aware Floating Control Pill',
+        title: 'Quick Settings Notification Tile',
         desc:
-            'Automatically hides while NoteKar is open on screen, reappearing when minimized. "✕ Hide" docks into a slim 5dp vertical edge handle.',
-        icon: Icons.picture_in_picture_alt_rounded,
+            'Toggle the floating timer bubble on or off directly from Android\'s system notification shade without opening the app.',
+        icon: Icons.notifications_active_rounded,
         tag: 'System',
       ),
       (
-        title: 'Oceanic Fluid Sanctuary & Queen Fish',
+        title: 'Interactive Bubble Dismissal Target',
         desc:
-            'Edge-to-edge borderless fluid wave, crowned Queen Fish swimming in deep waters with golden jewel crown, and 19 companion fish.',
-        icon: Icons.water_drop_rounded,
-        tag: 'Design',
+            'Drag the floating bubble to the bottom screen "✕" drop-target to dismiss it with tactile feedback, or re-summon via the Quick Settings Tile.',
+        icon: Icons.cancel_rounded,
+        tag: 'Controls',
       ),
       (
-        title: 'Peer Horizon QR Pass & Camera Scanner',
+        title: 'Canvas Habit Creator & Editor',
         desc:
-            'Minimal Apple HIG QR pass on Share Identity Card, paired with a fullscreen 60fps moving laser scanner with animated visual feedback.',
-        icon: Icons.qr_code_scanner_rounded,
-        tag: 'Peer',
+            'Dedicated interactive bottom sheet to author custom habits directly on the canvas with emoji selector, custom interval cadences, and deletion safeguards.',
+        icon: Icons.playlist_add_check_rounded,
+        tag: 'Habits',
       ),
       (
-        title: 'Peer Comparison & Sovereign Sync',
+        title: 'Media Symmetry in Note Previews',
         desc:
-            'Side-by-side 24-hour life balance comparison against peers with single-peer security and conflict management.',
-        icon: Icons.compare_arrows_rounded,
-        tag: 'Insights',
+            'Listen to audio voice memos with inline playback waveforms and inspect photo moments directly within the note preview modal.',
+        icon: Icons.graphic_eq_rounded,
+        tag: 'Media',
       ),
       (
-        title: 'Apple HIG Settings & Layout Polish',
+        title: 'Sovereign App Permissions Dashboard',
         desc:
-            'Broader cryptographic copy in Update Center and responsive headers on App Icons page eliminating layout overflows.',
-        icon: Icons.auto_awesome_rounded,
-        tag: 'UI Craft',
+            'Comprehensive live inspection of all 7 device capabilities with decoupled full-width titles, monospace chips, and iOS "Enable ›" action pills.',
+        icon: Icons.security_rounded,
+        tag: 'Privacy',
       ),
       (
-        title: 'Sandboxed Media & Resilient Recovery',
+        title: 'Global Content Rating Scorecard',
         desc:
-            'Isolated photo storage resolving history preview loading, coupled with automatic database self-healing against corruption.',
+            'Official IARC Everyone, ESRB E, PEGI 3, and USK 0 certifications with 0/5 mature topics scorecard using Apple soft-tinted squircle badges.',
+        icon: Icons.verified_user_rounded,
+        tag: 'Safety',
+      ),
+      (
+        title: 'Data Safety Sovereignty Nutrition Card',
+        desc:
+            'Google Play Store disclosures in a continuous 24pt squircle container with 100% on-device local Isar encryption verification.',
         icon: Icons.shield_rounded,
-        tag: 'Storage',
+        tag: 'Sovereignty',
+      ),
+      (
+        title: 'Apple HIG Visual Surgery & Typography',
+        desc:
+            'Zero text truncation, 44pt touch targets, whisper-thin borders, and adaptive headers withstanding 200% accessibility font scaling.',
+        icon: Icons.brush_rounded,
+        tag: 'UI Craft',
       ),
     ],
     items: [
-      'Sovereign QR Pass, Oceanic Fluid Sanctuary, App-Aware Floating Pill Docking, and Resilient Storage.',
-      '+ App-Aware Floating Pill: Auto-hides when NoteKar is open; reappears on minimize with chronometer sync',
-      '+ Slim Edge Handle Docking: Tapping "✕ Hide" docks into a 5dp vertical handle touching screen bezel',
-      '+ Gesture Restoration: Tap to spring back with overshoot bounce, or swipe inward (>12dp) to drag-out circle',
-      '+ Living Oceanic Fluid: Full-bleed water meniscus flowing naturally across full page width without card boundaries',
-      '+ Crowned Queen Fish: Selected accent crowned Queen Fish at bottom depth (1.38x scale) with aligned 3-point crown',
-      '+ 19 Companion Fish: Varied depths, organic speeds, theme-adaptive abyssal shadows, and fixed-color riverbed rocks',
-      '+ Minimal QR Pass: Temporary pass card displays clean QR pass only with zero extraneous chronometer metrics',
-      '+ Fullscreen Scanner: Continuous 60fps emerald laser sweep, dynamic reticle, and central success/failure checkmark HUD',
-      '+ Peer Comparison Sheet: Side-by-side life clock benchmarking with single-peer persistence and replace safeguards',
-      '+ Sandboxed Media Storage: History photos safely saved in app directory, preventing transient path expiration',
-      '+ Resilient Database Healing: Self-healing integrity engine safeguarding records against data corruption',
-      '+ Update Center & App Icons: Full-width cryptographic copy layout and responsive header wrapping',
-      '* All unit and widget tests passing with 0 lint warnings and 100% offline privacy preservation',
+      'Quick Settings Tile, Canvas Habits, Media Symmetry, App Permissions & Global Content Rating.',
+      '+ Quick Settings Tile: Added FloatingBubbleTileService to toggle floating timer bubble directly from Android notification shade',
+      '+ Interactive Bubble Dismissal: Bottom screen "✕" drop-target dismissal with drag-to-delete gesture and quick re-summon via tile or widget',
+      '+ Canvas Habit Creator: Added AddEditHabitSheet with custom emoji picker, interval cadences, and deletion confirmation safeguards',
+      '+ Media Symmetry: TimelineVoicePlayerPill audio playback and TimelineMediaAttachmentCard photo previews inside NotePreviewSheet',
+      '+ App Permissions Dashboard: Added AppPermissionsSettingsPage inspecting all 7 device permissions with decoupled full-width titles and monospace chips',
+      '+ Content Rating Disclosures: Added ContentRatingSettingsPage with IARC 3+, ESRB E, PEGI 3, USK 0 certifications and 0/5 mature topics scorecard',
+      '+ Data Safety Nutrition Card: Redesigned DataSafetySettingsPage top card with 24pt squircle curvature, 20x20 checkmark pills, and Isar local encryption disclosures',
+      '+ App Icons Header: Redesigned AppIconsSettingsPage instruction card with responsive adaptive Wrap header supporting up to 200% font scaling',
+      '+ Touch Target Enforcement: Checkpoints quick bar touch targets reinforced to Apple HIG 44pt minimum',
+      '+ Pre-commit Code Quality: 100% codebase formatted with dart format, 0 analyzer issues, and 422 passing automated tests',
     ],
   );
 

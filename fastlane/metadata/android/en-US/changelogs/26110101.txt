@@ -1,0 +1,9 @@
+Update to 7.5.12 (build 26BR1101):
+- Quick Settings Tile: Toggle the floating timer bubble from Android notification shade
+- Floating Bubble Gesture: Drag to bottom '✕' target to dismiss; re-summon anytime
+- Canvas Habit Creator: Add custom habits with emoji picker & flexible interval cadences
+- Media in Note Previews: Inline audio voice notes & instant photo moment previews
+- App Permissions Dashboard: Inspect on-device capabilities with zero-tracking disclosure
+- Content Rating Disclosures: Official IARC 3+ scorecard & family safety standards
+- Data Safety Nutrition Card: 24pt squircle Play Store disclosure with local Isar encryption
+- Apple HIG Polish: Refined typography, 44pt touch targets & zero text truncation
