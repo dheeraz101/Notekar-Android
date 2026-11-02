@@ -219,67 +219,92 @@ class _TimelineVoicePlayerPillState extends State<TimelineVoicePlayerPill> {
                   }
 
                   const barCount = 20;
-                  return GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTapDown: (details) => seekTo(details.localPosition),
-                    onHorizontalDragStart: (details) {
-                      _lastHapticScrubIndex = -1;
-                      seekTo(details.localPosition);
-                    },
-                    onHorizontalDragUpdate: (details) =>
-                        seekTo(details.localPosition),
-                    onHorizontalDragEnd: (_) => _lastHapticScrubIndex = -1,
-                    onHorizontalDragCancel: () => _lastHapticScrubIndex = -1,
-                    child: Container(
-                      color: Colors.transparent,
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: List.generate(barCount, (index) {
-                          final barThreshold = (index + 0.8) / barCount;
-                          final isFilled =
-                              progress > 0.01 &&
-                              (progress >= barThreshold ||
-                                  (index == barCount - 1 && progress >= 0.95));
-                          final heights = [
-                            10.0,
-                            16.0,
-                            22.0,
-                            14.0,
-                            18.0,
-                            24.0,
-                            12.0,
-                            20.0,
-                            16.0,
-                            22.0,
-                          ];
-                          final baseH =
-                              heights[index % heights.length] *
-                              (isCompact ? 0.72 : 0.88);
-                          final isPlayhead =
-                              _isThisPlaying &&
-                              (index == (progress * barCount).toInt() ||
-                                  (index == 0 && progress < 0.05));
-                          final effectiveH = isPlayhead
-                              ? (baseH * 1.18).clamp(6.0, 26.0)
-                              : baseH;
+                  final totalSec = total.inSeconds;
+                  final currentSec = pos.inSeconds;
 
-                          return AnimatedContainer(
-                            duration: const Duration(milliseconds: 100),
-                            curve: Curves.easeOutCubic,
-                            width: 2.6,
-                            height: effectiveH,
-                            decoration: BoxDecoration(
-                              color: isFilled
-                                  ? (isPlayhead
-                                        ? p.accent
-                                        : p.accent.withValues(alpha: 0.88))
-                                  : p.text3.withValues(alpha: 0.3),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                          );
-                        }),
+                  return RepaintBoundary(
+                    child: Semantics(
+                      slider: true,
+                      value: '$currentSec of $totalSec seconds',
+                      increasedValue:
+                          '${(currentSec + 5).clamp(0, totalSec)} seconds',
+                      decreasedValue:
+                          '${(currentSec - 5).clamp(0, totalSec)} seconds',
+                      onIncrease: () {
+                        final next = pos + const Duration(seconds: 5);
+                        _audioService.seek(next > total ? total : next);
+                      },
+                      onDecrease: () {
+                        final prev = pos - const Duration(seconds: 5);
+                        _audioService.seek(
+                          prev < Duration.zero ? Duration.zero : prev,
+                        );
+                      },
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTapDown: (details) => seekTo(details.localPosition),
+                        onHorizontalDragStart: (details) {
+                          _lastHapticScrubIndex = -1;
+                          seekTo(details.localPosition);
+                        },
+                        onHorizontalDragUpdate: (details) =>
+                            seekTo(details.localPosition),
+                        onHorizontalDragEnd: (_) => _lastHapticScrubIndex = -1,
+                        onHorizontalDragCancel: () =>
+                            _lastHapticScrubIndex = -1,
+                        child: Container(
+                          color: Colors.transparent,
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: List.generate(barCount, (index) {
+                              final barThreshold = (index + 0.8) / barCount;
+                              final isFilled =
+                                  progress > 0.01 &&
+                                  (progress >= barThreshold ||
+                                      (index == barCount - 1 &&
+                                          progress >= 0.95));
+                              final heights = [
+                                10.0,
+                                16.0,
+                                22.0,
+                                14.0,
+                                18.0,
+                                24.0,
+                                12.0,
+                                20.0,
+                                16.0,
+                                22.0,
+                              ];
+                              final baseH =
+                                  heights[index % heights.length] *
+                                  (isCompact ? 0.72 : 0.88);
+                              final isPlayhead =
+                                  _isThisPlaying &&
+                                  (index == (progress * barCount).toInt() ||
+                                      (index == 0 && progress < 0.05));
+                              final effectiveH = isPlayhead
+                                  ? (baseH * 1.18).clamp(6.0, 26.0)
+                                  : baseH;
+
+                              return AnimatedContainer(
+                                duration: const Duration(milliseconds: 100),
+                                curve: Curves.easeOutCubic,
+                                width: 2.6,
+                                height: effectiveH,
+                                decoration: BoxDecoration(
+                                  color: isFilled
+                                      ? (isPlayhead
+                                            ? p.accent
+                                            : p.accent.withValues(alpha: 0.88))
+                                      : p.text3.withValues(alpha: 0.3),
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                              );
+                            }),
+                          ),
+                        ),
                       ),
                     ),
                   );
@@ -298,30 +323,37 @@ class _TimelineVoicePlayerPillState extends State<TimelineVoicePlayerPill> {
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 4),
 
-            // Speed multiplier pill
+            // Speed multiplier pill with 44x44pt bounding touch area
             PressableScale(
               onTap: _cycleSpeed,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 6,
-                  vertical: 2.5,
-                ),
-                decoration: BoxDecoration(
-                  color: p.surface2,
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: p.border.withValues(alpha: 0.5),
-                    width: 0.6,
-                  ),
-                ),
-                child: Text(
-                  '${_audioService.playbackSpeed.toStringAsFixed(1)}x',
-                  style: TextStyle(
-                    color: p.accent,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
+              child: SizedBox(
+                width: 44,
+                height: 44,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2.5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: p.surface2,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: p.border.withValues(alpha: 0.5),
+                        width: 0.6,
+                      ),
+                    ),
+                    child: Text(
+                      '${_audioService.playbackSpeed.toStringAsFixed(1)}x',
+                      style: TextStyle(
+                        color: p.accent,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
                   ),
                 ),
               ),

@@ -44,7 +44,9 @@ class ChipButton extends StatelessWidget {
         child: PressableScale(
           onTap: onTap,
           onLongPress: onLongPress,
-          child: Container(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOutCubic,
             padding: EdgeInsets.symmetric(
               horizontal: (hasIcon && !hasLabel) ? 12 : 15,
               vertical: 9.5,

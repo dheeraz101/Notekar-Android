@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/models/sobriety_milestones.dart';
+import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
 /// Clean, Apple HIG inspired Home Screen Sobriety Streak Progress Card widget.
@@ -144,7 +145,7 @@ class HomeSobrietyStreakCard extends StatelessWidget {
                         ),
                       ),
                       alignment: Alignment.center,
-                      child: Text(
+                      child: IosEmojiText(
                         duration.inDays > 0 ? '🔥' : '🌱',
                         style: const TextStyle(fontSize: 18),
                       ),
@@ -166,7 +167,10 @@ class HomeSobrietyStreakCard extends StatelessWidget {
                                   color: progressColor,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.2,
+                                  letterSpacing: -0.1,
+                                  fontFeatures: const [
+                                    FontFeature.tabularFigures(),
+                                  ],
                                 ),
                               ),
                               if (streakShields > 0) ...[
@@ -183,7 +187,7 @@ class HomeSobrietyStreakCard extends StatelessWidget {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Text(
+                                      const IosEmojiText(
                                         '🛡️',
                                         style: TextStyle(fontSize: 8.5),
                                       ),
@@ -194,6 +198,9 @@ class HomeSobrietyStreakCard extends StatelessWidget {
                                           color: palette.text2,
                                           fontSize: 9.5,
                                           fontWeight: FontWeight.w700,
+                                          fontFeatures: const [
+                                            FontFeature.tabularFigures(),
+                                          ],
                                         ),
                                       ),
                                     ],

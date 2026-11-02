@@ -15,6 +15,7 @@ import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/widgets/apple_hig_action_sheet.dart';
+import 'package:notekar/widgets/design_system/nk_empty_state.dart';
 import 'package:notekar/widgets/milestone_celebration_dialog.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -486,69 +487,15 @@ class GoalsContentViewState extends State<GoalsContentView>
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            CupertinoIcons.flag_circle_fill,
-            size: 54,
-            color: widget.p.text3.withValues(alpha: 0.35),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'No Targets Defined'.localized(context),
-            style: TextStyle(
-              color: widget.p.text,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
-              'Set intentional allocation goals across weeks, months or years.'
-                  .localized(context),
-              textAlign: TextAlign.center,
-              style: TextStyle(color: widget.p.text3, fontSize: 13),
-            ),
-          ),
-          const SizedBox(height: 18),
-          PressableScale(
-            onTap: () {
-              HapticFeedback.lightImpact();
-              openCreateOrEditGoalDialog();
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-              decoration: BoxDecoration(
-                color: widget.p.accent,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    CupertinoIcons.plus,
-                    size: 16,
-                    color: Colors.white,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Create First Goal'.localized(context),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+    return NkEmptyState(
+      p: widget.p,
+      icon: CupertinoIcons.flag_circle_fill,
+      title: 'No Targets Defined'.localized(context),
+      description:
+          'Set intentional allocation goals across weeks, months or years.'
+              .localized(context),
+      actionLabel: 'Create First Goal'.localized(context),
+      onAction: openCreateOrEditGoalDialog,
     );
   }
 
@@ -819,9 +766,20 @@ class GoalsContentViewState extends State<GoalsContentView>
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
-              FractionallySizedBox(
-                alignment: Alignment.centerLeft,
-                widthFactor: progress.ratio.clamp(0.0, 1.0),
+              TweenAnimationBuilder<double>(
+                tween: Tween<double>(
+                  begin: 0.0,
+                  end: progress.ratio.clamp(0.0, 1.0),
+                ),
+                duration: const Duration(milliseconds: 380),
+                curve: Curves.easeOutCubic,
+                builder: (context, value, child) {
+                  return FractionallySizedBox(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: value,
+                    child: child,
+                  );
+                },
                 child: Container(
                   height: 8,
                   decoration: BoxDecoration(

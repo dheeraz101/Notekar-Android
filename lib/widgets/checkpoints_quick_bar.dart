@@ -8,6 +8,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/checkpoint_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/apple_hig_action_sheet.dart';
+import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -286,7 +287,7 @@ class _CheckpointsQuickBarState extends State<CheckpointsQuickBar> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text(
+                                  IosEmojiText(
                                     preset.emoji,
                                     style: const TextStyle(fontSize: 12),
                                   ),

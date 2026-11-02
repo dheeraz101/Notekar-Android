@@ -41,47 +41,55 @@ class HomeCategoryPills extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 4),
         children: [
           // "All" Pill
-          PressableScale(
-            onTap: () {
-              HapticFeedback.selectionClick();
-              onSelectCategory('All');
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOutCubic,
-              padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
-              decoration: BoxDecoration(
-                color: isAllSelected
-                    ? p.surface3
-                    : p.surface2.withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(
-                  color: isAllSelected
-                      ? p.text.withValues(alpha: 0.25)
-                      : p.border.withValues(alpha: 0.4),
-                  width: isAllSelected ? 1.2 : 0.8,
+          Semantics(
+            button: true,
+            selected: isAllSelected,
+            label: 'All filter',
+            child: PressableScale(
+              onTap: () {
+                HapticFeedback.selectionClick();
+                onSelectCategory('All');
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutCubic,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 11,
+                  vertical: 6,
                 ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.all_inclusive_rounded,
-                    size: 13,
-                    color: isAllSelected ? p.text : p.text3,
+                decoration: BoxDecoration(
+                  color: isAllSelected
+                      ? p.surface3
+                      : p.surface2.withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(
+                    color: isAllSelected
+                        ? p.text.withValues(alpha: 0.25)
+                        : p.border.withValues(alpha: 0.4),
+                    width: 1.0,
                   ),
-                  const SizedBox(width: 5),
-                  Text(
-                    'All',
-                    style: TextStyle(
-                      color: isAllSelected ? p.text : p.text2,
-                      fontSize: 12,
-                      fontWeight: isAllSelected
-                          ? FontWeight.w700
-                          : FontWeight.w500,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.all_inclusive_rounded,
+                      size: 13,
+                      color: isAllSelected ? p.text : p.text3,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 5),
+                    Text(
+                      'All',
+                      style: TextStyle(
+                        color: isAllSelected ? p.text : p.text2,
+                        fontSize: 12,
+                        fontWeight: isAllSelected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -113,80 +121,92 @@ class HomeCategoryPills extends StatelessWidget {
           ],
 
           // Add Category "+" Pill
-          PressableScale(
-            onTap: () {
-              HapticFeedback.lightImpact();
-              onAddCategory();
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-              decoration: BoxDecoration(
-                color: p.surface2.withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(
-                  color: p.border.withValues(alpha: 0.4),
-                  width: 0.8,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.add_rounded, size: 13, color: p.accent),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Add',
-                    style: TextStyle(
-                      color: p.accent,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          if (onOpenFilter != null) ...[
-            const SizedBox(width: 6),
-            PressableScale(
+          Semantics(
+            button: true,
+            label: 'Add Category',
+            child: PressableScale(
               onTap: () {
                 HapticFeedback.lightImpact();
-                onOpenFilter!();
+                onAddCategory();
               },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
+              child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
                 decoration: BoxDecoration(
-                  color: isFilterActive
-                      ? p.accent.withValues(alpha: 0.18)
-                      : p.surface2.withValues(alpha: 0.6),
+                  color: p.surface2.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(999),
                   border: Border.all(
-                    color: isFilterActive
-                        ? p.accent
-                        : p.border.withValues(alpha: 0.4),
-                    width: isFilterActive ? 1.2 : 0.8,
+                    color: p.border.withValues(alpha: 0.4),
+                    width: 1.0,
                   ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.tune_rounded,
-                      size: 13,
-                      color: isFilterActive ? p.accent : p.text3,
-                    ),
+                    Icon(Icons.add_rounded, size: 13, color: p.accent),
                     const SizedBox(width: 4),
                     Text(
-                      'Filter',
+                      'Add',
                       style: TextStyle(
-                        color: isFilterActive ? p.accent : p.text2,
+                        color: p.accent,
                         fontSize: 12,
-                        fontWeight: isFilterActive
-                            ? FontWeight.w700
-                            : FontWeight.w600,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
+                ),
+              ),
+            ),
+          ),
+          if (onOpenFilter != null) ...[
+            const SizedBox(width: 6),
+            Semantics(
+              button: true,
+              selected: isFilterActive,
+              label: 'Filter',
+              child: PressableScale(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  onOpenFilter!();
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 9,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isFilterActive
+                        ? p.accent.withValues(alpha: 0.18)
+                        : p.surface2.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: isFilterActive
+                          ? p.accent
+                          : p.border.withValues(alpha: 0.4),
+                      width: 1.0,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.tune_rounded,
+                        size: 13,
+                        color: isFilterActive ? p.accent : p.text3,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Filter',
+                        style: TextStyle(
+                          color: isFilterActive ? p.accent : p.text2,
+                          fontSize: 12,
+                          fontWeight: isFilterActive
+                              ? FontWeight.w700
+                              : FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -216,47 +236,56 @@ class _CategoryPillItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final meta = getCategoryMeta(category, p);
 
-    return PressableScale(
-      onTap: onTap,
-      onLongPress: onLongPress,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? meta.color.withValues(alpha: 0.16)
-              : p.surface2.withValues(alpha: 0.6),
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: '$category filter',
+      child: PressableScale(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+          decoration: BoxDecoration(
             color: isSelected
-                ? meta.color.withValues(alpha: 0.5)
-                : p.border.withValues(alpha: 0.4),
-            width: isSelected ? 1.2 : 0.8,
-          ),
-          boxShadow: [
-            if (isSelected)
-              BoxShadow(
-                color: meta.color.withValues(alpha: 0.12),
-                blurRadius: 6,
-                offset: const Offset(0, 1),
-              ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(meta.icon, size: 13, color: isSelected ? meta.color : p.text3),
-            const SizedBox(width: 5),
-            Text(
-              category,
-              style: TextStyle(
-                color: isSelected ? meta.color : p.text2,
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-              ),
+                ? meta.color.withValues(alpha: 0.16)
+                : p.surface2.withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: isSelected
+                  ? meta.color.withValues(alpha: 0.5)
+                  : p.border.withValues(alpha: 0.4),
+              width: 1.0,
             ),
-          ],
+            boxShadow: [
+              if (isSelected)
+                BoxShadow(
+                  color: meta.color.withValues(alpha: 0.12),
+                  blurRadius: 6,
+                  offset: const Offset(0, 1),
+                ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                meta.icon,
+                size: 13,
+                color: isSelected ? meta.color : p.text3,
+              ),
+              const SizedBox(width: 5),
+              Text(
+                category,
+                style: TextStyle(
+                  color: isSelected ? meta.color : p.text2,
+                  fontSize: 12,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -132,6 +132,14 @@ void main() async {
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarContrastEnforced: false,
+    ),
+  );
   final settingsController = SettingsController(prefs);
   runApp(
     SettingsProvider(
@@ -324,6 +332,22 @@ class NoteKarAppState extends State<NoteKarApp> {
           ),
         ),
       ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: isLight ? Brightness.dark : Brightness.light,
+          statusBarBrightness: isLight ? Brightness.light : Brightness.dark,
+          systemNavigationBarColor: Colors.transparent,
+          systemNavigationBarDividerColor: Colors.transparent,
+          systemNavigationBarIconBrightness: isLight
+              ? Brightness.dark
+              : Brightness.light,
+          systemNavigationBarContrastEnforced: false,
+        ),
+      ),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
           TargetPlatform.android: ZoomPageTransitionsBuilder(),
@@ -337,27 +361,48 @@ class NoteKarAppState extends State<NoteKarApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'NoteKar',
-      debugShowCheckedModeBanner: false,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      locale: _locale == 'system' ? null : Locale(_locale),
-      themeMode: _theme == 'light' ? ThemeMode.light : ThemeMode.dark,
-      theme: _buildThemeData(_theme, _accent, _highContrast),
-      builder: (context, child) {
-        final media = MediaQuery.of(context);
-        final clampedScaler = media.textScaler.clamp(
-          minScaleFactor: 0.85,
-          maxScaleFactor: 1.45,
-        );
+    final p = paletteFor(
+      _theme,
+      accentName: _accent,
+      highContrast: _highContrast,
+    );
+    final isLight = !p.isDark;
+    final overlayStyle = SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: isLight ? Brightness.dark : Brightness.light,
+      statusBarBrightness: isLight ? Brightness.light : Brightness.dark,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarIconBrightness: isLight
+          ? Brightness.dark
+          : Brightness.light,
+      systemNavigationBarContrastEnforced: false,
+    );
 
-        return MediaQuery(
-          data: media.copyWith(textScaler: clampedScaler),
-          child: child ?? const SizedBox.shrink(),
-        );
-      },
-      home: NoteKarHome(preloadedPrefs: widget.prefs),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: overlayStyle,
+      child: MaterialApp(
+        title: 'NoteKar',
+        debugShowCheckedModeBanner: false,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: _locale == 'system' ? null : Locale(_locale),
+        themeMode: _theme == 'light' ? ThemeMode.light : ThemeMode.dark,
+        theme: _buildThemeData(_theme, _accent, _highContrast),
+        builder: (context, child) {
+          final media = MediaQuery.of(context);
+          final clampedScaler = media.textScaler.clamp(
+            minScaleFactor: 0.85,
+            maxScaleFactor: 2.0,
+          );
+
+          return MediaQuery(
+            data: media.copyWith(textScaler: clampedScaler),
+            child: child ?? const SizedBox.shrink(),
+          );
+        },
+        home: NoteKarHome(preloadedPrefs: widget.prefs),
+      ),
     );
   }
 }

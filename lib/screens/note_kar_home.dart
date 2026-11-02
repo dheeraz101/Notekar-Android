@@ -2044,7 +2044,20 @@ class _NoteKarHomeState extends State<NoteKarHome>
       barrierColor: Colors.black.withValues(alpha: 0.42),
       barrierDismissible: true,
       barrierLabel: 'Close note',
-      transitionDuration: const Duration(milliseconds: 120),
+      transitionDuration: const Duration(milliseconds: 220),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutQuart,
+        );
+        return FadeTransition(
+          opacity: curved,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.92, end: 1.0).animate(curved),
+            child: child,
+          ),
+        );
+      },
       pageBuilder: (_, _, _) => NoteDialog(
         p: p,
         initialNote: initialNote,

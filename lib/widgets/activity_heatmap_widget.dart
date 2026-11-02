@@ -57,41 +57,18 @@ class ActivityHeatmapWidget extends StatelessWidget {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             reverse: true,
-            child: Row(
-              children: [
-                for (int col = 0; col < 16; col++) ...[
-                  Column(
-                    children: [
-                      for (int row = 0; row < 7; row++) ...[
-                        (() {
-                          final dayOffset = (col * 7) + row;
-                          final date = startDate.add(Duration(days: dayOffset));
-                          final key =
-                              '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-                          final count = dailyCounts[key] ?? 0;
-
-                          Color boxColor = p.surface3;
-                          if (count >= 3) {
-                            boxColor = p.accent;
-                          } else if (count >= 1) {
-                            boxColor = p.accent.withValues(alpha: 0.45);
-                          }
-
-                          return Container(
-                            width: 12,
-                            height: 12,
-                            margin: const EdgeInsets.all(2),
-                            decoration: BoxDecoration(
-                              color: boxColor,
-                              borderRadius: BorderRadius.circular(3),
-                            ),
-                          );
-                        }()),
-                      ],
-                    ],
+            child: RepaintBoundary(
+              child: Semantics(
+                label: '16-week habit activity grid',
+                child: CustomPaint(
+                  size: const Size(256.0, 112.0),
+                  painter: _HeatmapGridPainter(
+                    startDate: startDate,
+                    dailyCounts: dailyCounts,
+                    p: p,
                   ),
-                ],
-              ],
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 10),
@@ -147,5 +124,59 @@ class ActivityHeatmapWidget extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _HeatmapGridPainter extends CustomPainter {
+  _HeatmapGridPainter({
+    required this.startDate,
+    required this.dailyCounts,
+    required this.p,
+  });
+
+  final DateTime startDate;
+  final Map<String, int> dailyCounts;
+  final Palette p;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..style = PaintingStyle.fill;
+    const boxSize = 12.0;
+    const spacing = 4.0;
+    const step = boxSize + spacing;
+    const radius = Radius.circular(3.0);
+
+    for (int col = 0; col < 16; col++) {
+      for (int row = 0; row < 7; row++) {
+        final dayOffset = (col * 7) + row;
+        final date = startDate.add(Duration(days: dayOffset));
+        final key =
+            '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+        final count = dailyCounts[key] ?? 0;
+
+        Color boxColor = p.surface3;
+        if (count >= 3) {
+          boxColor = p.accent;
+        } else if (count >= 1) {
+          boxColor = p.accent.withValues(alpha: 0.45);
+        }
+
+        paint.color = boxColor;
+        final rect = Rect.fromLTWH(
+          col * step + 2.0,
+          row * step + 2.0,
+          boxSize,
+          boxSize,
+        );
+        canvas.drawRRect(RRect.fromRectAndRadius(rect, radius), paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _HeatmapGridPainter oldDelegate) {
+    return oldDelegate.startDate != startDate ||
+        oldDelegate.p != p ||
+        oldDelegate.dailyCounts != dailyCounts;
   }
 }

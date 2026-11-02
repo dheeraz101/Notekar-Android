@@ -1,12 +1,27 @@
 package app.notekar.notekar
 
+import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.service.quicksettings.TileService
 
 class QuickNoteTileService : TileService() {
+    private fun triggerHaptic() {
+        try {
+            val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                vibrator?.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator?.vibrate(VibrationEffect.createOneShot(20, VibrationEffect.DEFAULT_AMPLITUDE))
+            }
+        } catch (_: Exception) {}
+    }
+
     override fun onClick() {
         super.onClick()
+        triggerHaptic()
         val intent = Intent(this, QuickNoteActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
         }

@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 class IosActivityRingPainter extends CustomPainter {
   IosActivityRingPainter({
@@ -42,7 +43,53 @@ class IosActivityRingPainter extends CustomPainter {
   }
 
   @override
+  SemanticsBuilderCallback? get semanticsBuilder => (Size size) {
+    final percent = (progress.clamp(0.0, 1.0) * 100).toInt();
+    return [
+      CustomPainterSemantics(
+        rect: Offset.zero & size,
+        properties: SemanticsProperties(
+          label: 'Daily activity rings: $percent% completed',
+          value: '$percent%',
+        ),
+      ),
+    ];
+  };
+
+  @override
   bool shouldRepaint(covariant IosActivityRingPainter oldDelegate) {
     return oldDelegate.progress != progress || oldDelegate.color != color;
+  }
+}
+
+class IosActivityRing extends StatelessWidget {
+  const IosActivityRing({
+    super.key,
+    required this.progress,
+    required this.color,
+    required this.backgroundColor,
+    this.size = 24.0,
+  });
+
+  final double progress;
+  final Color color;
+  final Color backgroundColor;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final percent = (progress.clamp(0.0, 1.0) * 100).toInt();
+    return Semantics(
+      label: 'Daily activity rings: $percent% completed',
+      value: '$percent%',
+      child: CustomPaint(
+        size: Size(size, size),
+        painter: IosActivityRingPainter(
+          progress: progress,
+          color: color,
+          backgroundColor: backgroundColor,
+        ),
+      ),
+    );
   }
 }

@@ -53,6 +53,7 @@ class DataSafetySettingsPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Container(
                       width: 36,
@@ -88,41 +89,50 @@ class DataSafetySettingsPage extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 2),
-                          Text(
-                            'Google Play & Store Disclosures'.localized(
-                              context,
-                            ),
-                            style: TextStyle(
-                              color: p.text,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.3,
-                            ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Google Play & Store Disclosures'.localized(
+                                    context,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: p.text,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.3,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 9,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: p.green.withValues(alpha: 0.14),
+                                  borderRadius: BorderRadius.circular(999),
+                                  border: Border.all(
+                                    color: p.green.withValues(alpha: 0.35),
+                                    width: 0.8,
+                                  ),
+                                ),
+                                child: Text(
+                                  '100% On-Device',
+                                  style: TextStyle(
+                                    color: p.green,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.2,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 9,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: p.green.withValues(alpha: 0.14),
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                          color: p.green.withValues(alpha: 0.35),
-                          width: 0.8,
-                        ),
-                      ),
-                      child: Text(
-                        '100% On-Device',
-                        style: TextStyle(
-                          color: p.green,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.2,
-                        ),
                       ),
                     ),
                   ],
@@ -173,7 +183,7 @@ class DataSafetySettingsPage extends StatelessWidget {
               p: p,
               icon: CupertinoIcons.square_stack_3d_up_fill,
               title: 'App Permissions'.localized(context),
-              subtitle: 'Microphone, camera, alerts & background tasks',
+              subtitle: 'Microphone, camera, notifications & timers',
               color: p.accent,
               softIcon: true,
               onTap: () =>
@@ -185,7 +195,7 @@ class DataSafetySettingsPage extends StatelessWidget {
               title: 'Content Rating'.localized(context),
               subtitle: 'Certified clean for all ages (IARC 3+, ESRB E)',
               color: p.green,
-              status: '3+',
+              status: 'Everyone 3+',
               softIcon: true,
               onTap: () =>
                   onOpenCategory('Content Rating', parent: 'Data safety'),
@@ -421,22 +431,31 @@ class DataSafetySettingsPage extends StatelessWidget {
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title.localized(context),
-                    style: TextStyle(
-                      color: p.text,
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.2,
+                  Expanded(
+                    flex: 5,
+                    child: Text(
+                      title.localized(context),
+                      style: TextStyle(
+                        color: p.text,
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.2,
+                      ),
                     ),
                   ),
-                  Text(
-                    value,
-                    style: TextStyle(
-                      color: isSafe ? p.green : p.text2,
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w800,
+                  const SizedBox(width: 8),
+                  Flexible(
+                    flex: 4,
+                    child: Text(
+                      value,
+                      textAlign: TextAlign.end,
+                      style: TextStyle(
+                        color: isSafe ? p.green : p.text2,
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                 ],

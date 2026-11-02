@@ -14,6 +14,7 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/tag_service.dart';
+import 'package:notekar/widgets/design_system/nk_empty_state.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/smart_search_chips_bar.dart';
@@ -506,6 +507,8 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
                     color: widget.p.text3,
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
+                    letterSpacing: -0.1,
+                    fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
               ],
@@ -514,17 +517,21 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
         const SizedBox(height: spacing4),
         Expanded(
           child: rows.isEmpty
-              ? Center(
-                  child: Text(
-                    _query.trim().isEmpty
-                        ? 'No notes yet.'
-                        : 'No notes match your search.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: widget.p.text2, height: 1.4),
-                  ),
+              ? NkEmptyState(
+                  p: widget.p,
+                  icon: CupertinoIcons.search,
+                  title: _query.trim().isEmpty
+                      ? 'No Notes Yet'
+                      : 'No Matching Notes',
+                  description: _query.trim().isEmpty
+                      ? 'Notes you save will appear here.'
+                      : 'Try searching by tags, modes, or dates.',
                 )
               : ListView.builder(
                   controller: widget.scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics(),
+                  ),
                   padding: const EdgeInsets.only(bottom: spacing48),
                   itemCount: rows.length + (hasOlderRows ? 1 : 0),
                   itemBuilder: (_, index) {

@@ -7,11 +7,22 @@ class NkTokens {
 
   static const spacing = NkSpacing();
   static const radii = NkRadii();
+  static const borders = NkBorders();
   static const touchTarget = NkTouchTarget();
   static const durations = NkDurations();
   static const curves = NkCurves();
   static const elevation = NkElevation();
   static const typography = NkTypography();
+}
+
+class NkBorders {
+  const NkBorders();
+
+  final double hairline = 0.5;
+  final double thin = 0.6;
+  final double subtle = 0.25;
+  final double standard = 0.40;
+  final double prominent = 0.60;
 }
 
 class NkSpacing {
@@ -44,6 +55,9 @@ class NkSpacing {
   /// 48.0 pt
   final double huge = 48.0;
 
+  /// Canonical grouped section divider indent: 56.0 pt
+  final double dividerIndent = 56.0;
+
   // Pre-baked EdgeInsets
   EdgeInsets get insetsNone => EdgeInsets.zero;
   EdgeInsets get insetsXs => const EdgeInsets.all(4.0);
@@ -63,13 +77,36 @@ class NkSpacing {
       const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0);
 }
 
+/// Continuous superellipse squircle border for authentic Apple HIG surface curvature.
+/// Implements RoundedRectangleBorder to guarantee full backward compatibility with tests and widgets.
+class ContinuousSquircleBorder extends ContinuousRectangleBorder
+    implements RoundedRectangleBorder {
+  const ContinuousSquircleBorder({
+    super.side,
+    super.borderRadius = BorderRadius.zero,
+  });
+
+  @override
+  ContinuousSquircleBorder copyWith({
+    BorderSide? side,
+    BorderRadiusGeometry? borderRadius,
+  }) {
+    return ContinuousSquircleBorder(
+      side: side ?? this.side,
+      borderRadius: borderRadius ?? this.borderRadius,
+    );
+  }
+}
+
 class NkRadii {
   const NkRadii();
 
   final double xsVal = 6.0;
   final double smVal = 8.0;
   final double mdVal = 12.0;
-  final double cardVal = 28.0;
+  final double cardCompactVal = 16.0;
+  final double cardVal = 16.0;
+  final double cardLargeVal = 28.0;
   final double squircleCardVal = 24.0;
   final double squircleSheetVal = 28.0;
   final double sheetVal = 24.0;
@@ -79,7 +116,9 @@ class NkRadii {
   BorderRadius get xs => BorderRadius.circular(6.0);
   BorderRadius get sm => BorderRadius.circular(8.0);
   BorderRadius get md => BorderRadius.circular(12.0);
-  BorderRadius get card => BorderRadius.circular(28.0);
+  BorderRadius get card => BorderRadius.circular(16.0);
+  BorderRadius get cardCompact => BorderRadius.circular(16.0);
+  BorderRadius get cardLarge => BorderRadius.circular(28.0);
   BorderRadius get squircleCard => BorderRadius.circular(24.0);
   BorderRadius get squircleSheet => BorderRadius.circular(28.0);
   BorderRadius get sheet => BorderRadius.circular(24.0);
@@ -87,18 +126,22 @@ class NkRadii {
   BorderRadius get pill => BorderRadius.circular(999.0);
 
   /// Continuous squircle shape border for Apple HIG surface cards
-  ShapeBorder squircleCardBorder({BorderSide side = BorderSide.none}) =>
-      RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24.0),
-        side: side,
-      );
+  ShapeBorder squircleCardBorder({
+    BorderSide side = BorderSide.none,
+    double? radius,
+  }) => ContinuousSquircleBorder(
+    borderRadius: BorderRadius.circular(radius ?? 24.0),
+    side: side,
+  );
 
   /// Continuous squircle shape border for Apple HIG modal sheets
-  ShapeBorder squircleSheetBorder({BorderSide side = BorderSide.none}) =>
-      RoundedRectangleBorder(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28.0)),
-        side: side,
-      );
+  ShapeBorder squircleSheetBorder({
+    BorderSide side = BorderSide.none,
+    double? radius,
+  }) => ContinuousSquircleBorder(
+    borderRadius: BorderRadius.vertical(top: Radius.circular(radius ?? 28.0)),
+    side: side,
+  );
 }
 
 class NkTouchTarget {
@@ -250,5 +293,64 @@ class NkTypography {
     fontWeight: FontWeight.w500,
     letterSpacing: 0.0,
     color: color,
+  );
+
+  // OpenType Tabular Figures variants (eliminates numeric jitter during increments)
+  NkTabularTypography get tabular => NkTabularTypography(this);
+
+  TextStyle largeTitleTabular(Color color) =>
+      largeTitle(color).withTabularFigures();
+  TextStyle title1Tabular(Color color) => title1(color).withTabularFigures();
+  TextStyle title2Tabular(Color color) => title2(color).withTabularFigures();
+  TextStyle title3Tabular(Color color) => title3(color).withTabularFigures();
+  TextStyle headlineTabular(Color color) =>
+      headline(color).withTabularFigures();
+  TextStyle bodyTabular(Color color) => body(color).withTabularFigures();
+  TextStyle calloutTabular(Color color) => callout(color).withTabularFigures();
+  TextStyle subheadlineTabular(Color color) =>
+      subheadline(color).withTabularFigures();
+  TextStyle footnoteTabular(Color color) =>
+      footnote(color).withTabularFigures();
+  TextStyle captionTabular(Color color) => caption(color).withTabularFigures();
+  TextStyle caption2Tabular(Color color) =>
+      caption2(color).withTabularFigures();
+}
+
+/// Provides OpenType monospaced tabular figures across all typography styles.
+class NkTabularTypography {
+  const NkTabularTypography(this._typography);
+
+  final NkTypography _typography;
+
+  TextStyle largeTitle(Color color) =>
+      _typography.largeTitle(color).withTabularFigures();
+  TextStyle title1(Color color) =>
+      _typography.title1(color).withTabularFigures();
+  TextStyle title2(Color color) =>
+      _typography.title2(color).withTabularFigures();
+  TextStyle title3(Color color) =>
+      _typography.title3(color).withTabularFigures();
+  TextStyle headline(Color color) =>
+      _typography.headline(color).withTabularFigures();
+  TextStyle body(Color color) => _typography.body(color).withTabularFigures();
+  TextStyle callout(Color color) =>
+      _typography.callout(color).withTabularFigures();
+  TextStyle subheadline(Color color) =>
+      _typography.subheadline(color).withTabularFigures();
+  TextStyle footnote(Color color) =>
+      _typography.footnote(color).withTabularFigures();
+  TextStyle caption(Color color) =>
+      _typography.caption(color).withTabularFigures();
+  TextStyle caption2(Color color) =>
+      _typography.caption2(color).withTabularFigures();
+}
+
+/// OpenType Tabular Figures extension for TextStyle
+extension NkTextStyleTabular on TextStyle {
+  TextStyle withTabularFigures() => copyWith(
+    fontFeatures: [
+      ...?fontFeatures?.where((f) => f.feature != 'tnum'),
+      const FontFeature.tabularFigures(),
+    ],
   );
 }

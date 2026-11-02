@@ -155,22 +155,25 @@ class NkButton extends StatelessWidget {
       onTap: isEnabled ? onPressed : null,
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          minHeight: isSmall ? 36.0 : 48.0,
+          minHeight: isSmall ? 44.0 : 48.0,
           minWidth: isSmall ? 48.0 : 72.0,
         ),
-        child: Container(
-          width: fullWidth ? double.infinity : null,
-          padding: EdgeInsets.symmetric(
-            horizontal: horizontalPadding,
-            vertical: verticalPadding,
+        child: Center(
+          child: Container(
+            width: fullWidth ? double.infinity : null,
+            constraints: BoxConstraints(minHeight: isSmall ? 36.0 : 48.0),
+            padding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding,
+              vertical: verticalPadding,
+            ),
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: NkTokens.radii.pill,
+              border: border,
+            ),
+            alignment: Alignment.center,
+            child: buttonContent,
           ),
-          decoration: BoxDecoration(
-            color: backgroundColor,
-            borderRadius: NkTokens.radii.pill,
-            border: border,
-          ),
-          alignment: Alignment.center,
-          child: buttonContent,
         ),
       ),
     );

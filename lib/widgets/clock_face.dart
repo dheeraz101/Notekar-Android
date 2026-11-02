@@ -204,7 +204,7 @@ class _ClockFaceState extends State<ClockFace> {
     final mediaQuery = MediaQuery.of(context);
     final clampedScaler = mediaQuery.textScaler.clamp(
       minScaleFactor: 0.85,
-      maxScaleFactor: 1.25,
+      maxScaleFactor: 2.0,
     );
     final isApple =
         widget.fontFamily == 'Inter' || widget.fontFamily == 'SF Pro Display';
@@ -230,65 +230,74 @@ class _ClockFaceState extends State<ClockFace> {
             'sans-serif',
           ];
 
+    final accessibleTimeLabel =
+        'Current time: $hm ${period.isNotEmpty ? period : ''}';
+
     return MediaQuery(
       data: mediaQuery.copyWith(textScaler: clampedScaler),
-      child: AnimatedScale(
-        scale: _bright ? 0.96 : 1.0,
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeOutCubic,
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                hm,
-                style: TextStyle(
-                  color: clockColor,
-                  fontFamily: clockFamily,
-                  fontFamilyFallback: fallbacks,
-                  fontSize: hmFontSize,
-                  fontWeight: hmFontWeight,
-                  height: 1,
-                  letterSpacing: hmLetterSpacing,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                ),
+      child: RepaintBoundary(
+        child: Semantics(
+          label: accessibleTimeLabel,
+          excludeSemantics: true,
+          child: AnimatedScale(
+            scale: _bright ? 0.96 : 1.0,
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    hm,
+                    style: TextStyle(
+                      color: clockColor,
+                      fontFamily: clockFamily,
+                      fontFamilyFallback: fallbacks,
+                      fontSize: hmFontSize,
+                      fontWeight: hmFontWeight,
+                      height: 1,
+                      letterSpacing: hmLetterSpacing,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                  if (!widget.minimal && widget.showSeconds && sec.isNotEmpty)
+                    Text(
+                      sec,
+                      style: TextStyle(
+                        color: _bright
+                            ? actionColor.withValues(alpha: 0.75)
+                            : secondsColor,
+                        fontFamily: clockFamily,
+                        fontFamilyFallback: fallbacks,
+                        fontSize: secFontSize,
+                        fontWeight: secFontWeight,
+                        height: 1,
+                        letterSpacing: secLetterSpacing,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  if (!widget.minimal && period.isNotEmpty) ...[
+                    const SizedBox(width: 8),
+                    Text(
+                      period,
+                      style: TextStyle(
+                        color: _bright
+                            ? actionColor.withValues(alpha: 0.75)
+                            : secondsColor,
+                        fontFamily: clockFamily,
+                        fontFamilyFallback: fallbacks,
+                        fontSize: periodFontSize,
+                        fontWeight: periodFontWeight,
+                        height: 1,
+                        letterSpacing: periodLetterSpacing,
+                      ),
+                    ),
+                  ],
+                ],
               ),
-              if (!widget.minimal && widget.showSeconds && sec.isNotEmpty)
-                Text(
-                  sec,
-                  style: TextStyle(
-                    color: _bright
-                        ? actionColor.withValues(alpha: 0.75)
-                        : secondsColor,
-                    fontFamily: clockFamily,
-                    fontFamilyFallback: fallbacks,
-                    fontSize: secFontSize,
-                    fontWeight: secFontWeight,
-                    height: 1,
-                    letterSpacing: secLetterSpacing,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
-                ),
-              if (!widget.minimal && period.isNotEmpty) ...[
-                const SizedBox(width: 8),
-                Text(
-                  period,
-                  style: TextStyle(
-                    color: _bright
-                        ? actionColor.withValues(alpha: 0.75)
-                        : secondsColor,
-                    fontFamily: clockFamily,
-                    fontFamilyFallback: fallbacks,
-                    fontSize: periodFontSize,
-                    fontWeight: periodFontWeight,
-                    height: 1,
-                    letterSpacing: periodLetterSpacing,
-                  ),
-                ),
-              ],
-            ],
+            ),
           ),
         ),
       ),

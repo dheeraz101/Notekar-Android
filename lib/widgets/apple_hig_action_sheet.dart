@@ -28,7 +28,7 @@ class AppleHigActionItem {
 /// Telegram and Apple HIG spring damping animation curve for modal sheets.
 /// Eliminates rigid transition snaps in favor of natural momentum physics.
 const kTelegramSpringSheetAnimation = AnimationStyle(
-  curve: Curves.easeOutCubic,
+  curve: Cubic(0.2, 0.9, 0.3, 1.0),
   duration: Duration(milliseconds: 280),
   reverseCurve: Curves.easeInCubic,
   reverseDuration: Duration(milliseconds: 240),

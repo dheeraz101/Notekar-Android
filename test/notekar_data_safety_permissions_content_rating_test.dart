@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/settings/app_permissions_settings_page.dart';
@@ -100,7 +101,7 @@ void main() {
         expect(find.text('Profanity & Crude Humor'), findsOneWidget);
         expect(find.text('Drugs, Alcohol & Tobacco'), findsOneWidget);
         expect(find.text('Gambling & Simulated Betting'), findsOneWidget);
-        expect(find.text('None (0/5)'), findsNWidgets(5));
+        expect(find.text('None'), findsNWidgets(8));
 
         // Interactive Elements
         expect(find.text('User-Generated Content'), findsOneWidget);
@@ -152,6 +153,107 @@ void main() {
 
         // System Settings Button
         expect(find.text('Open System App Settings'), findsOneWidget);
+
+        // Verify Status Pill Styling: Not Granted uses red and xmark_circle_fill
+        expect(find.text('Not Granted'), findsNWidgets(7));
+        expect(find.byIcon(CupertinoIcons.xmark_circle_fill), findsNWidgets(7));
+
+        // Verify Semantics coverage for permission tag accessibility
+        expect(
+          find.byWidgetPredicate(
+            (w) =>
+                w is Semantics &&
+                w.properties.label == 'REQUEST_IGNORE_BATTERY_OPTIMIZATIONS',
+          ),
+          findsOneWidget,
+        );
+
+        // Verify Title Typography (fontSize 15, weight w700)
+        final micText = tester.widget<Text>(find.text('Microphone'));
+        expect(micText.style?.fontSize, 15);
+        expect(micText.style?.fontWeight, FontWeight.w700);
+      },
+    );
+
+    testWidgets(
+      'AppPermissionsSettingsPage renders cleanly on ultra-narrow 320dp screen without overflow',
+      (tester) async {
+        tester.view.physicalSize = const Size(320, 640);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: AppPermissionsSettingsPage(p: p),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text('REQUEST_IGNORE_BATTERY_OPTIMIZATIONS'),
+          findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets(
+      'ContentRatingSettingsPage and DataSafetySettingsPage render cleanly on 320dp screen',
+      (tester) async {
+        tester.view.physicalSize = const Size(320, 640);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: ContentRatingSettingsPage(p: p),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+
+        FlutterErrorDetails? caughtDetails;
+        final originalOnError = FlutterError.onError;
+        FlutterError.onError = (details) {
+          caughtDetails = details;
+        };
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: DataSafetySettingsPage(
+                  p: p,
+                  vtRatio: '0/72',
+                  vtStatus: 'Clean',
+                  vtScanDate: '2026-10-30',
+                  vtUrl: 'https://virustotal.com',
+                  privacyLock: true,
+                  obfuscateInRecents: false,
+                  onObfuscateInRecentsChanged: (_) {},
+                  onOpenCategory: (_, {required parent}) {},
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        FlutterError.onError = originalOnError;
+        expect(caughtDetails, isNull);
       },
     );
   });

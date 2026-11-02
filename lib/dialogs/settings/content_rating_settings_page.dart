@@ -113,15 +113,14 @@ class ContentRatingSettingsPage extends StatelessWidget {
               border: Border.all(color: p.border.withValues(alpha: 0.45)),
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildAuthorityPill('IARC', 'Everyone', p),
+                Expanded(child: _buildAuthorityPill('IARC', 'Everyone', p)),
                 _buildDivider(p),
-                _buildAuthorityPill('ESRB', 'Everyone (E)', p),
+                Expanded(child: _buildAuthorityPill('ESRB', 'Everyone (E)', p)),
                 _buildDivider(p),
-                _buildAuthorityPill('PEGI', '3', p),
+                Expanded(child: _buildAuthorityPill('PEGI', '3', p)),
                 _buildDivider(p),
-                _buildAuthorityPill('USK', '0', p),
+                Expanded(child: _buildAuthorityPill('USK', '0', p)),
               ],
             ),
           ),
@@ -132,7 +131,7 @@ class ContentRatingSettingsPage extends StatelessWidget {
         // 3. Content Scorecard Matrix
         SettingsGroup(
           p: p,
-          title: 'Content Scorecard (0/5 Mature Topics)'.localized(context),
+          title: 'Content Scorecard'.localized(context),
           insetDividers: true,
           children: [
             SettingsRow(
@@ -141,7 +140,7 @@ class ContentRatingSettingsPage extends StatelessWidget {
               title: 'Violence & Gore'.localized(context),
               subtitle: 'No physical violence, combat, or blood',
               color: p.green,
-              status: 'None (0/5)',
+              status: 'None',
               softIcon: true,
             ),
             SettingsRow(
@@ -150,7 +149,7 @@ class ContentRatingSettingsPage extends StatelessWidget {
               title: 'Sexual Content & Nudity'.localized(context),
               subtitle: 'No provocative themes or depictions',
               color: p.green,
-              status: 'None (0/5)',
+              status: 'None',
               softIcon: true,
             ),
             SettingsRow(
@@ -159,7 +158,7 @@ class ContentRatingSettingsPage extends StatelessWidget {
               title: 'Profanity & Crude Humor'.localized(context),
               subtitle: 'Zero offensive language or slurs',
               color: p.green,
-              status: 'None (0/5)',
+              status: 'None',
               softIcon: true,
             ),
             SettingsRow(
@@ -168,7 +167,7 @@ class ContentRatingSettingsPage extends StatelessWidget {
               title: 'Drugs, Alcohol & Tobacco'.localized(context),
               subtitle: 'Includes sobriety support & milestone logging',
               color: p.green,
-              status: 'None (0/5)',
+              status: 'None',
               softIcon: true,
             ),
             SettingsRow(
@@ -177,7 +176,7 @@ class ContentRatingSettingsPage extends StatelessWidget {
               title: 'Gambling & Simulated Betting'.localized(context),
               subtitle: 'Zero gambling mechanisms or coin wagering',
               color: p.green,
-              status: 'None (0/5)',
+              status: 'None',
               softIcon: true,
             ),
           ],
@@ -242,33 +241,39 @@ class ContentRatingSettingsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildAuthorityPill(String code, String rating, Palette p) {
+  static Widget _buildAuthorityPill(String code, String rating, Palette p) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          code,
-          style: TextStyle(
-            color: p.text3,
-            fontSize: 10,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 0.5,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            code,
+            style: TextStyle(
+              color: p.text3,
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.5,
+            ),
           ),
         ),
         const SizedBox(height: 3),
-        Text(
-          rating,
-          style: TextStyle(
-            color: p.text,
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            rating,
+            style: TextStyle(
+              color: p.text,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildDivider(Palette p) {
+  static Widget _buildDivider(Palette p) {
     return Container(
       width: 1,
       height: 22,

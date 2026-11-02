@@ -52,31 +52,39 @@ class _AppPermissionsSettingsPageState extends State<AppPermissionsSettingsPage>
 
   Future<void> _checkAllPermissions() async {
     try {
-      final mic =
-          await _channel.invokeMethod<bool>('checkAudioPermission') ?? false;
-      final cam =
-          await _channel.invokeMethod<bool>('checkCameraPermission') ?? false;
-      final notif =
-          await _channel.invokeMethod<bool>('canPostNotifications') ?? false;
-      final overlay =
-          await _channel.invokeMethod<bool>('hasOverlayPermission') ?? false;
-      final alarms =
-          await _channel.invokeMethod<bool>('canScheduleExactAlarms') ?? false;
-      final battery =
-          await _channel.invokeMethod<bool>('isIgnoringBatteryOptimizations') ??
-          false;
-      final usage =
-          await _channel.invokeMethod<bool>('hasUsagePermission') ?? false;
+      final results = await Future.wait([
+        _channel
+            .invokeMethod<bool>('checkAudioPermission')
+            .catchError((_) => null),
+        _channel
+            .invokeMethod<bool>('checkCameraPermission')
+            .catchError((_) => null),
+        _channel
+            .invokeMethod<bool>('canPostNotifications')
+            .catchError((_) => null),
+        _channel
+            .invokeMethod<bool>('hasOverlayPermission')
+            .catchError((_) => null),
+        _channel
+            .invokeMethod<bool>('canScheduleExactAlarms')
+            .catchError((_) => null),
+        _channel
+            .invokeMethod<bool>('isIgnoringBatteryOptimizations')
+            .catchError((_) => null),
+        _channel
+            .invokeMethod<bool>('hasUsagePermission')
+            .catchError((_) => null),
+      ]);
 
       if (mounted) {
         setState(() {
-          _micGranted = mic;
-          _cameraGranted = cam;
-          _notificationsGranted = notif;
-          _overlayGranted = overlay;
-          _exactAlarmsGranted = alarms;
-          _batteryExemptGranted = battery;
-          _usageStatsGranted = usage;
+          _micGranted = results[0] ?? false;
+          _cameraGranted = results[1] ?? false;
+          _notificationsGranted = results[2] ?? false;
+          _overlayGranted = results[3] ?? false;
+          _exactAlarmsGranted = results[4] ?? false;
+          _batteryExemptGranted = results[5] ?? false;
+          _usageStatsGranted = results[6] ?? false;
           _isLoading = false;
         });
       }
@@ -439,12 +447,11 @@ class _AppPermissionsSettingsPageState extends State<AppPermissionsSettingsPage>
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
               width: 38,
               height: 38,
-              margin: const EdgeInsets.only(top: 2),
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.14),
                 borderRadius: BorderRadius.circular(11),
@@ -464,12 +471,44 @@ class _AppPermissionsSettingsPageState extends State<AppPermissionsSettingsPage>
                     title,
                     style: TextStyle(
                       color: p.text,
-                      fontSize: 16,
+                      fontSize: 15,
                       fontWeight: FontWeight.w700,
                       letterSpacing: -0.3,
                     ),
                   ),
-                  const SizedBox(height: 3),
+                  const SizedBox(height: 4),
+                  Semantics(
+                    label: permissionTag,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: p.surface3.withValues(alpha: 0.55),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: p.border.withValues(alpha: 0.35),
+                          width: 0.6,
+                        ),
+                      ),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          permissionTag,
+                          style: TextStyle(
+                            color: p.text3,
+                            fontSize: 9.5,
+                            fontFamily: 'monospace',
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
                   Text(
                     subtitle,
                     style: TextStyle(
@@ -478,51 +517,25 @@ class _AppPermissionsSettingsPageState extends State<AppPermissionsSettingsPage>
                       height: 1.35,
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: p.surface3.withValues(alpha: 0.55),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: p.border.withValues(alpha: 0.35),
-                        width: 0.6,
-                      ),
-                    ),
-                    child: Text(
-                      permissionTag,
-                      style: TextStyle(
-                        color: p.text3,
-                        fontSize: 9.5,
-                        fontFamily: 'monospace',
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.2,
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
             const SizedBox(width: 12),
-            Padding(
-              padding: const EdgeInsets.only(top: 2),
+            RepaintBoundary(
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,
                   vertical: 5,
                 ),
                 decoration: BoxDecoration(
-                  color: (isGranted ? p.green : p.accent).withValues(
-                    alpha: 0.14,
-                  ),
-                  borderRadius: BorderRadius.circular(999),
+                  color: isGranted
+                      ? p.green.withValues(alpha: 0.12)
+                      : p.red.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: (isGranted ? p.green : p.accent).withValues(
-                      alpha: 0.4,
-                    ),
+                    color: isGranted
+                        ? p.green.withValues(alpha: 0.35)
+                        : p.red.withValues(alpha: 0.35),
                     width: 0.8,
                   ),
                 ),
@@ -531,18 +544,18 @@ class _AppPermissionsSettingsPageState extends State<AppPermissionsSettingsPage>
                   children: [
                     Icon(
                       isGranted
-                          ? CupertinoIcons.checkmark_alt
-                          : CupertinoIcons.arrow_right,
-                      size: 11,
-                      color: isGranted ? p.green : p.accent,
+                          ? CupertinoIcons.checkmark_circle_fill
+                          : CupertinoIcons.xmark_circle_fill,
+                      color: isGranted ? p.green : p.red,
+                      size: 12,
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      isGranted ? 'Granted' : 'Enable',
+                      isGranted ? 'Granted' : 'Not Granted',
                       style: TextStyle(
-                        color: isGranted ? p.green : p.accent,
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w800,
+                        color: isGranted ? p.green : p.red,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
                         letterSpacing: -0.2,
                       ),
                     ),

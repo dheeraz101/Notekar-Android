@@ -22,7 +22,7 @@ class NkCard extends StatelessWidget {
     this.actionText,
     this.onAction,
     this.showDividers = true,
-    this.dividerIndent = 54.0,
+    this.dividerIndent = 56.0,
     this.margin = const EdgeInsets.symmetric(horizontal: 0.0, vertical: 6.0),
     this.padding,
     this.clipBehavior = Clip.antiAlias,
@@ -41,7 +41,7 @@ class NkCard extends StatelessWidget {
     this.clipBehavior = Clip.antiAlias,
   }) : children = const [],
        showDividers = false,
-       dividerIndent = 54.0;
+       dividerIndent = 56.0;
 
   final Palette p;
   final List<Widget> children;
@@ -99,13 +99,23 @@ class NkCard extends StatelessWidget {
                     GestureDetector(
                       onTap: onAction,
                       behavior: HitTestBehavior.opaque,
-                      child: Text(
-                        actionText!,
-                        style: TextStyle(
-                          color: p.accent,
-                          fontSize: 13.0,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: 'Inter',
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 44.0),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12.0,
+                            vertical: 8.0,
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            actionText!,
+                            style: TextStyle(
+                              color: p.accent,
+                              fontSize: 13.0,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Inter',
+                            ),
+                          ),
                         ),
                       ),
                     ),

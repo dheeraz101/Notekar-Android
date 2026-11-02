@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:notekar/utils/app_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsController extends ChangeNotifier {
@@ -122,6 +123,7 @@ class SettingsController extends ChangeNotifier {
     _reduceMotion = _prefs.getBool('reduce_motion') ?? false;
     _haptics = _prefs.getBool('m-haptics') ?? true;
     _acousticFeedback = _prefs.getBool('acoustic_feedback') ?? true;
+    AppHaptics.configure(style: _hapticStyle, isEnabled: _haptics);
     _privacyLock = _prefs.getBool('m-privacy-lock') ?? false;
     _largeText = _prefs.getBool('large_text') ?? false;
     _highContrast = _prefs.getBool('m-high-contrast') ?? false;
@@ -179,6 +181,7 @@ class SettingsController extends ChangeNotifier {
   Future<void> setHapticStyle(String value) async {
     if (_hapticStyle == value) return;
     _hapticStyle = value;
+    AppHaptics.configure(style: value);
     await _prefs.setString('haptic_style', value);
     notifyListeners();
   }
@@ -263,6 +266,7 @@ class SettingsController extends ChangeNotifier {
   Future<void> setHaptics(bool value) async {
     if (_haptics == value) return;
     _haptics = value;
+    AppHaptics.configure(isEnabled: value);
     await _prefs.setBool('m-haptics', value);
     notifyListeners();
   }

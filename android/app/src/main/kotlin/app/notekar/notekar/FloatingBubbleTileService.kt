@@ -5,11 +5,24 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.provider.Settings
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 
 class FloatingBubbleTileService : TileService() {
+
+    private fun triggerHaptic() {
+        try {
+            val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                vibrator?.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator?.vibrate(VibrationEffect.createOneShot(20, VibrationEffect.DEFAULT_AMPLITUDE))
+            }
+        } catch (_: Exception) {}
+    }
 
     override fun onStartListening() {
         super.onStartListening()
@@ -18,6 +31,7 @@ class FloatingBubbleTileService : TileService() {
 
     override fun onClick() {
         super.onClick()
+        triggerHaptic()
         val context = applicationContext
         val flutterPrefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
         val isEnabled = flutterPrefs.getBoolean("flutter.floating_timer_enabled", false)

@@ -7,6 +7,8 @@ import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/widgets/design_system/nk_button.dart';
+import 'package:notekar/widgets/design_system/nk_empty_state.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
 
 class RecentlyDeletedDialog extends StatefulWidget {
@@ -82,6 +84,7 @@ class _RecentlyDeletedDialogState extends State<RecentlyDeletedDialog> {
     );
 
     if (confirmed == true) {
+      AppHaptics.heavy();
       await widget.onClearTrash();
       setState(() => _trash.clear());
     }
@@ -114,43 +117,20 @@ class _RecentlyDeletedDialogState extends State<RecentlyDeletedDialog> {
                   child: Row(
                     children: [
                       Expanded(
-                        child: OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: p.text2,
-                            side: BorderSide(color: p.border),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
+                        child: NkButton.secondary(
+                          p: p,
+                          label: 'Restore All'.localized(context),
+                          icon: Icons.restore_rounded,
                           onPressed: _confirmRestoreAll,
-                          icon: const Icon(Icons.restore_rounded, size: 18),
-                          label: Text(
-                            'Restore All'.localized(context),
-                            style: const TextStyle(fontWeight: FontWeight.w700),
-                          ),
                         ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: p.text2,
-                            side: BorderSide(color: p.border),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
+                        child: NkButton.destructive(
+                          p: p,
+                          label: 'Empty Trash'.localized(context),
+                          icon: Icons.delete_forever_rounded,
                           onPressed: _confirmEmptyTrash,
-                          icon: const Icon(
-                            Icons.delete_forever_rounded,
-                            size: 18,
-                          ),
-                          label: Text(
-                            'Empty Trash'.localized(context),
-                            style: const TextStyle(fontWeight: FontWeight.w700),
-                          ),
                         ),
                       ),
                     ],
@@ -161,78 +141,13 @@ class _RecentlyDeletedDialogState extends State<RecentlyDeletedDialog> {
             if (_trash.isEmpty)
               SliverFillRemaining(
                 hasScrollBody: false,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 40),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 56,
-                        height: 56,
-                        decoration: BoxDecoration(
-                          color: p.surface2,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.delete_outline_rounded,
-                          color: p.text3,
-                          size: 28,
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      Text(
-                        'Trash is Empty'.localized(context),
-                        style: TextStyle(
-                          color: p.text,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Deleted moments will appear here for easy restoration.'
-                            .localized(context),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: p.text2,
-                          fontSize: 13,
-                          height: 1.35,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          color: p.surface2,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: p.border),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.timer_outlined,
-                              color: p.orange,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Items auto-delete permanently after 30 days'
-                                  .localized(context),
-                              style: TextStyle(
-                                color: p.text3,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                child: NkEmptyState(
+                  p: p,
+                  icon: Icons.delete_outline_rounded,
+                  title: 'Trash is Empty'.localized(context),
+                  description: 'Deleted moments will appear here for 30 days.'
+                      .localized(context),
+                  iconColor: p.text3,
                 ),
               )
             else

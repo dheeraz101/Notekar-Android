@@ -301,12 +301,18 @@ class TimelineSingleTile extends StatelessWidget {
                                   const Spacer(),
                                   PressableScale(
                                     onTap: onEditNote,
-                                    child: Icon(
-                                      hasNote
-                                          ? Icons.edit_rounded
-                                          : Icons.add_rounded,
-                                      size: compact ? 13 : 15,
-                                      color: p.text3,
+                                    child: SizedBox(
+                                      width: 44,
+                                      height: 44,
+                                      child: Center(
+                                        child: Icon(
+                                          hasNote
+                                              ? Icons.edit_rounded
+                                              : Icons.add_rounded,
+                                          size: compact ? 14 : 16,
+                                          color: p.text3,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -355,6 +361,7 @@ class TimelineSingleTile extends StatelessWidget {
                                                 color: p.text2,
                                                 fontSize: compact ? 13.5 : 15.5,
                                                 height: 1.42,
+                                                letterSpacing: -0.18,
                                               ),
                                             ),
                                           if (tags.isNotEmpty) ...[

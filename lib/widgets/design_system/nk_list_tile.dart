@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
 enum NkTrailingKind { chevron, externalLink, popup, custom, none }
@@ -205,73 +206,89 @@ class NkSwitchTile extends StatelessWidget {
     final effectiveIconColor = iconColor ?? p.accent;
     final hasIcon = icon != null || customIcon != null;
 
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 48.0),
-      child: InkWell(
-        onTap: enabled ? () => onChanged(!value) : null,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-          child: Row(
-            children: [
-              if (hasIcon) ...[
-                customIcon ??
-                    Container(
-                      width: 32.0,
-                      height: 32.0,
-                      decoration: BoxDecoration(
-                        color: effectiveIconColor.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(8.0),
+    return Semantics(
+      toggled: value,
+      enabled: enabled,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 48.0),
+        child: InkWell(
+          onTap: enabled
+              ? () {
+                  AppHaptics.select();
+                  onChanged(!value);
+                }
+              : null,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 10.0,
+            ),
+            child: Row(
+              children: [
+                if (hasIcon) ...[
+                  customIcon ??
+                      Container(
+                        width: 32.0,
+                        height: 32.0,
+                        decoration: BoxDecoration(
+                          color: effectiveIconColor.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        alignment: Alignment.center,
+                        child: Icon(
+                          icon,
+                          size: 18.0,
+                          color: effectiveIconColor,
+                        ),
                       ),
-                      alignment: Alignment.center,
-                      child: Icon(icon, size: 18.0, color: effectiveIconColor),
-                    ),
-                const SizedBox(width: 14.0),
-              ],
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: enabled ? p.text : p.text3,
-                        fontSize: 15.5,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: -0.2,
-                        fontFamily: 'Inter',
-                      ),
-                    ),
-                    if (subtitle != null && subtitle!.trim().isNotEmpty) ...[
-                      const SizedBox(height: 2.0),
+                  const SizedBox(width: 14.0),
+                ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                       Text(
-                        subtitle!,
-                        maxLines: 2,
+                        title,
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: p.text3,
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w400,
-                          height: 1.25,
+                          color: enabled ? p.text : p.text3,
+                          fontSize: 15.5,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: -0.2,
                           fontFamily: 'Inter',
                         ),
                       ),
+                      if (subtitle != null && subtitle!.trim().isNotEmpty) ...[
+                        const SizedBox(height: 2.0),
+                        Text(
+                          subtitle!,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: p.text3,
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w400,
+                            height: 1.25,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12.0),
-              Switch.adaptive(
-                value: value,
-                onChanged: enabled ? onChanged : null,
-                activeThumbColor: p.accent,
-                activeTrackColor: p.accent.withValues(alpha: 0.4),
-                inactiveThumbColor: p.text3,
-                inactiveTrackColor: p.surface3,
-              ),
-            ],
+                const SizedBox(width: 12.0),
+                Switch.adaptive(
+                  value: value,
+                  onChanged: enabled ? onChanged : null,
+                  activeThumbColor: p.accent,
+                  activeTrackColor: p.accent.withValues(alpha: 0.4),
+                  inactiveThumbColor: p.text3,
+                  inactiveTrackColor: p.surface3,
+                ),
+              ],
+            ),
           ),
         ),
       ),

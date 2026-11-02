@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/theme/app_tokens.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/scroll_state_preserver.dart';
@@ -48,6 +49,7 @@ class AppSheet extends StatefulWidget {
 class _AppSheetState extends State<AppSheet> {
   double _titleOpacity = 0.0;
   double _leadingOpacity = 0.0;
+  double _dragOffset = 0.0;
 
   @override
   void initState() {
@@ -158,17 +160,27 @@ class _AppSheetState extends State<AppSheet> {
     final p = widget.p;
 
     Widget content = GestureDetector(
+      onVerticalDragStart: (_) => _dragOffset = 0.0,
+      onVerticalDragUpdate: (details) {
+        _dragOffset += details.primaryDelta ?? 0.0;
+      },
       onVerticalDragEnd: (details) {
-        if ((details.primaryVelocity ?? 0) > 650) {
+        final velocity = details.primaryVelocity ?? 0.0;
+        final sheetHeight = context.size?.height ?? 400.0;
+        if ((_dragOffset / sheetHeight > 0.35) || velocity > 350) {
           Navigator.maybePop(context);
         }
+        _dragOffset = 0.0;
       },
+      onVerticalDragCancel: () => _dragOffset = 0.0,
       child: Glass(
         p: p,
         blur: widget.blur,
-        radius: widget.docked ? 38 : 32,
+        radius: NkTokens.radii.sheetVal,
         borderRadius: widget.docked
-            ? const BorderRadius.vertical(top: Radius.circular(38))
+            ? BorderRadius.vertical(
+                top: Radius.circular(NkTokens.radii.sheetVal),
+              )
             : null,
         padding: EdgeInsets.fromLTRB(
           12.0,
@@ -185,14 +197,19 @@ class _AppSheetState extends State<AppSheet> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // The Drag Handle
-              Container(
-                width: 36,
-                height: 5,
-                margin: const EdgeInsets.only(bottom: spacing8),
-                decoration: BoxDecoration(
-                  color: p.text3.withValues(alpha: 0.35),
-                  borderRadius: BorderRadius.circular(999),
+              // The Drag Handle with Semantics
+              Semantics(
+                label: 'Dismiss sheet',
+                button: true,
+                onTap: () => Navigator.maybePop(context),
+                child: Container(
+                  width: 36,
+                  height: 5,
+                  margin: const EdgeInsets.only(bottom: spacing8),
+                  decoration: BoxDecoration(
+                    color: p.text3.withValues(alpha: 0.35),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
                 ),
               ),
 
@@ -363,25 +380,39 @@ class _HeaderCircleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isBack = icon == Icons.chevron_left_rounded;
+    final tooltipText = isBack
+        ? 'Back'.localized(context)
+        : 'Close'.localized(context);
+    final semanticsText = isBack
+        ? 'Back'.localized(context)
+        : 'Close sheet'.localized(context);
+
     return PressableScale(
       onTap: () {
-        HapticFeedback.selectionClick();
-        NotekarHaptics.selection('standard');
+        AppHaptics.tap();
         onTap();
       },
-      child: SizedBox(
-        width: 44,
-        height: 44,
-        child: Align(
-          alignment: Alignment.center,
-          child: Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: p.surface3,
-              shape: BoxShape.circle,
+      child: Tooltip(
+        message: tooltipText,
+        child: Semantics(
+          label: semanticsText,
+          button: true,
+          child: SizedBox(
+            width: 44,
+            height: 44,
+            child: Align(
+              alignment: Alignment.center,
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: p.surface3,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: p.text2, size: 22),
+              ),
             ),
-            child: Icon(icon, color: p.text2, size: 22),
           ),
         ),
       ),

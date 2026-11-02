@@ -47,6 +47,19 @@ class PhotoLightboxDialog extends StatefulWidget {
       barrierLabel: 'Dismiss photo',
       barrierColor: Colors.black.withValues(alpha: 0.88),
       transitionDuration: const Duration(milliseconds: 220),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutQuart,
+        );
+        return FadeTransition(
+          opacity: curved,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.92, end: 1.0).animate(curved),
+            child: child,
+          ),
+        );
+      },
       pageBuilder: (_, _, _) => PhotoLightboxDialog(
         p: p,
         imagePath: imagePath,
@@ -63,11 +76,18 @@ class PhotoLightboxDialog extends StatefulWidget {
   State<PhotoLightboxDialog> createState() => _PhotoLightboxDialogState();
 }
 
-class _PhotoLightboxDialogState extends State<PhotoLightboxDialog> {
+class _PhotoLightboxDialogState extends State<PhotoLightboxDialog>
+    with SingleTickerProviderStateMixin {
   late final PageController _pageController;
+  late final TransformationController _transformationController;
+  late final AnimationController _zoomAnimationController;
+  Animation<Matrix4>? _zoomAnimation;
   late int _currentIndex;
   final Map<int, File> _resolvedFiles = {};
   bool _isLoading = true;
+  bool _isZoomed = false;
+  double _dragOffsetY = 0.0;
+  TapDownDetails? _doubleTapDetails;
 
   List<String> get _effectivePaths {
     if (widget.imagePaths != null && widget.imagePaths!.isNotEmpty) {
@@ -84,13 +104,61 @@ class _PhotoLightboxDialogState extends State<PhotoLightboxDialog> {
     super.initState();
     _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: _currentIndex);
+    _transformationController = TransformationController();
+    _transformationController.addListener(_onTransformationChanged);
+    _zoomAnimationController =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 240),
+        )..addListener(() {
+          if (_zoomAnimation != null) {
+            _transformationController.value = _zoomAnimation!.value;
+          }
+        });
     _resolveImages();
+  }
+
+  void _onTransformationChanged() {
+    final isZoomed = _transformationController.value.getMaxScaleOnAxis() > 1.05;
+    if (isZoomed != _isZoomed) {
+      setState(() => _isZoomed = isZoomed);
+    }
   }
 
   @override
   void dispose() {
+    _transformationController.removeListener(_onTransformationChanged);
+    _zoomAnimationController.dispose();
     _pageController.dispose();
+    _transformationController.dispose();
     super.dispose();
+  }
+
+  void _onDoubleTap() {
+    if (_zoomAnimationController.isAnimating) return;
+
+    final isCurrentlyZoomed =
+        _transformationController.value.getMaxScaleOnAxis() > 1.05;
+    final beginMatrix = _transformationController.value;
+    final endMatrix = isCurrentlyZoomed
+        ? Matrix4.identity()
+        : () {
+            final position = _doubleTapDetails?.localPosition ?? Offset.zero;
+            final matrix = Matrix4.identity();
+            matrix.setEntry(0, 0, 2.5);
+            matrix.setEntry(1, 1, 2.5);
+            matrix.setEntry(0, 3, -position.dx * 1.5);
+            matrix.setEntry(1, 3, -position.dy * 1.5);
+            return matrix;
+          }();
+
+    _zoomAnimation = Matrix4Tween(begin: beginMatrix, end: endMatrix).animate(
+      CurvedAnimation(
+        parent: _zoomAnimationController,
+        curve: Curves.easeOutCubic,
+      ),
+    );
+    _zoomAnimationController.forward(from: 0.0);
   }
 
   Future<void> _resolveImages() async {
@@ -156,34 +224,75 @@ class _PhotoLightboxDialogState extends State<PhotoLightboxDialog> {
       body: SafeArea(
         child: Stack(
           children: [
-            // Centered Zoomable Photo(s)
-            Center(
-              child: _isLoading
-                  ? CupertinoActivityIndicator(radius: 14, color: p.accent)
-                  : isMulti
-                  ? PageView.builder(
-                      controller: _pageController,
-                      itemCount: paths.length,
-                      physics: const BouncingScrollPhysics(),
-                      onPageChanged: (i) {
-                        HapticFeedback.selectionClick();
-                        setState(() => _currentIndex = i);
-                      },
-                      itemBuilder: (ctx, i) {
-                        return InteractiveViewer(
-                          minScale: 0.8,
-                          maxScale: 4.5,
-                          clipBehavior: Clip.none,
-                          child: Center(child: _buildSingleImage(i, p)),
-                        );
-                      },
-                    )
-                  : InteractiveViewer(
-                      minScale: 0.8,
-                      maxScale: 4.5,
-                      clipBehavior: Clip.none,
-                      child: Center(child: _buildSingleImage(0, p)),
-                    ),
+            // Centered Zoomable Photo(s) with drag-to-dismiss & double-tap zoom
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onDoubleTapDown: (d) => _doubleTapDetails = d,
+              onDoubleTap: _onDoubleTap,
+              onVerticalDragUpdate: _isZoomed
+                  ? null
+                  : (details) {
+                      setState(() {
+                        _dragOffsetY =
+                            (_dragOffsetY + (details.primaryDelta ?? 0.0))
+                                .clamp(0.0, 300.0);
+                      });
+                    },
+              onVerticalDragEnd: _isZoomed
+                  ? null
+                  : (details) {
+                      if (_dragOffsetY > 100 ||
+                          (details.primaryVelocity ?? 0.0) > 350) {
+                        Navigator.maybePop(context);
+                      } else {
+                        setState(() => _dragOffsetY = 0.0);
+                      }
+                    },
+              onVerticalDragCancel: _isZoomed
+                  ? null
+                  : () => setState(() => _dragOffsetY = 0.0),
+              child: Transform.translate(
+                offset: Offset(0, _dragOffsetY),
+                child: Opacity(
+                  opacity: (1.0 - (_dragOffsetY / 300.0)).clamp(0.2, 1.0),
+                  child: Center(
+                    child: _isLoading
+                        ? CupertinoActivityIndicator(
+                            radius: 14,
+                            color: p.accent,
+                          )
+                        : isMulti
+                        ? PageView.builder(
+                            controller: _pageController,
+                            itemCount: paths.length,
+                            physics: const BouncingScrollPhysics(),
+                            onPageChanged: (i) {
+                              HapticFeedback.selectionClick();
+                              _transformationController.value =
+                                  Matrix4.identity();
+                              setState(() => _currentIndex = i);
+                            },
+                            itemBuilder: (ctx, i) {
+                              return InteractiveViewer(
+                                transformationController:
+                                    _transformationController,
+                                minScale: 0.8,
+                                maxScale: 4.5,
+                                clipBehavior: Clip.none,
+                                child: Center(child: _buildSingleImage(i, p)),
+                              );
+                            },
+                          )
+                        : InteractiveViewer(
+                            transformationController: _transformationController,
+                            minScale: 0.8,
+                            maxScale: 4.5,
+                            clipBehavior: Clip.none,
+                            child: Center(child: _buildSingleImage(0, p)),
+                          ),
+                  ),
+                ),
+              ),
             ),
 
             // Top Bar

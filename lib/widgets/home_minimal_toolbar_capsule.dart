@@ -31,8 +31,8 @@ class HomeMinimalToolbarCapsule extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 38,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+      constraints: const BoxConstraints(minHeight: 44),
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
         color: palette.surface2.withValues(
           alpha: enableTranslucency && AdaptiveEngine().supportsBlur
@@ -59,54 +59,63 @@ class HomeMinimalToolbarCapsule extends StatelessWidget {
             onTap: isSessionActive && onTogglePause != null
                 ? onTogglePause!
                 : onToggleMode,
-            child: Padding(
-              padding: const EdgeInsets.all(6),
-              child: Icon(
-                isSessionActive
-                    ? (isPaused
-                          ? Icons.play_arrow_rounded
-                          : Icons.pause_rounded)
-                    : (mode == 'single'
-                          ? Icons.radio_button_checked_rounded
-                          : Icons.all_inclusive_rounded),
-                size: 16,
-                color: isSessionActive
-                    ? (isPaused ? palette.orange : palette.text)
-                    : palette.accent,
+            child: SizedBox(
+              width: 44,
+              height: 44,
+              child: Center(
+                child: Icon(
+                  isSessionActive
+                      ? (isPaused
+                            ? Icons.play_arrow_rounded
+                            : Icons.pause_rounded)
+                      : (mode == 'single'
+                            ? Icons.radio_button_checked_rounded
+                            : Icons.all_inclusive_rounded),
+                  size: 18,
+                  color: isSessionActive
+                      ? (isPaused ? palette.orange : palette.text)
+                      : palette.accent,
+                ),
               ),
             ),
           ),
           Container(
             width: 0.5,
             height: 16,
-            margin: const EdgeInsets.symmetric(horizontal: 6),
+            margin: const EdgeInsets.symmetric(horizontal: 2),
             color: palette.border.withValues(alpha: 0.4),
           ),
           PressableScale(
             onTap: onOpenHistory,
-            child: Padding(
-              padding: const EdgeInsets.all(6),
-              child: Icon(
-                Icons.access_time_rounded,
-                size: 16,
-                color: palette.text,
+            child: SizedBox(
+              width: 44,
+              height: 44,
+              child: Center(
+                child: Icon(
+                  Icons.access_time_rounded,
+                  size: 18,
+                  color: palette.text,
+                ),
               ),
             ),
           ),
           Container(
             width: 0.5,
             height: 16,
-            margin: const EdgeInsets.symmetric(horizontal: 6),
+            margin: const EdgeInsets.symmetric(horizontal: 2),
             color: palette.border.withValues(alpha: 0.4),
           ),
           PressableScale(
             onTap: onOpenSettings,
-            child: Padding(
-              padding: const EdgeInsets.all(6),
-              child: Icon(
-                Icons.settings_rounded,
-                size: 16,
-                color: palette.text2,
+            child: SizedBox(
+              width: 44,
+              height: 44,
+              child: Center(
+                child: Icon(
+                  Icons.settings_rounded,
+                  size: 18,
+                  color: palette.text2,
+                ),
               ),
             ),
           ),

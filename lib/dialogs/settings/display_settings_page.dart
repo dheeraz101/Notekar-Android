@@ -652,7 +652,10 @@ class _DisplayLivePreviewState extends State<_DisplayLivePreview> {
     _clockTimer?.cancel();
     _clockTimer = Timer.periodic(
       Duration(seconds: widget.showSeconds ? 1 : 30),
-      (_) => setState(() => _now = DateTime.now()),
+      (_) {
+        if (!mounted) return;
+        setState(() => _now = DateTime.now());
+      },
     );
   }
 

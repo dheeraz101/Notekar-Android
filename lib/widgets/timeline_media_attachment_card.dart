@@ -21,6 +21,7 @@ class TimelineMediaAttachmentCard extends StatefulWidget {
     required this.isCollapsed,
     this.onToggleCollapse,
     this.compact = false,
+    this.momentId,
   });
 
   final Palette p;
@@ -28,6 +29,7 @@ class TimelineMediaAttachmentCard extends StatefulWidget {
   final bool isCollapsed;
   final VoidCallback? onToggleCollapse;
   final bool compact;
+  final int? momentId;
 
   static Widget buildCollapsedPill({
     required Palette p,
@@ -277,20 +279,26 @@ class _TimelineMediaAttachmentCardState
       },
       behavior: HitTestBehavior.opaque,
       child: Hero(
-        tag: 'media_$path',
-        child: resolvedFile.existsSync()
+        tag: widget.momentId != null
+            ? 'media_${widget.momentId}_$path'
+            : 'media_$path',
+        child: resolvedFile.path.isNotEmpty
             ? Image.file(
                 resolvedFile,
                 fit: BoxFit.cover,
+                cacheWidth: 360,
+                cacheHeight: 360,
                 errorBuilder: (_, _, _) => _buildFallback(p),
               )
             : FutureBuilder<File>(
                 future: MediaStorageService.instance.resolveFile(path),
                 builder: (context, snapshot) {
-                  if (snapshot.hasData && snapshot.data!.existsSync()) {
+                  if (snapshot.hasData && snapshot.data!.path.isNotEmpty) {
                     return Image.file(
                       snapshot.data!,
                       fit: BoxFit.cover,
+                      cacheWidth: 360,
+                      cacheHeight: 360,
                       errorBuilder: (_, _, _) => _buildFallback(p),
                     );
                   }

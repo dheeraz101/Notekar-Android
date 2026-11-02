@@ -24,15 +24,26 @@ class ZenDayRing extends StatelessWidget {
     final clamped = progress.clamp(0.0, 1.0);
     final isGoalMet = progress >= 1.0;
 
-    return SizedBox(
-      width: size,
-      height: size,
-      child: CustomPaint(
-        painter: _ZenRingPainter(
-          trackColor: p.text3.withValues(alpha: 0.2),
-          progressColor: isGoalMet ? p.green : p.accent,
-          progress: clamped,
-          strokeWidth: strokeWidth,
+    return Semantics(
+      label: 'Day progress gauge',
+      value: '${(clamped * 100).toInt()}%',
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: TweenAnimationBuilder<double>(
+          tween: Tween<double>(begin: 0.0, end: clamped),
+          duration: const Duration(milliseconds: 450),
+          curve: Curves.easeOutCubic,
+          builder: (context, animatedProgress, _) {
+            return CustomPaint(
+              painter: _ZenRingPainter(
+                trackColor: p.text3.withValues(alpha: 0.2),
+                progressColor: isGoalMet ? p.green : p.accent,
+                progress: animatedProgress,
+                strokeWidth: strokeWidth,
+              ),
+            );
+          },
         ),
       ),
     );

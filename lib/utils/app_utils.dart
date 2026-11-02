@@ -73,30 +73,105 @@ const termsUrl = 'https://notekarapp.vercel.app/terms.html';
 const githubRepo = 'https://github.com/dheeraz101/Notekar-Android';
 
 class AppHaptics {
+  static String activeStyle = 'standard';
+  static bool enabled = true;
+
+  static void configure({String? style, bool? isEnabled}) {
+    if (style != null) activeStyle = style;
+    if (isEnabled != null) enabled = isEnabled;
+  }
+
+  static bool get _canVibrate => enabled && activeStyle != 'off';
+
   // Legacy methods preserved for complete backward compatibility
-  static void light() => HapticFeedback.lightImpact();
+  static void light([String? style]) {
+    final s = style ?? activeStyle;
+    if (!enabled || s == 'off') return;
+    HapticFeedback.lightImpact();
+  }
 
-  static void medium() => HapticFeedback.mediumImpact();
+  static void medium([String? style]) {
+    final s = style ?? activeStyle;
+    if (!enabled || s == 'off') return;
+    if (s == 'light') {
+      HapticFeedback.selectionClick();
+    } else {
+      HapticFeedback.mediumImpact();
+    }
+  }
 
-  static void heavy() => HapticFeedback.heavyImpact();
+  static void heavy([String? style]) {
+    final s = style ?? activeStyle;
+    if (!enabled || s == 'off') return;
+    if (s == 'light') {
+      HapticFeedback.mediumImpact();
+    } else {
+      HapticFeedback.heavyImpact();
+    }
+  }
 
-  static void heavyImpact() => HapticFeedback.heavyImpact();
+  static void heavyImpact([String? style]) => heavy(style);
 
-  static void selection() => HapticFeedback.selectionClick();
+  static void selection([String? style]) {
+    final s = style ?? activeStyle;
+    if (!enabled || s == 'off') return;
+    HapticFeedback.selectionClick();
+  }
+
+  static void warning([String? style]) {
+    final s = style ?? activeStyle;
+    if (!enabled || s == 'off') return;
+    HapticFeedback.heavyImpact();
+    Future.delayed(const Duration(milliseconds: 60), () {
+      HapticFeedback.mediumImpact();
+    });
+  }
+
+  /// Authentic Apple double-beat rhythm: mediumImpact followed by lightImpact after 45ms
+  static void doubleBeat([String? style]) {
+    final s = style ?? activeStyle;
+    if (!enabled || s == 'off') return;
+    if (s == 'light') {
+      HapticFeedback.selectionClick();
+      return;
+    }
+    HapticFeedback.mediumImpact();
+    Future.delayed(const Duration(milliseconds: 45), () {
+      HapticFeedback.lightImpact();
+    });
+  }
+
+  static void successDouble([String? style]) => doubleBeat(style);
+
+  static void success([String? style]) => medium(style);
 
   // Apple HIG & BitChord Intent-Based Haptic Rhythms (all patterns <= 65ms)
 
   /// The lightest single beat, for drags crossing tab boundaries or slider scrubbing.
-  static void tick() => HapticFeedback.selectionClick();
+  static void tick() {
+    if (!_canVibrate) return;
+    HapticFeedback.selectionClick();
+  }
 
   /// A plain button press with no state behind it: More, Back, Action.
-  static void tap() => HapticFeedback.lightImpact();
+  static void tap() {
+    if (!_canVibrate) return;
+    HapticFeedback.lightImpact();
+  }
 
   /// A discrete choice landing: a tab, a filter pill, the end of a scrub.
-  static void select() => HapticFeedback.selectionClick();
+  static void select() {
+    if (!_canVibrate) return;
+    HapticFeedback.selectionClick();
+  }
 
   /// Switching something on: a light lead-in rising into a crisp beat.
   static void toggleOn() {
+    if (!_canVibrate) return;
+    if (activeStyle == 'light') {
+      HapticFeedback.selectionClick();
+      return;
+    }
     HapticFeedback.lightImpact();
     Future.delayed(const Duration(milliseconds: 35), () {
       HapticFeedback.selectionClick();
@@ -105,6 +180,11 @@ class AppHaptics {
 
   /// Switching something off: a crisp beat falling into subtle release.
   static void toggleOff() {
+    if (!_canVibrate) return;
+    if (activeStyle == 'light') {
+      HapticFeedback.selectionClick();
+      return;
+    }
     HapticFeedback.selectionClick();
     Future.delayed(const Duration(milliseconds: 30), () {
       HapticFeedback.lightImpact();
@@ -113,8 +193,13 @@ class AppHaptics {
 
   /// Successful save, milestone or completion: confident double-tap.
   static void confirm() {
+    if (!_canVibrate) return;
+    if (activeStyle == 'light') {
+      HapticFeedback.selectionClick();
+      return;
+    }
     HapticFeedback.mediumImpact();
-    Future.delayed(const Duration(milliseconds: 55), () {
+    Future.delayed(const Duration(milliseconds: 45), () {
       HapticFeedback.lightImpact();
     });
   }
@@ -466,7 +551,13 @@ bool isNewerVersion(String candidate, String current) {
 }
 
 List<BoxShadow> selectedGlow(Color color) {
-  return const [];
+  return [
+    BoxShadow(
+      color: color.withValues(alpha: 0.18),
+      blurRadius: 10,
+      spreadRadius: 0.5,
+    ),
+  ];
 }
 
 Color momentColor(Palette p, String type) {
@@ -484,7 +575,7 @@ IconData momentIcon(String type) {
 class NotekarHaptics {
   static void light(String style) {
     if (style == 'off') return;
-    HapticFeedback.selectionClick();
+    HapticFeedback.lightImpact();
   }
 
   static void selection(String style) {
@@ -517,16 +608,24 @@ class NotekarHaptics {
 
   static void warning(String style) {
     if (style == 'off') return;
-    HapticFeedback.vibrate();
+    HapticFeedback.heavyImpact();
+    Future.delayed(const Duration(milliseconds: 60), () {
+      HapticFeedback.mediumImpact();
+    });
   }
 
-  static void successDouble(String style) {
+  static void successDouble(String style, {bool forceDouble = false}) {
     if (style == 'off') return;
     if (style == 'light') {
       HapticFeedback.selectionClick();
       return;
     }
     HapticFeedback.mediumImpact();
+    if (forceDouble) {
+      Future.delayed(const Duration(milliseconds: 45), () {
+        HapticFeedback.lightImpact();
+      });
+    }
   }
 
   static void heavy(String style) {

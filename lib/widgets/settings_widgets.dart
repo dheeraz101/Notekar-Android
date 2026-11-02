@@ -67,7 +67,7 @@ class SettingsGroup extends StatelessWidget {
               color: p.border.withValues(
                 alpha: p.name == 'amoled' ? 0.5 : (!p.isDark ? 0.35 : 0.45),
               ),
-              width: 0.8,
+              width: 0.6,
             ),
           ),
           child: Builder(
@@ -85,7 +85,7 @@ class SettingsGroup extends StatelessWidget {
                 }
               }
               final effectiveIndent = (insetDividers && hasAnyIcon)
-                  ? 66.0
+                  ? 56.0
                   : 0.0;
 
               return Column(
@@ -95,7 +95,7 @@ class SettingsGroup extends StatelessWidget {
                     if (showDividers && i < children.length - 1)
                       Divider(
                         height: 0.5,
-                        color: p.border,
+                        color: p.border.withValues(alpha: 0.35),
                         indent: effectiveIndent,
                       ),
                   ],
@@ -497,7 +497,15 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
       if (message != null) widget.onDisabledTap?.call(message);
       return;
     }
-    if (widget.isSecurity) HapticFeedback.heavyImpact();
+    if (widget.isSecurity) {
+      HapticFeedback.heavyImpact();
+    } else {
+      if (!widget.value) {
+        AppHaptics.toggleOn();
+      } else {
+        AppHaptics.toggleOff();
+      }
+    }
     widget.onChanged(!widget.value);
   }
 

@@ -95,7 +95,9 @@ class Palette extends ThemeExtension<Palette> {
   final Color blue;
 
   bool get isDark => name != 'light' && name != 'eink';
-  Color get onAccent => name == 'matrix' ? Colors.black : Colors.white;
+  Color get onAccent => accent.computeLuminance() > 0.45
+      ? const Color(0xFF000000)
+      : const Color(0xFFFFFFFF);
   Color get subtext => text2;
   Color get surface1 => surface;
 }
