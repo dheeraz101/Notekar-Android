@@ -29,15 +29,20 @@ class SlopedHorizontalDragGestureRecognizer
     super.handleEvent(event);
   }
 
+  /// Evaluates whether the motion vector conforms to the 2:1 horizontal slope lock
+  bool isSlopeAllowed(Offset delta) {
+    final dx = delta.dx.abs();
+    final dy = delta.dy.abs();
+    return dy == 0 || dx >= 2.0 * dy;
+  }
+
   @override
   bool hasSufficientGlobalDistanceToAccept(
     PointerDeviceKind pointerDeviceKind,
     double? deviceTouchSlop,
   ) {
-    final dx = _accumulatedDelta.dx.abs();
-    final dy = _accumulatedDelta.dy.abs();
     // 2:1 horizontal slope lock: require dx >= 2 * dy
-    if (dy > 0 && dx < 2.0 * dy) {
+    if (!isSlopeAllowed(_accumulatedDelta)) {
       return false;
     }
     return super.hasSufficientGlobalDistanceToAccept(

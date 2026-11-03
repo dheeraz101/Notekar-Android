@@ -103,17 +103,32 @@ class AudioService extends ChangeNotifier {
               'getRecordingAmplitude',
             );
             if (amp != null && amp > 0) {
-              _currentRecordingAmplitude = (amp / 32767.0 * 2.5).clamp(
-                0.08,
-                1.0,
-              );
+              final targetAmp = (amp / 32767.0 * 2.5).clamp(0.08, 1.0);
+              // Audio meter peak envelope follower:
+              // Fast attack (15ms) on rising edges, smooth exponential release (120ms) on decay
+              if (targetAmp > _currentRecordingAmplitude) {
+                _currentRecordingAmplitude = targetAmp;
+              } else {
+                _currentRecordingAmplitude =
+                    (_currentRecordingAmplitude * 0.65 + targetAmp * 0.35)
+                        .clamp(0.06, 1.0);
+              }
             } else {
-              _currentRecordingAmplitude = (_currentRecordingAmplitude * 0.75)
+              _currentRecordingAmplitude = (_currentRecordingAmplitude * 0.68)
                   .clamp(0.06, 1.0);
             }
           } catch (_) {
             final ms = DateTime.now().millisecondsSinceEpoch;
-            _currentRecordingAmplitude = 0.2 + 0.6 * (((ms ~/ 120) % 5) / 5.0);
+            final targetSim = 0.2 + 0.6 * (((ms ~/ 120) % 5) / 5.0);
+            if (targetSim > _currentRecordingAmplitude) {
+              _currentRecordingAmplitude = targetSim;
+            } else {
+              _currentRecordingAmplitude =
+                  (_currentRecordingAmplitude * 0.65 + targetSim * 0.35).clamp(
+                    0.06,
+                    1.0,
+                  );
+            }
           }
           notifyListeners();
         }
@@ -140,7 +155,16 @@ class AudioService extends ChangeNotifier {
         if (_recordingStartTime != null) {
           _recordingDuration = DateTime.now().difference(_recordingStartTime!);
           final ms = DateTime.now().millisecondsSinceEpoch;
-          _currentRecordingAmplitude = 0.2 + 0.6 * (((ms ~/ 120) % 5) / 5.0);
+          final targetSim = 0.2 + 0.6 * (((ms ~/ 120) % 5) / 5.0);
+          if (targetSim > _currentRecordingAmplitude) {
+            _currentRecordingAmplitude = targetSim;
+          } else {
+            _currentRecordingAmplitude =
+                (_currentRecordingAmplitude * 0.65 + targetSim * 0.35).clamp(
+                  0.06,
+                  1.0,
+                );
+          }
           notifyListeners();
         }
       });
