@@ -5,11 +5,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/audio_service.dart';
 import 'package:notekar/services/media_storage_service.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/markdown_text_editing_controller.dart';
 import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/hashtag_suggestion_overlay.dart';
@@ -58,6 +60,7 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
   bool _isRecording = false;
   int _recordingSeconds = 0;
   Timer? _recordingTimer;
+  bool _saved = false;
 
   List<String> _tags = const [];
 
@@ -105,6 +108,25 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
     _recordingTimer?.cancel();
     if (_isRecording) {
       AudioService.instance.cancelRecording();
+    }
+    if (!_saved && _stagedVoicePaths.isNotEmpty) {
+      final initial = (widget.initialVoicePath ?? '')
+          .split('|')
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toSet();
+      for (final p in _stagedVoicePaths) {
+        if (!initial.contains(p)) {
+          MediaStorageService.instance
+              .resolveFile(p)
+              .then((file) async {
+                if (await file.exists()) {
+                  await file.delete();
+                }
+              })
+              .catchError((_) {});
+        }
+      }
     }
     _undoController.dispose();
     _controller.dispose();
@@ -432,7 +454,8 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
   }
 
   void _save() {
-    HapticFeedback.mediumImpact();
+    _saved = true;
+    AppHaptics.medium();
     final text = _controller.text.trim();
 
     // Extract tags from the final note text
@@ -937,9 +960,27 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
                             return const SizedBox.shrink();
                           }
                           return PressableScale(
-                            onTap: () {
-                              HapticFeedback.selectionClick();
-                              _controller.clear();
+                            onTap: () async {
+                              if (_controller.text.trim().length > 10) {
+                                AppHaptics.warning();
+                                final confirmed = await showIosConfirmSheet(
+                                  context,
+                                  p: p,
+                                  title: 'Clear Note?'.localized(context),
+                                  message:
+                                      'Are you sure you want to clear this note? This action cannot be undone.'
+                                          .localized(context),
+                                  confirmLabel: 'Clear Note'.localized(context),
+                                  isDestructive: true,
+                                  icon: CupertinoIcons.trash,
+                                );
+                                if (confirmed) {
+                                  _controller.clear();
+                                }
+                              } else {
+                                AppHaptics.selection();
+                                _controller.clear();
+                              }
                             },
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
@@ -947,7 +988,7 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
                                 vertical: 4,
                               ),
                               child: Text(
-                                'Clear',
+                                'Clear'.localized(context),
                                 style: TextStyle(
                                   color: p.text3,
                                   fontSize: 12,

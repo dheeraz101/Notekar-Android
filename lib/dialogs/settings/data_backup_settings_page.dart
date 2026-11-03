@@ -405,6 +405,7 @@ class LocalBackupsPage extends StatefulWidget {
 
 class _LocalBackupsPageState extends State<LocalBackupsPage> {
   List<File> _backupFiles = [];
+  Map<String, FileStat> _backupStats = {};
   bool _loading = true;
 
   @override
@@ -421,6 +422,7 @@ class _LocalBackupsPageState extends State<LocalBackupsPage> {
       if (dataDir == null) {
         setState(() {
           _backupFiles = [];
+          _backupStats = {};
           _loading = false;
         });
         return;
@@ -432,24 +434,33 @@ class _LocalBackupsPageState extends State<LocalBackupsPage> {
             .whereType<File>()
             .where((f) => f.path.endsWith('.json'))
             .toList();
+        final statPairs = await Future.wait(
+          files.map((file) async => MapEntry(file.path, await file.stat())),
+        );
+        final Map<String, FileStat> stats = Map.fromEntries(statPairs);
         files.sort((a, b) {
-          final aTime = a.lastModifiedSync();
-          final bTime = b.lastModifiedSync();
+          final aTime =
+              stats[a.path]?.modified ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final bTime =
+              stats[b.path]?.modified ?? DateTime.fromMillisecondsSinceEpoch(0);
           return bTime.compareTo(aTime);
         });
         setState(() {
           _backupFiles = files;
+          _backupStats = stats;
           _loading = false;
         });
       } else {
         setState(() {
           _backupFiles = [];
+          _backupStats = {};
           _loading = false;
         });
       }
     } catch (_) {
       setState(() {
         _backupFiles = [];
+        _backupStats = {};
         _loading = false;
       });
     }
@@ -490,8 +501,22 @@ class _LocalBackupsPageState extends State<LocalBackupsPage> {
   }
 
   Future<void> _restoreFile(File file) async {
+    AppHaptics.warning();
+    final confirmed = await showIosConfirmSheet(
+      context,
+      p: widget.p,
+      title: 'Restore Database Backup?'.localized(context),
+      message:
+          'Restoring this backup will replace current timeline sessions and categories. Any unsaved changes may be overwritten.'
+              .localized(context),
+      confirmLabel: 'Restore'.localized(context),
+      isDestructive: true,
+      icon: CupertinoIcons.arrow_counterclockwise,
+    );
+    if (!confirmed) return;
+
     try {
-      final content = await file.readAsString();
+      final content = file.readAsStringSync();
       final success = await widget.onRestore(content);
       if (success) {
         // Success toast is shown in note_kar_home, reload backups just in case
@@ -566,6 +591,7 @@ class _LocalBackupsPageState extends State<LocalBackupsPage> {
   }
 
   Future<void> _confirmDeleteBackup(File file) async {
+    AppHaptics.warning();
     final confirmed = await showIosConfirmSheet(
       context,
       p: widget.p,
@@ -582,13 +608,28 @@ class _LocalBackupsPageState extends State<LocalBackupsPage> {
 
   Widget _buildBackupRow(File file) {
     final p = widget.p;
-    final stat = file.statSync();
-    final dateFormatted = _formatDate(stat.modified);
-    final sizeFormatted = _formatSize(stat.size);
+    final stat = _backupStats[file.path];
+    final modified = stat?.modified ?? DateTime.now();
+    final size = stat?.size ?? 0;
+    final dateFormatted = _formatDate(modified);
+    final sizeFormatted = _formatSize(size);
 
     return Dismissible(
       key: Key(file.path),
       direction: DismissDirection.endToStart,
+      confirmDismiss: (direction) async {
+        AppHaptics.warning();
+        return await showIosConfirmSheet(
+          context,
+          p: widget.p,
+          title: 'Delete Backup?'.localized(context),
+          message: 'This local backup file will be erased permanently.'
+              .localized(context),
+          confirmLabel: 'Delete'.localized(context),
+          isDestructive: true,
+          icon: CupertinoIcons.trash_fill,
+        );
+      },
       background: Container(
         color: p.red,
         alignment: Alignment.centerRight,

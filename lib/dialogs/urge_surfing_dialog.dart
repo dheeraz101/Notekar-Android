@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 
 enum UrgeMode { boxBreathing, grounding }
@@ -24,6 +24,7 @@ class _UrgeSurfingDialogState extends State<UrgeSurfingDialog>
   // Box Breathing state
   late AnimationController _breathingController;
   Timer? _timer;
+  Timer? _holdTimer;
   int _secondsRemaining = 60;
   String _phaseText = 'Inhale';
   int _phaseIndex = 0; // 0: Inhale, 1: Hold, 2: Exhale, 3: Hold
@@ -63,16 +64,17 @@ class _UrgeSurfingDialogState extends State<UrgeSurfingDialog>
       _phaseIndex = 0;
       _phaseText = 'Inhale';
     });
-    HapticFeedback.mediumImpact();
+    AppHaptics.medium();
     _breathingController.forward(from: 0.0);
 
     _timer?.cancel();
+    _holdTimer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted) return;
       if (_secondsRemaining <= 1) {
         t.cancel();
         _stopBreathing();
-        HapticFeedback.heavyImpact();
+        AppHaptics.heavy();
       } else {
         setState(() {
           _secondsRemaining--;
@@ -84,7 +86,8 @@ class _UrgeSurfingDialogState extends State<UrgeSurfingDialog>
   void _nextPhase() {
     if (!_isActive) return;
     _phaseIndex = (_phaseIndex + 1) % 4;
-    HapticFeedback.lightImpact();
+    _holdTimer?.cancel();
+    AppHaptics.light();
 
     switch (_phaseIndex) {
       case 0:
@@ -94,7 +97,7 @@ class _UrgeSurfingDialogState extends State<UrgeSurfingDialog>
       case 1:
         _phaseText = 'Hold';
         _breathingController.stop();
-        Future.delayed(const Duration(seconds: 4), () {
+        _holdTimer = Timer(const Duration(seconds: 4), () {
           if (mounted && _isActive && _phaseIndex == 1) _nextPhase();
         });
         break;
@@ -105,7 +108,7 @@ class _UrgeSurfingDialogState extends State<UrgeSurfingDialog>
       case 3:
         _phaseText = 'Hold';
         _breathingController.stop();
-        Future.delayed(const Duration(seconds: 4), () {
+        _holdTimer = Timer(const Duration(seconds: 4), () {
           if (mounted && _isActive && _phaseIndex == 3) _nextPhase();
         });
         break;
@@ -115,6 +118,7 @@ class _UrgeSurfingDialogState extends State<UrgeSurfingDialog>
 
   void _stopBreathing() {
     _timer?.cancel();
+    _holdTimer?.cancel();
     _breathingController.stop();
     setState(() {
       _isActive = false;
@@ -125,6 +129,7 @@ class _UrgeSurfingDialogState extends State<UrgeSurfingDialog>
   @override
   void dispose() {
     _timer?.cancel();
+    _holdTimer?.cancel();
     _breathingController.dispose();
     super.dispose();
   }
@@ -152,7 +157,7 @@ class _UrgeSurfingDialogState extends State<UrgeSurfingDialog>
                 Expanded(
                   child: GestureDetector(
                     onTap: () {
-                      HapticFeedback.selectionClick();
+                      AppHaptics.selection();
                       setState(() => _mode = UrgeMode.boxBreathing);
                     },
                     child: Container(
@@ -193,7 +198,7 @@ class _UrgeSurfingDialogState extends State<UrgeSurfingDialog>
                 Expanded(
                   child: GestureDetector(
                     onTap: () {
-                      HapticFeedback.selectionClick();
+                      AppHaptics.selection();
                       setState(() => _mode = UrgeMode.grounding);
                     },
                     child: Container(
@@ -241,50 +246,53 @@ class _UrgeSurfingDialogState extends State<UrgeSurfingDialog>
                   animation: _breathingController,
                   builder: (context, child) {
                     final scale = 1.0 + (_breathingController.value * 0.35);
-                    return Container(
-                      width: 140 * scale,
-                      height: 140 * scale,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: p.accent.withValues(alpha: 0.15),
-                        border: Border.all(
-                          color: p.accent,
-                          width: _isActive ? 4 : 2,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: p.accent.withValues(
-                              alpha: 0.25 * _breathingController.value,
-                            ),
-                            blurRadius: 24,
-                            spreadRadius: 4,
+                    return Transform.scale(
+                      scale: scale,
+                      child: Container(
+                        width: 140,
+                        height: 140,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: p.accent.withValues(alpha: 0.15),
+                          border: Border.all(
+                            color: p.accent,
+                            width: _isActive ? 4 : 2,
                           ),
-                        ],
-                      ),
-                      alignment: Alignment.center,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            _phaseText,
-                            style: TextStyle(
-                              color: p.text,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                          if (_isActive) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              '${_secondsRemaining}s',
-                              style: TextStyle(
-                                color: p.accent,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
+                          boxShadow: [
+                            BoxShadow(
+                              color: p.accent.withValues(
+                                alpha: 0.25 * _breathingController.value,
                               ),
+                              blurRadius: 24,
+                              spreadRadius: 4,
                             ),
                           ],
-                        ],
+                        ),
+                        alignment: Alignment.center,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              _phaseText,
+                              style: TextStyle(
+                                color: p.text,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            if (_isActive) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                '${_secondsRemaining}s',
+                                style: TextStyle(
+                                  color: p.accent,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
                       ),
                     );
                   },
@@ -391,13 +399,13 @@ class _UrgeSurfingDialogState extends State<UrgeSurfingDialog>
                   ),
                 ),
                 onPressed: () {
-                  HapticFeedback.lightImpact();
+                  AppHaptics.light();
                   setState(() {
                     if (_groundingStep > 1) {
                       _groundingStep--;
                     } else {
                       _groundingStep = 5;
-                      HapticFeedback.heavyImpact();
+                      AppHaptics.heavy();
                     }
                   });
                 },

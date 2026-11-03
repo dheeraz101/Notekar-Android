@@ -1,7 +1,9 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/utils/app_utils.dart';
 
-class MarkdownText extends StatelessWidget {
+class MarkdownText extends StatefulWidget {
   const MarkdownText({
     super.key,
     required this.text,
@@ -14,8 +16,45 @@ class MarkdownText extends StatelessWidget {
   final void Function(String url) onOpenLink;
 
   @override
+  State<MarkdownText> createState() => _MarkdownTextState();
+}
+
+class _MarkdownTextState extends State<MarkdownText> {
+  final List<TapGestureRecognizer> _recognizers = [];
+
+  static final RegExp _tokenRegex = RegExp(
+    r'(\*\*.*?\*\*|\[.*?\]\(.*?\)|`.*?`|https?://[^\s]+)',
+    caseSensitive: false,
+  );
+
+  @override
+  void dispose() {
+    _clearRecognizers();
+    super.dispose();
+  }
+
+  void _clearRecognizers() {
+    for (final r in _recognizers) {
+      r.dispose();
+    }
+    _recognizers.clear();
+  }
+
+  TapGestureRecognizer _createRecognizer(String url) {
+    final recognizer = TapGestureRecognizer()
+      ..onTap = () {
+        AppHaptics.selection();
+        widget.onOpenLink(url);
+      };
+    _recognizers.add(recognizer);
+    return recognizer;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final lines = text.split('\n');
+    _clearRecognizers();
+    final p = widget.p;
+    final lines = widget.text.split('\n');
     final List<Widget> children = [];
 
     for (int i = 0; i < lines.length; i++) {
@@ -125,13 +164,10 @@ class MarkdownText extends StatelessWidget {
     bool isHeader = false,
     double headerSize = 12.0,
   }) {
+    final p = widget.p;
     final List<InlineSpan> spans = [];
-    final regExp = RegExp(
-      r'(\*\*.*?\*\*|\[.*?\]\(.*?\)|`.*?`|https?://[^\s]+)',
-      caseSensitive: false,
-    );
 
-    final matches = regExp.allMatches(rawText);
+    final matches = _tokenRegex.allMatches(rawText);
     int lastIndex = 0;
 
     for (final match in matches) {
@@ -192,41 +228,31 @@ class MarkdownText extends StatelessWidget {
         );
 
         spans.add(
-          WidgetSpan(
-            alignment: PlaceholderAlignment.middle,
-            child: GestureDetector(
-              onTap: () => onOpenLink(url),
-              child: Text(
-                label,
-                style: TextStyle(
-                  color: p.accent,
-                  fontSize: headerSize,
-                  fontWeight: FontWeight.w600,
-                  decoration: TextDecoration.underline,
-                  decorationColor: p.accent,
-                ),
-              ),
+          TextSpan(
+            text: label,
+            style: TextStyle(
+              color: p.accent,
+              fontSize: headerSize,
+              fontWeight: FontWeight.w600,
+              decoration: TextDecoration.underline,
+              decorationColor: p.accent,
             ),
+            recognizer: _createRecognizer(url),
           ),
         );
       } else if (matchText.startsWith('http://') ||
           matchText.startsWith('https://')) {
         spans.add(
-          WidgetSpan(
-            alignment: PlaceholderAlignment.middle,
-            child: GestureDetector(
-              onTap: () => onOpenLink(matchText),
-              child: Text(
-                matchText,
-                style: TextStyle(
-                  color: p.accent,
-                  fontSize: headerSize,
-                  fontWeight: FontWeight.w600,
-                  decoration: TextDecoration.underline,
-                  decorationColor: p.accent,
-                ),
-              ),
+          TextSpan(
+            text: matchText,
+            style: TextStyle(
+              color: p.accent,
+              fontSize: headerSize,
+              fontWeight: FontWeight.w600,
+              decoration: TextDecoration.underline,
+              decorationColor: p.accent,
             ),
+            recognizer: _createRecognizer(matchText),
           ),
         );
       }

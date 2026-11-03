@@ -82,6 +82,11 @@ class _SmartTrimSheetState extends State<SmartTrimSheet> {
   }
 
   Future<void> _pickCustomTime() async {
+    final spansAcrossDays =
+        widget.startDateTime.day != widget.originalEndDateTime.day ||
+        widget.startDateTime.month != widget.originalEndDateTime.month ||
+        widget.startDateTime.year != widget.originalEndDateTime.year;
+
     final picked = await showCupertinoDatePickerSheet(
       context,
       p: widget.p,
@@ -89,7 +94,9 @@ class _SmartTrimSheetState extends State<SmartTrimSheet> {
       initialDateTime: _selectedEndTime,
       minimumDate: widget.startDateTime,
       maximumDate: widget.originalEndDateTime,
-      mode: CupertinoDatePickerMode.time,
+      mode: spansAcrossDays
+          ? CupertinoDatePickerMode.dateAndTime
+          : CupertinoDatePickerMode.time,
     );
     if (picked != null) {
       _confirm(picked);

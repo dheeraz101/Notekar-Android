@@ -1,6 +1,51 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+
+/// Directional horizontal drag recognizer requiring horizontal displacement
+/// to exceed vertical displacement by at least 2:1 slope before winning
+/// the gesture arena, preventing conflicts with vertical scrolling.
+class SlopedHorizontalDragGestureRecognizer
+    extends HorizontalDragGestureRecognizer {
+  SlopedHorizontalDragGestureRecognizer({
+    super.debugOwner,
+    super.supportedDevices,
+  });
+
+  Offset _accumulatedDelta = Offset.zero;
+
+  @override
+  void addAllowedPointer(PointerDownEvent event) {
+    _accumulatedDelta = Offset.zero;
+    super.addAllowedPointer(event);
+  }
+
+  @override
+  void handleEvent(PointerEvent event) {
+    if (event is PointerMoveEvent) {
+      _accumulatedDelta += event.delta;
+    }
+    super.handleEvent(event);
+  }
+
+  @override
+  bool hasSufficientGlobalDistanceToAccept(
+    PointerDeviceKind pointerDeviceKind,
+    double? deviceTouchSlop,
+  ) {
+    final dx = _accumulatedDelta.dx.abs();
+    final dy = _accumulatedDelta.dy.abs();
+    // 2:1 horizontal slope lock: require dx >= 2 * dy
+    if (dy > 0 && dx < 2.0 * dy) {
+      return false;
+    }
+    return super.hasSufficientGlobalDistanceToAccept(
+      pointerDeviceKind,
+      deviceTouchSlop,
+    );
+  }
+}
 
 /// An Apple-grade physical swipeable card that reveals a true bed of color
 /// directly underneath the sliding card.
@@ -238,12 +283,22 @@ class SwipeableCardBedState extends State<SwipeableCardBed>
 
     final isVisible = _dx != 0 || _isDragging || _controller.isAnimating;
 
-    return GestureDetector(
+    return RawGestureDetector(
       behavior: HitTestBehavior.opaque,
-      onHorizontalDragStart: _onHorizontalDragStart,
-      onHorizontalDragUpdate: _onHorizontalDragUpdate,
-      onHorizontalDragEnd: _onHorizontalDragEnd,
-      onHorizontalDragCancel: _onHorizontalDragCancel,
+      gestures: <Type, GestureRecognizerFactory>{
+        SlopedHorizontalDragGestureRecognizer:
+            GestureRecognizerFactoryWithHandlers<
+              SlopedHorizontalDragGestureRecognizer
+            >(() => SlopedHorizontalDragGestureRecognizer(debugOwner: this), (
+              SlopedHorizontalDragGestureRecognizer instance,
+            ) {
+              instance
+                ..onStart = _onHorizontalDragStart
+                ..onUpdate = _onHorizontalDragUpdate
+                ..onEnd = _onHorizontalDragEnd
+                ..onCancel = _onHorizontalDragCancel;
+            }),
+      },
       child: ClipRRect(
         borderRadius: widget.borderRadius,
         child: Stack(

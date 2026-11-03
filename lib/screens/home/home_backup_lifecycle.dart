@@ -5,7 +5,7 @@ extension _HomeBackupLifecycleExtension on _NoteKarHomeState {
     final exportedAt = DateTime.now().toIso8601String();
     final d = _csvDelimiter;
     final buffer = StringBuffer(
-      'app${d}version${d}exported_at${d}id${d}timestamp${d}iso${d}date${d}time${d}type${d}note\n',
+      'app${d}version${d}exported_at${d}id${d}timestamp${d}iso${d}date${d}time${d}type${d}category${d}goalId${d}tags${d}note\n',
     );
     final rows =
         _entries
@@ -22,10 +22,14 @@ extension _HomeBackupLifecycleExtension on _NoteKarHomeState {
       final iso = DateTime.fromMillisecondsSinceEpoch(
         e.timestamp,
       ).toIso8601String();
+      final escapedCat = (e.category ?? '').replaceAll('"', '""');
+      final escapedGoal = (e.effectiveGoalId ?? '').replaceAll('"', '""');
+      final escapedTags = e.tags.join(';').replaceAll('"', '""');
       final escapedNote = e.note.replaceAll('"', '""');
       buffer.writeln(
         '"NoteKar"$d"$appVersion"$d"$exportedAt"$d${e.id}$d${e.timestamp}$d'
         '"$iso"$d"${e.date}"$d"${timeOnly(e.timestamp)}"$d"${e.type}"$d'
+        '"$escapedCat"$d"$escapedGoal"$d"$escapedTags"$d'
         '"$escapedNote"',
       );
     }
@@ -136,15 +140,16 @@ extension _HomeBackupLifecycleExtension on _NoteKarHomeState {
         .toList();
 
     if (backupFiles.length > 15) {
-      backupFiles.sort((a, b) {
-        final aTime = a.lastModifiedSync();
-        final bTime = b.lastModifiedSync();
-        return bTime.compareTo(aTime);
-      });
+      final List<(File, DateTime)> filesWithTime = [];
+      for (final f in backupFiles) {
+        final stat = await f.stat();
+        filesWithTime.add((f, stat.modified));
+      }
+      filesWithTime.sort((a, b) => b.$2.compareTo(a.$2));
 
-      for (int i = 15; i < backupFiles.length; i++) {
+      for (int i = 15; i < filesWithTime.length; i++) {
         try {
-          await backupFiles[i].delete();
+          await filesWithTime[i].$1.delete();
         } catch (_) {}
       }
     }

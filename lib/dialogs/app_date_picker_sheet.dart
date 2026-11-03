@@ -1,12 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 
 /// Reusable Apple HIG Cupertino Date & Time picker bottom sheet.
 /// Conforms to native iOS modal presentation guidelines and can be reused app-wide.
-class AppDatePickerSheet extends StatelessWidget {
+class AppDatePickerSheet extends StatefulWidget {
   const AppDatePickerSheet({
     super.key,
     required this.p,
@@ -51,8 +51,29 @@ class AppDatePickerSheet extends StatelessWidget {
   }
 
   @override
+  State<AppDatePickerSheet> createState() => _AppDatePickerSheetState();
+}
+
+class _AppDatePickerSheetState extends State<AppDatePickerSheet> {
+  late DateTime _selected;
+
+  @override
+  void initState() {
+    super.initState();
+    _selected = widget.initialDateTime;
+  }
+
+  @override
+  void didUpdateWidget(covariant AppDatePickerSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialDateTime != widget.initialDateTime) {
+      _selected = widget.initialDateTime;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    DateTime selected = initialDateTime;
+    final p = widget.p;
 
     return Material(
       color: Colors.transparent,
@@ -106,7 +127,7 @@ class AppDatePickerSheet extends StatelessWidget {
                       CupertinoButton(
                         padding: EdgeInsets.zero,
                         onPressed: () {
-                          HapticFeedback.lightImpact();
+                          AppHaptics.light();
                           Navigator.pop(context, null);
                         },
                         child: Text(
@@ -120,7 +141,7 @@ class AppDatePickerSheet extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        title.localized(context),
+                        widget.title.localized(context),
                         style: TextStyle(
                           color: p.text,
                           fontSize: 16,
@@ -132,8 +153,8 @@ class AppDatePickerSheet extends StatelessWidget {
                       CupertinoButton(
                         padding: EdgeInsets.zero,
                         onPressed: () {
-                          HapticFeedback.mediumImpact();
-                          Navigator.pop(context, selected);
+                          AppHaptics.medium();
+                          Navigator.pop(context, _selected);
                         },
                         child: Text(
                           'Done'.localized(context),
@@ -169,13 +190,13 @@ class AppDatePickerSheet extends StatelessWidget {
                       ),
                     ),
                     child: CupertinoDatePicker(
-                      mode: mode,
-                      initialDateTime: initialDateTime,
-                      minimumDate: minimumDate,
-                      maximumDate: maximumDate,
+                      mode: widget.mode,
+                      initialDateTime: widget.initialDateTime,
+                      minimumDate: widget.minimumDate,
+                      maximumDate: widget.maximumDate,
                       onDateTimeChanged: (DateTime newDateTime) {
-                        HapticFeedback.selectionClick();
-                        selected = newDateTime;
+                        AppHaptics.selection();
+                        _selected = newDateTime;
                       },
                     ),
                   ),

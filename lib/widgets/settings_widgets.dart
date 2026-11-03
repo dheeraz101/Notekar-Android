@@ -1421,7 +1421,7 @@ void showBetaInfoPopup(
   );
 }
 
-class SettingsBetaNote extends StatelessWidget {
+class SettingsBetaNote extends StatefulWidget {
   const SettingsBetaNote({
     super.key,
     required this.p,
@@ -1441,15 +1441,59 @@ class SettingsBetaNote extends StatelessWidget {
       'Features on this page are in beta and continuously improving.';
 
   @override
+  State<SettingsBetaNote> createState() => _SettingsBetaNoteState();
+}
+
+class _SettingsBetaNoteState extends State<SettingsBetaNote> {
+  TapGestureRecognizer? _recognizer;
+
+  @override
+  void initState() {
+    super.initState();
+    _recognizer = TapGestureRecognizer()
+      ..onTap =
+          widget.onLearnMore ??
+          () => showBetaInfoPopup(
+            context,
+            widget.p,
+            onFeedback: widget.onFeedback,
+          );
+  }
+
+  @override
+  void didUpdateWidget(covariant SettingsBetaNote oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.onLearnMore != widget.onLearnMore ||
+        oldWidget.onFeedback != widget.onFeedback ||
+        oldWidget.p != widget.p) {
+      _recognizer?.dispose();
+      _recognizer = TapGestureRecognizer()
+        ..onTap =
+            widget.onLearnMore ??
+            () => showBetaInfoPopup(
+              context,
+              widget.p,
+              onFeedback: widget.onFeedback,
+            );
+    }
+  }
+
+  @override
+  void dispose() {
+    _recognizer?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final displayText = text ?? defaultBetaDescription;
+    final displayText = widget.text ?? SettingsBetaNote.defaultBetaDescription;
     return Padding(
-      padding: EdgeInsets.fromLTRB(20, 5, 20, bottomPadding),
+      padding: EdgeInsets.fromLTRB(20, 5, 20, widget.bottomPadding),
       child: Text.rich(
         TextSpan(
           // Baseline style for the entire rich text block
           style: TextStyle(
-            color: p.text3,
+            color: widget.p.text3,
             fontSize: 13,
             height: 1.45,
             fontWeight: FontWeight.w400,
@@ -1469,10 +1513,7 @@ class SettingsBetaNote extends StatelessWidget {
                 fontVariations: [FontVariation('wght', 400)],
                 decoration: TextDecoration.none,
               ),
-              recognizer: TapGestureRecognizer()
-                ..onTap =
-                    onLearnMore ??
-                    () => showBetaInfoPopup(context, p, onFeedback: onFeedback),
+              recognizer: _recognizer,
             ),
           ],
         ),
@@ -1550,7 +1591,7 @@ class SettingsSearchBox extends StatelessWidget {
   }
 }
 
-class SettingsAboutBlock extends StatelessWidget {
+class SettingsAboutBlock extends StatefulWidget {
   const SettingsAboutBlock({
     super.key,
     required this.p,
@@ -1561,7 +1602,38 @@ class SettingsAboutBlock extends StatelessWidget {
   final ValueChanged<String> onOpenLink;
 
   @override
+  State<SettingsAboutBlock> createState() => _SettingsAboutBlockState();
+}
+
+class _SettingsAboutBlockState extends State<SettingsAboutBlock> {
+  TapGestureRecognizer? _recognizer;
+
+  @override
+  void initState() {
+    super.initState();
+    _recognizer = TapGestureRecognizer()
+      ..onTap = () => widget.onOpenLink(yabpSite);
+  }
+
+  @override
+  void didUpdateWidget(covariant SettingsAboutBlock oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.onOpenLink != widget.onOpenLink) {
+      _recognizer?.dispose();
+      _recognizer = TapGestureRecognizer()
+        ..onTap = () => widget.onOpenLink(yabpSite);
+    }
+  }
+
+  @override
+  void dispose() {
+    _recognizer?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final p = widget.p;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
@@ -1639,8 +1711,7 @@ class SettingsAboutBlock extends StatelessWidget {
                     decoration: TextDecoration.underline,
                     decorationColor: p.accent.withValues(alpha: 0.3),
                   ),
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () => onOpenLink(yabpSite),
+                  recognizer: _recognizer,
                 ),
                 TextSpan(
                   text:

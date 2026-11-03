@@ -18,6 +18,7 @@ class CanonicalInterval {
     this.inMomentId,
     this.outMomentId,
     this.isOngoing = false,
+    this.isAutoRecovered = false,
   });
 
   final String id;
@@ -32,6 +33,7 @@ class CanonicalInterval {
   final int? inMomentId;
   final int? outMomentId;
   final bool isOngoing;
+  final bool isAutoRecovered;
 
   int get durationMs => math.max(0, endMs - startMs);
   Duration get duration => Duration(milliseconds: durationMs);
@@ -69,6 +71,7 @@ class CanonicalInterval {
           inMomentId: inMomentId,
           outMomentId: outMomentId,
           isOngoing: isOngoing && sliceEnd == endMs,
+          isAutoRecovered: isAutoRecovered,
         ),
       );
 
@@ -282,6 +285,7 @@ class UniversalIntervalLedger {
           tags: activeIn.tags,
           inMomentId: activeIn.id,
           isOngoing: isToday,
+          isAutoRecovered: !isToday,
         ),
       );
     }

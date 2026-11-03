@@ -185,13 +185,16 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
     caseSensitive: false,
   );
 
+  static final RegExp _tagRegex = RegExp(
+    r'(?:^|\s)#[a-zA-Z0-9_\u0900-\u097F\u0080-\uFFFF]+',
+  );
+
+  static final RegExp _numListRegex = RegExp(r'^(\d+\.)\s+');
+
   static String _cleanNoteBody(String note) {
     if (note.isEmpty) return '';
     // Strip standalone hashtags (e.g. #focus), but preserve Markdown headers like '# Heading'
-    final withoutTags = note.replaceAll(
-      RegExp(r'(?:^|\s)#[a-zA-Z0-9_\u0900-\u097F\u0080-\uFFFF]+'),
-      '',
-    );
+    final withoutTags = note.replaceAll(_tagRegex, '');
     final lines = withoutTags.split('\n').map((l) => l.trimRight()).toList();
     while (lines.isNotEmpty && lines.first.trim().isEmpty) {
       lines.removeAt(0);
@@ -598,7 +601,7 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
       }
 
       // Numbered lists: e.g. 1. , 2.
-      final numMatch = RegExp(r'^(\d+\.)\s+').firstMatch(line);
+      final numMatch = _numListRegex.firstMatch(line);
       if (numMatch != null) {
         final prefix = numMatch.group(0)!;
         final numLabel = numMatch.group(1)!;

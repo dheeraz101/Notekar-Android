@@ -213,7 +213,7 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
                 bgPrefs.edit()
                     .putString("flutter.log_$currentPendingCount", logString)
                     .putInt("flutter.pending_count", currentPendingCount + 1)
-                    .commit()
+                    .apply()
             }
 
             // Update widget preferences instantly so home screen widget state & chronometer reflect immediately
@@ -334,7 +334,7 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
                     bgEditor.remove("flutter.m-paused-at")
                 }
             }
-            bgEditor.commit()
+            bgEditor.apply()
 
             // Update all widgets visually and instantly
             updateAllWidgets(context)
@@ -380,7 +380,7 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
                     .putBoolean(KEY_IS_PAUSED, false)
                     .putLong(KEY_PAUSED_AT, 0L)
                     .putLong(KEY_LAST_TIMESTAMP, lastTimestamp)
-                    .commit()
+                    .apply()
 
                 flutterPrefs.edit()
                     .putBoolean("flutter.is_paused", false)
@@ -388,21 +388,21 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
                     .putLong("flutter.m-ses", lastTimestamp)
                     .remove("flutter.paused_at")
                     .remove("flutter.m-paused-at")
-                    .commit()
+                    .apply()
 
                 Toast.makeText(context, "Session Resumed", Toast.LENGTH_SHORT).show()
             } else {
                 prefs.edit()
                     .putBoolean(KEY_IS_PAUSED, true)
                     .putLong(KEY_PAUSED_AT, now)
-                    .commit()
+                    .apply()
 
                 flutterPrefs.edit()
                     .putBoolean("flutter.is_paused", true)
                     .putBoolean("flutter.m-paused", true)
                     .putLong("flutter.paused_at", now)
                     .putLong("flutter.m-paused-at", now)
-                    .commit()
+                    .apply()
 
                 Toast.makeText(context, "Session Paused", Toast.LENGTH_SHORT).show()
             }

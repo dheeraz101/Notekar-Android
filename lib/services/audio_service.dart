@@ -260,6 +260,11 @@ class AudioService extends ChangeNotifier {
     } catch (_) {}
   }
 
+  Future<void> reset() async {
+    await stop();
+    await cancelRecording();
+  }
+
   Future<void> seek(Duration position) async {
     _currentPosition = position;
     try {
@@ -348,7 +353,11 @@ class AudioService extends ChangeNotifier {
   @override
   void dispose() {
     _recordingTimer?.cancel();
+    _recordingTimer = null;
     _playbackPollTimer?.cancel();
+    _playbackPollTimer = null;
+    _isRecording = false;
+    _isPlaying = false;
     super.dispose();
   }
 }

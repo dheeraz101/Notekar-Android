@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
+import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/shareable_milestone_sheet.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
@@ -87,16 +87,31 @@ class SobrietyCompanionSettingsPage extends StatelessWidget {
                     'Start a fresh clean streak from this moment without altering existing logs.'
                         .localized(context),
                 color: p.orange,
-                onTap: () {
-                  HapticFeedback.heavyImpact();
-                  final nowMs = DateTime.now().millisecondsSinceEpoch;
-                  onSobrietyCustomStartMsChanged(nowMs);
-                  showIosPillToast(
-                    context: context,
+                onTap: () async {
+                  AppHaptics.warning();
+                  final confirmed = await showIosConfirmSheet(
+                    context,
                     p: p,
-                    message: 'Streak reset to 0h Clean'.localized(context),
+                    title: 'Reset Sobriety Streak?'.localized(context),
+                    message:
+                        'This will reset your current clean milestone progress back to Day 0. Your previous logs will remain intact.'
+                            .localized(context),
+                    confirmLabel: 'Reset Streak'.localized(context),
+                    isDestructive: true,
                     icon: CupertinoIcons.arrow_counterclockwise,
                   );
+                  if (confirmed) {
+                    final nowMs = DateTime.now().millisecondsSinceEpoch;
+                    onSobrietyCustomStartMsChanged(nowMs);
+                    if (context.mounted) {
+                      showIosPillToast(
+                        context: context,
+                        p: p,
+                        message: 'Streak reset to 0h Clean'.localized(context),
+                        icon: CupertinoIcons.arrow_counterclockwise,
+                      );
+                    }
+                  }
                 },
               ),
             ],
@@ -151,14 +166,34 @@ class SobrietyCompanionSettingsPage extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (sobrietyCustomStartMs != null)
-                      GestureDetector(
-                        onTap: () {
-                          onSobrietyCustomStartMsChanged(null);
+                      InkResponse(
+                        radius: 22,
+                        onTap: () async {
+                          AppHaptics.warning();
+                          final confirmed = await showIosConfirmSheet(
+                            context,
+                            p: p,
+                            title: 'Clear Custom Start Date?'.localized(
+                              context,
+                            ),
+                            message:
+                                'Your sobriety streak will revert to automatic calculation from your logs.'
+                                    .localized(context),
+                            confirmLabel: 'Clear Date'.localized(context),
+                            isDestructive: true,
+                            icon: CupertinoIcons.clear,
+                          );
+                          if (confirmed) {
+                            onSobrietyCustomStartMsChanged(null);
+                          }
                         },
-                        child: Icon(
-                          CupertinoIcons.clear,
-                          color: p.text3,
-                          size: 18,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Icon(
+                            CupertinoIcons.clear,
+                            color: p.text3,
+                            size: 18,
+                          ),
                         ),
                       ),
                     const SizedBox(width: 4),

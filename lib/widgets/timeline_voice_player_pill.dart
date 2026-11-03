@@ -80,6 +80,19 @@ class TimelineVoicePlayerPill extends StatefulWidget {
 }
 
 class _TimelineVoicePlayerPillState extends State<TimelineVoicePlayerPill> {
+  static const List<double> _kWaveformHeights = [
+    10.0,
+    16.0,
+    22.0,
+    14.0,
+    18.0,
+    24.0,
+    12.0,
+    20.0,
+    16.0,
+    22.0,
+  ];
+
   final AudioService _audioService = AudioService.instance;
   int _lastHapticScrubIndex = -1;
 
@@ -265,20 +278,9 @@ class _TimelineVoicePlayerPillState extends State<TimelineVoicePlayerPill> {
                                   (progress >= barThreshold ||
                                       (index == barCount - 1 &&
                                           progress >= 0.95));
-                              final heights = [
-                                10.0,
-                                16.0,
-                                22.0,
-                                14.0,
-                                18.0,
-                                24.0,
-                                12.0,
-                                20.0,
-                                16.0,
-                                22.0,
-                              ];
                               final baseH =
-                                  heights[index % heights.length] *
+                                  _kWaveformHeights[index %
+                                      _kWaveformHeights.length] *
                                   (isCompact ? 0.72 : 0.88);
                               final isPlayhead =
                                   _isThisPlaying &&
