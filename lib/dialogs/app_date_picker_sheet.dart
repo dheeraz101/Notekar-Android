@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/theme/app_tokens.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 
@@ -86,7 +87,9 @@ class _AppDatePickerSheetState extends State<AppDatePickerSheet> {
         child: Container(
           decoration: BoxDecoration(
             color: p.surface2,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(NkTokens.radii.squircleSheetVal),
+            ),
             border: Border.all(
               color: p.border.withValues(alpha: 0.6),
               width: 0.8,
@@ -125,7 +128,8 @@ class _AppDatePickerSheetState extends State<AppDatePickerSheet> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       CupertinoButton(
-                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(44.0, 44.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
                         onPressed: () {
                           AppHaptics.light();
                           Navigator.pop(context, null);
@@ -151,7 +155,8 @@ class _AppDatePickerSheetState extends State<AppDatePickerSheet> {
                         ),
                       ),
                       CupertinoButton(
-                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(44.0, 44.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
                         onPressed: () {
                           AppHaptics.medium();
                           Navigator.pop(context, _selected);

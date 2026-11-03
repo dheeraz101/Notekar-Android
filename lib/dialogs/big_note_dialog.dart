@@ -10,6 +10,7 @@ import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/audio_service.dart';
 import 'package:notekar/services/media_storage_service.dart';
+import 'package:notekar/theme/app_tokens.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/markdown_text_editing_controller.dart';
@@ -982,17 +983,25 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
                                 _controller.clear();
                               }
                             },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 4,
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                minWidth: 44,
+                                minHeight: 44,
                               ),
-                              child: Text(
-                                'Clear'.localized(context),
-                                style: TextStyle(
-                                  color: p.text3,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
+                              child: Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 4,
+                                  ),
+                                  child: Text(
+                                    'Clear'.localized(context),
+                                    style: TextStyle(
+                                      color: p.text3,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -1136,26 +1145,37 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
       onTap: onTap,
       child: Opacity(
         opacity: enabled ? 1.0 : 0.4,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: widget.p.surface,
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: widget.p.border.withValues(alpha: 0.5)),
-          ),
-          child: icon != null
-              ? Icon(icon, size: 12, color: widget.p.text2)
-              : Text(
-                  label ?? '',
-                  style: TextStyle(
-                    color: widget.p.text2,
-                    fontSize: 12,
-                    fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
-                    fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
-                    fontFamily: isMono ? 'monospace' : null,
-                    decoration: isStrike ? TextDecoration.lineThrough : null,
-                  ),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 34, minHeight: 44),
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+              decoration: BoxDecoration(
+                color: widget.p.surface,
+                borderRadius: NkTokens.radii.xs,
+                border: Border.all(
+                  color: widget.p.border.withValues(alpha: 0.5),
                 ),
+              ),
+              child: icon != null
+                  ? Icon(icon, size: 12, color: widget.p.text2)
+                  : Text(
+                      label ?? '',
+                      style: TextStyle(
+                        color: widget.p.text2,
+                        fontSize: 12,
+                        fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
+                        fontStyle: isItalic
+                            ? FontStyle.italic
+                            : FontStyle.normal,
+                        fontFamily: isMono ? 'monospace' : null,
+                        decoration: isStrike
+                            ? TextDecoration.lineThrough
+                            : null,
+                      ),
+                    ),
+            ),
+          ),
         ),
       ),
     );
@@ -1168,27 +1188,32 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
   }) {
     return PressableScale(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: widget.p.surface,
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: widget.p.border.withValues(alpha: 0.5)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 12, color: widget.p.text2),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: widget.p.text2,
-                fontSize: 11.5,
-                fontWeight: FontWeight.w500,
-              ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 36, minHeight: 44),
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+            decoration: BoxDecoration(
+              color: widget.p.surface,
+              borderRadius: NkTokens.radii.xs,
+              border: Border.all(color: widget.p.border.withValues(alpha: 0.5)),
             ),
-          ],
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 12, color: widget.p.text2),
+                const SizedBox(width: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: widget.p.text2,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

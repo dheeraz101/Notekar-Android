@@ -670,11 +670,17 @@ class _NotePreviewSheetState extends State<NotePreviewSheet> {
       );
     }
 
-    return Column(
+    final content = Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: children,
     );
+
+    if (widget.items != null && widget.items!.length > 1) {
+      return content;
+    }
+
+    return SelectionArea(child: content);
   }
 
   @override

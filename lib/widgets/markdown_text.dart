@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
@@ -23,9 +24,11 @@ class _MarkdownTextState extends State<MarkdownText> {
   final List<TapGestureRecognizer> _recognizers = [];
 
   static final RegExp _tokenRegex = RegExp(
-    r'(\*\*.*?\*\*|\[.*?\]\(.*?\)|`.*?`|https?://[^\s]+)',
+    r"""(\*\*.*?\*\*|~~.*?~~|(?<=[\s\(\[\{\"'']|^)\*.*?\*(?=[\s\)\.\,\!\?\]\}\"'']|$)|(?<=[\s\(\[\{\"'']|^)_.*?_(?=[\s\)\.\,\!\?\]\}\"'']|$)|\[.*?\]\(.*?\)|`.*?`|https?://[^\s]+)""",
     caseSensitive: false,
   );
+
+  static final RegExp _orderedListRegex = RegExp(r'^(\d+)\.\s+(.*)$');
 
   @override
   void dispose() {
@@ -75,6 +78,29 @@ class _MarkdownTextState extends State<MarkdownText> {
         continue;
       }
 
+      // Blockquotes (> Quote)
+      if (line.startsWith('> ') || line == '>') {
+        final content = line.length > 2 ? line.substring(2) : '';
+        children.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 3.0),
+            child: Container(
+              padding: const EdgeInsets.only(left: 12.0, top: 4.0, bottom: 4.0),
+              decoration: BoxDecoration(
+                border: Border(
+                  left: BorderSide(
+                    color: p.accent.withValues(alpha: 0.7),
+                    width: 3.0,
+                  ),
+                ),
+              ),
+              child: _buildRichText(content, isItalic: true),
+            ),
+          ),
+        );
+        continue;
+      }
+
       // Headings
       if (line.startsWith('# ')) {
         children.add(
@@ -116,7 +142,70 @@ class _MarkdownTextState extends State<MarkdownText> {
         continue;
       }
 
-      // Unordered Lists
+      // Task List Checkboxes (- [ ] or - [x])
+      if (line.startsWith('- [ ] ') ||
+          line.startsWith('- [x] ') ||
+          line.startsWith('- [X] ')) {
+        final isChecked = !line.startsWith('- [ ] ');
+        final content = line.substring(6);
+        children.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 2.0, right: 8.0),
+                  child: Icon(
+                    isChecked
+                        ? CupertinoIcons.checkmark_circle_fill
+                        : CupertinoIcons.circle,
+                    size: 15,
+                    color: isChecked ? p.green : p.text3,
+                  ),
+                ),
+                Expanded(
+                  child: _buildRichText(content, isStrikethrough: isChecked),
+                ),
+              ],
+            ),
+          ),
+        );
+        continue;
+      }
+
+      // Ordered Lists (1. Item)
+      final orderedMatch = _orderedListRegex.firstMatch(line);
+      if (orderedMatch != null) {
+        final numStr = orderedMatch.group(1)!;
+        final content = orderedMatch.group(2)!;
+        children.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 6.0),
+                  child: Text(
+                    '$numStr.',
+                    style: TextStyle(
+                      color: p.accent,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ),
+                Expanded(child: _buildRichText(content)),
+              ],
+            ),
+          ),
+        );
+        continue;
+      }
+
+      // Unordered Lists (- Item or * Item)
       if (line.startsWith('- ') || line.startsWith('* ')) {
         final content = line.substring(2);
         children.add(
@@ -153,9 +242,11 @@ class _MarkdownTextState extends State<MarkdownText> {
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: children,
+    return SelectionArea(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: children,
+      ),
     );
   }
 
@@ -163,6 +254,8 @@ class _MarkdownTextState extends State<MarkdownText> {
     String rawText, {
     bool isHeader = false,
     double headerSize = 12.0,
+    bool isItalic = false,
+    bool isStrikethrough = false,
   }) {
     final p = widget.p;
     final List<InlineSpan> spans = [];
@@ -170,35 +263,69 @@ class _MarkdownTextState extends State<MarkdownText> {
     final matches = _tokenRegex.allMatches(rawText);
     int lastIndex = 0;
 
+    TextStyle baseStyle({
+      bool bold = false,
+      bool italic = false,
+      bool strike = false,
+      Color? color,
+    }) {
+      return TextStyle(
+        color: color ?? (isHeader ? p.text : (strike ? p.text3 : p.text2)),
+        fontSize: headerSize,
+        fontWeight: isHeader || bold ? FontWeight.w800 : FontWeight.normal,
+        fontStyle: isItalic || italic ? FontStyle.italic : FontStyle.normal,
+        decoration: isStrikethrough || strike
+            ? TextDecoration.lineThrough
+            : TextDecoration.none,
+        decorationColor: p.text3,
+        height: 1.45,
+      );
+    }
+
     for (final match in matches) {
       if (match.start > lastIndex) {
         spans.add(
           TextSpan(
             text: rawText.substring(lastIndex, match.start),
-            style: TextStyle(
-              color: isHeader ? p.text : p.text2,
-              fontSize: headerSize,
-              fontWeight: isHeader ? FontWeight.w800 : FontWeight.normal,
-              height: 1.45,
-            ),
+            style: baseStyle(),
           ),
         );
       }
 
       final matchText = match.group(0)!;
-      if (matchText.startsWith('**') && matchText.endsWith('**')) {
+      if (matchText.startsWith('**') &&
+          matchText.endsWith('**') &&
+          matchText.length >= 4) {
         spans.add(
           TextSpan(
             text: matchText.substring(2, matchText.length - 2),
-            style: TextStyle(
-              color: p.text,
-              fontSize: headerSize,
-              fontWeight: FontWeight.w800,
-              height: 1.45,
-            ),
+            style: baseStyle(bold: true, color: p.text),
           ),
         );
-      } else if (matchText.startsWith('`') && matchText.endsWith('`')) {
+      } else if (matchText.startsWith('~~') &&
+          matchText.endsWith('~~') &&
+          matchText.length >= 4) {
+        spans.add(
+          TextSpan(
+            text: matchText.substring(2, matchText.length - 2),
+            style: baseStyle(strike: true),
+          ),
+        );
+      } else if ((matchText.startsWith('*') &&
+              matchText.endsWith('*') &&
+              matchText.length >= 2) ||
+          (matchText.startsWith('_') &&
+              matchText.endsWith('_') &&
+              matchText.length >= 2)) {
+        spans.add(
+          TextSpan(
+            text: matchText.substring(1, matchText.length - 1),
+            style: baseStyle(italic: true),
+          ),
+        );
+      } else if (matchText.startsWith('`') &&
+          matchText.endsWith('`') &&
+          matchText.length >= 2) {
         spans.add(
           WidgetSpan(
             alignment: PlaceholderAlignment.middle,
@@ -262,15 +389,7 @@ class _MarkdownTextState extends State<MarkdownText> {
 
     if (lastIndex < rawText.length) {
       spans.add(
-        TextSpan(
-          text: rawText.substring(lastIndex),
-          style: TextStyle(
-            color: isHeader ? p.text : p.text2,
-            fontSize: headerSize,
-            fontWeight: isHeader ? FontWeight.w800 : FontWeight.normal,
-            height: 1.45,
-          ),
-        ),
+        TextSpan(text: rawText.substring(lastIndex), style: baseStyle()),
       );
     }
 
