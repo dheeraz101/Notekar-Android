@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/utils/l10n_utils.dart';
 
 const appVersion = '7.5.12';
 const kAppVersion = appVersion;
@@ -474,7 +475,29 @@ String defaultModeLabel(String mode) {
   }
 }
 
-String privacyLockDelayLabel(int value) {
+/// Computes duration between two timestamps with explicit cross-midnight rollover support.
+/// If [end] is chronologically before [start] (e.g. session starting at 23:30 and finishing at 01:15),
+/// calculates the positive duration across midnight.
+Duration calculateIntervalDuration(DateTime start, DateTime end) {
+  if (end.isBefore(start)) {
+    final nextDayEnd = end.add(const Duration(days: 1));
+    if (nextDayEnd.isAfter(start)) {
+      return nextDayEnd.difference(start);
+    }
+  }
+  return end.difference(start);
+}
+
+String privacyLockDelayLabel(int value, [BuildContext? context]) {
+  if (context != null) {
+    return switch (value) {
+      0 => 'Immediately'.localized(context),
+      1 => 'After 1 Min'.localized(context),
+      5 => 'After 5 Min'.localized(context),
+      10 => 'After 10 Min'.localized(context),
+      _ => 'Immediately'.localized(context),
+    };
+  }
   return switch (value) {
     0 => 'Immediately',
     1 => 'After 1 Min',

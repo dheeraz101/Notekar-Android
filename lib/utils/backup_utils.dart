@@ -1,10 +1,32 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:isolate';
 
 import 'package:notekar/models/backup_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/utils/app_utils.dart';
+
+/// Bundles a NoteKar backup JSON into a compressed .notekar archive payload.
+String bundleCompressedBackup(String jsonContent) {
+  final bytes = utf8.encode(jsonContent);
+  final compressed = gzip.encode(bytes);
+  return base64Encode(compressed);
+}
+
+/// Extracts NoteKar JSON payload from either a plain JSON string or a compressed .notekar bundle.
+String extractBackupJson(String payload) {
+  final trimmed = payload.trim();
+  if (trimmed.startsWith('H4sI')) {
+    try {
+      final compressedBytes = base64Decode(trimmed);
+      return utf8.decode(gzip.decode(compressedBytes));
+    } catch (_) {
+      return payload;
+    }
+  }
+  return payload;
+}
 
 Future<BackupValidationResult> validateNoteKarBackupContentAsync(
   String content,
@@ -17,7 +39,8 @@ Future<BackupValidationResult> validateNoteKarBackupContentAsync(
 
 BackupValidationResult validateNoteKarBackupContent(String content) {
   final logger = AppLogger();
-  if (content.length > 25 * 1024 * 1024) {
+  final resolvedContent = extractBackupJson(content);
+  if (resolvedContent.length > 25 * 1024 * 1024) {
     // Increased to 25MB
     return const BackupValidationResult.invalid(
       'Backup is too large to import safely',
@@ -26,7 +49,7 @@ BackupValidationResult validateNoteKarBackupContent(String content) {
 
   Object? decoded;
   try {
-    decoded = jsonDecode(content);
+    decoded = jsonDecode(resolvedContent);
   } catch (e) {
     logger.error('Backup JSON decode failed', e);
     return const BackupValidationResult.invalid('Backup is not valid JSON');
