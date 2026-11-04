@@ -39,135 +39,137 @@ class DataSafetySettingsPage extends StatelessWidget {
         const SizedBox(height: spacing8),
 
         // 1. Google Play Data Safety Breakdown Card
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: p.surface2.withValues(alpha: 0.65),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: p.border.withValues(alpha: 0.45)),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: p.surface2.withValues(alpha: 0.65),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: p.border.withValues(
+                alpha: p.name == 'amoled' ? 0.5 : (!p.isDark ? 0.35 : 0.45),
+              ),
+              width: 0.6,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: p.green.withValues(alpha: 0.16),
-                        borderRadius: BorderRadius.circular(11),
-                        border: Border.all(
-                          color: p.green.withValues(alpha: 0.28),
-                          width: 0.8,
-                        ),
-                      ),
-                      child: Center(
-                        child: Icon(
-                          CupertinoIcons.checkmark_shield_fill,
-                          color: p.green,
-                          size: 20,
-                        ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: p.green.withValues(alpha: 0.16),
+                      borderRadius: BorderRadius.circular(11),
+                      border: Border.all(
+                        color: p.green.withValues(alpha: 0.28),
+                        width: 0.8,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'DATA SAFETY SOVEREIGNTY'.localized(context),
-                            style: TextStyle(
-                              color: p.green,
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1.3,
+                    child: Center(
+                      child: Icon(
+                        CupertinoIcons.checkmark_shield_fill,
+                        color: p.green,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'DATA SAFETY SOVEREIGNTY'.localized(context),
+                          style: TextStyle(
+                            color: p.green,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.3,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Google Play & Store Disclosures'.localized(
+                                  context,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: p.text,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.3,
+                                ),
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 2),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  'Google Play & Store Disclosures'.localized(
-                                    context,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: p.text,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: -0.3,
-                                  ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 9,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: p.green.withValues(alpha: 0.14),
+                                borderRadius: BorderRadius.circular(999),
+                                border: Border.all(
+                                  color: p.green.withValues(alpha: 0.35),
+                                  width: 0.8,
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 9,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: p.green.withValues(alpha: 0.14),
-                                  borderRadius: BorderRadius.circular(999),
-                                  border: Border.all(
-                                    color: p.green.withValues(alpha: 0.35),
-                                    width: 0.8,
-                                  ),
-                                ),
-                                child: Text(
-                                  '100% On-Device',
-                                  style: TextStyle(
-                                    color: p.green,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: -0.2,
-                                  ),
+                              child: Text(
+                                '100% On-Device',
+                                style: TextStyle(
+                                  color: p.green,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.2,
                                 ),
                               ),
-                            ],
-                          ),
-                        ],
-                      ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                Divider(height: 1, color: p.border.withValues(alpha: 0.35)),
-                const SizedBox(height: 14),
-                _buildSafetyMetricRow(
-                  context: context,
-                  title: 'Data Collected',
-                  value: '0 KB (None)',
-                  description:
-                      'No personal info, identity, or financial details logged',
-                  isSafe: true,
-                ),
-                const SizedBox(height: 12),
-                _buildSafetyMetricRow(
-                  context: context,
-                  title: 'Data Shared',
-                  value: 'None',
-                  description:
-                      'Zero third-party trackers, advertisers, or cloud brokers',
-                  isSafe: true,
-                ),
-                const SizedBox(height: 12),
-                _buildSafetyMetricRow(
-                  context: context,
-                  title: 'Security Practices',
-                  value: 'Local Isar Encrypted',
-                  description:
-                      'Encrypted at rest on device with 1-tap complete data wipe',
-                  isSafe: true,
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Divider(height: 1, color: p.border.withValues(alpha: 0.35)),
+              const SizedBox(height: 14),
+              _buildSafetyMetricRow(
+                context: context,
+                title: 'Data Collected',
+                value: '0 KB (None)',
+                description:
+                    'No personal info, identity, or financial details logged',
+                isSafe: true,
+              ),
+              const SizedBox(height: 12),
+              _buildSafetyMetricRow(
+                context: context,
+                title: 'Data Shared',
+                value: 'None',
+                description:
+                    'Zero third-party trackers, advertisers, or cloud brokers',
+                isSafe: true,
+              ),
+              const SizedBox(height: 12),
+              _buildSafetyMetricRow(
+                context: context,
+                title: 'Security Practices',
+                value: 'Local Isar Encrypted',
+                description:
+                    'Encrypted at rest on device with 1-tap complete data wipe',
+                isSafe: true,
+              ),
+            ],
           ),
         ),
 

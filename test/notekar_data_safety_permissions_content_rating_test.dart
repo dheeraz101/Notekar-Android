@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/settings/app_permissions_settings_page.dart';
 import 'package:notekar/dialogs/settings/content_rating_settings_page.dart';
+import 'package:notekar/dialogs/settings/help_guides_settings_page.dart';
 import 'package:notekar/dialogs/settings/privacy_security_settings_page.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/widgets/settings_widgets.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -254,6 +256,84 @@ void main() {
         await tester.pumpAndSettle();
         FlutterError.onError = originalOnError;
         expect(caughtDetails, isNull);
+      },
+    );
+  });
+
+  group('4. Layout Alignment and About Page Deduplication Tests', () {
+    testWidgets(
+      'DataSafetySettingsPage hero card matches width of SettingsGroup cards',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SizedBox(
+                width: 400,
+                child: SingleChildScrollView(
+                  child: DataSafetySettingsPage(
+                    p: p,
+                    vtRatio: '0/72',
+                    vtStatus: 'Clean',
+                    vtScanDate: '2026-10-30',
+                    vtUrl: 'https://virustotal.com',
+                    privacyLock: true,
+                    obfuscateInRecents: false,
+                    onObfuscateInRecentsChanged: (_) {},
+                    onOpenCategory: (_, {required parent}) {},
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // The hero container containing 'DATA SAFETY SOVEREIGNTY'
+        final heroFinder = find
+            .ancestor(
+              of: find.text('DATA SAFETY SOVEREIGNTY'),
+              matching: find.byType(Container),
+            )
+            .first;
+        final heroSize = tester.getSize(heroFinder);
+
+        // The SettingsGroup container
+        final settingsGroupFinder = find.byType(SettingsGroup).first;
+        final settingsGroupSize = tester.getSize(settingsGroupFinder);
+
+        // Hero card width should equal SettingsGroup width (no 16px horizontal inset)
+        expect(heroSize.width, equals(400.0));
+        expect(settingsGroupSize.width, equals(400.0));
+        expect(heroSize.width, equals(settingsGroupSize.width));
+      },
+    );
+
+    testWidgets(
+      'HelpGuidesSettingsPage has no duplicate Data Safety, Content Rating, App Permissions rows',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: HelpGuidesSettingsPage(
+                  p: p,
+                  onOpenCategory: (_, {required parent}) {},
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Legal rows that SHOULD exist
+        expect(find.text('Licenses'), findsOneWidget);
+        expect(find.text('Terms of Use'), findsOneWidget);
+        expect(find.text('Privacy Policy'), findsOneWidget);
+
+        // Duplicate rows that SHOULD NOT exist in About / Help & Guides
+        expect(find.text('Data safety'), findsNothing);
+        expect(find.text('Content Rating'), findsNothing);
+        expect(find.text('App Permissions'), findsNothing);
       },
     );
   });
