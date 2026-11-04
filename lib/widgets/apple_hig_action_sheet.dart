@@ -5,7 +5,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 
 /// Single item descriptor in an [AppleHigActionSheet].
-class AppleHigActionItem {
+class AppleHigActionItem<T> {
   const AppleHigActionItem({
     required this.title,
     this.subtitle,
@@ -13,7 +13,8 @@ class AppleHigActionItem {
     this.color,
     this.isDestructive = false,
     this.isSelected = false,
-    required this.onTap,
+    this.value,
+    this.onTap,
   });
 
   final String title;
@@ -22,7 +23,8 @@ class AppleHigActionItem {
   final Color? color;
   final bool isDestructive;
   final bool isSelected;
-  final VoidCallback onTap;
+  final T? value;
+  final VoidCallback? onTap;
 }
 
 /// Telegram and Apple HIG spring damping animation curve for modal sheets.
@@ -41,7 +43,7 @@ const kTelegramSpringSheetAnimation = AnimationStyle(
 /// - Centered actions with Cupertino icons and typography.
 /// - Standalone floating Cancel action.
 /// - Adaptive light and dark iOS frosted materials.
-class AppleHigActionSheet extends StatelessWidget {
+class AppleHigActionSheet<T> extends StatelessWidget {
   const AppleHigActionSheet({
     super.key,
     required this.p,
@@ -54,7 +56,7 @@ class AppleHigActionSheet extends StatelessWidget {
   final Palette p;
   final String title;
   final String? subtitle;
-  final List<AppleHigActionItem> actions;
+  final List<AppleHigActionItem<dynamic>> actions;
   final String cancelLabel;
 
   /// Convenience presenter for the Apple HIG Action Sheet.
@@ -63,13 +65,13 @@ class AppleHigActionSheet extends StatelessWidget {
     required Palette p,
     required String title,
     String? subtitle,
-    required List<AppleHigActionItem> actions,
+    required List<AppleHigActionItem<dynamic>> actions,
     String cancelLabel = 'Cancel',
   }) {
     HapticFeedback.lightImpact();
     return showCupertinoModalPopup<T>(
       context: context,
-      builder: (ctx) => AppleHigActionSheet(
+      builder: (ctx) => AppleHigActionSheet<T>(
         p: p,
         title: title,
         subtitle: subtitle,
@@ -110,8 +112,8 @@ class AppleHigActionSheet extends StatelessWidget {
             isDestructiveAction: item.isDestructive,
             isDefaultAction: item.isSelected,
             onPressed: () {
-              Navigator.pop(context);
-              item.onTap();
+              Navigator.of(context).pop(item.value);
+              item.onTap?.call();
             },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,

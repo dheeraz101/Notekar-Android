@@ -666,11 +666,13 @@ class ModeDetailSettingsPage extends StatefulWidget {
 class _ModeDetailSettingsPageState extends State<ModeDetailSettingsPage> {
   late Color _currentColor;
   late IconData _currentIcon;
+  late String _currentCategoryName;
 
   @override
   void initState() {
     super.initState();
-    final meta = getCategoryMeta(widget.category, widget.p);
+    _currentCategoryName = widget.category;
+    final meta = getCategoryMeta(_currentCategoryName, widget.p);
     _currentColor = meta.color;
     _currentIcon = meta.icon;
   }
@@ -679,7 +681,8 @@ class _ModeDetailSettingsPageState extends State<ModeDetailSettingsPage> {
   void didUpdateWidget(covariant ModeDetailSettingsPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.category != widget.category || oldWidget.p != widget.p) {
-      final meta = getCategoryMeta(widget.category, widget.p);
+      _currentCategoryName = widget.category;
+      final meta = getCategoryMeta(_currentCategoryName, widget.p);
       _currentColor = meta.color;
       _currentIcon = meta.icon;
     }
@@ -699,6 +702,78 @@ class _ModeDetailSettingsPageState extends State<ModeDetailSettingsPage> {
     }
   }
 
+  Future<void> _showRenameCategoryDialog() async {
+    HapticFeedback.lightImpact();
+    final textController = TextEditingController(text: _currentCategoryName);
+
+    final renamed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => CupertinoTheme(
+        data: CupertinoThemeData(
+          brightness: widget.p.name == 'light'
+              ? Brightness.light
+              : Brightness.dark,
+          primaryColor: _currentColor,
+        ),
+        child: CupertinoAlertDialog(
+          title: Text('Rename Mode'.localized(ctx)),
+          content: Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: CupertinoTextField(
+              controller: textController,
+              autofocus: true,
+              placeholder: 'New Mode Name'.localized(ctx),
+              placeholderStyle: TextStyle(color: widget.p.text3),
+              textCapitalization: TextCapitalization.words,
+              maxLength: 15,
+              inputFormatters: [LengthLimitingTextInputFormatter(15)],
+              style: TextStyle(color: widget.p.text),
+              decoration: BoxDecoration(
+                color: widget.p.name == 'light'
+                    ? const Color(0xFFE5E5EA)
+                    : (widget.p.name == 'amoled'
+                          ? const Color(0xFF161616)
+                          : widget.p.surface3),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: widget.p.border.withValues(alpha: 0.5),
+                ),
+              ),
+            ),
+          ),
+          actions: [
+            CupertinoDialogAction(
+              child: Text('Cancel'.localized(ctx)),
+              onPressed: () => Navigator.pop(ctx, false),
+            ),
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              child: Text('Save'.localized(ctx)),
+              onPressed: () => Navigator.pop(ctx, true),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (renamed == true) {
+      final newName = textController.text.trim();
+      if (newName.isNotEmpty && newName != _currentCategoryName) {
+        final success = await CategoryService().renameCategory(
+          _currentCategoryName,
+          newName,
+        );
+        if (success) {
+          HapticFeedback.mediumImpact();
+          setState(() {
+            _currentCategoryName = newName;
+          });
+          widget.onCategoriesChanged?.call();
+        }
+      }
+    }
+  }
+
   Future<void> _confirmDeleteCategory(BuildContext context) async {
     HapticFeedback.heavyImpact();
     final confirmed = await showDialog<bool>(
@@ -713,7 +788,7 @@ class _ModeDetailSettingsPageState extends State<ModeDetailSettingsPage> {
         child: CupertinoAlertDialog(
           title: Text('Delete Mode?'.localized(ctx)),
           content: Text(
-            'Are you sure you want to remove "${widget.category}"? Existing logged moments will retain their history.'
+            'Are you sure you want to remove "$_currentCategoryName"? Existing logged moments will retain their history.'
                 .localized(ctx),
           ),
           actions: [
@@ -732,7 +807,9 @@ class _ModeDetailSettingsPageState extends State<ModeDetailSettingsPage> {
     );
 
     if (confirmed == true) {
-      final success = await CategoryService().deleteCategory(widget.category);
+      final success = await CategoryService().deleteCategory(
+        _currentCategoryName,
+      );
       if (success) {
         widget.onCategoriesChanged?.call();
         widget.onDelete?.call();
@@ -840,13 +917,40 @@ class _ModeDetailSettingsPageState extends State<ModeDetailSettingsPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        category,
-                        style: TextStyle(
-                          color: p.text,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                        ),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              _currentCategoryName,
+                              style: TextStyle(
+                                color: p.text,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: _showRenameCategoryDialog,
+                            child: Container(
+                              padding: const EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: p.surface2,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: p.border.withValues(alpha: 0.5),
+                                  width: 0.8,
+                                ),
+                              ),
+                              child: Icon(
+                                CupertinoIcons.pencil,
+                                size: 13,
+                                color: _currentColor,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -909,7 +1013,7 @@ class _ModeDetailSettingsPageState extends State<ModeDetailSettingsPage> {
                           HapticFeedback.selectionClick();
                           setState(() => _currentColor = col);
                           await CategoryService().setCategoryColor(
-                            widget.category,
+                            _currentCategoryName,
                             col,
                           );
                           widget.onCategoriesChanged?.call();
@@ -990,7 +1094,7 @@ class _ModeDetailSettingsPageState extends State<ModeDetailSettingsPage> {
                           HapticFeedback.selectionClick();
                           setState(() => _currentIcon = ic);
                           await CategoryService().setCategoryIcon(
-                            widget.category,
+                            _currentCategoryName,
                             ic,
                           );
                           widget.onCategoriesChanged?.call();

@@ -9,6 +9,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/checkpoint_service.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/widgets/apple_hig_action_sheet.dart';
 import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
@@ -135,6 +136,56 @@ class _CheckpointsDashboardScreenState
               }
             },
             icon: Icon(Icons.add_rounded, size: 24, color: p.accent),
+          ),
+          PopupMenuButton<String>(
+            tooltip: 'More Options'.localized(context),
+            icon: Icon(Icons.more_vert_rounded, size: 20, color: p.text2),
+            color: p.surface2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+              side: BorderSide(color: p.border.withValues(alpha: 0.5)),
+            ),
+            onSelected: (val) async {
+              if (val == 'restore_defaults') {
+                HapticFeedback.selectionClick();
+                final confirmed = await AppleHigActionSheet.show<bool>(
+                  context,
+                  p: p,
+                  title: 'Restore Default Habits'.localized(context),
+                  subtitle:
+                      'This will reset your habit checkpoints back to the default routine list.'
+                          .localized(context),
+                  actions: [
+                    AppleHigActionItem<bool>(
+                      title: 'Reset to Defaults'.localized(context),
+                      isDestructive: true,
+                      icon: Icons.refresh_rounded,
+                      value: true,
+                    ),
+                  ],
+                );
+                if (confirmed == true) {
+                  HapticFeedback.mediumImpact();
+                  await CheckpointService.instance.resetToDefaults();
+                  if (mounted) setState(() {});
+                }
+              }
+            },
+            itemBuilder: (ctx) => [
+              PopupMenuItem(
+                value: 'restore_defaults',
+                child: Row(
+                  children: [
+                    Icon(Icons.refresh_rounded, size: 16, color: p.text),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Restore Defaults'.localized(ctx),
+                      style: TextStyle(color: p.text, fontSize: 13),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -414,6 +465,39 @@ class _CheckpointsDashboardScreenState
                           style: TextStyle(color: p.text2, fontSize: 12),
                         ),
                       ],
+                    ),
+                  ),
+                  PressableScale(
+                    onTap: () async {
+                      HapticFeedback.selectionClick();
+                      final res = await AddEditHabitSheet.show(
+                        context,
+                        p: p,
+                        preset: preset,
+                      );
+                      if (res == true && mounted) {
+                        if (_findPreset(preset.id) == null) {
+                          _selectedPresetId = null;
+                        }
+                        setState(() {});
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      margin: const EdgeInsets.only(right: 6),
+                      decoration: BoxDecoration(
+                        color: p.surface2,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: p.border.withValues(alpha: 0.5),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.edit_outlined,
+                        size: 15,
+                        color: p.text2,
+                      ),
                     ),
                   ),
                   PressableScale(

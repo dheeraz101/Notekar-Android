@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/services/checkpoint_service.dart';
+import 'package:notekar/utils/moment_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CategoryMeta {
@@ -300,6 +302,92 @@ class CategoryService {
     if (icon != null) {
       await setCategoryIcon(clean, icon, prefs: p);
     }
+    return true;
+  }
+
+  Future<bool> renameCategory(
+    String oldName,
+    String newName, {
+    SharedPreferences? prefs,
+  }) async {
+    final cleanOld = oldName.trim();
+    final cleanNew = newName.trim();
+    if (cleanNew.isEmpty || cleanNew.length > 15) return false;
+    if (cleanOld.toLowerCase() == cleanNew.toLowerCase()) return true;
+
+    final p = await _getPrefs(prefs: prefs);
+    final all = await getCategories(prefs: p);
+
+    // Prevent duplicate category names
+    if (all.any((e) => e.toLowerCase() == cleanNew.toLowerCase())) {
+      return false;
+    }
+
+    final stored = p.getStringList(keyCustomCategories) ?? [];
+    final idx = stored.indexWhere(
+      (e) => e.trim().toLowerCase() == cleanOld.toLowerCase(),
+    );
+    if (idx != -1) {
+      stored[idx] = cleanNew;
+      await p.setStringList(keyCustomCategories, stored);
+    } else {
+      stored.add(cleanNew);
+      await p.setStringList(keyCustomCategories, stored);
+    }
+
+    // Migrate cached color
+    final oldColor = _customColorCache.remove(cleanOld.toLowerCase());
+    if (oldColor != null) {
+      _customColorCache[cleanNew.toLowerCase()] = oldColor;
+      await setCategoryColor(cleanNew, Color(oldColor), prefs: p);
+    }
+
+    // Migrate cached icon
+    final oldIcon = _customIconCache.remove(cleanOld.toLowerCase());
+    if (oldIcon != null) {
+      final iconData = minimalGlyphIcons.firstWhere(
+        (ic) => ic.codePoint == oldIcon,
+        orElse: () => minimalGlyphIcons.first,
+      );
+      await setCategoryIcon(cleanNew, iconData, prefs: p);
+    }
+
+    // Update active category if matching
+    final active = await getActiveCategory(prefs: p);
+    if (active.toLowerCase() == cleanOld.toLowerCase()) {
+      await setActiveCategory(cleanNew, prefs: p);
+    }
+
+    // Cascade update to Checkpoint Presets
+    try {
+      final presets = CheckpointService.instance.presets;
+      bool presetUpdated = false;
+      final updatedPresets = presets.map((preset) {
+        if (preset.category.toLowerCase() == cleanOld.toLowerCase()) {
+          presetUpdated = true;
+          return preset.copyWith(category: cleanNew);
+        }
+        return preset;
+      }).toList();
+      if (presetUpdated) {
+        await CheckpointService.instance.savePresets(updatedPresets);
+      }
+    } catch (_) {}
+
+    // Cascade update to Moments
+    try {
+      final moments = MomentRepository.instance.getAllMoments();
+      final matchingMoments = moments
+          .where((m) => m.category?.toLowerCase() == cleanOld.toLowerCase())
+          .toList();
+      if (matchingMoments.isNotEmpty) {
+        final updatedMoments = matchingMoments
+            .map((m) => m.copyWith(category: cleanNew))
+            .toList();
+        await MomentRepository.instance.saveMoments(updatedMoments);
+      }
+    } catch (_) {}
+
     return true;
   }
 

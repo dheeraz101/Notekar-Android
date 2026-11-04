@@ -10,7 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Service managing Routine Habit Checkpoint presets, fast logging,
 /// and timing variance analytics.
-class CheckpointService {
+class CheckpointService extends ChangeNotifier {
   CheckpointService._();
 
   static final CheckpointService instance = CheckpointService._();
@@ -142,6 +142,7 @@ class CheckpointService {
     final sp = await SharedPreferences.getInstance();
     final jsonStr = jsonEncode(_presets.map((p) => p.toJson()).toList());
     await sp.setString(_prefsKey, jsonStr);
+    notifyListeners();
   }
 
   Future<void> addPreset(CheckpointPreset preset) async {

@@ -5123,6 +5123,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
                     moments: _entries,
                     onLogCheckpoint: _handleLogCheckpoint,
                     onOpenDashboard: () => _openCheckpointsDashboard(),
+                    onHabitsChanged: () => setState(() {}),
                   ),
                 ],
               ],

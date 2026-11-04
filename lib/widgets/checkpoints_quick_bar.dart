@@ -45,6 +45,17 @@ class _CheckpointsQuickBarState extends State<CheckpointsQuickBar> {
     super.initState();
     _isCollapsed = widget.initialCollapsed;
     _loadCollapsedPref();
+    CheckpointService.instance.addListener(_onServiceChanged);
+  }
+
+  @override
+  void dispose() {
+    CheckpointService.instance.removeListener(_onServiceChanged);
+    super.dispose();
+  }
+
+  void _onServiceChanged() {
+    if (mounted) setState(() {});
   }
 
   Future<void> _loadCollapsedPref() async {
@@ -217,27 +228,22 @@ class _CheckpointsQuickBarState extends State<CheckpointsQuickBar> {
                               context,
                             ),
                             actions: [
-                              AppleHigActionItem(
+                              AppleHigActionItem<String>(
                                 title: 'Log Checkpoint'.localized(context),
                                 icon: CupertinoIcons.checkmark_circle,
-                                onTap: () => Navigator.of(context).pop('log'),
+                                value: 'log',
                               ),
-                              AppleHigActionItem(
+                              AppleHigActionItem<String>(
                                 title: 'Edit Habit'.localized(context),
                                 icon: CupertinoIcons.pencil,
-                                onTap: () => Navigator.of(context).pop('edit'),
+                                value: 'edit',
                               ),
-                              if (preset.id.startsWith('custom_') ||
-                                  !CheckpointService.defaultPresetIds.contains(
-                                    preset.id,
-                                  ))
-                                AppleHigActionItem(
-                                  title: 'Delete Habit'.localized(context),
-                                  isDestructive: true,
-                                  icon: CupertinoIcons.trash,
-                                  onTap: () =>
-                                      Navigator.of(context).pop('delete'),
-                                ),
+                              AppleHigActionItem<String>(
+                                title: 'Delete Habit'.localized(context),
+                                isDestructive: true,
+                                icon: CupertinoIcons.trash,
+                                value: 'delete',
+                              ),
                             ],
                           );
 
@@ -247,6 +253,10 @@ class _CheckpointsQuickBarState extends State<CheckpointsQuickBar> {
                             widget.onLogCheckpoint(preset);
                           } else if (action == 'edit') {
                             if (!context.mounted) return;
+                            await Future<void>.delayed(
+                              const Duration(milliseconds: 90),
+                            );
+                            if (!mounted || !context.mounted) return;
                             final res = await AddEditHabitSheet.show(
                               context,
                               p: p,
@@ -257,11 +267,37 @@ class _CheckpointsQuickBarState extends State<CheckpointsQuickBar> {
                               widget.onHabitsChanged?.call();
                             }
                           } else if (action == 'delete') {
-                            await CheckpointService.instance.deletePreset(
-                              preset.id,
+                            if (!context.mounted) return;
+                            await Future<void>.delayed(
+                              const Duration(milliseconds: 90),
                             );
-                            if (mounted) setState(() {});
-                            widget.onHabitsChanged?.call();
+                            if (!mounted || !context.mounted) return;
+                            final confirmed = await AppleHigActionSheet.show<bool>(
+                              context,
+                              p: p,
+                              title: 'Delete Habit Checkpoint'.localized(
+                                context,
+                              ),
+                              subtitle:
+                                  'Are you sure you want to remove "${preset.label}" from your habits?'
+                                      .localized(context),
+                              actions: [
+                                AppleHigActionItem<bool>(
+                                  title: 'Delete Habit'.localized(context),
+                                  isDestructive: true,
+                                  icon: CupertinoIcons.trash,
+                                  value: true,
+                                ),
+                              ],
+                            );
+                            if (confirmed == true) {
+                              HapticFeedback.mediumImpact();
+                              await CheckpointService.instance.deletePreset(
+                                preset.id,
+                              );
+                              if (mounted) setState(() {});
+                              widget.onHabitsChanged?.call();
+                            }
                           }
                         },
                         child: ConstrainedBox(
