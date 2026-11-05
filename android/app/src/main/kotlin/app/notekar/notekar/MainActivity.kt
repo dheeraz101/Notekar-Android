@@ -820,7 +820,7 @@ class MainActivity : FlutterActivity() {
                     result.success(getFileSha256(filePath))
                 }
 
-                "setObfuscateInRecents" -> {
+                "setObfuscateInRecents", "setWindowObfuscation" -> {
                     val enabled = call.argument<Boolean>("enabled") ?: false
                     try {
                         if (enabled) {

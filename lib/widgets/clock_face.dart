@@ -103,6 +103,7 @@ class ClockFace extends StatefulWidget {
     required this.showSeconds,
     required this.highlightSeconds,
     this.use24HourFormat = true,
+    this.showPeriod = false,
     this.sessionElapsed,
     this.isPaused = false,
     this.fontFamily = 'BebasNeue',
@@ -116,6 +117,7 @@ class ClockFace extends StatefulWidget {
   final bool showSeconds;
   final bool highlightSeconds;
   final bool use24HourFormat;
+  final bool showPeriod;
   final Duration? sessionElapsed;
   final bool isPaused;
   final String fontFamily;
@@ -176,7 +178,7 @@ class _ClockFaceState extends State<ClockFace> {
       } else {
         final h = widget.now.hour % 12 == 0 ? 12 : widget.now.hour % 12;
         hm = '$h:${widget.now.minute.toString().padLeft(2, '0')}';
-        period = '';
+        period = widget.showPeriod ? (widget.now.hour >= 12 ? 'PM' : 'AM') : '';
       }
       sec = '.${widget.now.second.toString().padLeft(2, '0')}';
     }

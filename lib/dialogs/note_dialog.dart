@@ -11,6 +11,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/audio_service.dart';
 import 'package:notekar/services/media_storage_service.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/markdown_text_editing_controller.dart';
 import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/hashtag_suggestion_overlay.dart';
@@ -114,10 +115,80 @@ class _NoteDialogState extends State<NoteDialog> {
       _showSobrietyTray = true;
     }
 
+    if (widget.initialNote.isEmpty) {
+      _loadDraft();
+    }
+
     // Auto-focus keyboard on appearance
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
+  }
+
+  Future<void> _loadDraft() async {
+    if (widget.initialNote.isNotEmpty) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final draft = prefs.getString('draft.note');
+      if (draft != null &&
+          draft.trim().isNotEmpty &&
+          mounted &&
+          _controller.text.isEmpty) {
+        setState(() {
+          _controller.text = draft;
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<bool> _handleClose() async {
+    final text = _controller.text.trim();
+    final hasChanges =
+        (text.isNotEmpty && text != widget.initialNote.trim()) ||
+        _stagedImagePaths.isNotEmpty ||
+        _stagedVoicePaths.isNotEmpty;
+
+    if (!hasChanges) {
+      if (mounted) Navigator.of(context).pop();
+      return true;
+    }
+
+    // Auto-save draft so user never loses their thoughts
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('draft.note', _controller.text);
+
+    if (!mounted) return false;
+
+    final shouldDiscard = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: Text('Discard Note?'.localized(context)),
+        content: Text(
+          'You have unsaved changes. A draft has been saved.'.localized(
+            context,
+          ),
+        ),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text('Keep Editing'.localized(context)),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text('Discard'.localized(context)),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDiscard == true) {
+      await prefs.remove('draft.note');
+      if (mounted) Navigator.of(context).pop();
+      return true;
+    }
+    return false;
   }
 
   @override
@@ -440,711 +511,669 @@ class _NoteDialogState extends State<NoteDialog> {
     );
     final compactMaxHeight = 120.0;
 
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Material(
-        type: MaterialType.transparency,
-        child: AnimatedPadding(
-          duration: const Duration(milliseconds: 150),
-          curve: Curves.easeOutQuad,
-          padding: EdgeInsets.only(
-            bottom: keyboardHeight > 0 ? keyboardHeight : 0,
-          ),
-          child: Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: widget.p.surface,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(22),
-              ),
-              border: Border(
-                top: BorderSide(
-                  color: widget.p.border.withValues(alpha: 0.65),
-                  width: 1,
-                ),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.25),
-                  blurRadius: 20,
-                  offset: const Offset(0, -4),
-                ),
-              ],
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        _handleClose();
+      },
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: Material(
+          type: MaterialType.transparency,
+          child: AnimatedPadding(
+            duration: const Duration(milliseconds: 150),
+            curve: Curves.easeOutQuad,
+            padding: EdgeInsets.only(
+              bottom: keyboardHeight > 0 ? keyboardHeight : 0,
             ),
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(22),
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: widget.p.surface,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(22),
+                ),
+                border: Border(
+                  top: BorderSide(
+                    color: widget.p.border.withValues(alpha: 0.65),
+                    width: 1,
+                  ),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.25),
+                    blurRadius: 20,
+                    offset: const Offset(0, -4),
+                  ),
+                ],
               ),
-              child: SafeArea(
-                top: false,
-                bottom: keyboardHeight == 0,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Top header row: Title, Plus button, Expand toggle, Close
-                      Row(
-                        children: [
-                          Text(
-                            widget.title,
-                            style: TextStyle(
-                              color: widget.p.text,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: -0.2,
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(22),
+                ),
+                child: SafeArea(
+                  top: false,
+                  bottom: keyboardHeight == 0,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Top header row: Title, Plus button, Expand toggle, Close
+                        Row(
+                          children: [
+                            Text(
+                              widget.title,
+                              style: TextStyle(
+                                color: widget.p.text,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: -0.2,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          ValueListenableBuilder<TextEditingValue>(
-                            valueListenable: _controller,
-                            builder: (context, value, _) {
-                              final count = value.text.length;
-                              final remaining = maxNoteLength - count;
-                              final alert = remaining <= 20;
-                              return Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: alert
-                                          ? widget.p.red.withValues(alpha: 0.15)
-                                          : widget.p.surface3,
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      '$count/$maxNoteLength',
-                                      style: TextStyle(
-                                        color: alert
-                                            ? widget.p.red
-                                            : widget.p.text3,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w700,
-                                        fontFeatures: const [
-                                          FontFeature.tabularFigures(),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  if (value.text.trim().isNotEmpty) ...[
-                                    const SizedBox(width: 4),
+                            const SizedBox(width: 8),
+                            ValueListenableBuilder<TextEditingValue>(
+                              valueListenable: _controller,
+                              builder: (context, value, _) {
+                                final count = value.text.length;
+                                final remaining = maxNoteLength - count;
+                                final alert = remaining <= 20;
+                                return Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
                                     Container(
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 6,
                                         vertical: 2,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: widget.p.surface3,
+                                        color: alert
+                                            ? widget.p.red.withValues(
+                                                alpha: 0.15,
+                                              )
+                                            : widget.p.surface3,
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Text(
-                                        '$_wordCount words • $_readingTimeEstimate',
+                                        '$count/$maxNoteLength',
                                         style: TextStyle(
-                                          color: widget.p.text3,
+                                          color: alert
+                                              ? widget.p.red
+                                              : widget.p.text3,
                                           fontSize: 10,
-                                          fontWeight: FontWeight.w600,
+                                          fontWeight: FontWeight.w700,
+                                          fontFeatures: const [
+                                            FontFeature.tabularFigures(),
+                                          ],
                                         ),
                                       ),
                                     ),
-                                  ],
-                                ],
-                              );
-                            },
-                          ),
-                          const Spacer(),
-                          // Telegram-style Extra Mode: Expand into Full-Screen Writing Canvas
-                          PressableScale(
-                            onTap: _openBigNote,
-                            child: Container(
-                              width: 28,
-                              height: 28,
-                              decoration: BoxDecoration(
-                                color: widget.p.surface3,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                CupertinoIcons.arrow_up_left_arrow_down_right,
-                                size: 13,
-                                color: widget.p.text2,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          // Expand / Collapse Height Toggle
-                          PressableScale(
-                            onTap: () {
-                              setState(() => _isExpanded = !_isExpanded);
-                            },
-                            child: Container(
-                              width: 28,
-                              height: 28,
-                              decoration: BoxDecoration(
-                                color: widget.p.surface3,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                _isExpanded
-                                    ? Icons.keyboard_arrow_down_rounded
-                                    : Icons.keyboard_arrow_up_rounded,
-                                size: 14,
-                                color: widget.p.text2,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          // Close / Cancel Button
-                          PressableScale(
-                            onTap: () {
-                              Navigator.pop(context);
-                            },
-                            child: Container(
-                              width: 28,
-                              height: 28,
-                              decoration: BoxDecoration(
-                                color: widget.p.surface3,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.close_rounded,
-                                size: 12,
-                                color: widget.p.text2,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      // Optional Sobriety Controls Tray
-                      if (_sobrietyMode && _showSobrietyTray) ...[
-                        const SizedBox(height: 10),
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: widget.p.surface2,
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: widget.p.border.withValues(alpha: 0.6),
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SettingsSwitchRow(
-                                p: widget.p,
-                                icon: CupertinoIcons.flame_fill,
-                                title: 'Mark as Relapse / Reset',
-                                subtitle:
-                                    'Reset active sobriety streak for this moment',
-                                value: _relapseSelected,
-                                color: widget.p.orange,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _relapseSelected = value;
-                                    if (!value) _shieldActivated = false;
-                                  });
-                                },
-                              ),
-                              if (_relapseSelected &&
-                                  _availableShields > 0) ...[
-                                Divider(
-                                  height: 1,
-                                  thickness: 0.6,
-                                  color: widget.p.border.withValues(alpha: 0.6),
-                                ),
-                                SettingsSwitchRow(
-                                  p: widget.p,
-                                  icon: CupertinoIcons.shield_fill,
-                                  title: 'Use Streak Shield',
-                                  subtitle:
-                                      '$_availableShields remaining · protect streak',
-                                  value: _shieldActivated,
-                                  color: widget.p.green,
-                                  onChanged: (value) {
-                                    setState(() => _shieldActivated = value);
-                                  },
-                                ),
-                              ],
-                              const SizedBox(height: 8),
-                              SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Row(
-                                  children: [
-                                    for (final mood in [
-                                      'Bored',
-                                      'Anxious',
-                                      'Fatigue',
-                                      'Stressed',
-                                      'Lonely',
-                                    ])
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                          right: 6,
+                                    if (value.text.trim().isNotEmpty) ...[
+                                      const SizedBox(width: 4),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 2,
                                         ),
-                                        child: _buildTagChip(
-                                          mood,
-                                          _selectedMood == mood.toLowerCase(),
-                                          () {
-                                            setState(() {
-                                              _selectedMood =
-                                                  _selectedMood ==
-                                                      mood.toLowerCase()
-                                                  ? null
-                                                  : mood.toLowerCase();
-                                            });
-                                          },
-                                          widget.p.accent,
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-
-                      const SizedBox(height: 10),
-
-                      // Active Voice Recording Indicator Bar
-                      if (_isRecording) ...[
-                        Container(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: widget.p.red.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: widget.p.red.withValues(alpha: 0.4),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: const BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Recording ${_formatSeconds(_recordingSeconds)}',
-                                style: TextStyle(
-                                  color: widget.p.red,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  fontFeatures: const [
-                                    FontFeature.tabularFigures(),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              // Dynamic Amplitude Waveform Bars
-                              AnimatedBuilder(
-                                animation: AudioService.instance,
-                                builder: (context, _) {
-                                  final amp = AudioService
-                                      .instance
-                                      .currentRecordingAmplitude;
-                                  const barCount = 7;
-                                  final factors = [
-                                    0.35,
-                                    0.7,
-                                    1.0,
-                                    0.85,
-                                    1.0,
-                                    0.65,
-                                    0.4,
-                                  ];
-                                  return Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: List.generate(barCount, (i) {
-                                      final h = (4.0 + 16.0 * amp * factors[i])
-                                          .clamp(4.0, 18.0);
-                                      return Container(
-                                        margin: const EdgeInsets.symmetric(
-                                          horizontal: 1.5,
-                                        ),
-                                        width: 2.5,
-                                        height: h,
                                         decoration: BoxDecoration(
-                                          color: widget.p.red,
+                                          color: widget.p.surface3,
                                           borderRadius: BorderRadius.circular(
-                                            999,
+                                            6,
                                           ),
                                         ),
-                                      );
-                                    }),
-                                  );
-                                },
-                              ),
-                              const Spacer(),
-                              PressableScale(
-                                onTap: _cancelVoiceRecording,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(4),
-                                  child: Icon(
-                                    CupertinoIcons.trash,
-                                    size: 16,
-                                    color: widget.p.text3,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              PressableScale(
-                                onTap: _stopVoiceRecording,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: widget.p.red,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: const Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        CupertinoIcons.checkmark,
-                                        size: 12,
-                                        color: Colors.white,
-                                      ),
-                                      SizedBox(width: 4),
-                                      Text(
-                                        'Done',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.bold,
+                                        child: Text(
+                                          '$_wordCount words • $_readingTimeEstimate',
+                                          style: TextStyle(
+                                            color: widget.p.text3,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
                                       ),
                                     ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-
-                      // Staged Image Preview Bar (Multi-photo strip - compact)
-                      if (_stagedImagePaths.isNotEmpty) ...[
-                        Container(
-                          margin: const EdgeInsets.only(bottom: 6),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 5,
-                          ),
-                          decoration: BoxDecoration(
-                            color: widget.p.surface2,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: widget.p.border.withValues(alpha: 0.6),
-                            ),
-                          ),
-                          child: SizedBox(
-                            height: 36,
-                            child: ListView.separated(
-                              scrollDirection: Axis.horizontal,
-                              physics: const BouncingScrollPhysics(),
-                              itemCount: _stagedImagePaths.length,
-                              separatorBuilder: (_, _) =>
-                                  const SizedBox(width: 6),
-                              itemBuilder: (context, idx) {
-                                final imgPath = _stagedImagePaths[idx];
-                                return Stack(
-                                  children: [
-                                    PressableScale(
-                                      onTap: () {
-                                        PhotoLightboxDialog.show(
-                                          context,
-                                          p: widget.p,
-                                          imagePaths: _stagedImagePaths,
-                                          initialIndex: idx,
-                                        );
-                                      },
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(7),
-                                        child: SizedBox(
-                                          width: 36,
-                                          height: 36,
-                                          child: _buildStagedImageThumbnail(
-                                            imgPath,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Positioned(
-                                      top: 1,
-                                      right: 1,
-                                      child: PressableScale(
-                                        onTap: () {
-                                          HapticFeedback.selectionClick();
-                                          setState(() {
-                                            _stagedImagePaths.removeAt(idx);
-                                          });
-                                        },
-                                        child: Container(
-                                          width: 15,
-                                          height: 15,
-                                          decoration: BoxDecoration(
-                                            color: Colors.black.withValues(
-                                              alpha: 0.7,
-                                            ),
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: const Center(
-                                            child: Icon(
-                                              CupertinoIcons.xmark,
-                                              size: 8,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
                                   ],
                                 );
                               },
                             ),
-                          ),
-                        ),
-                      ],
-
-                      // Staged Voice Preview Bar (Multi-voice notes - compact)
-                      if (_stagedVoicePaths.isNotEmpty) ...[
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 6),
-                          child: Wrap(
-                            spacing: 6,
-                            runSpacing: 4,
-                            children: List.generate(_stagedVoicePaths.length, (
-                              idx,
-                            ) {
-                              final dur = idx < _stagedVoiceDurations.length
-                                  ? _stagedVoiceDurations[idx]
-                                  : 0;
-                              return Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: widget.p.surface2,
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: widget.p.border.withValues(
-                                      alpha: 0.6,
-                                    ),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      CupertinoIcons.mic_fill,
-                                      size: 11,
-                                      color: widget.p.accent,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      'Voice ${idx + 1} (${_formatMs(dur)})',
-                                      style: TextStyle(
-                                        color: widget.p.text,
-                                        fontSize: 10.5,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    PressableScale(
-                                      onTap: () {
-                                        HapticFeedback.selectionClick();
-                                        setState(() {
-                                          _stagedVoicePaths.removeAt(idx);
-                                          if (idx <
-                                              _stagedVoiceDurations.length) {
-                                            _stagedVoiceDurations.removeAt(idx);
-                                          }
-                                        });
-                                      },
-                                      child: Icon(
-                                        CupertinoIcons.xmark_circle_fill,
-                                        size: 13,
-                                        color: widget.p.text3,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }),
-                          ),
-                        ),
-                      ],
-
-                      // Media Action Chips Row (Camera, Photo, Mic)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Row(
-                          children: [
+                            const Spacer(),
+                            // Telegram-style Extra Mode: Expand into Full-Screen Writing Canvas
                             PressableScale(
-                              onTap: () => _pickPhoto(ImageSource.camera),
+                              onTap: _openBigNote,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
+                                width: 28,
+                                height: 28,
                                 decoration: BoxDecoration(
-                                  color: widget.p.surface2,
-                                  borderRadius: BorderRadius.circular(999),
-                                  border: Border.all(
-                                    color: widget.p.border.withValues(
-                                      alpha: 0.6,
-                                    ),
-                                  ),
+                                  color: widget.p.surface3,
+                                  shape: BoxShape.circle,
                                 ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      CupertinoIcons.camera_fill,
-                                      size: 12,
-                                      color: widget.p.accent,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      'Camera',
-                                      style: TextStyle(
-                                        color: widget.p.text2,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
+                                child: Icon(
+                                  CupertinoIcons.arrow_up_left_arrow_down_right,
+                                  size: 13,
+                                  color: widget.p.text2,
                                 ),
                               ),
                             ),
                             const SizedBox(width: 6),
+                            // Expand / Collapse Height Toggle
                             PressableScale(
-                              onTap: () => _pickPhoto(ImageSource.gallery),
+                              onTap: () {
+                                setState(() => _isExpanded = !_isExpanded);
+                              },
                               child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
+                                width: 28,
+                                height: 28,
                                 decoration: BoxDecoration(
-                                  color: widget.p.surface2,
-                                  borderRadius: BorderRadius.circular(999),
-                                  border: Border.all(
-                                    color: widget.p.border.withValues(
-                                      alpha: 0.6,
-                                    ),
-                                  ),
+                                  color: widget.p.surface3,
+                                  shape: BoxShape.circle,
                                 ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      CupertinoIcons
-                                          .photo_fill_on_rectangle_fill,
-                                      size: 12,
-                                      color: widget.p.accent,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      'Photo',
-                                      style: TextStyle(
-                                        color: widget.p.text2,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
+                                child: Icon(
+                                  _isExpanded
+                                      ? Icons.keyboard_arrow_down_rounded
+                                      : Icons.keyboard_arrow_up_rounded,
+                                  size: 14,
+                                  color: widget.p.text2,
                                 ),
                               ),
                             ),
                             const SizedBox(width: 6),
+                            // Close / Cancel Button
                             PressableScale(
-                              onTap: _toggleVoiceRecording,
+                              onTap: _handleClose,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
+                                width: 28,
+                                height: 28,
                                 decoration: BoxDecoration(
-                                  color: _isRecording
-                                      ? widget.p.red.withValues(alpha: 0.15)
-                                      : widget.p.surface2,
-                                  borderRadius: BorderRadius.circular(999),
-                                  border: Border.all(
-                                    color: _isRecording
-                                        ? widget.p.red
-                                        : widget.p.border.withValues(
-                                            alpha: 0.6,
+                                  color: widget.p.surface3,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.close_rounded,
+                                  size: 12,
+                                  color: widget.p.text2,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        // Optional Sobriety Controls Tray
+                        if (_sobrietyMode && _showSobrietyTray) ...[
+                          const SizedBox(height: 10),
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: widget.p.surface2,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: widget.p.border.withValues(alpha: 0.6),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SettingsSwitchRow(
+                                  p: widget.p,
+                                  icon: CupertinoIcons.flame_fill,
+                                  title: 'Mark as Relapse / Reset',
+                                  subtitle:
+                                      'Reset active sobriety streak for this moment',
+                                  value: _relapseSelected,
+                                  color: widget.p.orange,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _relapseSelected = value;
+                                      if (!value) _shieldActivated = false;
+                                    });
+                                  },
+                                ),
+                                if (_relapseSelected &&
+                                    _availableShields > 0) ...[
+                                  Divider(
+                                    height: 1,
+                                    thickness: 0.6,
+                                    color: widget.p.border.withValues(
+                                      alpha: 0.6,
+                                    ),
+                                  ),
+                                  SettingsSwitchRow(
+                                    p: widget.p,
+                                    icon: CupertinoIcons.shield_fill,
+                                    title: 'Use Streak Shield',
+                                    subtitle:
+                                        '$_availableShields remaining · protect streak',
+                                    value: _shieldActivated,
+                                    color: widget.p.green,
+                                    onChanged: (value) {
+                                      setState(() => _shieldActivated = value);
+                                    },
+                                  ),
+                                ],
+                                const SizedBox(height: 8),
+                                SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: [
+                                      for (final mood in [
+                                        'Bored',
+                                        'Anxious',
+                                        'Fatigue',
+                                        'Stressed',
+                                        'Lonely',
+                                      ])
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            right: 6,
                                           ),
+                                          child: _buildTagChip(
+                                            mood,
+                                            _selectedMood == mood.toLowerCase(),
+                                            () {
+                                              setState(() {
+                                                _selectedMood =
+                                                    _selectedMood ==
+                                                        mood.toLowerCase()
+                                                    ? null
+                                                    : mood.toLowerCase();
+                                              });
+                                            },
+                                            widget.p.accent,
+                                          ),
+                                        ),
+                                    ],
                                   ),
                                 ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      _isRecording
-                                          ? CupertinoIcons.stop_fill
-                                          : CupertinoIcons.mic_fill,
-                                      size: 12,
-                                      color: _isRecording
-                                          ? widget.p.red
-                                          : widget.p.accent,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      _isRecording ? 'Stop' : 'Voice',
-                                      style: TextStyle(
-                                        color: _isRecording
-                                            ? widget.p.red
-                                            : widget.p.text2,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+
+                        const SizedBox(height: 10),
+
+                        // Active Voice Recording Indicator Bar
+                        if (_isRecording) ...[
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: widget.p.red.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: widget.p.red.withValues(alpha: 0.4),
                               ),
                             ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Recording ${_formatSeconds(_recordingSeconds)}',
+                                  style: TextStyle(
+                                    color: widget.p.red,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    fontFeatures: const [
+                                      FontFeature.tabularFigures(),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                // Dynamic Amplitude Waveform Bars
+                                AnimatedBuilder(
+                                  animation: AudioService.instance,
+                                  builder: (context, _) {
+                                    final amp = AudioService
+                                        .instance
+                                        .currentRecordingAmplitude;
+                                    const barCount = 7;
+                                    final factors = [
+                                      0.35,
+                                      0.7,
+                                      1.0,
+                                      0.85,
+                                      1.0,
+                                      0.65,
+                                      0.4,
+                                    ];
+                                    return Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: List.generate(barCount, (i) {
+                                        final h =
+                                            (4.0 + 16.0 * amp * factors[i])
+                                                .clamp(4.0, 18.0);
+                                        return Container(
+                                          margin: const EdgeInsets.symmetric(
+                                            horizontal: 1.5,
+                                          ),
+                                          width: 2.5,
+                                          height: h,
+                                          decoration: BoxDecoration(
+                                            color: widget.p.red,
+                                            borderRadius: BorderRadius.circular(
+                                              999,
+                                            ),
+                                          ),
+                                        );
+                                      }),
+                                    );
+                                  },
+                                ),
+                                const Spacer(),
+                                PressableScale(
+                                  onTap: _cancelVoiceRecording,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(4),
+                                    child: Icon(
+                                      CupertinoIcons.trash,
+                                      size: 16,
+                                      color: widget.p.text3,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                PressableScale(
+                                  onTap: _stopVoiceRecording,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: widget.p.red,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          CupertinoIcons.checkmark,
+                                          size: 12,
+                                          color: Colors.white,
+                                        ),
+                                        SizedBox(width: 4),
+                                        Text(
+                                          'Done',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
 
-                            if (_sobrietyMode) ...[
-                              const SizedBox(width: 6),
-                              PressableScale(
-                                onTap: () {
-                                  setState(
-                                    () =>
-                                        _showSobrietyTray = !_showSobrietyTray,
+                        // Staged Image Preview Bar (Multi-photo strip - compact)
+                        if (_stagedImagePaths.isNotEmpty) ...[
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: widget.p.surface2,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: widget.p.border.withValues(alpha: 0.6),
+                              ),
+                            ),
+                            child: SizedBox(
+                              height: 36,
+                              child: ListView.separated(
+                                scrollDirection: Axis.horizontal,
+                                physics: const BouncingScrollPhysics(),
+                                itemCount: _stagedImagePaths.length,
+                                separatorBuilder: (_, _) =>
+                                    const SizedBox(width: 6),
+                                itemBuilder: (context, idx) {
+                                  final imgPath = _stagedImagePaths[idx];
+                                  return Stack(
+                                    children: [
+                                      PressableScale(
+                                        onTap: () {
+                                          PhotoLightboxDialog.show(
+                                            context,
+                                            p: widget.p,
+                                            imagePaths: _stagedImagePaths,
+                                            initialIndex: idx,
+                                          );
+                                        },
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            7,
+                                          ),
+                                          child: SizedBox(
+                                            width: 36,
+                                            height: 36,
+                                            child: _buildStagedImageThumbnail(
+                                              imgPath,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 1,
+                                        right: 1,
+                                        child: PressableScale(
+                                          onTap: () {
+                                            HapticFeedback.selectionClick();
+                                            setState(() {
+                                              _stagedImagePaths.removeAt(idx);
+                                            });
+                                          },
+                                          child: Container(
+                                            width: 15,
+                                            height: 15,
+                                            decoration: BoxDecoration(
+                                              color: Colors.black.withValues(
+                                                alpha: 0.7,
+                                              ),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: const Center(
+                                              child: Icon(
+                                                CupertinoIcons.xmark,
+                                                size: 8,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   );
                                 },
+                              ),
+                            ),
+                          ),
+                        ],
+
+                        // Staged Voice Preview Bar (Multi-voice notes - compact)
+                        if (_stagedVoicePaths.isNotEmpty) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 6),
+                            child: Wrap(
+                              spacing: 6,
+                              runSpacing: 4,
+                              children: List.generate(_stagedVoicePaths.length, (
+                                idx,
+                              ) {
+                                final dur = idx < _stagedVoiceDurations.length
+                                    ? _stagedVoiceDurations[idx]
+                                    : 0;
+                                return Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: widget.p.surface2,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: widget.p.border.withValues(
+                                        alpha: 0.6,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        CupertinoIcons.mic_fill,
+                                        size: 11,
+                                        color: widget.p.accent,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'Voice ${idx + 1} (${_formatMs(dur)})',
+                                        style: TextStyle(
+                                          color: widget.p.text,
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      PressableScale(
+                                        onTap: () {
+                                          HapticFeedback.selectionClick();
+                                          setState(() {
+                                            _stagedVoicePaths.removeAt(idx);
+                                            if (idx <
+                                                _stagedVoiceDurations.length) {
+                                              _stagedVoiceDurations.removeAt(
+                                                idx,
+                                              );
+                                            }
+                                          });
+                                        },
+                                        child: Icon(
+                                          CupertinoIcons.xmark_circle_fill,
+                                          size: 13,
+                                          color: widget.p.text3,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }),
+                            ),
+                          ),
+                        ],
+
+                        // Media Action Chips Row (Camera, Photo, Mic)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Row(
+                            children: [
+                              PressableScale(
+                                onTap: () => _pickPhoto(ImageSource.camera),
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 8,
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: _relapseSelected
-                                        ? widget.p.orange.withValues(
-                                            alpha: 0.15,
-                                          )
+                                    color: widget.p.surface2,
+                                    borderRadius: BorderRadius.circular(999),
+                                    border: Border.all(
+                                      color: widget.p.border.withValues(
+                                        alpha: 0.6,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        CupertinoIcons.camera_fill,
+                                        size: 12,
+                                        color: widget.p.accent,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'Camera',
+                                        style: TextStyle(
+                                          color: widget.p.text2,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              PressableScale(
+                                onTap: () => _pickPhoto(ImageSource.gallery),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: widget.p.surface2,
+                                    borderRadius: BorderRadius.circular(999),
+                                    border: Border.all(
+                                      color: widget.p.border.withValues(
+                                        alpha: 0.6,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        CupertinoIcons
+                                            .photo_fill_on_rectangle_fill,
+                                        size: 12,
+                                        color: widget.p.accent,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'Photo',
+                                        style: TextStyle(
+                                          color: widget.p.text2,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              PressableScale(
+                                onTap: _toggleVoiceRecording,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: _isRecording
+                                        ? widget.p.red.withValues(alpha: 0.15)
                                         : widget.p.surface2,
                                     borderRadius: BorderRadius.circular(999),
                                     border: Border.all(
-                                      color: _relapseSelected
-                                          ? widget.p.orange
+                                      color: _isRecording
+                                          ? widget.p.red
                                           : widget.p.border.withValues(
                                               alpha: 0.6,
                                             ),
@@ -1154,21 +1183,20 @@ class _NoteDialogState extends State<NoteDialog> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(
-                                        CupertinoIcons
-                                            .exclamationmark_shield_fill,
+                                        _isRecording
+                                            ? CupertinoIcons.stop_fill
+                                            : CupertinoIcons.mic_fill,
                                         size: 12,
-                                        color: _relapseSelected
-                                            ? widget.p.orange
-                                            : widget.p.text3,
+                                        color: _isRecording
+                                            ? widget.p.red
+                                            : widget.p.accent,
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
-                                        _relapseSelected
-                                            ? 'Relapse'
-                                            : 'Sobriety',
+                                        _isRecording ? 'Stop' : 'Voice',
                                         style: TextStyle(
-                                          color: _relapseSelected
-                                              ? widget.p.orange
+                                          color: _isRecording
+                                              ? widget.p.red
                                               : widget.p.text2,
                                           fontSize: 11,
                                           fontWeight: FontWeight.w600,
@@ -1178,230 +1206,291 @@ class _NoteDialogState extends State<NoteDialog> {
                                   ),
                                 ),
                               ),
+
+                              if (_sobrietyMode) ...[
+                                const SizedBox(width: 6),
+                                PressableScale(
+                                  onTap: () {
+                                    setState(
+                                      () => _showSobrietyTray =
+                                          !_showSobrietyTray,
+                                    );
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: _relapseSelected
+                                          ? widget.p.orange.withValues(
+                                              alpha: 0.15,
+                                            )
+                                          : widget.p.surface2,
+                                      borderRadius: BorderRadius.circular(999),
+                                      border: Border.all(
+                                        color: _relapseSelected
+                                            ? widget.p.orange
+                                            : widget.p.border.withValues(
+                                                alpha: 0.6,
+                                              ),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          CupertinoIcons
+                                              .exclamationmark_shield_fill,
+                                          size: 12,
+                                          color: _relapseSelected
+                                              ? widget.p.orange
+                                              : widget.p.text3,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          _relapseSelected
+                                              ? 'Relapse'
+                                              : 'Sobriety',
+                                          style: TextStyle(
+                                            color: _relapseSelected
+                                                ? widget.p.orange
+                                                : widget.p.text2,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ],
+                          ),
+                        ),
+
+                        // Inline Hashtag Autocomplete Suggestions Overlay
+                        HashtagSuggestionOverlay(
+                          controller: _controller,
+                          p: widget.p,
+                        ),
+
+                        // Telegram-style Keyboard-Docked Rich Formatting Bar
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 6),
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            physics: const BouncingScrollPhysics(),
+                            child: Row(
+                              children: [
+                                // Undo / Redo
+                                ListenableBuilder(
+                                  listenable: _undoController,
+                                  builder: (context, _) => Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      _buildFormattingButton(
+                                        icon: CupertinoIcons.arrow_uturn_left,
+                                        enabled: _undoController.value.canUndo,
+                                        onTap: () {
+                                          if (_undoController.value.canUndo) {
+                                            HapticFeedback.lightImpact();
+                                            _undoController.undo();
+                                          }
+                                        },
+                                      ),
+                                      const SizedBox(width: 4),
+                                      _buildFormattingButton(
+                                        icon: CupertinoIcons.arrow_uturn_right,
+                                        enabled: _undoController.value.canRedo,
+                                        onTap: () {
+                                          if (_undoController.value.canRedo) {
+                                            HapticFeedback.lightImpact();
+                                            _undoController.redo();
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                Container(
+                                  margin: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                  ),
+                                  width: 1,
+                                  height: 16,
+                                  color: widget.p.border.withValues(alpha: 0.5),
+                                ),
+
+                                // Bold
+                                _buildFormattingButton(
+                                  label: 'B',
+                                  isBold: true,
+                                  onTap: () => _wrapOrInsert('**', '**'),
+                                ),
+                                const SizedBox(width: 4),
+
+                                // Italic
+                                _buildFormattingButton(
+                                  label: 'I',
+                                  isItalic: true,
+                                  onTap: () => _wrapOrInsert('*', '*'),
+                                ),
+                                const SizedBox(width: 4),
+
+                                // Monospace / Code
+                                _buildFormattingButton(
+                                  label: '` `',
+                                  isMono: true,
+                                  onTap: () => _wrapOrInsert('`', '`'),
+                                ),
+                                const SizedBox(width: 4),
+
+                                // Strikethrough
+                                _buildFormattingButton(
+                                  label: 'S',
+                                  isStrike: true,
+                                  onTap: () => _wrapOrInsert('~~', '~~'),
+                                ),
+                                const SizedBox(width: 4),
+
+                                // Blockquote
+                                _buildFormattingButton(
+                                  label: '" "',
+                                  onTap: () => _insertLinePrefix('> '),
+                                ),
+                                const SizedBox(width: 4),
+
+                                // Checklist
+                                _buildFormattingButton(
+                                  label: '[ ]',
+                                  onTap: () => _insertLinePrefix('- [ ] '),
+                                ),
+                                const SizedBox(width: 4),
+
+                                // Bullet List
+                                _buildFormattingButton(
+                                  label: '•',
+                                  onTap: () => _insertLinePrefix('• '),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        // Input Bar Row: WhatsApp style (Input box on left + Circular action button on right)
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Expanded(
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                curve: Curves.easeInOut,
+                                constraints: BoxConstraints(
+                                  minHeight: 46,
+                                  maxHeight: _isExpanded
+                                      ? expandedMaxHeight
+                                      : compactMaxHeight,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: widget.p.surface3,
+                                  borderRadius: BorderRadius.circular(18),
+                                  border: Border.all(
+                                    color: _showWarning
+                                        ? widget.p.red
+                                        : widget.p.border.withValues(
+                                            alpha: 0.8,
+                                          ),
+                                  ),
+                                ),
+                                child: TextField(
+                                  controller: _controller,
+                                  undoController: _undoController,
+                                  focusNode: _focusNode,
+                                  maxLength:
+                                      widget.initialNote.length > maxNoteLength
+                                      ? null
+                                      : maxNoteLength,
+                                  maxLengthEnforcement: MaxLengthEnforcement
+                                      .truncateAfterCompositionEnds,
+                                  minLines: _isExpanded ? 7 : 2,
+                                  maxLines: _isExpanded ? 14 : 4,
+                                  textAlignVertical: TextAlignVertical.top,
+                                  keyboardType: TextInputType.multiline,
+                                  textInputAction: TextInputAction.newline,
+                                  textCapitalization:
+                                      TextCapitalization.sentences,
+                                  autocorrect: true,
+                                  enableSuggestions: true,
+                                  scrollPadding: EdgeInsets.zero,
+                                  style: TextStyle(
+                                    color: widget.p.text,
+                                    fontSize: 14,
+                                    height: 1.35,
+                                  ),
+                                  decoration: InputDecoration(
+                                    counterText: '',
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 10,
+                                    ),
+                                    hintText:
+                                        widget.hintText ??
+                                        'What should this moment remember?',
+                                    hintStyle: TextStyle(
+                                      color: widget.p.text3,
+                                      fontSize: 13,
+                                    ),
+                                    border: InputBorder.none,
+                                    isDense: true,
+                                  ),
+                                  onChanged: (text) {
+                                    if (_showWarning) {
+                                      setState(() => _showWarning = false);
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+
+                            // Circular WhatsApp-style Send/Save Button (Minimal, non-glowing)
+                            PressableScale(
+                              onTap: _saveNote,
+                              child: Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: widget.p.accent,
+                                ),
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.arrow_upward_rounded,
+                                    color: Colors.white,
+                                    size: 22,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ],
                         ),
-                      ),
 
-                      // Inline Hashtag Autocomplete Suggestions Overlay
-                      HashtagSuggestionOverlay(
-                        controller: _controller,
-                        p: widget.p,
-                      ),
-
-                      // Telegram-style Keyboard-Docked Rich Formatting Bar
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 6),
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          physics: const BouncingScrollPhysics(),
-                          child: Row(
-                            children: [
-                              // Undo / Redo
-                              ListenableBuilder(
-                                listenable: _undoController,
-                                builder: (context, _) => Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    _buildFormattingButton(
-                                      icon: CupertinoIcons.arrow_uturn_left,
-                                      enabled: _undoController.value.canUndo,
-                                      onTap: () {
-                                        if (_undoController.value.canUndo) {
-                                          HapticFeedback.lightImpact();
-                                          _undoController.undo();
-                                        }
-                                      },
-                                    ),
-                                    const SizedBox(width: 4),
-                                    _buildFormattingButton(
-                                      icon: CupertinoIcons.arrow_uturn_right,
-                                      enabled: _undoController.value.canRedo,
-                                      onTap: () {
-                                        if (_undoController.value.canRedo) {
-                                          HapticFeedback.lightImpact();
-                                          _undoController.redo();
-                                        }
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              Container(
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                ),
-                                width: 1,
-                                height: 16,
-                                color: widget.p.border.withValues(alpha: 0.5),
-                              ),
-
-                              // Bold
-                              _buildFormattingButton(
-                                label: 'B',
-                                isBold: true,
-                                onTap: () => _wrapOrInsert('**', '**'),
-                              ),
-                              const SizedBox(width: 4),
-
-                              // Italic
-                              _buildFormattingButton(
-                                label: 'I',
-                                isItalic: true,
-                                onTap: () => _wrapOrInsert('*', '*'),
-                              ),
-                              const SizedBox(width: 4),
-
-                              // Monospace / Code
-                              _buildFormattingButton(
-                                label: '` `',
-                                isMono: true,
-                                onTap: () => _wrapOrInsert('`', '`'),
-                              ),
-                              const SizedBox(width: 4),
-
-                              // Strikethrough
-                              _buildFormattingButton(
-                                label: 'S',
-                                isStrike: true,
-                                onTap: () => _wrapOrInsert('~~', '~~'),
-                              ),
-                              const SizedBox(width: 4),
-
-                              // Blockquote
-                              _buildFormattingButton(
-                                label: '" "',
-                                onTap: () => _insertLinePrefix('> '),
-                              ),
-                              const SizedBox(width: 4),
-
-                              // Checklist
-                              _buildFormattingButton(
-                                label: '[ ]',
-                                onTap: () => _insertLinePrefix('- [ ] '),
-                              ),
-                              const SizedBox(width: 4),
-
-                              // Bullet List
-                              _buildFormattingButton(
-                                label: '•',
-                                onTap: () => _insertLinePrefix('• '),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      // Input Bar Row: WhatsApp style (Input box on left + Circular action button on right)
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Expanded(
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              curve: Curves.easeInOut,
-                              constraints: BoxConstraints(
-                                minHeight: 46,
-                                maxHeight: _isExpanded
-                                    ? expandedMaxHeight
-                                    : compactMaxHeight,
-                              ),
-                              decoration: BoxDecoration(
-                                color: widget.p.surface3,
-                                borderRadius: BorderRadius.circular(18),
-                                border: Border.all(
-                                  color: _showWarning
-                                      ? widget.p.red
-                                      : widget.p.border.withValues(alpha: 0.8),
-                                ),
-                              ),
-                              child: TextField(
-                                controller: _controller,
-                                undoController: _undoController,
-                                focusNode: _focusNode,
-                                maxLength:
-                                    widget.initialNote.length > maxNoteLength
-                                    ? null
-                                    : maxNoteLength,
-                                maxLengthEnforcement: MaxLengthEnforcement
-                                    .truncateAfterCompositionEnds,
-                                minLines: _isExpanded ? 7 : 2,
-                                maxLines: _isExpanded ? 14 : 4,
-                                textAlignVertical: TextAlignVertical.top,
-                                keyboardType: TextInputType.multiline,
-                                textInputAction: TextInputAction.newline,
-                                textCapitalization:
-                                    TextCapitalization.sentences,
-                                autocorrect: true,
-                                enableSuggestions: true,
-                                scrollPadding: EdgeInsets.zero,
-                                style: TextStyle(
-                                  color: widget.p.text,
-                                  fontSize: 14,
-                                  height: 1.35,
-                                ),
-                                decoration: InputDecoration(
-                                  counterText: '',
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 10,
-                                  ),
-                                  hintText:
-                                      widget.hintText ??
-                                      'What should this moment remember?',
-                                  hintStyle: TextStyle(
-                                    color: widget.p.text3,
-                                    fontSize: 13,
-                                  ),
-                                  border: InputBorder.none,
-                                  isDense: true,
-                                ),
-                                onChanged: (text) {
-                                  if (_showWarning) {
-                                    setState(() => _showWarning = false);
-                                  }
-                                },
+                        if (_showWarning)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 6, left: 4),
+                            child: Text(
+                              'Write something to save.',
+                              style: TextStyle(
+                                color: widget.p.red,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ),
-                          const SizedBox(width: 8),
-
-                          // Circular WhatsApp-style Send/Save Button (Minimal, non-glowing)
-                          PressableScale(
-                            onTap: _saveNote,
-                            child: Container(
-                              width: 44,
-                              height: 44,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: widget.p.accent,
-                              ),
-                              child: const Center(
-                                child: Icon(
-                                  Icons.arrow_upward_rounded,
-                                  color: Colors.white,
-                                  size: 22,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      if (_showWarning)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 6, left: 4),
-                          child: Text(
-                            'Write something to save.',
-                            style: TextStyle(
-                              color: widget.p.red,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -1538,6 +1627,12 @@ class _NoteDialogState extends State<NoteDialog> {
     final totalDuration = _stagedVoiceDurations.isEmpty
         ? null
         : _stagedVoiceDurations.fold(0, (a, b) => a + b);
+
+    unawaited(
+      SharedPreferences.getInstance().then(
+        (prefs) => prefs.remove('draft.note'),
+      ),
+    );
 
     Navigator.pop(
       context,

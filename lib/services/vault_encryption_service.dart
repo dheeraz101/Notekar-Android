@@ -21,7 +21,7 @@ class VaultEncryptionService {
   VaultEncryptionService._();
   static final VaultEncryptionService instance = VaultEncryptionService._();
 
-  static const int defaultPbkdf2Iterations = 10000;
+  static const int defaultPbkdf2Iterations = 100000;
   static const int saltLength = 16;
   static const int nonceLength = 12;
   static const int keyLength = 32; // 256-bit AES

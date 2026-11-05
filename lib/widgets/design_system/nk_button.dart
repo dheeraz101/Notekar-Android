@@ -91,7 +91,9 @@ class NkButton extends StatelessWidget {
         backgroundColor = isEnabled
             ? p.accent
             : p.accent.withValues(alpha: 0.4);
-        foregroundColor = Colors.white;
+        foregroundColor = isEnabled
+            ? p.onAccent
+            : p.onAccent.withValues(alpha: 0.6);
         border = null;
         break;
       case NkButtonVariant.secondary:

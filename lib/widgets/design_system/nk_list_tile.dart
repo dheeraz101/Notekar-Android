@@ -279,13 +279,15 @@ class NkSwitchTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12.0),
-                Switch.adaptive(
-                  value: value,
-                  onChanged: enabled ? onChanged : null,
-                  activeThumbColor: p.accent,
-                  activeTrackColor: p.accent.withValues(alpha: 0.4),
-                  inactiveThumbColor: p.text3,
-                  inactiveTrackColor: p.surface3,
+                ExcludeSemantics(
+                  child: Switch.adaptive(
+                    value: value,
+                    onChanged: enabled ? onChanged : null,
+                    activeThumbColor: p.accent,
+                    activeTrackColor: p.accent.withValues(alpha: 0.4),
+                    inactiveThumbColor: p.text3,
+                    inactiveTrackColor: p.surface3,
+                  ),
                 ),
               ],
             ),

@@ -60,18 +60,20 @@ class NkEmptyState extends StatelessWidget {
                 fontFamily: 'Inter',
               ),
             ),
-            const SizedBox(height: 8.0),
-            Text(
-              description,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: p.text3,
-                fontSize: 13.5,
-                fontWeight: FontWeight.w400,
-                height: 1.4,
-                fontFamily: 'Inter',
+            if (description.trim().isNotEmpty) ...[
+              const SizedBox(height: 8.0),
+              Text(
+                description,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: p.text3,
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w400,
+                  height: 1.4,
+                  fontFamily: 'Inter',
+                ),
               ),
-            ),
+            ],
             if (actionLabel != null && onAction != null) ...[
               const SizedBox(height: 20.0),
               NkButton.secondary(
