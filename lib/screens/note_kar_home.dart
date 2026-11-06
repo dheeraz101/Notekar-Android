@@ -15,6 +15,7 @@ import 'package:flutter/cupertino.dart'
         CupertinoThemeData,
         showCupertinoDialog;
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/backup_dialogs.dart';
@@ -293,9 +294,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   StreamSubscription<AccelerometerEvent>? _motionSub;
+  Ticker? _motionTicker;
+  double _targetMotionX = 0.0;
+  double _targetMotionY = 0.0;
+  bool _awaitingOverlayPermissionCheck = false;
   final ValueNotifier<Offset> _motion = ValueNotifier(Offset.zero);
 
-  int _lastMotionMs = 0;
   bool _adaptiveModeColor = false;
 
   Color? get _activeAdaptiveColor {
@@ -380,6 +384,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
     _privacyOverlayEntry?.remove();
     _privacyOverlayEntry = null;
     _motionSub?.cancel();
+    _motionTicker?.dispose();
+    _motionTicker = null;
     _motion.dispose();
     _updateStatusResetTimer?.cancel();
     _midSessionGoalCelebrationTimer?.cancel();
@@ -490,12 +496,32 @@ class _NoteKarHomeState extends State<NoteKarHome>
     return true;
   }
 
+  void _onMotionTick(Duration elapsed) {
+    if (!mounted) return;
+    final current = _motion.value;
+    final nextX = current.dx + (_targetMotionX - current.dx) * 0.12;
+    final nextY = current.dy + (_targetMotionY - current.dy) * 0.12;
+
+    if ((nextX - current.dx).abs() < 0.0004 &&
+        (nextY - current.dy).abs() < 0.0004) {
+      return;
+    }
+
+    _motion.value = Offset(nextX, nextY);
+  }
+
   void _startMotionIfNeeded() {
     if (_reduceMotion || !_homeMenuAnimations) {
       _motionSub?.cancel();
       _motionSub = null;
+      _motionTicker?.stop();
       _motion.value = Offset.zero;
       return;
+    }
+
+    _motionTicker ??= createTicker(_onMotionTick);
+    if (!_motionTicker!.isTicking) {
+      _motionTicker!.start();
     }
 
     if (_motionSub != null) return;
@@ -505,30 +531,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
           samplingPeriod: const Duration(milliseconds: 100),
         ).listen(
           (event) {
-            final now = DateTime.now().millisecondsSinceEpoch;
-            if (now - _lastMotionMs < 100) return;
-            _lastMotionMs = now;
-
-            final targetX = (event.x / 9.8).clamp(-1.0, 1.0);
-            final targetY = (event.y / 9.8).clamp(-1.0, 1.0);
-
-            if (!mounted) return;
-
-            final current = _motion.value;
-
-            final nextX = current.dx + (targetX - current.dx) * 0.20;
-            final nextY = current.dy + (targetY - current.dy) * 0.20;
-
-            if ((nextX - current.dx).abs() < 0.003 &&
-                (nextY - current.dy).abs() < 0.003) {
-              return;
-            }
-
-            _motion.value = Offset(nextX, nextY);
+            _targetMotionX = (event.x / 9.8).clamp(-1.0, 1.0);
+            _targetMotionY = (event.y / 9.8).clamp(-1.0, 1.0);
           },
           onError: (_) {
             _motionSub?.cancel();
             _motionSub = null;
+            _motionTicker?.stop();
           },
         );
   }
@@ -538,6 +547,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     if (state == AppLifecycleState.resumed) {
       unawaited(DeviceHealthManager.instance.refresh());
       unawaited(DigitalWellbeingService.instance.checkPermission());
+      unawaited(_checkOverlayPermissionOnResume());
       if (_prefs != null) {
         unawaited(() async {
           await _prefs!.reload();
@@ -581,6 +591,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         state == AppLifecycleState.inactive) {
       _motionSub?.cancel();
       _motionSub = null;
+      _motionTicker?.stop();
 
       if (_isPrivacyAuthGraceActive()) return;
 
@@ -2617,11 +2628,32 @@ class _NoteKarHomeState extends State<NoteKarHome>
     unawaited(_updateAndroidWidget());
   }
 
+  Future<void> _checkOverlayPermissionOnResume() async {
+    try {
+      final canDraw =
+          await _fileChannel.invokeMethod<bool>('canDrawOverlays') ?? false;
+      if (canDraw && _awaitingOverlayPermissionCheck) {
+        _awaitingOverlayPermissionCheck = false;
+        await _fileChannel.invokeMethod<void>('startFloatingTimer');
+        if (!mounted) return;
+        setState(() => _floatingTimerEnabled = true);
+        await _saveSetting('floating_timer_enabled', true);
+        if (!mounted) return;
+        _showToast('Floating Control Pill enabled'.localized(context));
+      } else if (!canDraw && _floatingTimerEnabled) {
+        if (!mounted) return;
+        setState(() => _floatingTimerEnabled = false);
+        await _saveSetting('floating_timer_enabled', false);
+      }
+    } catch (_) {}
+  }
+
   Future<void> _toggleFloatingTimer(bool enabled) async {
     if (enabled) {
       final canDraw =
           await _fileChannel.invokeMethod<bool>('canDrawOverlays') ?? false;
       if (!canDraw) {
+        _awaitingOverlayPermissionCheck = true;
         await _fileChannel.invokeMethod<void>('requestOverlayPermission');
         if (!mounted) return;
         _showToast(

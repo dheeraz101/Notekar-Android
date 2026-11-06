@@ -26,7 +26,8 @@ class TargetsProjectsSettingsPage extends StatefulWidget {
 }
 
 class _TargetsProjectsSettingsPageState
-    extends State<TargetsProjectsSettingsPage> {
+    extends State<TargetsProjectsSettingsPage>
+    with WidgetsBindingObserver {
   static const _channel = MethodChannel('notekar/files');
 
   bool _reflectionEnabled = true;
@@ -41,7 +42,36 @@ class _TargetsProjectsSettingsPageState
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadPreferences();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkOverlayPermissionOnResume();
+    }
+  }
+
+  Future<void> _checkOverlayPermissionOnResume() async {
+    try {
+      final canDraw =
+          await _channel.invokeMethod<bool>('canDrawOverlays') ?? false;
+      final prefs = await SharedPreferences.getInstance();
+      if (_floatingTimerEnabled && canDraw) {
+        await _channel.invokeMethod('startFloatingTimer');
+      } else if (!canDraw && _floatingTimerEnabled) {
+        _floatingTimerEnabled = false;
+        await prefs.setBool('floating_timer_enabled', false);
+        if (mounted) setState(() {});
+      }
+    } catch (_) {}
   }
 
   Future<void> _loadPreferences() async {
