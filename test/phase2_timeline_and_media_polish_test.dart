@@ -175,5 +175,84 @@ void main() {
         await tester.pumpAndSettle();
       },
     );
+
+    testWidgets(
+      'IosEmojiText fast-path activates for bullet lists starting with - and renders bullets',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: IosEmojiText('- Task 1\n- Task 2', accentColor: p.accent),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Should render rich text with bullet symbol
+        final richTextFinder = find.byType(RichText);
+        expect(richTextFinder, findsOneWidget);
+        final richText = tester.widget<RichText>(richTextFinder);
+        expect(richText.text.toPlainText(), contains('• Task 1'));
+        expect(richText.text.toPlainText(), contains('• Task 2'));
+      },
+    );
+
+    testWidgets(
+      'ExpandableTimelineNote resets expansion when updated with short text',
+      (tester) async {
+        final longNote = 'Line 1\nLine 2\nLine 3\nLine 4\nLine 5\nLine 6';
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: StatefulBuilder(
+                builder: (context, setState) {
+                  return SizedBox(
+                    width: 300,
+                    child: ExpandableTimelineNote(
+                      text: longNote,
+                      p: p,
+                      collapsedMaxLines: 2,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Tap "show more"
+        expect(find.text('show more'), findsOneWidget);
+        await tester.tap(find.text('show more'));
+        await tester.pumpAndSettle();
+        expect(find.text('show less'), findsOneWidget);
+
+        // Update with short note
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: StatefulBuilder(
+                builder: (context, setState) {
+                  return SizedBox(
+                    width: 300,
+                    child: ExpandableTimelineNote(
+                      text: 'Short note',
+                      p: p,
+                      collapsedMaxLines: 2,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // "show less" must NOT be visible on a short note
+        expect(find.text('show less'), findsNothing);
+        expect(find.text('show more'), findsNothing);
+      },
+    );
   });
 }

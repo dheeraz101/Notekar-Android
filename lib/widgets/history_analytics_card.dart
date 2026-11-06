@@ -637,7 +637,7 @@ class _AnnualHeatmapGridPainter extends CustomPainter {
     for (int col = 0; col < columnCount; col++) {
       for (int row = 0; row < 7; row++) {
         final currentDay = runner.add(Duration(days: row));
-        if (currentDay.isAfter(now)) continue;
+        if (dateKey(currentDay).compareTo(dateKey(now)) > 0) continue;
 
         final key = dateKey(currentDay);
         final count = countMap[key] ?? 0;

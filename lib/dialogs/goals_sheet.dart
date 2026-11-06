@@ -53,6 +53,8 @@ class GoalsSheet extends StatefulWidget {
     this.onStartSession,
     this.onStopSession,
     this.onManualEntry,
+    this.canPop,
+    this.onPopInvokedWithResult,
   });
 
   final Palette p;
@@ -63,6 +65,8 @@ class GoalsSheet extends StatefulWidget {
   final ValueChanged<Goal>? onStartSession;
   final VoidCallback? onStopSession;
   final ValueChanged<Goal>? onManualEntry;
+  final bool? canPop;
+  final PopInvokedWithResultCallback<Object?>? onPopInvokedWithResult;
 
   static Future<dynamic> show(
     BuildContext context, {
@@ -74,6 +78,8 @@ class GoalsSheet extends StatefulWidget {
     ValueChanged<Goal>? onStartSession,
     VoidCallback? onStopSession,
     ValueChanged<Goal>? onManualEntry,
+    bool? canPop,
+    PopInvokedWithResultCallback<Object?>? onPopInvokedWithResult,
   }) {
     return showModalBottomSheet<dynamic>(
       context: context,
@@ -89,6 +95,8 @@ class GoalsSheet extends StatefulWidget {
         onStartSession: onStartSession,
         onStopSession: onStopSession,
         onManualEntry: onManualEntry,
+        canPop: canPop,
+        onPopInvokedWithResult: onPopInvokedWithResult,
       ),
     );
   }
@@ -106,6 +114,8 @@ class _GoalsSheetState extends State<GoalsSheet> {
     return AppSheet(
       p: widget.p,
       title: 'Targets & Goals'.localized(context),
+      canPop: widget.canPop,
+      onPopInvokedWithResult: widget.onPopInvokedWithResult,
       trailingAction: _hasGoals
           ? PressableScale(
               onTap: () {

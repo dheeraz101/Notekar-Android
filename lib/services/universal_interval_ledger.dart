@@ -351,27 +351,30 @@ class UniversalIntervalLedger {
         continue;
       }
 
-      final startDt = DateTime.fromMillisecondsSinceEpoch(interval.startMs);
-      final y = startDt.year;
-      final m = startDt.month;
-      final d = startDt.day;
+      final slices = interval.sliceAtMidnights();
+      for (final slice in slices) {
+        final startDt = DateTime.fromMillisecondsSinceEpoch(slice.startMs);
+        final y = startDt.year;
+        final m = startDt.month;
+        final d = startDt.day;
 
-      final t0 = DateTime(y, m, d, 0).millisecondsSinceEpoch;
-      final t6 = DateTime(y, m, d, 6).millisecondsSinceEpoch;
-      final t12 = DateTime(y, m, d, 12).millisecondsSinceEpoch;
-      final t17 = DateTime(y, m, d, 17).millisecondsSinceEpoch;
-      final t22 = DateTime(y, m, d, 22).millisecondsSinceEpoch;
-      final t24 = DateTime(y, m, d + 1, 0).millisecondsSinceEpoch;
+        final t0 = DateTime(y, m, d, 0).millisecondsSinceEpoch;
+        final t6 = DateTime(y, m, d, 6).millisecondsSinceEpoch;
+        final t12 = DateTime(y, m, d, 12).millisecondsSinceEpoch;
+        final t17 = DateTime(y, m, d, 17).millisecondsSinceEpoch;
+        final t22 = DateTime(y, m, d, 22).millisecondsSinceEpoch;
+        final t24 = DateTime(y, m, d + 1, 0).millisecondsSinceEpoch;
 
-      final s = interval.startMs;
-      final e = interval.endMs;
+        final s = slice.startMs;
+        final e = slice.endMs;
 
-      // Night: 0..6 and 22..24
-      nightMs += math.max(0, math.min(e, t6) - math.max(s, t0));
-      morningMs += math.max(0, math.min(e, t12) - math.max(s, t6));
-      afternoonMs += math.max(0, math.min(e, t17) - math.max(s, t12));
-      eveningMs += math.max(0, math.min(e, t22) - math.max(s, t17));
-      nightMs += math.max(0, math.min(e, t24) - math.max(s, t22));
+        // Night: 0..6 and 22..24
+        nightMs += math.max(0, math.min(e, t6) - math.max(s, t0));
+        morningMs += math.max(0, math.min(e, t12) - math.max(s, t6));
+        afternoonMs += math.max(0, math.min(e, t17) - math.max(s, t12));
+        eveningMs += math.max(0, math.min(e, t22) - math.max(s, t17));
+        nightMs += math.max(0, math.min(e, t24) - math.max(s, t22));
+      }
     }
 
     final totalMs = morningMs + afternoonMs + eveningMs + nightMs;

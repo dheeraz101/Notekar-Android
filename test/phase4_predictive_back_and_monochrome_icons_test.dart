@@ -108,6 +108,53 @@ void main() {
         'android/app/src/main/res/drawable/ic_launcher_foreground.xml',
       );
       expect(foregroundXml.existsSync(), isTrue);
+
+      final manifestXml = File('android/app/src/main/AndroidManifest.xml');
+      expect(manifestXml.existsSync(), isTrue);
+      final manifestContent = manifestXml.readAsStringSync();
+      expect(
+        manifestContent.contains(
+          'android:roundIcon="@mipmap/ic_launcher_round"',
+        ),
+        isTrue,
+      );
+      expect(
+        manifestContent.contains('android:enableOnBackInvokedCallback="true"'),
+        isTrue,
+      );
     });
+
+    testWidgets(
+      'GoalsSheet forwards canPop and onPopInvokedWithResult for predictive back',
+      (tester) async {
+        bool popInvoked = false;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: AppSheet(
+                p: p,
+                title: 'Goals Sheet Test',
+                canPop: false,
+                onPopInvokedWithResult: (didPop, result) {
+                  popInvoked = true;
+                },
+                child: const Text('Goals content'),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final popScopeFinder = find.byWidgetPredicate((w) => w is PopScope);
+        expect(popScopeFinder, findsOneWidget);
+
+        final popScope = tester.widget<PopScope>(popScopeFinder);
+        expect(popScope.canPop, isFalse);
+
+        popScope.onPopInvokedWithResult?.call(false, null);
+        expect(popInvoked, isTrue);
+      },
+    );
   });
 }

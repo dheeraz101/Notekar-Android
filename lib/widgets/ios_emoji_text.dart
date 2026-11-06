@@ -59,6 +59,8 @@ class IosEmojiText extends StatelessWidget {
         text.contains('#') ||
         text.contains('>') ||
         text.contains('- [') ||
+        text.contains('- ') ||
+        text.contains('• ') ||
         text.contains('_');
 
     if (!hasMarkdown) {

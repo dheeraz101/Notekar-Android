@@ -43,6 +43,14 @@ class _ExpandableTimelineNoteState extends State<ExpandableTimelineNote> {
   }
 
   @override
+  void didUpdateWidget(covariant ExpandableTimelineNote oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.text != widget.text && !_isLikelyLong) {
+      _isExpanded = false;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (widget.text.trim().isEmpty) {
       return const SizedBox.shrink();

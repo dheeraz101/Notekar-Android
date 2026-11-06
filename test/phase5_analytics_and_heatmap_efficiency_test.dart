@@ -54,6 +54,35 @@ void main() {
     );
 
     test(
+      'UniversalIntervalLedger.computeTimeSlotBias correctly splits multi-day session across midnight boundaries without dropping hours',
+      () {
+        // May 10 23:00 to May 11 03:00 (4 hours total, all in Night slot: 22-06)
+        final start = DateTime(2026, 5, 10, 23, 0).millisecondsSinceEpoch;
+        final end = DateTime(2026, 5, 11, 3, 0).millisecondsSinceEpoch;
+
+        final intervals = [
+          CanonicalInterval(
+            id: 'sess_midnight',
+            startMs: start,
+            endMs: end,
+            dateKey: '2026-05-10',
+            category: 'DeepFocus',
+            isSession: true,
+          ),
+        ];
+
+        final dist = UniversalIntervalLedger.computeTimeSlotBias(intervals);
+        expect(dist.totalMs, 4 * 3600 * 1000);
+        expect(dist.nightMs, 4 * 3600 * 1000);
+        expect(dist.morningMs, 0);
+        expect(dist.afternoonMs, 0);
+        expect(dist.eveningMs, 0);
+        expect(dist.nightPct, 100);
+        expect(dist.peakSlot, 'Night');
+      },
+    );
+
+    test(
       'DashboardMetricsService computes duration-weighted time-slot bias from sessions',
       () {
         // 3-hour evening session: 18:00 to 21:00
