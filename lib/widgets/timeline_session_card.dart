@@ -9,7 +9,7 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/tag_service.dart';
-import 'package:notekar/widgets/ios_emoji_text.dart';
+import 'package:notekar/widgets/expandable_timeline_note.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/swipeable_card_bed.dart';
 import 'package:notekar/widgets/timeline_media_attachment_card.dart';
@@ -503,10 +503,13 @@ class TimelineSessionCard extends StatelessWidget {
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           if (clean.isNotEmpty)
-                                            IosEmojiText(
-                                              clean,
-                                              maxLines: compact ? 1 : 3,
-                                              overflow: TextOverflow.ellipsis,
+                                            ExpandableTimelineNote(
+                                              text: clean,
+                                              p: p,
+                                              compact: compact,
+                                              collapsedMaxLines: compact
+                                                  ? 1
+                                                  : 3,
                                               style: TextStyle(
                                                 color: p.text,
                                                 fontSize: compact ? 13.5 : 15.5,

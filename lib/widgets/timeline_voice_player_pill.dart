@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -95,6 +96,9 @@ class _TimelineVoicePlayerPillState extends State<TimelineVoicePlayerPill> {
 
   final AudioService _audioService = AudioService.instance;
   int _lastHapticScrubIndex = -1;
+  Timer? _seekDebounceTimer;
+  double? _scrubDragRatio;
+  Duration? _pendingSeekPosition;
 
   @override
   void initState() {
@@ -104,8 +108,18 @@ class _TimelineVoicePlayerPillState extends State<TimelineVoicePlayerPill> {
 
   @override
   void dispose() {
+    _seekDebounceTimer?.cancel();
     _audioService.removeListener(_onAudioStateChanged);
     super.dispose();
+  }
+
+  void _performSeek(Duration target) {
+    _seekDebounceTimer?.cancel();
+    _seekDebounceTimer = null;
+    _pendingSeekPosition = null;
+    _scrubDragRatio = null;
+    _audioService.seek(target);
+    if (mounted) setState(() {});
   }
 
   void _onAudioStateChanged() {
@@ -166,9 +180,11 @@ class _TimelineVoicePlayerPillState extends State<TimelineVoicePlayerPill> {
     final isCompact = widget.compact;
     final total = _totalDuration;
     final pos = _currentPosition;
-    final progress = total.inMilliseconds > 0
-        ? (pos.inMilliseconds / total.inMilliseconds).clamp(0.0, 1.0)
-        : 0.0;
+    final progress =
+        _scrubDragRatio ??
+        (total.inMilliseconds > 0
+            ? (pos.inMilliseconds / total.inMilliseconds).clamp(0.0, 1.0)
+            : 0.0);
 
     return Padding(
       padding: const EdgeInsets.only(top: 6.0, bottom: 2.0),
@@ -214,7 +230,7 @@ class _TimelineVoicePlayerPillState extends State<TimelineVoicePlayerPill> {
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final waveformWidth = constraints.maxWidth;
-                  void seekTo(Offset localPosition) {
+                  void seekTo(Offset localPosition, {bool immediate = false}) {
                     if (waveformWidth > 0 && total > Duration.zero) {
                       final ratio = (localPosition.dx / waveformWidth).clamp(
                         0.0,
@@ -227,7 +243,25 @@ class _TimelineVoicePlayerPillState extends State<TimelineVoicePlayerPill> {
                         HapticFeedback.selectionClick();
                       }
                       final targetMs = (ratio * total.inMilliseconds).toInt();
-                      _audioService.seek(Duration(milliseconds: targetMs));
+                      final targetDuration = Duration(milliseconds: targetMs);
+
+                      if (immediate) {
+                        _performSeek(targetDuration);
+                      } else {
+                        _scrubDragRatio = ratio;
+                        _pendingSeekPosition = targetDuration;
+                        if (mounted) setState(() {});
+
+                        _seekDebounceTimer?.cancel();
+                        _seekDebounceTimer = Timer(
+                          const Duration(milliseconds: 50),
+                          () {
+                            if (_pendingSeekPosition != null) {
+                              _audioService.seek(_pendingSeekPosition!);
+                            }
+                          },
+                        );
+                      }
                     }
                   }
 
@@ -255,16 +289,30 @@ class _TimelineVoicePlayerPillState extends State<TimelineVoicePlayerPill> {
                       },
                       child: GestureDetector(
                         behavior: HitTestBehavior.opaque,
-                        onTapDown: (details) => seekTo(details.localPosition),
+                        onTapDown: (details) =>
+                            seekTo(details.localPosition, immediate: true),
                         onHorizontalDragStart: (details) {
                           _lastHapticScrubIndex = -1;
                           seekTo(details.localPosition);
                         },
                         onHorizontalDragUpdate: (details) =>
                             seekTo(details.localPosition),
-                        onHorizontalDragEnd: (_) => _lastHapticScrubIndex = -1,
-                        onHorizontalDragCancel: () =>
-                            _lastHapticScrubIndex = -1,
+                        onHorizontalDragEnd: (_) {
+                          _lastHapticScrubIndex = -1;
+                          if (_pendingSeekPosition != null) {
+                            _performSeek(_pendingSeekPosition!);
+                          } else {
+                            _scrubDragRatio = null;
+                            if (mounted) setState(() {});
+                          }
+                        },
+                        onHorizontalDragCancel: () {
+                          _lastHapticScrubIndex = -1;
+                          _seekDebounceTimer?.cancel();
+                          _pendingSeekPosition = null;
+                          _scrubDragRatio = null;
+                          if (mounted) setState(() {});
+                        },
                         child: Container(
                           color: Colors.transparent,
                           padding: const EdgeInsets.symmetric(vertical: 6),

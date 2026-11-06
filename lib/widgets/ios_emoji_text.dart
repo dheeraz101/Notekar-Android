@@ -38,7 +38,9 @@ class IosEmojiText extends StatelessWidget {
   static final RegExp _inlineRegex = RegExp(
     r'(\*\*\*(?:[^\s*](?:[^*\n]*?[^\s*])?)\*\*\*)|' // 1: ***bold italic***
     r'(\*\*(?:[^\s*](?:[^*\n]*?[^\s*])?)\*\*)|' // 2: **bold**
+    r'(__[^\s](?:.*?[^\s])?__)|' // 2b: __bold__
     r'(\*(?:[^\s*](?:[^*\n]*?[^\s*])?)\*)|' // 3: *italic*
+    r'((?<=[\s\(\[\{\x22\x27]|^)_[^\s](?:.*?[^\s])?_(?=[\s\)\.\,\!\?\]\}\x22\x27]|$))|' // 3b: _italic_
     r'(`(?:[^`\n]+?)`)|' // 4: `code`
     r'(~~(?:[^\s~](?:[^~\n]*?[^\s~])?)~~)|' // 5: ~~strike~~
     r'(#[a-zA-Z0-9_\u0900-\u097F\u0080-\uFFFF]+)', // 6: #hashtag
@@ -56,7 +58,8 @@ class IosEmojiText extends StatelessWidget {
         text.contains('~') ||
         text.contains('#') ||
         text.contains('>') ||
-        text.contains('- [');
+        text.contains('- [') ||
+        text.contains('_');
 
     if (!hasMarkdown) {
       return Text(
@@ -72,7 +75,7 @@ class IosEmojiText extends StatelessWidget {
     final baseStyle = style ?? defaultStyle;
     final accent = accentColor ?? Theme.of(context).colorScheme.primary;
 
-    final span = _parseMarkdown(text, baseStyle, accent);
+    final span = parseMarkdown(text, baseStyle, accent);
 
     return Text.rich(
       span,
@@ -82,7 +85,7 @@ class IosEmojiText extends StatelessWidget {
     );
   }
 
-  static TextSpan _parseMarkdown(
+  static TextSpan parseMarkdown(
     String text,
     TextStyle baseStyle,
     Color accentColor,
@@ -217,8 +220,28 @@ class IosEmojiText extends StatelessWidget {
             style: baseStyle.copyWith(fontWeight: FontWeight.w700),
           ),
         );
+      } else if (matchedText.startsWith('__') &&
+          matchedText.endsWith('__') &&
+          matchedText.length >= 4) {
+        final inner = matchedText.substring(2, matchedText.length - 2);
+        spans.add(
+          TextSpan(
+            text: inner,
+            style: baseStyle.copyWith(fontWeight: FontWeight.w700),
+          ),
+        );
       } else if (matchedText.startsWith('*') &&
           matchedText.endsWith('*') &&
+          matchedText.length >= 2) {
+        final inner = matchedText.substring(1, matchedText.length - 1);
+        spans.add(
+          TextSpan(
+            text: inner,
+            style: baseStyle.copyWith(fontStyle: FontStyle.italic),
+          ),
+        );
+      } else if (matchedText.startsWith('_') &&
+          matchedText.endsWith('_') &&
           matchedText.length >= 2) {
         final inner = matchedText.substring(1, matchedText.length - 1);
         spans.add(

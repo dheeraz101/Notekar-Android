@@ -684,6 +684,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'Shirley à l\'empereur Lelouch VI Britannia.',
     'show all': 'Tout afficher',
     'show more': 'afficher plus',
+    'show less': 'afficher moins',
     'show recent 7 days': 'Afficher les 7 derniers jours',
     'show seconds': 'Afficher les secondes',
     'shows 00–99 counters instead of static icons in history.':
@@ -1537,6 +1538,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'De Shirley al Emperador Lelouch vi Britannia.',
     'show all': 'Mostrar todos',
     'show more': 'Mostrar más',
+    'show less': 'Mostrar menos',
     'show recent 7 days': 'Mostrar últimos 7 días',
     'show seconds': 'Mostrar segundos',
     'shows sequential numbers (00, 01...) on the tap pulse animation.':
@@ -2360,6 +2362,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'शर्ली से सम्राट लेलौच वी ब्रिटानिया तक।',
     'show all': 'सभी दिखाएं',
     'show more': 'अधिक दिखाएं',
+    'show less': 'कम दिखाएं',
     'show recent 7 days': 'हाल के 7 दिन दिखाएं',
     'show seconds': 'सेकंड दिखाएं',
     'shows sequential numbers (00, 01...) on the tap pulse animation.':
@@ -3263,6 +3266,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'Shirley bis Kaiser Lelouch vi Britannia.',
     'show all': 'Alle anzeigen',
     'show more': 'Mehr anzeigen',
+    'show less': 'Weniger anzeigen',
     'show recent 7 days': 'Letzte 7 Tage anzeigen',
     'show seconds': 'Sekunden anzeigen',
     'shows 00–99 counters instead of static icons in history.':
@@ -4144,6 +4148,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'shirley to emperor lelouch vi britannia.': 'シャーリーから皇帝ルルーシュ・ヴィ・ブリタニアへ。',
     'show all': 'すべて表示',
     'show more': 'さらに表示',
+    'show less': '折りたたむ',
     'show recent 7 days': '直近7日間を表示',
     'show seconds': '秒を表示',
     'shows 00–99 counters instead of static icons in history.':
@@ -5043,6 +5048,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'От Ширли до императора Лелуша ви Британия.',
     'show all': 'Показать все',
     'show more': 'Показать больше',
+    'show less': 'Показать меньше',
     'show recent 7 days': 'Показать 7 дней',
     'show seconds': 'Показывать секунды',
     'shows 00–99 counters instead of static icons in history.':
