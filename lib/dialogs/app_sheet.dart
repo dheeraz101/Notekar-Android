@@ -19,6 +19,8 @@ class AppSheet extends StatefulWidget {
     this.controller,
     this.showLargeTitle = false,
     this.onBack,
+    this.canPop,
+    this.onPopInvokedWithResult,
     this.leadingAction,
     this.scrollLeadingAction,
     this.trailingAction,
@@ -35,6 +37,8 @@ class AppSheet extends StatefulWidget {
   final ScrollController? controller;
   final bool showLargeTitle;
   final VoidCallback? onBack;
+  final bool? canPop;
+  final PopInvokedWithResultCallback<Object?>? onPopInvokedWithResult;
   final Widget? leadingAction;
   final Widget? scrollLeadingAction;
   final Widget? trailingAction;
@@ -337,6 +341,18 @@ class _AppSheetState extends State<AppSheet> {
           ),
         ),
       ),
+    );
+
+    content = PopScope(
+      canPop: widget.canPop ?? (widget.onBack == null),
+      onPopInvokedWithResult:
+          widget.onPopInvokedWithResult ??
+          (didPop, result) {
+            if (!didPop && widget.onBack != null) {
+              widget.onBack!();
+            }
+          },
+      child: content,
     );
 
     if (widget.largeText) {

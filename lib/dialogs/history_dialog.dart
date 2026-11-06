@@ -684,6 +684,14 @@ class _HistoryDialogState extends State<HistoryDialog> {
         if (!didPop) {
           if (_inSheetView == 'create_goal') {
             _setSheetView('goals');
+          } else if (_inSheetView == 'manual') {
+            final fromGoals = _manualInitialGoal != null;
+            _manualPrefilledStartTime = null;
+            _manualPrefilledEndTime = null;
+            _activeGapKey = null;
+            _manualInitialGoal = null;
+            _manualLockToSession = false;
+            _setSheetView(fromGoals ? 'goals' : null);
           } else if (_inSheetView != null) {
             _setSheetView(null);
           } else if (_activeInsightsSection != null) {
