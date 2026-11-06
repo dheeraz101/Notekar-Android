@@ -648,11 +648,21 @@ class DashboardMetricsService {
       }
     }
 
+    final intervals = UniversalIntervalLedger.reconstructAndSlice(entries);
+    final hasSessions = intervals.any((i) => i.isSession && i.durationMs > 0);
+    final dist = UniversalIntervalLedger.computeTimeSlotBias(intervals);
+
     final total = entries.length;
-    final mPct = (morning / total * 100).round();
-    final aPct = (afternoon / total * 100).round();
-    final ePct = (evening / total * 100).round();
-    final nPct = (night / total * 100).round();
+    final mPct = hasSessions
+        ? dist.morningPct
+        : (morning / total * 100).round();
+    final aPct = hasSessions
+        ? dist.afternoonPct
+        : (afternoon / total * 100).round();
+    final ePct = hasSessions
+        ? dist.eveningPct
+        : (evening / total * 100).round();
+    final nPct = hasSessions ? dist.nightPct : (night / total * 100).round();
 
     int maxCount = morning;
     String peak = 'Morning';
@@ -669,7 +679,18 @@ class DashboardMetricsService {
       peak = 'Night';
     }
 
-    final peakPct = (maxCount / total * 100).round();
+    if (hasSessions) {
+      peak = dist.peakSlot;
+    }
+
+    final peakPct = hasSessions
+        ? switch (peak) {
+            'Morning' => dist.morningPct,
+            'Afternoon' => dist.afternoonPct,
+            'Evening' => dist.eveningPct,
+            _ => dist.nightPct,
+          }
+        : (maxCount / total * 100).round();
     final peakRange = switch (peak) {
       'Morning' => '6 AM – 12 PM',
       'Afternoon' => '12 PM – 5 PM',

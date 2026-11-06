@@ -485,52 +485,18 @@ class ActivityHeatmapCard extends StatelessWidget {
       countMap[entry.date] = (countMap[entry.date] ?? 0) + 1;
     }
 
-    final List<Widget> columns = [];
+    int colCount = 0;
     DateTime runner = gridStartDate;
-
     while (runner.isBefore(now) || dateKey(runner) == dateKey(now)) {
-      final List<Widget> dayCells = [];
-      for (int d = 0; d < 7; d++) {
-        final currentDay = runner.add(Duration(days: d));
-        final key = dateKey(currentDay);
-        final count = countMap[key] ?? 0;
-
-        Color cellColor;
-        if (currentDay.isAfter(now)) {
-          cellColor = Colors.transparent;
-        } else if (count == 0) {
-          cellColor = p.border.withValues(alpha: 0.15);
-        } else if (count <= 2) {
-          cellColor = p.accent.withValues(alpha: 0.25);
-        } else if (count <= 4) {
-          cellColor = p.accent.withValues(alpha: 0.55);
-        } else {
-          cellColor = p.accent;
-        }
-
-        dayCells.add(
-          Container(
-            width: 10,
-            height: 10,
-            margin: const EdgeInsets.all(1.5),
-            decoration: BoxDecoration(
-              color: cellColor,
-              borderRadius: BorderRadius.circular(2.5),
-              border: count == 0
-                  ? Border.all(
-                      color: p.border.withValues(alpha: 0.2),
-                      width: 0.5,
-                    )
-                  : null,
-            ),
-          ),
-        );
-      }
-
-      columns.add(Column(mainAxisSize: MainAxisSize.min, children: dayCells));
-
+      colCount++;
       runner = runner.add(const Duration(days: 7));
     }
+
+    const boxSize = 10.0;
+    const spacing = 3.0;
+    const step = boxSize + spacing;
+    final totalWidth = colCount * step + 3.0;
+    final totalHeight = 7 * step + 3.0;
 
     return Container(
       margin: const EdgeInsets.only(top: 8, bottom: 0),
@@ -584,7 +550,21 @@ class ActivityHeatmapCard extends StatelessWidget {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             reverse: true,
-            child: Row(mainAxisSize: MainAxisSize.min, children: columns),
+            child: RepaintBoundary(
+              child: Semantics(
+                label: 'Annual activity heatmap grid',
+                child: CustomPaint(
+                  size: Size(totalWidth, totalHeight),
+                  painter: _AnnualHeatmapGridPainter(
+                    gridStartDate: gridStartDate,
+                    now: now,
+                    countMap: countMap,
+                    columnCount: colCount,
+                    p: p,
+                  ),
+                ),
+              ),
+            ),
           ),
           const SizedBox(height: 12),
           Row(
@@ -622,6 +602,83 @@ class ActivityHeatmapCard extends StatelessWidget {
             : null,
       ),
     );
+  }
+}
+
+class _AnnualHeatmapGridPainter extends CustomPainter {
+  _AnnualHeatmapGridPainter({
+    required this.gridStartDate,
+    required this.now,
+    required this.countMap,
+    required this.columnCount,
+    required this.p,
+  });
+
+  final DateTime gridStartDate;
+  final DateTime now;
+  final Map<String, int> countMap;
+  final int columnCount;
+  final Palette p;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final fillPaint = Paint()..style = PaintingStyle.fill;
+    final strokePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.5
+      ..color = p.border.withValues(alpha: 0.2);
+
+    const boxSize = 10.0;
+    const spacing = 3.0;
+    const step = boxSize + spacing;
+    const radius = Radius.circular(2.5);
+
+    DateTime runner = gridStartDate;
+    for (int col = 0; col < columnCount; col++) {
+      for (int row = 0; row < 7; row++) {
+        final currentDay = runner.add(Duration(days: row));
+        if (currentDay.isAfter(now)) continue;
+
+        final key = dateKey(currentDay);
+        final count = countMap[key] ?? 0;
+
+        Color cellColor;
+        if (count == 0) {
+          cellColor = p.border.withValues(alpha: 0.15);
+        } else if (count <= 2) {
+          cellColor = p.accent.withValues(alpha: 0.25);
+        } else if (count <= 4) {
+          cellColor = p.accent.withValues(alpha: 0.55);
+        } else {
+          cellColor = p.accent;
+        }
+
+        final rect = Rect.fromLTWH(
+          col * step + 1.5,
+          row * step + 1.5,
+          boxSize,
+          boxSize,
+        );
+        final rrect = RRect.fromRectAndRadius(rect, radius);
+
+        fillPaint.color = cellColor;
+        canvas.drawRRect(rrect, fillPaint);
+
+        if (count == 0) {
+          canvas.drawRRect(rrect, strokePaint);
+        }
+      }
+      runner = runner.add(const Duration(days: 7));
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _AnnualHeatmapGridPainter oldDelegate) {
+    return oldDelegate.gridStartDate != gridStartDate ||
+        oldDelegate.now != now ||
+        oldDelegate.columnCount != columnCount ||
+        oldDelegate.p != p ||
+        oldDelegate.countMap != countMap;
   }
 }
 

@@ -304,4 +304,150 @@ class UniversalIntervalLedger {
     sliced.sort((a, b) => a.startMs.compareTo(b.startMs));
     return sliced;
   }
+
+  /// Computes interval duration-weighted time slot distribution across:
+  /// - Morning: 6 AM – 12 PM (6 <= hour < 12)
+  /// - Afternoon: 12 PM – 5 PM (12 <= hour < 17)
+  /// - Evening: 5 PM – 10 PM (17 <= hour < 22)
+  /// - Night: 10 PM – 6 AM (hour >= 22 or hour < 6)
+  ///
+  /// Multi-hour session intervals are partitioned with exact millisecond precision.
+  /// Zero-duration moments are assigned to their instant time slot.
+  static TimeSlotDistribution computeTimeSlotBias(
+    List<CanonicalInterval> intervals,
+  ) {
+    if (intervals.isEmpty) {
+      return const TimeSlotDistribution(
+        morningMs: 0,
+        afternoonMs: 0,
+        eveningMs: 0,
+        nightMs: 0,
+        totalMs: 0,
+        morningPct: 0,
+        afternoonPct: 0,
+        eveningPct: 0,
+        nightPct: 0,
+        peakSlot: 'None',
+      );
+    }
+
+    int morningMs = 0;
+    int afternoonMs = 0;
+    int eveningMs = 0;
+    int nightMs = 0;
+
+    for (final interval in intervals) {
+      if (interval.durationMs == 0) {
+        final hour = DateTime.fromMillisecondsSinceEpoch(interval.startMs).hour;
+        if (hour >= 6 && hour < 12) {
+          morningMs += 60000;
+        } else if (hour >= 12 && hour < 17) {
+          afternoonMs += 60000;
+        } else if (hour >= 17 && hour < 22) {
+          eveningMs += 60000;
+        } else {
+          nightMs += 60000;
+        }
+        continue;
+      }
+
+      final startDt = DateTime.fromMillisecondsSinceEpoch(interval.startMs);
+      final y = startDt.year;
+      final m = startDt.month;
+      final d = startDt.day;
+
+      final t0 = DateTime(y, m, d, 0).millisecondsSinceEpoch;
+      final t6 = DateTime(y, m, d, 6).millisecondsSinceEpoch;
+      final t12 = DateTime(y, m, d, 12).millisecondsSinceEpoch;
+      final t17 = DateTime(y, m, d, 17).millisecondsSinceEpoch;
+      final t22 = DateTime(y, m, d, 22).millisecondsSinceEpoch;
+      final t24 = DateTime(y, m, d + 1, 0).millisecondsSinceEpoch;
+
+      final s = interval.startMs;
+      final e = interval.endMs;
+
+      // Night: 0..6 and 22..24
+      nightMs += math.max(0, math.min(e, t6) - math.max(s, t0));
+      morningMs += math.max(0, math.min(e, t12) - math.max(s, t6));
+      afternoonMs += math.max(0, math.min(e, t17) - math.max(s, t12));
+      eveningMs += math.max(0, math.min(e, t22) - math.max(s, t17));
+      nightMs += math.max(0, math.min(e, t24) - math.max(s, t22));
+    }
+
+    final totalMs = morningMs + afternoonMs + eveningMs + nightMs;
+    if (totalMs == 0) {
+      return const TimeSlotDistribution(
+        morningMs: 0,
+        afternoonMs: 0,
+        eveningMs: 0,
+        nightMs: 0,
+        totalMs: 0,
+        morningPct: 0,
+        afternoonPct: 0,
+        eveningPct: 0,
+        nightPct: 0,
+        peakSlot: 'None',
+      );
+    }
+
+    final mPct = (morningMs / totalMs * 100).round();
+    final aPct = (afternoonMs / totalMs * 100).round();
+    final ePct = (eveningMs / totalMs * 100).round();
+    final nPct = (nightMs / totalMs * 100).round();
+
+    int maxMs = morningMs;
+    String peak = 'Morning';
+    if (afternoonMs > maxMs) {
+      maxMs = afternoonMs;
+      peak = 'Afternoon';
+    }
+    if (eveningMs > maxMs) {
+      maxMs = eveningMs;
+      peak = 'Evening';
+    }
+    if (nightMs > maxMs) {
+      maxMs = nightMs;
+      peak = 'Night';
+    }
+
+    return TimeSlotDistribution(
+      morningMs: morningMs,
+      afternoonMs: afternoonMs,
+      eveningMs: eveningMs,
+      nightMs: nightMs,
+      totalMs: totalMs,
+      morningPct: mPct,
+      afternoonPct: aPct,
+      eveningPct: ePct,
+      nightPct: nPct,
+      peakSlot: peak,
+    );
+  }
+}
+
+/// Represents duration-weighted distribution across day parts.
+class TimeSlotDistribution {
+  const TimeSlotDistribution({
+    required this.morningMs,
+    required this.afternoonMs,
+    required this.eveningMs,
+    required this.nightMs,
+    required this.totalMs,
+    required this.morningPct,
+    required this.afternoonPct,
+    required this.eveningPct,
+    required this.nightPct,
+    required this.peakSlot,
+  });
+
+  final int morningMs;
+  final int afternoonMs;
+  final int eveningMs;
+  final int nightMs;
+  final int totalMs;
+  final int morningPct;
+  final int afternoonPct;
+  final int eveningPct;
+  final int nightPct;
+  final String peakSlot;
 }
