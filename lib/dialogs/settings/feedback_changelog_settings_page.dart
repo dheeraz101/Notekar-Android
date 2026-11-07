@@ -23,8 +23,8 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.5.12',
-    date: 'November 01, 2026',
+    version: '7.5.13',
+    date: 'November 07, 2026',
     edition: 'Quick Settings Tile, Canvas Habits & Apple HIG Surgery',
     badgeColor: Color(0xFFFF9F0A),
     innovations: [

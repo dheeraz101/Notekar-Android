@@ -1,0 +1,13 @@
+Update to 7.5.13 (build 26BR1107):
+- New: Classic iOS custom switch toggles (commit 9a166b26) with 62x32 track, 34x28 white pill thumb, fluid mechanical stretch, and Apple HIG accessibility indicators
+- New: Full 3-tier hierarchical settings back-navigation ensuring swipe-back and back buttons return to the immediate parent page
+- New: Apple HIG & BitChord precision design system with continuous squircle tokens (60.7% smoothing), SF Pro tracking physics, and lifted pill segmented controls
+- New: Habit checkpoints refinement with universal deletion, inline editing, and dynamic custom category authoring
+- New: Timeline inline rich markdown rendering (bold, italic, code, lists, quotes) and expandable note cards ('Show more / Show less')
+- New: Zero-knowledge vault PBKDF2 iteration hardening to 100,000 iterations and note composer draft auto-saving
+- New: Android 14/15 predictive back gesture integration and Material You themed adaptive monochrome launcher icons
+- New: 120Hz hardware Vsync Ticker parallax tilt smoothing and overlay permission auto-recovery
+- New: Universal duration-weighted time-slot bias with cross-midnight interval slicing and GPU heatmap CustomPainter
+- Fix: Duplicate PopScope double-pop on system back gestures resolved
+- Fix: Predictive edge-swipe touch-slop recognition threshold hardened
+- Fix: Controlled switch visual state reconciliation on rejected toggles

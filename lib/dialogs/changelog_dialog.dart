@@ -28,80 +28,82 @@ class ChangelogDialog extends StatefulWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.5.12',
-    date: 'November 01, 2026',
-    edition: 'Quick Settings Tile, Canvas Habits & Apple HIG Surgery',
+    version: '7.5.13',
+    date: 'November 07, 2026',
+    edition:
+        'Classic iOS Switches, Hierarchical Navigation & Apple HIG Architecture',
     badgeColor: Color(0xFFFF9F0A),
     highlights: [
       (
-        title: 'Quick Settings Notification Tile',
+        title: 'Classic iOS Custom Switch Toggles',
         desc:
-            'Toggle the floating timer bubble on or off directly from Android\'s system notification shade without opening the app.',
-        icon: Icons.notifications_active_rounded,
-        tag: 'System',
-      ),
-      (
-        title: 'Interactive Bubble Dismissal Target',
-        desc:
-            'Drag the floating bubble to the bottom screen "✕" drop-target to dismiss it with tactile feedback, or re-summon via the Quick Settings Tile.',
-        icon: Icons.cancel_rounded,
+            'Restored authentic custom iOS switch (commit 9a166b26) with 62x32 track, 34x28 white pill thumb, fluid +10px mechanical stretch, drop shadow, and Apple HIG Accessibility indicators ("|" and "O").',
+        icon: Icons.toggle_on_rounded,
         tag: 'Controls',
       ),
       (
-        title: 'Canvas Habit Creator & Editor',
+        title: 'Hierarchical Settings Back-Navigation',
         desc:
-            'Dedicated interactive bottom sheet to author custom habits directly on the canvas with emoji selector, custom interval cadences, and deletion safeguards.',
+            'Full 3-tier navigation stack and canonical parent resolution. Swiping back or tapping Back ascends to the immediate parent category rather than popping all the way back to root settings.',
+        icon: Icons.account_tree_rounded,
+        tag: 'Navigation',
+      ),
+      (
+        title: 'Apple HIG & BitChord Precision Architecture',
+        desc:
+            'Continuous squircle tokens with 60.7% corner smoothing, positive SF Pro micro-typography tracking (+0.05 to +0.2), lifted pill segmented controls, and de-pilled action buttons.',
+        icon: Icons.auto_awesome_rounded,
+        tag: 'Design',
+      ),
+      (
+        title: 'Routine Habit Checkpoints & Custom Categories',
+        desc:
+            'Edit or delete any habit checkpoint (including default routines) with confirmation safeguards. Create custom categories with dedicated color palettes and emojis with instant moment migration.',
         icon: Icons.playlist_add_check_rounded,
         tag: 'Habits',
       ),
       (
-        title: 'Media Symmetry in Note Previews',
+        title: 'Timeline Rich Markdown & Expandable Notes',
         desc:
-            'Listen to audio voice memos with inline playback waveforms and inspect photo moments directly within the note preview modal.',
-        icon: Icons.graphic_eq_rounded,
-        tag: 'Media',
+            'Formatted bold, italic, code, blockquotes, and bullet lists rendered directly on timeline cards with inline "Show more / Show less" expansion toggle and debounced audio scrubbing.',
+        icon: Icons.notes_rounded,
+        tag: 'Timeline',
       ),
       (
-        title: 'Sovereign App Permissions Dashboard',
+        title: 'Zero-Knowledge Vault 100k Hardening',
         desc:
-            'Comprehensive live inspection of all 7 device capabilities with decoupled full-width titles, monospace chips, and iOS "Enable ›" action pills.',
-        icon: Icons.security_rounded,
-        tag: 'Privacy',
+            'Upgraded key derivation to OWASP-standard 100,000 PBKDF2 iterations, note composer draft auto-saving with discard protection, and dynamic window obfuscation.',
+        icon: Icons.lock_outline_rounded,
+        tag: 'Security',
       ),
       (
-        title: 'Global Content Rating Scorecard',
+        title: 'Android 14/15 Parity: Predictive Back & Themed Icons',
         desc:
-            'Official IARC Everyone, ESRB E, PEGI 3, and USK 0 certifications with 0/5 mature topics scorecard using Apple soft-tinted squircle badges.',
-        icon: Icons.verified_user_rounded,
-        tag: 'Safety',
+            'Predictive Back gesture support across modal sheets and Material You themed adaptive monochrome launcher icons (android:roundIcon) for dynamic system theming.',
+        icon: Icons.android_rounded,
+        tag: 'Platform',
       ),
       (
-        title: 'Data Safety Sovereignty Nutrition Card',
+        title: 'Universal Ledger & Analytics Performance',
         desc:
-            'Google Play Store disclosures in a continuous 24pt squircle container with 100% on-device local Isar encryption verification.',
-        icon: Icons.shield_rounded,
-        tag: 'Sovereignty',
-      ),
-      (
-        title: 'Apple HIG Visual Surgery & Typography',
-        desc:
-            'Zero text truncation, 44pt touch targets, whisper-thin borders, and adaptive headers withstanding 200% accessibility font scaling.',
-        icon: Icons.brush_rounded,
-        tag: 'UI Craft',
+            'Duration-weighted time-slot bias with cross-midnight interval slicing and GPU-accelerated annual activity heatmap CustomPainter replacing 425 nested widgets.',
+        icon: Icons.analytics_rounded,
+        tag: 'Analytics',
       ),
     ],
     items: [
-      'Quick Settings Tile, Canvas Habits, Media Symmetry, App Permissions & Global Content Rating.',
-      '+ Quick Settings Tile: Added FloatingBubbleTileService to toggle floating timer bubble directly from Android notification shade',
-      '+ Interactive Bubble Dismissal: Bottom screen "✕" drop-target dismissal with drag-to-delete gesture and quick re-summon via tile or widget',
-      '+ Canvas Habit Creator: Added AddEditHabitSheet with custom emoji picker, interval cadences, and deletion confirmation safeguards',
-      '+ Media Symmetry: TimelineVoicePlayerPill audio playback and TimelineMediaAttachmentCard photo previews inside NotePreviewSheet',
-      '+ App Permissions Dashboard: Added AppPermissionsSettingsPage inspecting all 7 device permissions with decoupled full-width titles and monospace chips',
-      '+ Content Rating Disclosures: Added ContentRatingSettingsPage with IARC 3+, ESRB E, PEGI 3, USK 0 certifications and 0/5 mature topics scorecard',
-      '+ Data Safety Nutrition Card: Redesigned DataSafetySettingsPage top card with 24pt squircle curvature, 20x20 checkmark pills, and Isar local encryption disclosures',
-      '+ App Icons Header: Redesigned AppIconsSettingsPage instruction card with responsive adaptive Wrap header supporting up to 200% font scaling',
-      '+ Touch Target Enforcement: Checkpoints quick bar touch targets reinforced to Apple HIG 44pt minimum',
-      '+ Pre-commit Code Quality: 100% codebase formatted with dart format, 0 analyzer issues, and 422 passing automated tests',
+      'Classic iOS Switches, Hierarchical Navigation, Apple HIG Architecture & 505 Micro-Improvements.',
+      '+ Classic iOS Switch Toggles: Restored 62x32 custom switch with +10px mechanical stretch, Apple HIG "|" and "O" markings, and velocity fling snapping',
+      '+ Hierarchical Settings Back-Navigation: 3-tier navigation stack ensuring swipe-back and back buttons ascend to the immediate parent page',
+      '+ Apple HIG & BitChord Precision Design System: Continuous squircle tokens (60.7% smoothing), SF Pro tracking physics, and lifted pill segmented controls',
+      '+ Routine Habit Checkpoints: Universal habit deletion, inline editing, and dynamic custom category authoring with color palettes and emoji pickers',
+      '+ Timeline Rich Markdown & Expandable Notes: Formatted inline markdown rendering and "Show more / Show less" expandable note cards',
+      '+ Zero-Knowledge Vault Hardening: Upgraded key derivation to OWASP-standard 100,000 PBKDF2 iterations and note composer draft auto-saving',
+      '+ Android 14/15 System Parity: Predictive Back gesture support across modal sheets and Material You themed adaptive monochrome launcher icons',
+      '+ 120Hz Parallax Motion: Hardware-synced Vsync Ticker parallax tilt smoothing with lifecycle backgrounding pause',
+      '+ System Overlay Recovery: Auto-detects floating bubble permission grant upon returning from Android system settings',
+      '+ Universal Ledger & Analytics: Duration-weighted time-slot bias with cross-midnight interval slicing and GPU heatmap CustomPainter',
+      '+ Bug Fixes: Fixed duplicate PopScope invocation, predictive edge swipe threshold, controlled switch reconciliation, and bulletin modal dismissal',
     ],
   );
 

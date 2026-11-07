@@ -1,5 +1,90 @@
 [
     {
+        "version": "7.5.13",
+        "buildNumber": "26BR1107",
+        "releaseDate": "2026-11-07",
+        "channel": "beta",
+        "channelTag": "[Beta]",
+        "isBeta": true,
+        "edition": "Classic iOS Switches, Hierarchical Navigation & Apple HIG Architecture",
+        "badgeColor": "#FF9F0A",
+        "isLatest": true,
+        "highlights": [
+            {
+                "title": "Classic iOS Custom Switch Toggles",
+                "description": "Restored authentic custom iOS switch with 62x32 track, 34x28 white pill thumb, fluid mechanical stretch, and Apple HIG Accessibility markings.",
+                "icon": "toggle_on_rounded"
+            },
+            {
+                "title": "Hierarchical Settings Back-Navigation",
+                "description": "Full 3-tier navigation stack and parent category tracking ensuring swipe-back and back buttons return to the immediate upper page rather than collapsing to root.",
+                "icon": "account_tree_rounded"
+            },
+            {
+                "title": "Apple HIG & BitChord Precision Architecture",
+                "description": "Continuous squircle tokens with 60.7% corner smoothing, positive SF Pro micro-typography tracking, lifted pill segmented controls, and de-pilled action buttons.",
+                "icon": "auto_awesome_rounded"
+            },
+            {
+                "title": "Routine Habit Checkpoints & Consistency",
+                "description": "Edit or delete any habit checkpoint with confirmation sheets, and author custom categories with dedicated color palettes and emoji pickers.",
+                "icon": "playlist_add_check_rounded"
+            },
+            {
+                "title": "Timeline Rich Markdown & Expandable Notes",
+                "description": "Formatted bold, italic, code, blockquotes, and bullet lists rendered directly on timeline cards with inline 'Show more / Show less' expansion.",
+                "icon": "notes_rounded"
+            },
+            {
+                "title": "Zero-Knowledge Vault 100k Hardening",
+                "description": "Upgraded key derivation to OWASP-standard 100,000 PBKDF2 iterations, note composer draft protection, and dynamic window obfuscation.",
+                "icon": "lock_outline_rounded"
+            },
+            {
+                "title": "Android 14/15 Parity & Modern System Integrations",
+                "description": "Predictive Back gesture support across modal sheets, themed adaptive monochrome launcher icons, and 120Hz hardware vsync parallax motion.",
+                "icon": "android_rounded"
+            },
+            {
+                "title": "Universal Ledger & Analytics Performance",
+                "description": "Duration-weighted time-slot bias with cross-midnight interval slicing and GPU-accelerated annual activity heatmap CustomPainter.",
+                "icon": "analytics_rounded"
+            }
+        ],
+        "fullChangelog": {
+            "What's New": [
+                "Classic iOS Custom Switch Toggles (Commit 9a166b26): Exact 62x32 track, 34x28 white pill thumb, fluid mechanical stretch, and Apple HIG Accessibility markings.",
+                "Hierarchical Settings Back-Navigation: 3-tier navigation stack ensuring swipe-back and back buttons return to the immediate parent category.",
+                "Apple HIG & BitChord Precision Architecture: Continuous squircle tokens with 60.7% corner smoothing, SF Pro tracking physics, and lifted pill segmented controls.",
+                "Routine Habit Checkpoints: Universal deletion, inline editing, and dynamic custom category authoring with color palettes and emoji pickers.",
+                "Timeline Rich Markdown & Expandable Notes: Formatted inline markdown rendering and 'Show more / Show less' expandable note cards.",
+                "Zero-Knowledge Vault Hardening: Upgraded key derivation to OWASP-standard 100,000 PBKDF2 iterations and note composer draft auto-saving.",
+                "Android 14/15 System Parity: Predictive Back gesture support across modal sheets and Material You themed adaptive monochrome launcher icons.",
+                "Universal Ledger & Analytics Performance: Duration-weighted time-slot bias with cross-midnight interval slicing and GPU heatmap CustomPainter."
+            ],
+            "Improvements & Bug Fixes": [
+                "Fixed duplicate PopScope invocation on Android system back gestures, ensuring one-tier-at-a-time ascension.",
+                "Hardened predictive edge-swipe touch-slop recognition threshold in PredictiveBackPeek.",
+                "Reconciled controlled switch visual state when parent rejects state change.",
+                "Added modal dismissal before official bulletins sheet navigation actions.",
+                "Debounced audio player drag seeking to 50ms for smooth 120fps playhead tracking.",
+                "Hardware-synced Vsync Ticker parallax tilt smoothing with lifecycle backgrounding pause.",
+                "System overlay permission listener auto-recovering bubble service on resume from Android settings.",
+                "Narrow-viewport RenderFlex overflow guards across display and profile settings pages."
+            ],
+            "Integrity & Technical Details": [
+                "Automated Tests: 513 unit & widget tests passing (100% green across 272 test suites).",
+                "Static Analysis: 0 issues found across entire codebase (flutter analyze).",
+                "Code Formatting: 100% compliant with dart format.",
+                "Architecture: 100% offline-first, zero telemetry, local Isar encryption."
+            ]
+        },
+        "downloads": {
+            "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.5.13/NoteKar-v7.5.13-universal-release.apk",
+            "arm64Apk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.5.13/NoteKar-v7.5.13-arm64-v8a-release.apk"
+        }
+    },
+    {
         "version": "7.5.12",
         "buildNumber": "26BR1101",
         "releaseDate": "2026-11-01",
@@ -8,7 +93,7 @@
         "isBeta": true,
         "edition": "Quick Settings Tile, Canvas Habits & Apple HIG Surgery",
         "badgeColor": "#FF9F0A",
-        "isLatest": true,
+        "isLatest": false,
         "highlights": [
             {
                 "title": "Quick Settings Notification Tile",
@@ -17,7 +102,7 @@
             },
             {
                 "title": "Interactive Bubble Dismissal Target",
-                "description": "Drag the floating bubble to the bottom screen '\u2715' drop-target to dismiss it with tactile feedback, or re-summon via the Quick Settings Tile.",
+                "description": "Drag the floating bubble to the bottom screen '?' drop-target to dismiss it with tactile feedback, or re-summon via the Quick Settings Tile.",
                 "icon": "cancel_rounded"
             },
             {
@@ -32,7 +117,7 @@
             },
             {
                 "title": "Sovereign App Permissions Dashboard",
-                "description": "Comprehensive live inspection of all 7 device capabilities with decoupled full-width titles, monospace chips, and iOS 'Enable \u203a' action pills.",
+                "description": "Comprehensive live inspection of all 7 device capabilities with decoupled full-width titles, monospace chips, and iOS 'Enable �' action pills.",
                 "icon": "security_rounded"
             },
             {
@@ -53,7 +138,7 @@
         ],
         "fullChangelog": [
             "Quick Settings Tile: Added FloatingBubbleTileService to toggle floating timer bubble directly from Android notification shade",
-            "Interactive Bubble Dismissal: Bottom screen '\u2715' drop-target dismissal with drag-to-delete gesture and quick re-summon via tile or widget",
+            "Interactive Bubble Dismissal: Bottom screen '?' drop-target dismissal with drag-to-delete gesture and quick re-summon via tile or widget",
             "Canvas Habit Creator: Added AddEditHabitSheet with custom emoji picker, interval cadences, and deletion confirmation safeguards",
             "Media Symmetry: TimelineVoicePlayerPill audio playback and TimelineMediaAttachmentCard photo previews inside NotePreviewSheet",
             "App Permissions Dashboard: Added AppPermissionsSettingsPage inspecting all 7 device permissions with decoupled full-width titles and monospace chips",
@@ -81,7 +166,7 @@
         "highlights": [
             {
                 "title": "App-Aware Floating Control Pill",
-                "description": "Auto-hides while NoteKar is open on screen; restores on minimize. Tapping '\u2715 Hide' docks into a slim 5dp vertical edge handle.",
+                "description": "Auto-hides while NoteKar is open on screen; restores on minimize. Tapping '? Hide' docks into a slim 5dp vertical edge handle.",
                 "icon": "auto_awesome_rounded"
             },
             {
@@ -112,11 +197,11 @@
         ],
         "fullChangelog": [
             "App-Aware Floating Control Pill: Overlay automatically hides while inside NoteKar and reappears when app is minimized",
-            "Slim Edge Handle Docking: Tapping '\u2715 Hide' docks pill into a slim 5dp vertical handle flush against the screen corner",
+            "Slim Edge Handle Docking: Tapping '? Hide' docks pill into a slim 5dp vertical handle flush against the screen corner",
             "Elastic Orb Restoration: Single-tap springs orb back with overshoot bounce; inward swipe (>12dp) morphs handle into circle",
             "Living Oceanic Fluid: Borderless edge-to-edge wave flow transitioning directly from page background into water",
             "Crowned Queen Fish: Active accent is crowned Queen Fish at deep waters (1.38x scale) with dorsal-aligned golden crown",
-            "19 Companion Fish: Distinct species scales (0.72x\u20130.92x), natural wave propulsion, and theme-adaptive abyssal shadows",
+            "19 Companion Fish: Distinct species scales (0.72x�0.92x), natural wave propulsion, and theme-adaptive abyssal shadows",
             "Riverbed Invariant Rocks: 7 organic faceted stones reflecting immutable UI colors unaffected by accent selections",
             "Minimal QR Pass: Share Identity Card presents a clean, sovereign Apple HIG QR pass with zero extraneous chronometer text",
             "Fullscreen Laser Scanner: Continuous 60fps emerald laser sweep with animated checkmark success and error HUD feedback",
@@ -214,7 +299,7 @@
             },
             {
                 "title": "Headless Silent Share Intake",
-                "description": "Share images, text, and web links directly to NoteKar in the background with immediate timestamp logging\u2014without launching or interrupting the active app window.",
+                "description": "Share images, text, and web links directly to NoteKar in the background with immediate timestamp logging�without launching or interrupting the active app window.",
                 "icon": "share_rounded"
             },
             {
@@ -625,7 +710,7 @@
             },
             {
                 "title": "Timeline Gap Rest Quick-Claim",
-                "description": "Convert empty gaps \u2265 15m into conscious recovery moments with one-tap Rest button and undo.",
+                "description": "Convert empty gaps = 15m into conscious recovery moments with one-tap Rest button and undo.",
                 "icon": "bedtime_rounded"
             },
             {
@@ -646,7 +731,7 @@
             "+ Elevated Control Pills: Luminous fill and subtle ambient shadows for active segments in filters and dialogs",
             "+ Auto-Collapsing Capsule: Smooth 320ms spring physics collapse to resting 32px pill on canvas touch or timeline scroll",
             "+ Horology Detent Haptics: Tactile crown click at 50% swipe threshold between Single and Two-Way tracking modes",
-            "+ Rest Quick-Claim: One-tap button on gap cards \u2265 15m to reclaim void time as conscious restorative moments with undo",
+            "+ Rest Quick-Claim: One-tap button on gap cards = 15m to reclaim void time as conscious restorative moments with undo",
             "+ Complication Radial Glow: Soft 8% ambient light behind complication capsule matching active mode color",
             "+ Retrospective Entry: Complete Single and Two-Way manual entry parity with inline custom mode creation and zero yellow underlines",
             "+ Rendering Resilience: Hardened Android GPU pipeline and eliminated startup green screen anomalies",

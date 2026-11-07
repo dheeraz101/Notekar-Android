@@ -901,6 +901,149 @@ const List<HelpGuideItem> allGuideItems = [
       'vulnerability',
     ],
   ),
+  HelpGuideItem(
+    icon: Icons.toggle_on_rounded,
+    title: 'Classic iOS Switch Toggles & Mechanical Physics',
+    content:
+        'NoteKar features custom-crafted classic iOS switch toggles (restored from commit 9a166b26). Engineered with a 62x32 track, 34x28 white pill thumb, and a dynamic +10px mechanical elongation along the travel vector during tap-down or drag. Features built-in Apple HIG Accessibility indicators ("|" for active and "O" for inactive), tactile haptic resonance, and 400px/s velocity fling snapping.',
+    isFaq: false,
+    keywords: [
+      'switch',
+      'toggle',
+      'ios switch',
+      'custom switch',
+      'stretch',
+      'mechanical',
+      'accessibility markings',
+      'drag',
+      'fling',
+      '9a166b26',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.account_tree_rounded,
+    title: 'Hierarchical Settings Navigation & Tier Ascension',
+    content:
+        'Settings is architected with a full 3-tier hierarchical navigation stack. When exploring in-depth screens (such as Display, Search Notes, Configure Lock, Local Backups, Time Reflection, or Network Monitor), edge-swipe gestures and the back button return you to the immediate parent category rather than popping all the way back to root settings. Android system back gestures ascend strictly one tier at a time.',
+    isFaq: false,
+    keywords: [
+      'navigation',
+      'back',
+      'swipe back',
+      'parent',
+      'hierarchy',
+      'upper page',
+      'settings navigation',
+      'tier',
+      'predictive back',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.playlist_add_check_rounded,
+    title: 'Habit Checkpoints & Category Customization',
+    content:
+        'Track daily micro-routines with habit checkpoints directly on your home canvas. Long-press any habit to edit its cadence, title, or icon, or delete any routine (including defaults) with confirmation safeguards. Create and customize categories with dedicated Apple HIG color palettes and custom emojis—all matching moments and checkpoints automatically migrate.',
+    isFaq: false,
+    keywords: [
+      'checkpoints',
+      'habits',
+      'routine',
+      'delete habit',
+      'edit habit',
+      'custom categories',
+      'emoji',
+      'palette',
+      'consistency',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.notes_rounded,
+    title: 'Timeline Rich Markdown & Expandable Notes',
+    content:
+        'Timeline cards render clean, styled Markdown formatting without raw syntax clutter. Supports bold (**text**), italic (*text*), inline code (`code`), strikethrough (~~text~~), blockquotes (> quote), hashtags (#tag), and bullet lists (- item). Long notes gracefully truncate with an inline "Show more / Show less" expansion toggle, preventing layout shifts.',
+    isFaq: false,
+    keywords: [
+      'markdown',
+      'timeline notes',
+      'formatting',
+      'bold',
+      'italic',
+      'code',
+      'show more',
+      'show less',
+      'expandable notes',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.lock_outline_rounded,
+    title: 'Zero-Knowledge Vault Hardening (OWASP 100k PBKDF2)',
+    content:
+        'The private vault and encrypted database backups employ military-grade AES-GCM-256 encryption hardened with 100,000 PBKDF2 key derivation iterations, meeting modern OWASP security standards. Backups include header iteration metadata for seamless backward compatibility across legacy vaults.',
+    isFaq: false,
+    keywords: [
+      'vault',
+      'encryption',
+      'pbkdf2',
+      '100000',
+      '100k',
+      'security',
+      'aes',
+      'zero-knowledge',
+      'hardened',
+      'owasp',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.android_rounded,
+    title: 'Android 14/15 Parity: Predictive Back & Themed Icons',
+    content:
+        'NoteKar integrates modern Android 14 and 15 capabilities, including Predictive Back gesture integration across sheets (AppSheet, GoalsSheet, HistoryDialog) and Material You adaptive monochrome launcher icons for dynamic system theming on Pixel and One UI devices.',
+    isFaq: false,
+    keywords: [
+      'android 14',
+      'android 15',
+      'predictive back',
+      'monochrome',
+      'themed icons',
+      'material you',
+      'round icon',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.speed_rounded,
+    title: '120Hz Hardware Vsync Parallax & Overlay Recovery',
+    content:
+        'Parallax tilt physics are driven by a hardware-synced Vsync Ticker interpolating motion at your display\'s maximum refresh rate (up to 120Hz LTPO), pausing automatically when backgrounded to conserve battery. When enabling the floating bubble, NoteKar automatically detects permission grants upon returning from Android system settings.',
+    isFaq: false,
+    keywords: [
+      'parallax',
+      '120hz',
+      'vsync',
+      'ticker',
+      'tilt',
+      'accelerometer',
+      'floating bubble',
+      'overlay permission',
+      'battery',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.analytics_rounded,
+    title: 'Universal Duration-Weighted Analytics & Annual Heatmap',
+    content:
+        'The Universal Interval Ledger accurately calculates time-slot bias (Morning, Afternoon, Evening, Night) with cross-midnight interval slicing, ensuring sessions spanning 00:00 midnight preserve 100% of their hours. The Annual Activity Heatmap is powered by a GPU-accelerated CustomPainter replacing hundreds of widgets for butter-smooth scrolling.',
+    isFaq: false,
+    keywords: [
+      'analytics',
+      'time slot bias',
+      'midnight',
+      'heatmap',
+      'annual heatmap',
+      'custom painter',
+      'performance',
+      'universal interval ledger',
+    ],
+  ),
 ];
 
 const List<HelpGuideItem> allHelpFaqItems = [
@@ -1593,6 +1736,59 @@ const List<HelpGuideItem> allHelpFaqItems = [
       'diagnostics',
       'build number',
       'tap 7 times',
+    ],
+  ),
+  HelpGuideItem(
+    title: 'How does the new hierarchical back navigation work?',
+    content:
+        'When you are inside a sub-settings page (like Display or Configure Lock), pressing the back button or swiping from the left screen edge will take you back to its parent section (Personalization or App Lock) instead of taking you all the way back to the main settings page. This makes navigating complex settings much faster and prevents losing your place.',
+    isFaq: true,
+    keywords: [
+      'back navigation',
+      'parent page',
+      'subpage',
+      'swipe back',
+      'settings back',
+      'hierarchy',
+    ],
+  ),
+  HelpGuideItem(
+    title: 'Can I delete or customize the default habit checkpoints?',
+    content:
+        'Yes! You can customize or delete any habit routine on your home bar or dashboard, including default routines like Morning Water or Read Book. Long-press any habit and select Edit to change its icon, category, or cadence, or select Delete to remove it with an Apple HIG confirmation prompt.',
+    isFaq: true,
+    keywords: [
+      'delete habit',
+      'default habits',
+      'custom habits',
+      'remove checkpoint',
+      'edit checkpoint',
+    ],
+  ),
+  HelpGuideItem(
+    title: 'What Markdown syntax is supported on timeline note cards?',
+    content:
+        'Timeline cards render bold (**text**), italic (*text*), inline code (`code`), strikethrough (~~text~~), blockquotes (> quote), hashtags (#tag), and bullet lists (- item). Identifiers with underscores (like snake_case_var) are preserved without accidental italicization.',
+    isFaq: true,
+    keywords: [
+      'markdown syntax',
+      'timeline bold',
+      'timeline code',
+      'bullet list',
+      'strikethrough',
+    ],
+  ),
+  HelpGuideItem(
+    title: 'Why does the switch toggle stretch when I touch it?',
+    content:
+        'NoteKar uses custom classic iOS mechanical switch toggles (restored from commit 9a166b26). When you touch down or drag the switch, the white thumb physically elongates by +10px along the direction of travel, mimicking the inertia of a physical mechanical switch. It also displays authentic Apple HIG Accessibility markings ("|" for on and "O" for off).',
+    isFaq: true,
+    keywords: [
+      'switch stretch',
+      'custom switch',
+      'toggle stretch',
+      'mechanical switch',
+      'accessibility indicators',
     ],
   ),
 ];

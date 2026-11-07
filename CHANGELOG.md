@@ -6,6 +6,30 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [7.5.13] - 2026-11-07 (versionCode 26BR1107) [Beta]
+
+### What's New
+- **Classic iOS Custom Switch Toggles (Commit 9a166b26)**: Exact 62x32 track, 34x28 white pill thumb, fluid mechanical stretch (+10.0px), and Apple HIG Accessibility markings ('|' and 'O').
+- **Hierarchical Settings Back-Navigation**: 3-tier navigation stack ensuring swipe-back and back buttons return to the immediate parent category rather than collapsing to root.
+- **Apple HIG & BitChord Precision Architecture**: Continuous squircle tokens with 60.7% corner smoothing, positive SF Pro micro-typography tracking, and lifted pill segmented controls.
+- **Routine Habit Checkpoints**: Universal deletion, inline editing, and dynamic custom category authoring with dedicated color palettes and emoji pickers.
+- **Timeline Rich Markdown & Expandable Notes**: Formatted inline markdown rendering and 'Show more / Show less' expandable note cards.
+- **Zero-Knowledge Vault 100k Hardening**: Upgraded key derivation to OWASP-standard 100,000 PBKDF2 iterations and note composer draft auto-saving.
+- **Android 14/15 System Parity**: Predictive Back gesture support across modal sheets and Material You themed adaptive monochrome launcher icons.
+- **Universal Ledger & Analytics Performance**: Duration-weighted time-slot bias with cross-midnight interval slicing and GPU heatmap CustomPainter.
+
+### Improvements & Bug Fixes
+- Fixed duplicate PopScope invocation on Android system back gestures, ensuring one-tier-at-a-time ascension.
+- Hardened predictive edge-swipe touch-slop recognition threshold in PredictiveBackPeek.
+- Reconciled controlled switch visual state when parent rejects state change.
+- Added modal dismissal before official bulletins sheet navigation actions.
+- Debounced audio player drag seeking to 50ms for smooth 120fps playhead tracking.
+- Hardware-synced Vsync Ticker parallax tilt smoothing with lifecycle backgrounding pause.
+- System overlay permission listener auto-recovering bubble service on resume from Android settings.
+- Narrow-viewport RenderFlex overflow guards across display and profile settings pages.
+
+---
+
 ## [7.5.12] - 2026-11-01 (versionCode 26BR1101) [BR]
 
 > *Quick Settings Notification Tile, Floating Bubble Dismissal Target, Canvas Habit Creation, Inline Audio & Photo Previews, Sovereign App Permissions & Global Content Rating.*
