@@ -152,14 +152,18 @@ class NkButton extends StatelessWidget {
           Icon(icon, size: isSmall ? 15.0 : 17.0, color: foregroundColor),
           const SizedBox(width: 6.0),
         ],
-        Text(
-          label,
-          style: TextStyle(
-            color: foregroundColor,
-            fontSize: fontSize,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.2,
-            fontFamily: 'Inter',
+        Flexible(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: foregroundColor,
+              fontSize: fontSize,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.2,
+              fontFamily: 'Inter',
+            ),
           ),
         ),
       ],

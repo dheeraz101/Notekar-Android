@@ -6,6 +6,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/widgets/apple_hig_action_sheet.dart';
+import 'package:notekar/widgets/design_system/nk_ios_switch.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
 /// Modal sheet to confirm and customize merging 2 independent single logs
@@ -459,11 +460,10 @@ class _MergeEntriesSheetState extends State<MergeEntriesSheet> {
                   ],
                 ),
               ),
-              Switch.adaptive(
+              NkIosSwitch(
                 value: _unifyNotes,
-                activeTrackColor: p.accent,
+                activeColor: p.accent,
                 onChanged: (val) {
-                  HapticFeedback.selectionClick();
                   setState(() => _unifyNotes = val);
                 },
               ),

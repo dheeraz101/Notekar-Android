@@ -6,6 +6,7 @@ import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/widgets/design_system/nk_ios_switch.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
 class TimelineFilterCriteria {
@@ -422,9 +423,9 @@ class _TimelineFilterSheetState extends State<TimelineFilterSheet> {
                     ],
                   ),
                 ),
-                CupertinoSwitch(
+                NkIosSwitch(
                   value: _consolidateCards,
-                  activeTrackColor: p.accent,
+                  activeColor: p.accent,
                   onChanged: (val) {
                     HapticFeedback.selectionClick();
                     setState(() => _consolidateCards = val);

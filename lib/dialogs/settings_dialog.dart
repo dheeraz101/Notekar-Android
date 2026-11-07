@@ -454,20 +454,20 @@ class _SettingsDialogState extends State<SettingsDialog> {
   void _handleBulletinNavigateAction(String target) {
     if (target.startsWith('settings:')) {
       final category = target.substring(9).trim();
-      _openCategory(category, parent: 'Preferences');
+      _openCategory(category);
       return;
     }
     switch (target) {
       case 'sobriety':
       case 'page:sobriety':
-        _openCategory('Sobriety Companion', parent: 'Focus & Targets');
+        _openCategory('Sobriety Companion', parent: 'Logging');
       case 'audit':
       case 'life_audit':
       case 'page:audit':
-        _openCategory('Life Audit', parent: 'Focus & Targets');
+        _openCategory('Life Audit', parent: 'Logging');
       case 'backup':
       case 'page:backup':
-        _openCategory('Data & Backup', parent: 'Data & Backup');
+        _openCategory('Data & Backup', parent: 'Data safety');
       case 'history':
       case 'page:history':
         Navigator.of(context).pop();
@@ -482,7 +482,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         Navigator.of(context).pop();
         widget.onTriggerUrlScheme?.call('notekar://camera');
       default:
-        _openCategory(target, parent: 'Preferences');
+        _openCategory(target);
     }
   }
 
@@ -1101,7 +1101,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       if (type == 'monthly') initialText = _monthlyReminderBody;
       _reminderMessageController.text = initialText;
     });
-    _openCategory('Reminder Message');
+    _openCategory('Reminder Message', parent: 'Reminders');
   }
 
   Future<DateTime?> _showIOSDateTimePicker(
@@ -1447,8 +1447,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
     });
 
     if (widget.initialCategory != null) {
-      category = widget.initialCategory;
+      final initial =
+          _normalizeCategory(widget.initialCategory!) ??
+          widget.initialCategory!;
+      category = initial;
       _categoryStack.clear();
+      _categoryStack.addAll(_getAncestors(initial));
     }
 
     widget.entriesNotifier.addListener(_onEntriesChanged);
@@ -1937,13 +1941,176 @@ class _SettingsDialogState extends State<SettingsDialog> {
     }
   }
 
+  String? _normalizeCategory(String? cat) {
+    if (cat == null) return null;
+    switch (cat) {
+      case 'Privacy & Security':
+        return 'Data safety';
+      case 'Help & Guides':
+        return 'About';
+      case 'Focus & Targets':
+        return 'Logging';
+      case 'Preferences':
+        return 'Personalization';
+      case 'App Icon':
+        return 'App Icons';
+      case 'Modes & Categories':
+        return 'Modes';
+      case 'Projects':
+        return 'Targets & Projects';
+      case 'Tags':
+      case 'Quick Tags':
+        return 'Activity Tags';
+      case 'Sobriety':
+        return 'Sobriety Companion';
+      case 'Display & Gestures':
+        return 'Display';
+      case 'Workflow & Capture':
+        return 'Capture';
+      case 'Targets & Goals':
+        return 'Targets & Projects';
+      default:
+        return cat;
+    }
+  }
+
+  String? _getParentCategory(String cat, {String? explicitParent}) {
+    final normCat = _normalizeCategory(cat) ?? cat;
+    final normExplicit = _normalizeCategory(explicitParent);
+
+    if (normExplicit != null &&
+        normExplicit.isNotEmpty &&
+        normExplicit != normCat) {
+      return normExplicit;
+    }
+
+    if (normCat.startsWith('Mode: ')) return 'Modes';
+
+    switch (normCat) {
+      // Personalization children
+      case 'Display':
+      case 'Accent Color':
+      case 'App Icons':
+        return 'Personalization';
+
+      // Personal Profile is root-level (child of Main Settings, parent is null)
+      case 'Personal Profile':
+        return null;
+
+      // Logging children (Level 2)
+      case 'Dashboard':
+      case 'Capture':
+      case 'Moments':
+      case 'Modes':
+      case 'Targets & Projects':
+      case 'Activity Tags':
+      case 'Reminders':
+      case 'Trash Bin':
+      case 'Sobriety Companion':
+      case 'Life Audit':
+        return 'Logging';
+
+      // Deep Logging children (Level 3)
+      case 'Search Notes':
+        return 'Moments';
+      case 'Reminder Message':
+      case 'Time Reflection':
+        return 'Reminders';
+      case 'Milestones':
+      case 'Trigger Analysis':
+      case 'Milestone Theme':
+        return 'Sobriety Companion';
+
+      // Data safety children (Level 2)
+      case 'Data & Backup':
+      case 'App Permissions':
+      case 'Content Rating':
+      case 'App Lock':
+        return 'Data safety';
+
+      // Deep Data safety children (Level 3)
+      case 'Backup & Export':
+      case 'Backup Status':
+      case 'Local Backups':
+        return 'Data & Backup';
+      case 'Configure Lock':
+        return 'App Lock';
+
+      // Updates & Notices children (Level 2)
+      case 'Update Center':
+      case 'Build Choose':
+      case 'Official Bulletins':
+      case "What's New":
+      case 'Changelog':
+        return 'Updates & Notices';
+
+      // About children (Level 2)
+      case 'App Philosophy':
+      case 'Guides':
+      case 'Help':
+      case 'Upcoming Features':
+      case 'Licenses':
+      case 'Terms of Use':
+      case 'Privacy Policy':
+        return 'About';
+
+      // Advanced children (Level 2)
+      case 'Language':
+      case 'Accessibility':
+      case 'Developer Options':
+      case 'Reset':
+      case 'God Mode':
+      case 'Integrations & Automation':
+      case 'Integrations':
+        return 'Advanced';
+
+      // Deep Advanced children (Level 3)
+      case 'Diagnostics':
+      case 'Device Health':
+      case 'Network Monitor':
+      case 'Commits':
+        return 'Developer Options';
+
+      // Level 1 categories have parent null (Main Settings)
+      case 'Personalization':
+      case 'Logging':
+      case 'Data safety':
+      case 'Updates & Notices':
+      case 'About':
+      case 'Advanced':
+      case 'Feedback':
+      case 'Search':
+        return null;
+
+      default:
+        return null;
+    }
+  }
+
+  List<String> _getAncestors(String cat, {String? explicitParent}) {
+    final ancestors = <String>[];
+    final visited = <String>{cat};
+    var curr = _getParentCategory(cat, explicitParent: explicitParent);
+    while (curr != null && !visited.contains(curr)) {
+      visited.add(curr);
+      ancestors.insert(0, curr);
+      curr = _getParentCategory(curr);
+    }
+    return ancestors;
+  }
+
   void _openCategory(String name, {String? parent}) {
-    if (name == 'God Mode' && !_isGodModeUnlocked) {
+    final normName = _normalizeCategory(name) ?? name;
+    final normParent = _normalizeCategory(parent);
+
+    if (normName == 'God Mode' && !_isGodModeUnlocked) {
       return;
     }
-    if (name == 'Network Monitor') {
+    if (normName == 'Network Monitor') {
       _loadNetworkLogs();
     }
+    if (category == normName) return;
+
     final currentKey = category ?? 'root';
     if (_scrollControllers[currentKey]?.hasClients == true) {
       AppScrollState.save(
@@ -1951,16 +2118,53 @@ class _SettingsDialogState extends State<SettingsDialog> {
         _scrollControllers[currentKey]!.offset,
       );
     }
+
+    final effectiveParent = normParent ?? _getParentCategory(normName);
+
     setState(() {
       _prevStackLength = _categoryStack.length;
-      if (category != null) _categoryStack.add(category!);
-      category = name;
+
+      if (category == 'Search') {
+        _settingsQuery = '';
+        _settingsSearchController.clear();
+        _settingsSearchFocusNode.unfocus();
+        _categoryStack.clear();
+        _categoryStack.addAll(
+          _getAncestors(normName, explicitParent: effectiveParent),
+        );
+      } else {
+        if (effectiveParent != null) {
+          if (category == effectiveParent) {
+            _categoryStack.add(category!);
+          } else {
+            if (category != null && !_categoryStack.contains(category)) {
+              _categoryStack.add(category!);
+            }
+            if (!_categoryStack.contains(effectiveParent)) {
+              final parentAncestors = _getAncestors(effectiveParent);
+              for (final anc in parentAncestors) {
+                if (!_categoryStack.contains(anc)) {
+                  _categoryStack.add(anc);
+                }
+              }
+              _categoryStack.add(effectiveParent);
+            }
+          }
+        } else {
+          if (category != null && category != normName) {
+            _categoryStack.clear();
+          }
+        }
+      }
+
+      category = normName;
     });
-    if (name == 'Search') {
+
+    if (normName == 'Search') {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _settingsSearchFocusNode.requestFocus();
       });
-    } else if (name == 'Search Notes') {
+    } else if (normName == 'Search Notes') {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _noteSearchFocusNode.requestFocus();
       });
@@ -1989,9 +2193,23 @@ class _SettingsDialogState extends State<SettingsDialog> {
       });
       _noteSearchFocusNode.unfocus();
     }
-    if (_categoryStack.isEmpty) {
-      if (category == null) {
-        Navigator.pop(context);
+
+    if (_categoryStack.isNotEmpty) {
+      final nextCategory = _categoryStack.removeLast();
+      setState(() {
+        _prevStackLength = _categoryStack.length + 1;
+        category = nextCategory;
+      });
+    } else if (category != null) {
+      final parent = _getParentCategory(category!);
+      if (parent != null) {
+        final upperAncestors = _getAncestors(parent);
+        setState(() {
+          _categoryStack.clear();
+          _categoryStack.addAll(upperAncestors);
+          _prevStackLength = _categoryStack.length + 1;
+          category = parent;
+        });
       } else {
         setState(() {
           _prevStackLength = 0;
@@ -1999,10 +2217,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         });
       }
     } else {
-      setState(() {
-        _prevStackLength = _categoryStack.length + 1;
-        category = _categoryStack.removeLast();
-      });
+      Navigator.pop(context);
     }
   }
 
@@ -3121,8 +3336,10 @@ $cleanStack
                                     entries: entries,
                                     sleepHours: _timeAuditSleepHours,
                                     essentialsHours: _timeAuditEssentialsHours,
-                                    onOpenPersonalProfile: () =>
-                                        _openCategory('Personal Profile'),
+                                    onOpenPersonalProfile: () => _openCategory(
+                                      'Personal Profile',
+                                      parent: 'Life Audit',
+                                    ),
                                     onSleepHoursChanged: (val) async {
                                       setState(
                                         () => _timeAuditSleepHours = val,

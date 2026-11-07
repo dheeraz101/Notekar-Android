@@ -18,6 +18,7 @@ class NkIosSwitch extends StatefulWidget {
     required this.value,
     required this.onChanged,
     this.activeColor,
+    this.inactiveColor,
     this.enabled = true,
     this.useAppleGreen = false,
     this.enableHaptics = true,
@@ -27,6 +28,7 @@ class NkIosSwitch extends StatefulWidget {
   final bool value;
   final ValueChanged<bool>? onChanged;
   final Color? activeColor;
+  final Color? inactiveColor;
   final bool enabled;
   final bool useAppleGreen;
   final bool enableHaptics;
@@ -44,12 +46,13 @@ class _NkIosSwitchState extends State<NkIosSwitch>
   late final AnimationController _stretchController;
   late final CurvedAnimation _stretchAnimation;
 
-  static const double _trackWidth = 51.0;
-  static const double _trackHeight = 31.0;
-  static const double _thumbDiameter = 27.0;
+  static const double _trackWidth = 62.0;
+  static const double _trackHeight = 32.0;
+  static const double _thumbBaseWidth = 34.0;
+  static const double _thumbHeight = 28.0;
   static const double _thumbPadding = 2.0;
   static const double _maxTravel =
-      _trackWidth - _thumbDiameter - (_thumbPadding * 2); // 20.0
+      _trackWidth - _thumbBaseWidth - (_thumbPadding * 2); // 24.0
 
   bool _isDragging = false;
   double _dragStartValue = 0.0;
@@ -60,22 +63,22 @@ class _NkIosSwitchState extends State<NkIosSwitch>
     _positionController = AnimationController(
       vsync: this,
       value: widget.value ? 1.0 : 0.0,
-      duration: const Duration(milliseconds: 220),
+      duration: const Duration(milliseconds: 200),
     );
     _positionAnimation = CurvedAnimation(
       parent: _positionController,
-      curve: const Cubic(0.25, 0.9, 0.35, 1.0),
-      reverseCurve: const Cubic(0.25, 0.9, 0.35, 1.0),
+      curve: Curves.easeInOut,
+      reverseCurve: Curves.easeInOut,
     );
 
     _stretchController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 140),
+      duration: const Duration(milliseconds: 180),
     );
     _stretchAnimation = CurvedAnimation(
       parent: _stretchController,
-      curve: Curves.easeOutQuad,
-      reverseCurve: Curves.easeInQuad,
+      curve: Curves.easeInOut,
+      reverseCurve: Curves.easeInOut,
     );
   }
 
@@ -86,14 +89,14 @@ class _NkIosSwitchState extends State<NkIosSwitch>
       if (widget.value) {
         _positionController.animateTo(
           1.0,
-          duration: const Duration(milliseconds: 220),
-          curve: const Cubic(0.25, 0.9, 0.35, 1.0),
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
         );
       } else {
         _positionController.animateTo(
           0.0,
-          duration: const Duration(milliseconds: 220),
-          curve: const Cubic(0.25, 0.9, 0.35, 1.0),
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
         );
       }
     }
@@ -125,8 +128,8 @@ class _NkIosSwitchState extends State<NkIosSwitch>
     _triggerHaptic(newValue);
     _positionController.animateTo(
       newValue ? 1.0 : 0.0,
-      duration: const Duration(milliseconds: 220),
-      curve: const Cubic(0.25, 0.9, 0.35, 1.0),
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
     );
     widget.onChanged!(newValue);
   }
@@ -143,6 +146,7 @@ class _NkIosSwitchState extends State<NkIosSwitch>
 
   void _handleTapCancel() {
     if (!widget.enabled || widget.onChanged == null) return;
+    if (_isDragging) return;
     _stretchController.reverse();
   }
 
@@ -175,8 +179,8 @@ class _NkIosSwitchState extends State<NkIosSwitch>
 
     _positionController.animateTo(
       targetValue ? 1.0 : 0.0,
-      duration: const Duration(milliseconds: 220),
-      curve: const Cubic(0.25, 0.9, 0.35, 1.0),
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
     );
 
     if (targetValue != widget.value) {
@@ -191,8 +195,8 @@ class _NkIosSwitchState extends State<NkIosSwitch>
     _stretchController.reverse();
     _positionController.animateTo(
       widget.value ? 1.0 : 0.0,
-      duration: const Duration(milliseconds: 220),
-      curve: const Cubic(0.25, 0.9, 0.35, 1.0),
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
     );
   }
 
@@ -207,92 +211,135 @@ class _NkIosSwitchState extends State<NkIosSwitch>
             ? (isDark ? const Color(0xFF30D158) : const Color(0xFF34C759))
             : p.accent);
 
-    final offColor = isDark
-        ? const Color(0xFF8E8E93).withValues(alpha: 0.36)
-        : const Color(0xFF8E8E93).withValues(alpha: 0.22);
+    final offColor = widget.inactiveColor ?? p.surface3;
 
     return Semantics(
       toggled: widget.value,
       enabled: widget.enabled,
       onTap: (widget.enabled && widget.onChanged != null) ? _handleTap : null,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: _handleTap,
-        onTapDown: _handleTapDown,
-        onTapUp: _handleTapUp,
-        onTapCancel: _handleTapCancel,
-        onHorizontalDragStart: _handleDragStart,
-        onHorizontalDragUpdate: _handleDragUpdate,
-        onHorizontalDragEnd: _handleDragEnd,
-        onHorizontalDragCancel: _handleDragCancel,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
-          child: Center(
-            child: AnimatedBuilder(
-              animation: Listenable.merge([
-                _positionAnimation,
-                _stretchAnimation,
-              ]),
-              builder: (context, _) {
-                final pos = _positionAnimation.value;
-                final stretch = 1.0 + (_stretchAnimation.value * 0.16);
-                final currentTrackColor =
-                    Color.lerp(offColor, onColor, pos) ?? offColor;
+      child: Listener(
+        onPointerDown: (_) {
+          if (widget.enabled && widget.onChanged != null) {
+            _stretchController.forward();
+          }
+        },
+        onPointerUp: (_) {
+          if (widget.enabled && widget.onChanged != null) {
+            _stretchController.reverse();
+          }
+        },
+        onPointerCancel: (_) {
+          if (widget.enabled && widget.onChanged != null) {
+            _stretchController.reverse();
+          }
+        },
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: _handleTap,
+          onTapDown: _handleTapDown,
+          onTapUp: _handleTapUp,
+          onTapCancel: _handleTapCancel,
+          onHorizontalDragStart: _handleDragStart,
+          onHorizontalDragUpdate: _handleDragUpdate,
+          onHorizontalDragEnd: _handleDragEnd,
+          onHorizontalDragCancel: _handleDragCancel,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+            child: Center(
+              child: AnimatedBuilder(
+                animation: Listenable.merge([
+                  _positionAnimation,
+                  _stretchAnimation,
+                ]),
+                builder: (context, _) {
+                  final pos = _positionAnimation.value;
+                  final stretch = _stretchAnimation.value * 10.0;
+                  final currentTrackColor =
+                      Color.lerp(offColor, onColor, pos) ?? offColor;
+                  final currentBorderColor =
+                      Color.lerp(p.border, onColor, pos) ?? p.border;
 
-                final thumbOffset = _thumbPadding + (_maxTravel * pos);
+                  final thumbOffset =
+                      _thumbPadding + (_maxTravel * pos) - (stretch * pos);
 
-                return Opacity(
-                  opacity: widget.enabled ? 1.0 : 0.45,
-                  child: Container(
-                    width: _trackWidth,
-                    height: _trackHeight,
-                    decoration: BoxDecoration(
-                      color: currentTrackColor,
-                      borderRadius: BorderRadius.circular(_trackHeight / 2),
-                      border: Border.all(
-                        color: p.border.withValues(alpha: isDark ? 0.25 : 0.15),
-                        width: 0.5,
+                  return Opacity(
+                    opacity: widget.enabled ? 1.0 : 0.45,
+                    child: Container(
+                      width: _trackWidth,
+                      height: _trackHeight,
+                      padding: const EdgeInsets.all(_thumbPadding),
+                      decoration: BoxDecoration(
+                        color: currentTrackColor,
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                          color: currentBorderColor,
+                          width: 1.0,
+                        ),
                       ),
-                    ),
-                    child: Stack(
-                      alignment: Alignment.centerLeft,
-                      children: [
-                        Transform.translate(
-                          offset: Offset(thumbOffset, 0),
-                          child: Transform.scale(
-                            scaleX: stretch,
-                            // When at left (pos <= 0.5), anchor left edge so stretch expands right (inward).
-                            // When at right (pos > 0.5), anchor right edge so stretch expands left (inward).
-                            alignment: pos > 0.5
-                                ? Alignment.centerRight
-                                : Alignment.centerLeft,
-                            child: Container(
-                              width: _thumbDiameter,
-                              height: _thumbDiameter,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.16),
-                                    blurRadius: 4.0,
-                                    offset: const Offset(0, 2),
+                      child: RepaintBoundary(
+                        child: Stack(
+                          children: [
+                            // "On" Indicator (Apple HIG Accessibility '|' Bar)
+                            Opacity(
+                              opacity: pos.clamp(0.0, 1.0),
+                              child: Align(
+                                alignment: const Alignment(-0.58, 0),
+                                child: Container(
+                                  width: 2.0,
+                                  height: 10.5,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.85),
+                                    borderRadius: BorderRadius.circular(999),
                                   ),
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.08),
-                                    blurRadius: 1.0,
-                                    offset: const Offset(0, 0.5),
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
-                          ),
+                            // "Off" Indicator (Apple HIG Accessibility 'O' Ring)
+                            Opacity(
+                              opacity: (1.0 - pos).clamp(0.0, 1.0),
+                              child: Align(
+                                alignment: const Alignment(0.72, 0),
+                                child: Container(
+                                  width: 8.0,
+                                  height: 8.0,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: p.text3.withValues(alpha: 0.50),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            // Pill thumb with inward-expanding touch stretch
+                            Transform.translate(
+                              offset: Offset(thumbOffset - _thumbPadding, 0),
+                              child: Container(
+                                width: _thumbBaseWidth + stretch,
+                                height: _thumbHeight,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(999),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.15,
+                                      ),
+                                      blurRadius: 8.0,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         ),

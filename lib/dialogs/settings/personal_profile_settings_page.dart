@@ -655,23 +655,22 @@ class _PersonalProfileSettingsPageState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Icon(CupertinoIcons.hourglass, size: 16, color: p.orange),
-                      const SizedBox(width: 8),
-                      Text(
-                        'MEMENTO MORI HORIZON',
-                        style: TextStyle(
-                          color: p.orange,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.8,
-                        ),
+                  Icon(CupertinoIcons.hourglass, size: 16, color: p.orange),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'MEMENTO MORI HORIZON',
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: p.orange,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.8,
                       ),
-                    ],
+                    ),
                   ),
+                  const SizedBox(width: 8),
                   Text(
                     'Max 100 Years',
                     style: TextStyle(
@@ -700,12 +699,15 @@ class _PersonalProfileSettingsPageState
                     ),
                   ),
                   const SizedBox(width: 6),
-                  Text(
-                    'Years Life Expectancy',
-                    style: TextStyle(
-                      color: p.text2,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
+                  Flexible(
+                    child: Text(
+                      'Years Life Expectancy',
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: p.text2,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ],
@@ -1059,27 +1061,22 @@ class _PersonalProfileSettingsPageState
 
                 // Visual 2: 1-Hour Daily Leverage Growth Multiplier
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        Icon(
-                          CupertinoIcons.bolt_fill,
-                          size: 14,
-                          color: p.green,
+                    Icon(CupertinoIcons.bolt_fill, size: 14, color: p.green),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        '1-HOUR DAILY LEVERAGE',
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: p.text,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.6,
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          '1-HOUR DAILY LEVERAGE',
-                          style: TextStyle(
-                            color: p.text,
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.6,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
+                    const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,

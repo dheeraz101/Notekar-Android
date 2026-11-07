@@ -33,7 +33,7 @@ class AppLockSettingsPage extends StatelessWidget {
   final VoidCallback onResetPrivacyPin;
   final ValueChanged<String> onPrivacyLockTypeChanged;
   final ValueChanged<int> onPrivacyLockDelayChanged;
-  final void Function(String category) onOpenCategory;
+  final void Function(String category, {String? parent}) onOpenCategory;
   final VoidCallback onPopCategory;
   final VoidCallback? onLearnMoreBeta;
 
@@ -69,7 +69,8 @@ class AppLockSettingsPage extends StatelessWidget {
                 status: privacyLockType == 'system'
                     ? 'System Lock'
                     : 'In-App PIN',
-                onTap: () => onOpenCategory('Configure Lock'),
+                onTap: () =>
+                    onOpenCategory('Configure Lock', parent: 'App Lock'),
               ),
             if (privacyLock && privacyLockType == 'custom_pin')
               SettingsRow(

@@ -3090,7 +3090,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
       return;
     }
     if (result.title == 'Minimal Sobriety Home Widget') {
-      _openCategory('Sobriety Companion', parent: 'Focus & Targets');
+      _openCategory('Sobriety Companion', parent: 'Logging');
       return;
     }
     if (result.title == 'Instant Camera Photo Widget' ||
@@ -3102,11 +3102,11 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
       return;
     }
     if (result.title == 'Daily Wrap-up & Day Sealing') {
-      _openCategory('Moments');
+      _openCategory('Moments', parent: 'Logging');
       return;
     }
     if (result.title == 'Interactive Note Preview Links') {
-      _openCategory('Privacy & Security');
+      _openCategory('Data safety');
       return;
     }
     if (result.title == 'Media Moments Filter') {
@@ -3154,21 +3154,21 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
       return;
     }
     if (result.title == 'Configure Lock') {
-      _openCategory('Configure Lock', parent: 'Privacy & Security');
+      _openCategory('Configure Lock', parent: 'App Lock');
       return;
     }
     if (result.title == 'When to Lock') {
-      _openCategory('App Lock', parent: 'Privacy & Security');
+      _openCategory('App Lock', parent: 'Data safety');
       return;
     }
     if (result.title == 'Sobriety Tracker' ||
         result.category == 'Sobriety' ||
         result.category == 'Sobriety Companion') {
-      _openCategory('Sobriety Companion');
+      _openCategory('Sobriety Companion', parent: 'Logging');
       return;
     }
     if (result.title == 'Search Notes' || result.category == 'Search Notes') {
-      _openCategory('Search Notes');
+      _openCategory('Search Notes', parent: 'Moments');
       return;
     }
     if (result.title == 'Executive Intelligence Hub') {
@@ -3180,7 +3180,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
       return;
     }
     if (result.title == 'Life Audit') {
-      _openCategory('Life Audit', parent: 'Dashboard');
+      _openCategory('Life Audit', parent: 'Logging');
       return;
     }
     if (result.title == 'Show Images Always') {
@@ -3190,7 +3190,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
     if (result.title == 'Backup & Export' ||
         result.title == 'Backup Status' ||
         result.title == 'Migrate from Other Apps') {
-      _openCategory('Data & Backup');
+      _openCategory('Data & Backup', parent: 'Data safety');
       return;
     }
 

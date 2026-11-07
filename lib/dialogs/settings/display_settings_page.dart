@@ -757,12 +757,16 @@ class _DisplayLivePreviewState extends State<_DisplayLivePreview> {
                     ],
                   ),
                 ),
-                Text(
-                  '${theme.toUpperCase()} • $clockFont',
-                  style: TextStyle(
-                    color: p.text3,
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w700,
+                Flexible(
+                  child: Text(
+                    '${theme.toUpperCase()} • $clockFont',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: p.text3,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ],
