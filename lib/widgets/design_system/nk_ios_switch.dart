@@ -85,16 +85,14 @@ class _NkIosSwitchState extends State<NkIosSwitch>
   @override
   void didUpdateWidget(covariant NkIosSwitch oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.value != widget.value && !_isDragging) {
-      if (widget.value) {
+    if (!_isDragging) {
+      final target = widget.value ? 1.0 : 0.0;
+      final isMismatched =
+          (widget.value && _positionController.value < 1.0) ||
+          (!widget.value && _positionController.value > 0.0);
+      if (oldWidget.value != widget.value || isMismatched) {
         _positionController.animateTo(
-          1.0,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeInOut,
-        );
-      } else {
-        _positionController.animateTo(
-          0.0,
+          target,
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeInOut,
         );

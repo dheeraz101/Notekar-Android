@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:notekar/dialogs/official_bulletins_sheet.dart';
 import 'package:notekar/dialogs/settings_dialog.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/widgets/design_system/nk_ios_switch.dart';
+import 'package:notekar/widgets/predictive_back_peek.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -143,6 +145,51 @@ void main() {
       await tester.pumpAndSettle();
       expect(rowVal, isTrue);
     });
+
+    testWidgets(
+      'Controlled switch: when parent rejects state change, switch reconciles back to false without desync',
+      (tester) async {
+        bool switchVal = false;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: StatefulBuilder(
+                builder: (context, setState) {
+                  return Center(
+                    child: NkIosSwitch(
+                      value: switchVal,
+                      onChanged: (v) {
+                        // Reject change: do not mutate switchVal, but trigger rebuild
+                        setState(() {});
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+
+        // Tap switch
+        await tester.tap(find.byType(NkIosSwitch));
+        // Pump 50ms into animation
+        await tester.pump(const Duration(milliseconds: 50));
+        // Settle animation
+        await tester.pumpAndSettle();
+
+        // Switch value in parent remains false
+        expect(switchVal, isFalse);
+
+        // Verify thumb returned to 0 position (left-aligned)
+        final thumbContainer = find.byWidgetPredicate(
+          (w) =>
+              w is Container &&
+              w.constraints?.maxWidth == 34.0 &&
+              w.constraints?.maxHeight == 28.0,
+        );
+        expect(thumbContainer, findsOneWidget);
+      },
+    );
   });
 
   group('Settings In-Depth Pages Hierarchical Back-Navigation', () {
@@ -492,6 +539,253 @@ void main() {
         await tester.tap(find.byTooltip('Back'));
         await pumpFrames(tester);
         expect(find.text('Settings'), findsWidgets);
+      },
+    );
+
+    testWidgets(
+      'Edge swipe gesture via PredictiveBackPeek pops Level 3 page back to Level 2',
+      (tester) async {
+        await tester.pumpWidget(
+          buildTestSettingsDialog(initialCategory: 'Local Backups'),
+        );
+        await pumpFrames(tester);
+
+        expect(find.text('Local Backups'), findsWidgets);
+
+        // Perform edge swipe starting within 40px left edge
+        final peekFinder = find.byType(PredictiveBackPeek);
+        expect(peekFinder, findsOneWidget);
+        final topLeft = tester.getTopLeft(peekFinder);
+
+        await tester.dragFrom(
+          topLeft + const Offset(15.0, 150.0),
+          const Offset(120.0, 0.0),
+        );
+        await pumpFrames(tester);
+
+        // Should now be on Data & Backup
+        expect(find.text('Data & Backup'), findsWidgets);
+      },
+    );
+
+    testWidgets(
+      'System back (handlePopRoute) ascends hierarchy from Level 3 to root and exits sheet',
+      (tester) async {
+        final entriesNotifier = ValueNotifier<List<Moment>>([]);
+        final trashNotifier = ValueNotifier<List<Moment>>([]);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Builder(
+              builder: (ctx) {
+                return Scaffold(
+                  body: Center(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: ctx,
+                          isScrollControlled: true,
+                          builder: (_) => SettingsDialog(
+                            p: testPalette,
+                            initialCategory: 'Configure Lock',
+                            theme: 'light',
+                            defaultMode: 'two-way',
+                            tapDelay: 300,
+                            accentColor: 'blue',
+                            appIconStyle: 'default',
+                            hapticStyle: 'standard',
+                            historyDensity: 'standard',
+                            privacyLock: false,
+                            backupReminderDays: 7,
+                            lastBackupAt: null,
+                            remoteNotices: false,
+                            reduceMotion: true,
+                            largeText: false,
+                            highContrast: false,
+                            confirmDelete: false,
+                            showSeconds: false,
+                            highlightSeconds: false,
+                            buttonLabels: true,
+                            largeControls: false,
+                            homeMenuPill: false,
+                            homeMenuAnimations: false,
+                            showHistoryText: true,
+                            showLastSavedHint: true,
+                            extendedDuration: false,
+                            minimalMomentOptions: false,
+                            enableTranslucency: false,
+                            privacyLockDelayMinutes: 0,
+                            isSystemLockAvailable: false,
+                            privacyLockType: 'system',
+                            onPrivacyLockTypeChanged: (_) async => true,
+                            updateStatus: '',
+                            checkingUpdates: false,
+                            lastUpdateCheckedAt: null,
+                            entriesNotifier: entriesNotifier,
+                            lastSavedAt: null,
+                            trashEntriesNotifier: trashNotifier,
+                            currentLocale: 'en',
+                            onLocaleChanged: (_) {},
+                            onTheme: (_) {},
+                            onDefaultMode: (_) {},
+                            onDelay: (_) {},
+                            onAccentColor: (_) {},
+                            onAppIconStyle: (_) async => true,
+                            onHapticStyle: (_) {},
+                            onHistoryDensity: (_) {},
+                            onPrivacyLock: (_) async => true,
+                            onResetPrivacyPin: () async {},
+                            onBackupReminderDays: (_) {},
+                            onRemoteNotices: (_) {},
+                            onReduceMotion: (_) {},
+                            onLargeText: (_) {},
+                            onHighContrast: (_) {},
+                            onConfirmDelete: (_) {},
+                            onShowSeconds: (_) {},
+                            onHighlightSeconds: (_) {},
+                            onButtonLabels: (_) {},
+                            onLargeControls: (_) {},
+                            onHomeMenuPill: (_) {},
+                            onHomeMenuAnimations: (_) async => true,
+                            onShowHistoryText: (_) {},
+                            onShowLastSavedHint: (_) {},
+                            onExtendedDuration: (_) {},
+                            onMinimalMomentOptions: (_) {},
+                            onTranslucency: (_) {},
+                            onPrivacyLockDelay: (_) {},
+                            onExportCsv: () async => '',
+                            onExportRecentCsv: () async => '',
+                            onExportJson: () async => '',
+                            onExportBackup: () async => '',
+                            onImportBackup: () async {},
+                            onRestoreBackupFromString: (_) async => true,
+                            onSaveQuickBackup: () async {},
+                            onCheckUpdates: () async =>
+                                (status: 'Up to date', info: null),
+                            onOpenLink: (_) {},
+                            onShowChangelog: (_) {},
+                            onReset: () async {},
+                            onFactoryReset: () async {},
+                            onResetSettings: () async {},
+                            onRestoreSettings: (_) async {},
+                            onFeedback: (_) {},
+                            onRestoreTrashMoment: (_) async {},
+                            onRestoreAllTrash: () async {},
+                            onDeleteTrashPermanent: (_) async {},
+                            onClearTrash: () async {},
+                          ),
+                        );
+                      },
+                      child: const Text('Open Settings'),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+
+        // Open Settings sheet
+        await tester.tap(find.text('Open Settings'));
+        await pumpFrames(tester);
+
+        expect(find.text('Configure Lock'), findsWidgets);
+
+        // System back 1: pops Configure Lock -> App Lock
+        bool handled = await tester.binding.handlePopRoute();
+        expect(handled, isTrue);
+        await pumpFrames(tester);
+        expect(find.text('App Lock'), findsWidgets);
+
+        // System back 2: pops App Lock -> Data safety
+        handled = await tester.binding.handlePopRoute();
+        expect(handled, isTrue);
+        await pumpFrames(tester);
+        expect(find.text('Data safety'), findsWidgets);
+
+        // System back 3: pops Data safety -> Settings root
+        handled = await tester.binding.handlePopRoute();
+        expect(handled, isTrue);
+        await pumpFrames(tester);
+        expect(find.text('Settings'), findsWidgets);
+
+        // System back 4: pops Settings root -> exits bottom sheet
+        handled = await tester.binding.handlePopRoute();
+        expect(handled, isTrue);
+        await pumpFrames(tester);
+        expect(find.text('Open Settings'), findsOneWidget);
+        expect(find.text('Settings'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'Rapid double-tap back during running transition animation navigates up two tiers smoothly',
+      (tester) async {
+        await tester.pumpWidget(
+          buildTestSettingsDialog(initialCategory: 'Local Backups'),
+        );
+        await pumpFrames(tester);
+
+        expect(find.text('Local Backups'), findsWidgets);
+
+        // First tap initiates transition to Data & Backup
+        await tester.tap(find.byTooltip('Back'));
+        // Advance only 30ms so animation is actively running
+        await tester.pump(const Duration(milliseconds: 30));
+
+        // Second rapid tap while animating
+        await tester.tap(find.byTooltip('Back'));
+        await pumpFrames(tester);
+
+        // Should have cleanly navigated up 2 tiers to Data safety
+        expect(find.text('Data safety'), findsWidgets);
+      },
+    );
+
+    testWidgets(
+      'OfficialBulletinsSheet modal dismisses itself before invoking onNavigateAction',
+      (tester) async {
+        String? targetAction;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Builder(
+              builder: (ctx) {
+                return Scaffold(
+                  body: Center(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        OfficialBulletinsSheet.show(
+                          ctx,
+                          p: testPalette,
+                          onOpenLink: (_) {},
+                          onNavigateAction: (route) {
+                            targetAction = route;
+                          },
+                        );
+                      },
+                      child: const Text('Open Bulletins'),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+
+        // Open Official Bulletins modal sheet
+        await tester.tap(find.text('Open Bulletins'));
+        await pumpFrames(tester);
+
+        expect(find.text('Official Bulletins'), findsOneWidget);
+
+        // Tap back on the sheet
+        await tester.tap(find.byTooltip('Back'));
+        await pumpFrames(tester);
+
+        // Modal sheet should be dismissed, returning to parent scaffold
+        expect(find.text('Open Bulletins'), findsOneWidget);
+        expect(find.text('Official Bulletins'), findsNothing);
+        expect(targetAction, isNull);
       },
     );
   });

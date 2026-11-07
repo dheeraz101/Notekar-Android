@@ -40,12 +40,19 @@ class OfficialBulletinsSheet extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => OfficialBulletinsSheet(
+      builder: (sheetContext) => OfficialBulletinsSheet(
         p: p,
         onOpenLink: onOpenLink,
         onBack: onBack,
         onLearnMoreBeta: onLearnMoreBeta,
-        onNavigateAction: onNavigateAction,
+        onNavigateAction: onNavigateAction == null
+            ? null
+            : (actionRoute) {
+                if (Navigator.of(sheetContext).canPop()) {
+                  Navigator.of(sheetContext).pop();
+                }
+                onNavigateAction(actionRoute);
+              },
       ),
     );
   }

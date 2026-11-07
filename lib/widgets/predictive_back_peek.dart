@@ -83,12 +83,10 @@ class _PredictiveBackPeekState extends State<PredictiveBackPeek>
 
   void _onHorizontalDragStart(DragStartDetails details) {
     if (!widget.enabled) return;
-    if (details.localPosition.dx <= widget.edgeWidth) {
-      _isDragging = true;
-      _dragDistance = 0.0;
-      _hapticTriggered = false;
-      _animController.stop();
-    }
+    _isDragging = true;
+    _dragDistance = 0.0;
+    _hapticTriggered = false;
+    _animController.stop();
   }
 
   void _onHorizontalDragUpdate(DragUpdateDetails details) {
