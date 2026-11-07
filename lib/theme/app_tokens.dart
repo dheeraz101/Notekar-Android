@@ -55,6 +55,15 @@ class NkSpacing {
   /// 48.0 pt
   final double huge = 48.0;
 
+  /// Standard screen gutter (Apple HIG / BitChord): 16.0 pt
+  final double screenGutter = 16.0;
+
+  /// Floating nav bar margin gutter (BitChord / Apple HIG): 19.0 pt
+  final double navBarGutter = 19.0;
+
+  /// Floating pill inner inset: 4.0 pt
+  final double pillInset = 4.0;
+
   /// Canonical grouped section divider indent: 56.0 pt
   final double dividerIndent = 56.0;
 
@@ -104,8 +113,10 @@ class NkRadii {
   final double xsVal = 6.0;
   final double smVal = 8.0;
   final double mdVal = 12.0;
+  final double buttonVal = 14.0;
   final double cardCompactVal = 16.0;
   final double cardVal = 16.0;
+  final double cardGroupedVal = 20.0;
   final double cardLargeVal = 28.0;
   final double squircleCardVal = 24.0;
   final double squircleSheetVal = 28.0;
@@ -116,8 +127,10 @@ class NkRadii {
   BorderRadius get xs => BorderRadius.circular(6.0);
   BorderRadius get sm => BorderRadius.circular(8.0);
   BorderRadius get md => BorderRadius.circular(12.0);
+  BorderRadius get button => BorderRadius.circular(14.0);
   BorderRadius get card => BorderRadius.circular(16.0);
   BorderRadius get cardCompact => BorderRadius.circular(16.0);
+  BorderRadius get cardGrouped => BorderRadius.circular(20.0);
   BorderRadius get cardLarge => BorderRadius.circular(28.0);
   BorderRadius get squircleCard => BorderRadius.circular(24.0);
   BorderRadius get squircleSheet => BorderRadius.circular(28.0);
@@ -157,10 +170,16 @@ class NkTouchTarget {
 class NkDurations {
   const NkDurations();
 
+  /// Micro transition: 100ms
+  final Duration micro = const Duration(milliseconds: 100);
+
   /// Instant micro-feedback: 150ms
   final Duration fast = const Duration(milliseconds: 150);
 
-  /// Standard snappy transition: 250ms
+  /// Standard snappy transition: 220ms
+  final Duration springSnap = const Duration(milliseconds: 220);
+
+  /// Snappy transition: 250ms
   final Duration snappy = const Duration(milliseconds: 250);
 
   /// Smooth layout change: 350ms
@@ -173,6 +192,8 @@ class NkDurations {
 class NkCurves {
   const NkCurves();
 
+  /// Single-pass Apple spring curve (BitChord GlassSpring equivalent)
+  final Curve appleSpring = const Cubic(0.25, 0.9, 0.35, 1.0);
   final Curve appleEase = Curves.easeInOutCubic;
   final Curve springSnappy = Curves.fastOutSlowIn;
   final Curve decelerate = Curves.easeOutCubic;

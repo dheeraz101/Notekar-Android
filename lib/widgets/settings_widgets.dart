@@ -8,6 +8,8 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
+import 'package:notekar/widgets/design_system/nk_ios_switch.dart';
+import 'package:notekar/widgets/design_system/nk_pill_segmented_control.dart';
 import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
@@ -62,12 +64,14 @@ class SettingsGroup extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: p.surface2,
-            borderRadius: BorderRadius.circular(28), // Unified 28pt card radius
+            borderRadius: BorderRadius.circular(
+              20,
+            ), // Standardized 20pt card radius
             border: Border.all(
               color: p.border.withValues(
-                alpha: p.name == 'amoled' ? 0.5 : (!p.isDark ? 0.35 : 0.45),
+                alpha: p.name == 'amoled' ? 0.45 : (!p.isDark ? 0.35 : 0.40),
               ),
-              width: 0.6,
+              width: 0.5,
             ),
           ),
           child: Builder(
@@ -227,11 +231,11 @@ class SettingsRow extends StatelessWidget {
                           : rowColor);
 
                 return Container(
-                  width: 36,
-                  height: 36,
+                  width: 32,
+                  height: 32,
                   decoration: BoxDecoration(
                     color: bgColor,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(8),
                     border: (isNearWhite || softIcon)
                         ? Border.all(
                             color: softIcon
@@ -242,7 +246,7 @@ class SettingsRow extends StatelessWidget {
                         : null,
                   ),
                   alignment: Alignment.center,
-                  child: customIcon ?? Icon(icon!, color: glyphColor, size: 20),
+                  child: customIcon ?? Icon(icon!, color: glyphColor, size: 18),
                 );
               }()),
               const SizedBox(width: 14),
@@ -336,12 +340,18 @@ class SegmentedSetting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasSubtitle = subtitle != null && subtitle!.isNotEmpty;
-    return Glass(
-      p: p,
-      radius: 16,
-      // Unified 16pt card style
-      blur: blur,
+    return Container(
       padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: p.surface2,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: p.border.withValues(
+            alpha: p.name == 'amoled' ? 0.45 : (!p.isDark ? 0.35 : 0.40),
+          ),
+          width: 0.5,
+        ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -357,15 +367,21 @@ class SegmentedSetting extends StatelessWidget {
                       title.localized(context),
                       style: TextStyle(
                         color: p.text,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         fontSize: hasSubtitle ? 14 : 15,
+                        letterSpacing: -0.2,
+                        fontFamily: 'Inter',
                       ),
                     ),
                     if (hasSubtitle) ...[
                       const SizedBox(height: 3),
                       Text(
                         subtitle!.localized(context),
-                        style: TextStyle(color: p.text2, fontSize: 12),
+                        style: TextStyle(
+                          color: p.text2,
+                          fontSize: 12,
+                          fontFamily: 'Inter',
+                        ),
                       ),
                     ],
                   ],
@@ -376,63 +392,19 @@ class SegmentedSetting extends StatelessWidget {
                   status!.localized(context),
                   style: TextStyle(
                     color: p.text2,
-                    fontSize: 15,
+                    fontSize: 14,
                     fontWeight: FontWeight.w400,
+                    fontFamily: 'Inter',
                   ),
                 ),
             ],
           ),
           const SizedBox(height: 12),
-          Container(
-            height: 40,
-            padding: const EdgeInsets.all(2),
-            decoration: BoxDecoration(
-              color: p.surface3,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: values.entries.map((e) {
-                final active = e.key == value;
-                return Expanded(
-                  child: PressableScale(
-                    onTap: () => onChanged(e.key),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 140),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: active
-                            ? (!p.isDark
-                                  ? Colors.white
-                                  : (p.name == 'amoled'
-                                        ? const Color(0xFF28282C)
-                                        : const Color(0xFF48484A)))
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: active
-                            ? [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.1),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ]
-                            : null,
-                      ),
-                      child: Text(
-                        e.value.localized(context),
-                        style: TextStyle(
-                          color: active ? p.text : p.text2,
-                          fontSize: 13,
-                          fontWeight: active
-                              ? FontWeight.w800
-                              : FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
+          NkPillSegmentedControl<String>(
+            options: values.keys.toList(),
+            selected: value,
+            onChanged: onChanged,
+            labelBuilder: (k) => values[k]?.localized(context) ?? k,
           ),
         ],
       ),
@@ -472,25 +444,7 @@ class SettingsSwitchRow extends StatefulWidget {
   State<SettingsSwitchRow> createState() => _SettingsSwitchRowState();
 }
 
-class _SettingsSwitchRowState extends State<SettingsSwitchRow>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _stretchController;
-
-  @override
-  void initState() {
-    super.initState();
-    _stretchController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 180),
-    );
-  }
-
-  @override
-  void dispose() {
-    _stretchController.dispose();
-    super.dispose();
-  }
-
+class _SettingsSwitchRowState extends State<SettingsSwitchRow> {
   void _handleToggle() {
     if (!widget.enabled) {
       final message = widget.disabledMessage;
@@ -507,6 +461,11 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
       }
     }
     widget.onChanged(!widget.value);
+  }
+
+  void _onSwitchChanged(bool v) {
+    if (!widget.enabled) return;
+    widget.onChanged(v);
   }
 
   @override
@@ -532,16 +491,8 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
       onTap: enabled ? _handleToggle : null,
       child: ExcludeSemantics(
         child: GestureDetector(
-          onTapDown: (_) {
-            _stretchController.forward();
-          },
-          onTapUp: (_) {
-            _stretchController.reverse();
-          },
-          onTapCancel: () {
-            _stretchController.reverse();
-          },
           onTap: _handleToggle,
+          behavior: HitTestBehavior.opaque,
           child: Container(
             padding: EdgeInsets.symmetric(
               horizontal: hasIcon ? 16 : 20,
@@ -555,18 +506,18 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
               children: [
                 if (hasIcon) ...[
                   Container(
-                    width: 36,
-                    height: 36,
-                    margin: hasSubtitle ? const EdgeInsets.only(top: 6) : null,
+                    width: 32,
+                    height: 32,
+                    margin: hasSubtitle ? const EdgeInsets.only(top: 4) : null,
                     decoration: BoxDecoration(
                       color: (enabled && value ? switchColor : p.text3)
                           .withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
                       widget.icon,
                       color: enabled && value ? switchColor : p.text2,
-                      size: 20,
+                      size: 18,
                     ),
                   ),
                   const SizedBox(width: 14),
@@ -601,96 +552,18 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
                     ],
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Padding(
                   padding: EdgeInsets.only(top: hasSubtitle ? 4 : 0),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeInOut,
-                    width: 62,
-                    // Refined HIG width
-                    height: 32,
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      color: enabled && value ? switchColor : p.surface3,
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(
-                        color: enabled && value ? switchColor : p.border,
-                      ),
-                    ),
-                    child: RepaintBoundary(
-                      child: Stack(
-                        children: [
-                          // "On" Indicator (Apple HIG Accessibility '|' Bar)
-                          AnimatedOpacity(
-                            duration: const Duration(milliseconds: 200),
-                            opacity: value ? 1.0 : 0.0,
-                            child: Align(
-                              alignment: const Alignment(-0.58, 0),
-                              child: Container(
-                                width: 2.0,
-                                height: 10.5,
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.85),
-                                  borderRadius: BorderRadius.circular(999),
-                                ),
-                              ),
-                            ),
-                          ),
-                          // "Off" Indicator (Apple HIG Accessibility 'O' Ring)
-                          AnimatedOpacity(
-                            duration: const Duration(milliseconds: 200),
-                            opacity: !value ? 1.0 : 0.0,
-                            child: Align(
-                              alignment: const Alignment(0.72, 0),
-                              child: Container(
-                                width: 8.0,
-                                height: 8.0,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: p.text3.withValues(alpha: 0.50),
-                                    width: 1.5,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          AnimatedAlign(
-                            duration: const Duration(milliseconds: 200),
-                            curve: Curves.easeInOut,
-                            alignment: value
-                                ? Alignment.centerRight
-                                : Alignment.centerLeft,
-                            child: AnimatedBuilder(
-                              animation: _stretchController,
-                              builder: (context, child) {
-                                // Fluid "pill" thumb stretch animation
-                                final stretch = _stretchController.value * 10;
-                                return Container(
-                                  width:
-                                      34 +
-                                      stretch, // Refined base thumb width 34
-                                  height: 28,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(999),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(
-                                          alpha: 0.15,
-                                        ),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
+                  child: ExcludeSemantics(
+                    child: NkIosSwitch(
+                      value: value,
+                      onChanged: enabled ? _onSwitchChanged : null,
+                      activeColor: switchColor,
+                      enabled: enabled,
+                      onHaptic: widget.isSecurity
+                          ? HapticFeedback.heavyImpact
+                          : null,
                     ),
                   ),
                 ),

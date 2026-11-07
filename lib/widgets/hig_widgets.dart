@@ -1,7 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/widgets/design_system/nk_ios_switch.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
 /// Standard Apple HIG Inset Grouped Section Header & Footer.
@@ -100,7 +101,7 @@ class HigGroupedCard extends StatelessWidget {
       if (i < children.length - 1) {
         dividedChildren.add(
           Padding(
-            padding: const EdgeInsets.only(left: 54),
+            padding: const EdgeInsets.only(left: 56),
             child: Divider(
               height: 0.5,
               thickness: 0.5,
@@ -115,8 +116,13 @@ class HigGroupedCard extends StatelessWidget {
       margin: margin,
       decoration: BoxDecoration(
         color: p.surface2,
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: p.border.withValues(alpha: 0.5), width: 0.6),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: p.border.withValues(
+            alpha: p.name == 'amoled' ? 0.45 : (!p.isDark ? 0.35 : 0.40),
+          ),
+          width: 0.5,
+        ),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(mainAxisSize: MainAxisSize.min, children: dividedChildren),
@@ -160,14 +166,14 @@ class HigRow extends StatelessWidget {
       iconWidget = customIcon!;
     } else if (icon != null) {
       iconWidget = Container(
-        width: 30,
-        height: 30,
+        width: 32,
+        height: 32,
         decoration: BoxDecoration(
           color: effectiveIconColor,
           borderRadius: BorderRadius.circular(8),
         ),
         alignment: Alignment.center,
-        child: Icon(icon, size: 17, color: Colors.white),
+        child: Icon(icon, size: 18, color: Colors.white),
       );
     } else {
       iconWidget = const SizedBox(width: 8);
@@ -270,12 +276,19 @@ class HigSwitchRow extends StatelessWidget {
       icon: icon,
       iconColor: iconColor,
       showChevron: false,
-      trailing: CupertinoSwitch(
+      trailing: NkIosSwitch(
         value: value,
-        activeTrackColor: p.accent,
+        activeColor: p.accent,
         onChanged: onChanged,
       ),
-      onTap: () => onChanged(!value),
+      onTap: () {
+        if (!value) {
+          AppHaptics.toggleOn();
+        } else {
+          AppHaptics.toggleOff();
+        }
+        onChanged(!value);
+      },
     );
   }
 }

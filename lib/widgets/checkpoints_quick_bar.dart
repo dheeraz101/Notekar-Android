@@ -120,7 +120,7 @@ class _CheckpointsQuickBarState extends State<CheckpointsQuickBar> {
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
                             color: p.border.withValues(alpha: 0.5),
-                            width: 0.8,
+                            width: 0.5,
                           ),
                         ),
                         child: Row(
@@ -312,12 +312,12 @@ class _CheckpointsQuickBarState extends State<CheckpointsQuickBar> {
                                 color: isDone
                                     ? p.accent.withValues(alpha: 0.12)
                                     : p.surface2,
-                                borderRadius: BorderRadius.circular(11),
+                                borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
                                   color: isDone
                                       ? p.accent.withValues(alpha: 0.45)
                                       : p.border.withValues(alpha: 0.5),
-                                  width: isDone ? 1.0 : 0.8,
+                                  width: isDone ? 0.8 : 0.5,
                                 ),
                               ),
                               child: Row(
@@ -334,7 +334,7 @@ class _CheckpointsQuickBarState extends State<CheckpointsQuickBar> {
                                       color: isDone ? p.accent : p.text,
                                       fontSize: 11,
                                       fontWeight: isDone
-                                          ? FontWeight.w800
+                                          ? FontWeight.w700
                                           : FontWeight.w600,
                                     ),
                                   ),
@@ -376,10 +376,10 @@ class _CheckpointsQuickBarState extends State<CheckpointsQuickBar> {
                             ),
                             decoration: BoxDecoration(
                               color: p.surface2,
-                              borderRadius: BorderRadius.circular(11),
+                              borderRadius: BorderRadius.circular(12),
                               border: Border.all(
                                 color: p.accent.withValues(alpha: 0.5),
-                                width: 0.8,
+                                width: 0.5,
                               ),
                             ),
                             child: Row(

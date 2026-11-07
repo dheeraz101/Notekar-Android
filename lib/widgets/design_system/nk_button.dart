@@ -22,6 +22,8 @@ class NkButton extends StatelessWidget {
     this.onPressed,
     this.isLoading = false,
     this.fullWidth = false,
+    this.isPill = false,
+    this.borderRadius,
   });
 
   const NkButton.primary({
@@ -33,6 +35,8 @@ class NkButton extends StatelessWidget {
     this.onPressed,
     this.isLoading = false,
     this.fullWidth = false,
+    this.isPill = false,
+    this.borderRadius,
   }) : variant = NkButtonVariant.primary;
 
   const NkButton.secondary({
@@ -44,6 +48,8 @@ class NkButton extends StatelessWidget {
     this.onPressed,
     this.isLoading = false,
     this.fullWidth = false,
+    this.isPill = false,
+    this.borderRadius,
   }) : variant = NkButtonVariant.secondary;
 
   const NkButton.ghost({
@@ -55,6 +61,8 @@ class NkButton extends StatelessWidget {
     this.onPressed,
     this.isLoading = false,
     this.fullWidth = false,
+    this.isPill = false,
+    this.borderRadius,
   }) : variant = NkButtonVariant.ghost;
 
   const NkButton.destructive({
@@ -66,6 +74,8 @@ class NkButton extends StatelessWidget {
     this.onPressed,
     this.isLoading = false,
     this.fullWidth = false,
+    this.isPill = false,
+    this.borderRadius,
   }) : variant = NkButtonVariant.destructive;
 
   final Palette p;
@@ -76,6 +86,8 @@ class NkButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final bool isLoading;
   final bool fullWidth;
+  final bool isPill;
+  final BorderRadius? borderRadius;
 
   @override
   Widget build(BuildContext context) {
@@ -170,7 +182,11 @@ class NkButton extends StatelessWidget {
             ),
             decoration: BoxDecoration(
               color: backgroundColor,
-              borderRadius: NkTokens.radii.pill,
+              borderRadius:
+                  borderRadius ??
+                  (isPill
+                      ? NkTokens.radii.pill
+                      : (isSmall ? NkTokens.radii.md : NkTokens.radii.button)),
               border: border,
             ),
             alignment: Alignment.center,

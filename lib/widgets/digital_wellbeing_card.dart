@@ -78,8 +78,8 @@ class _DigitalWellbeingCardState extends State<DigitalWellbeingCard>
       padding: NkTokens.spacing.cardPadding,
       decoration: BoxDecoration(
         color: p.surface,
-        borderRadius: NkTokens.radii.card,
-        border: Border.all(color: p.border.withValues(alpha: 0.3), width: 0.8),
+        borderRadius: NkTokens.radii.cardGrouped,
+        border: Border.all(color: p.border.withValues(alpha: 0.35), width: 0.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,8 +230,8 @@ class _DigitalWellbeingCardState extends State<DigitalWellbeingCard>
       padding: NkTokens.spacing.cardPadding,
       decoration: BoxDecoration(
         color: p.surface,
-        borderRadius: NkTokens.radii.card,
-        border: Border.all(color: p.border.withValues(alpha: 0.3), width: 0.8),
+        borderRadius: NkTokens.radii.cardGrouped,
+        border: Border.all(color: p.border.withValues(alpha: 0.35), width: 0.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

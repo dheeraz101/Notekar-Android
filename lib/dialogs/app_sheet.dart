@@ -291,8 +291,8 @@ class _AppSheetState extends State<AppSheet> {
                                       style: TextStyle(
                                         color: p.text,
                                         fontSize: 17,
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: -0.4,
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: -0.3,
                                         fontFamily: 'Inter',
                                       ),
                                     ),
@@ -425,8 +425,12 @@ class _HeaderCircleButton extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: p.surface3,
                   shape: BoxShape.circle,
+                  border: Border.all(
+                    color: p.border.withValues(alpha: 0.5),
+                    width: 0.5,
+                  ),
                 ),
-                child: Icon(icon, color: p.text2, size: 22),
+                child: Icon(icon, color: p.text2, size: 20),
               ),
             ),
           ),
@@ -500,8 +504,8 @@ class AppSheetLargeTitle extends StatelessWidget {
             style: TextStyle(
               color: p.text,
               fontSize: 34,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -1.4,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.8,
               fontFamily: 'Inter',
             ),
           ),

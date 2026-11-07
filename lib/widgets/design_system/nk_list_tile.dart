@@ -283,10 +283,12 @@ class NkSwitchTile extends StatelessWidget {
                   child: Switch.adaptive(
                     value: value,
                     onChanged: enabled ? onChanged : null,
-                    activeThumbColor: p.accent,
-                    activeTrackColor: p.accent.withValues(alpha: 0.4),
-                    inactiveThumbColor: p.text3,
-                    inactiveTrackColor: p.surface3,
+                    activeTrackColor: p.accent.withValues(alpha: 0.5),
+                    thumbColor: WidgetStateProperty.resolveWith(
+                      (states) => states.contains(WidgetState.selected)
+                          ? p.accent
+                          : null,
+                    ),
                   ),
                 ),
               ],

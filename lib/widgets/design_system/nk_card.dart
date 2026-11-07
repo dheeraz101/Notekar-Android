@@ -25,6 +25,7 @@ class NkCard extends StatelessWidget {
     this.dividerIndent = 56.0,
     this.margin = const EdgeInsets.symmetric(horizontal: 0.0, vertical: 6.0),
     this.padding,
+    this.borderRadius,
     this.clipBehavior = Clip.antiAlias,
   }) : child = null;
 
@@ -38,6 +39,7 @@ class NkCard extends StatelessWidget {
     this.onAction,
     this.margin = const EdgeInsets.symmetric(horizontal: 0.0, vertical: 6.0),
     this.padding,
+    this.borderRadius,
     this.clipBehavior = Clip.antiAlias,
   }) : children = const [],
        showDividers = false,
@@ -54,6 +56,7 @@ class NkCard extends StatelessWidget {
   final double dividerIndent;
   final EdgeInsetsGeometry margin;
   final EdgeInsetsGeometry? padding;
+  final BorderRadiusGeometry? borderRadius;
   final Clip clipBehavior;
 
   @override
@@ -128,14 +131,14 @@ class NkCard extends StatelessWidget {
               padding: padding,
               decoration: BoxDecoration(
                 color: p.surface2,
-                borderRadius: NkTokens.radii.card,
+                borderRadius: borderRadius ?? NkTokens.radii.cardGrouped,
                 border: Border.all(
                   color: p.border.withValues(
                     alpha: p.name == 'amoled'
-                        ? 0.6
-                        : (p.name == 'light' ? 0.4 : 0.5),
+                        ? 0.45
+                        : (p.name == 'light' ? 0.35 : 0.40),
                   ),
-                  width: 0.6,
+                  width: NkTokens.borders.hairline,
                 ),
                 boxShadow: p.name == 'light'
                     ? [

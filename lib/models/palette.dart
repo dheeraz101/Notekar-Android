@@ -117,18 +117,18 @@ Palette paletteFor(
     return Palette(
       name: 'light',
       bg: const Color(0xFFF2F2F7),
-      // Official iOS Grouped Modal Sheet Surface: #FFFFFF
-      surface: const Color(0xFFFFFFFF),
-      // Official iOS Card color
+      // Apple Grouped Base Surface (Sheets / Pinned Headers): #F7F7F9
+      surface: const Color(0xFFF7F7F9),
+      // Apple Grouped Card Surface: #FFFFFF
       surface2: const Color(0xFFFFFFFF),
-      // Official iOS Tertiary Control / Fill: #E5E5EA
+      // Apple Tertiary Control / Fill: #E5E5EA
       surface3: const Color(0xFFE5E5EA),
-      border: highContrast ? const Color(0xFFB8B8B8) : const Color(0xFFE4E4E4),
+      border: highContrast ? const Color(0xFF8E8E93) : const Color(0xFFE5E5EA),
       text: const Color(0xFF000000),
       text2: highContrast
           ? const Color(0xFF1A1A1A)
           : const Color(0xFF3C3C43).withValues(alpha: 0.75),
-      text3: highContrast ? const Color(0xFF4A4A4A) : const Color(0xFF6C6C70),
+      text3: highContrast ? const Color(0xFF3C3C43) : const Color(0xFF6C6C70),
       clock: highContrast ? const Color(0xFF8E8E93) : const Color(0xFFD1D1D6),
       accent: accent,
       green: const Color(0xFF248A3D),

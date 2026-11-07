@@ -50,8 +50,8 @@ class Glass extends StatelessWidget {
     // Light strikes from the top, creating a crisp white hairline highlight
     // that tapers into ambient border tint at the bottom.
     final topHighlightColor = isLight
-        ? Colors.white.withValues(alpha: 0.65)
-        : Colors.white.withValues(alpha: isAmoled ? 0.16 : 0.22);
+        ? Colors.white.withValues(alpha: 0.45)
+        : Colors.white.withValues(alpha: isAmoled ? 0.12 : 0.18);
 
     Widget content = DecoratedBox(
       decoration: BoxDecoration(
@@ -63,13 +63,13 @@ class Glass extends StatelessWidget {
                 end: Alignment.bottomCenter,
                 colors: [
                   surfaceColor.withValues(
-                    alpha: (surfaceColor.a * (isLight ? 1.08 : 1.15)).clamp(
+                    alpha: (surfaceColor.a * (isLight ? 1.04 : 1.08)).clamp(
                       0.0,
                       1.0,
                     ),
                   ),
                   surfaceColor.withValues(
-                    alpha: (surfaceColor.a * (isLight ? 0.94 : 0.92)).clamp(
+                    alpha: (surfaceColor.a * (isLight ? 0.96 : 0.94)).clamp(
                       0.0,
                       1.0,
                     ),
@@ -81,26 +81,26 @@ class Glass extends StatelessWidget {
           color: (effectiveBlur && showSpecularHighlight)
               ? topHighlightColor
               : p.border.withValues(alpha: opacity * p.border.a),
-          width: 0.6,
+          width: 0.5,
         ),
-        boxShadow: (isAmoled && !effectiveBlur)
+        boxShadow: (isAmoled && !effectiveBlur) || p.name == 'eink'
             ? null
             : [
-                // Soft diffuse ambient depth shadow
+                // Soft restrained ambient depth shadow
                 BoxShadow(
                   color: Colors.black.withValues(
-                    alpha: isLight ? 0.06 : (isAmoled ? 0.25 : 0.35),
+                    alpha: isLight ? 0.05 : (isAmoled ? 0.20 : 0.25),
                   ),
-                  blurRadius: effectiveBlur ? 28 : 20,
-                  spreadRadius: effectiveBlur ? -3 : -2,
-                  offset: const Offset(0, 8),
+                  blurRadius: effectiveBlur ? 20 : 16,
+                  spreadRadius: effectiveBlur ? -1 : 0,
+                  offset: const Offset(0, 4),
                 ),
-                if (!isLight && effectiveBlur)
+                if (!isLight && effectiveBlur && !isAmoled)
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.18),
-                    blurRadius: 10,
+                    color: Colors.black.withValues(alpha: 0.12),
+                    blurRadius: 8,
                     spreadRadius: -1,
-                    offset: const Offset(0, 3),
+                    offset: const Offset(0, 2),
                   ),
               ],
       ),

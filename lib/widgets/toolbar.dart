@@ -67,43 +67,29 @@ class _ToolbarState extends State<Toolbar> with SingleTickerProviderStateMixin {
     super.initState();
     _bounceController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 700),
+      duration: const Duration(milliseconds: 280),
     );
     _bounceAnimation = TweenSequence<double>([
       TweenSequenceItem(
         tween: Tween<double>(
           begin: 0.0,
-          end: -8.0,
-        ).chain(CurveTween(curve: Curves.easeOutQuad)),
-        weight: 25,
+          end: -3.5,
+        ).chain(CurveTween(curve: Curves.easeOutCubic)),
+        weight: 35,
       ),
       TweenSequenceItem(
         tween: Tween<double>(
-          begin: -8.0,
-          end: 6.0,
-        ).chain(CurveTween(curve: Curves.easeInOutQuad)),
-        weight: 25,
-      ),
-      TweenSequenceItem(
-        tween: Tween<double>(
-          begin: 6.0,
-          end: -3.0,
-        ).chain(CurveTween(curve: Curves.easeInOutQuad)),
-        weight: 25,
-      ),
-      TweenSequenceItem(
-        tween: Tween<double>(
-          begin: -3.0,
+          begin: -3.5,
           end: 0.0,
-        ).chain(CurveTween(curve: Curves.easeInQuad)),
-        weight: 25,
+        ).chain(CurveTween(curve: const Cubic(0.25, 0.9, 0.35, 1.0))),
+        weight: 65,
       ),
     ]).animate(_bounceController);
 
     if (widget.isSessionActive &&
         widget.activeGoalTitle != null &&
         widget.enableGoalSwitcher) {
-      _bounceController.forward();
+      _bounceController.forward(from: 0.0);
     }
   }
 
@@ -411,30 +397,30 @@ BoxDecoration _bottomNavDecoration(Palette p, bool blur) {
   final isAmoled = p.name == 'amoled';
 
   final surfaceColor = isLight
-      ? const Color(0xFFFFFFFF).withValues(alpha: blur ? 0.72 : 0.95)
+      ? const Color(0xFFFFFFFF).withValues(alpha: blur ? 0.75 : 0.96)
       : (isAmoled
-            ? const Color(0xFF000000).withValues(alpha: blur ? 0.85 : 0.98)
-            : const Color(0xFF1C1C1E).withValues(alpha: blur ? 0.70 : 0.94));
+            ? const Color(0xFF0C0C0E).withValues(alpha: blur ? 0.88 : 0.98)
+            : const Color(0xFF18181B).withValues(alpha: blur ? 0.75 : 0.95));
 
   final topRimColor = isLight
-      ? Colors.white.withValues(alpha: 0.65)
-      : Colors.white.withValues(alpha: isAmoled ? 0.18 : 0.24);
+      ? Colors.white.withValues(alpha: 0.45)
+      : Colors.white.withValues(alpha: isAmoled ? 0.14 : 0.18);
 
   return BoxDecoration(
     color: surfaceColor,
     borderRadius: BorderRadius.circular(999),
     border: Border.all(
-      color: blur ? topRimColor : p.border.withValues(alpha: 0.6),
-      width: 0.6,
+      color: blur ? topRimColor : p.border.withValues(alpha: 0.5),
+      width: 0.5,
     ),
     boxShadow: (isAmoled && !blur)
         ? null
         : [
             BoxShadow(
-              color: Colors.black.withValues(alpha: isLight ? 0.08 : 0.35),
-              blurRadius: blur ? 28 : 18,
-              spreadRadius: blur ? -3 : -1,
-              offset: const Offset(0, 8),
+              color: Colors.black.withValues(alpha: isLight ? 0.06 : 0.28),
+              blurRadius: blur ? 20 : 14,
+              spreadRadius: 0,
+              offset: const Offset(0, 4),
             ),
           ],
   );
