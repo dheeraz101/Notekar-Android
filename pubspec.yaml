@@ -44,6 +44,7 @@ flutter:
     - icon-maskable-512.png
     - app_icons/
     - assets/images/
+    - notice_image/
 
   fonts:
     - family: Inter

@@ -250,7 +250,21 @@ class _NoticeImagePostDialogState extends State<NoticeImagePostDialog>
     }
 
     try {
-      // 1. If it's a local file path
+      // 1. Direct asset path check
+      if (url.startsWith('assets/') || url.startsWith('notice_image/')) {
+        try {
+          final assetData = await rootBundle.load(url);
+          if (mounted) {
+            setState(() {
+              _imageBytes = assetData.buffer.asUint8List();
+              _isLoading = false;
+            });
+          }
+          return;
+        } catch (_) {}
+      }
+
+      // 2. Direct local file path check
       if (!url.startsWith('http://') && !url.startsWith('https://')) {
         final localFile = File(url);
         if (localFile.existsSync()) {
@@ -265,24 +279,77 @@ class _NoticeImagePostDialogState extends State<NoticeImagePostDialog>
         }
       }
 
-      // 2. Fetch from GitHub / remote HTTPS
-      final response = await http
-          .get(Uri.parse(url))
-          .timeout(const Duration(seconds: 12));
+      // 3. Remote HTTPS fetch
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        try {
+          final response = await http
+              .get(Uri.parse(url))
+              .timeout(const Duration(seconds: 8));
 
-      if (response.statusCode == 200 && response.bodyBytes.isNotEmpty) {
-        if (mounted) {
-          setState(() {
-            _imageBytes = response.bodyBytes;
-            _isLoading = false;
-          });
+          if (response.statusCode == 200 && response.bodyBytes.isNotEmpty) {
+            if (mounted) {
+              setState(() {
+                _imageBytes = response.bodyBytes;
+                _isLoading = false;
+              });
+            }
+            return;
+          }
+        } catch (netErr) {
+          _logger.warn('Remote image fetch failed for $url: $netErr');
         }
-        return;
-      } else {
-        throw HttpException(
-          'HTTP ${response.statusCode}: Failed to fetch notice image',
-        );
       }
+
+      // 4. Local asset & bundled fallback
+      final uri = Uri.tryParse(url);
+      final fileName = uri != null && uri.pathSegments.isNotEmpty
+          ? uri.pathSegments.last
+          : '';
+
+      if (fileName.isNotEmpty) {
+        // Try bundled asset under notice_image/
+        try {
+          final assetData = await rootBundle.load('notice_image/$fileName');
+          if (mounted) {
+            setState(() {
+              _imageBytes = assetData.buffer.asUint8List();
+              _isLoading = false;
+            });
+          }
+          return;
+        } catch (_) {}
+
+        // Try bundled asset under assets/images/
+        try {
+          final assetData = await rootBundle.load('assets/images/$fileName');
+          if (mounted) {
+            setState(() {
+              _imageBytes = assetData.buffer.asUint8List();
+              _isLoading = false;
+            });
+          }
+          return;
+        } catch (_) {}
+
+        // Try relative local file paths
+        final candidateFiles = [File('notice_image/$fileName'), File(fileName)];
+        for (final cand in candidateFiles) {
+          if (cand.existsSync()) {
+            final bytes = await cand.readAsBytes();
+            if (mounted) {
+              setState(() {
+                _imageBytes = bytes;
+                _isLoading = false;
+              });
+            }
+            return;
+          }
+        }
+      }
+
+      throw HttpException(
+        'Unable to load notice image from $url or local bundled fallback',
+      );
     } catch (e, stack) {
       _logger.warn('Failed to load notice image from $url: $e', e, stack);
       if (mounted) {

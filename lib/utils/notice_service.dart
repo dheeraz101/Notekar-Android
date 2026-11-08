@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:notekar/models/app_notice.dart';
 import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -88,12 +89,100 @@ class NoticeService {
       'maxShows': 5,
       'cooldownHours': 24,
     },
+    {
+      'enabled': true,
+      'id': 'diwali_2026',
+      'title': 'Notice',
+      'title_es': 'Aviso',
+      'title_hi': 'सूचना',
+      'title_de': 'Hinweis',
+      'title_fr': 'Avis',
+      'title_ja': 'お知らせ',
+      'title_ru': 'Уведомление',
+      'body':
+          'Wishing you and your loved ones a very Happy, Bright, and Prosperous Diwali! May this festival of lights illuminate your path with joy, peace, good health, and success.',
+      'body_es':
+          '¡Les deseamos a usted y a sus seres queridos un muy feliz, brillante y próspero Diwali! Que este festival de luces ilumine su camino con alegría, paz, salud y éxito.',
+      'body_hi':
+          'आपको और आपके पूरे परिवार को दीपावली की हार्दिक शुभकामनाएं! रोशनी का यह पावन पर्व आपके जीवन में सुख, शांति, समृद्धि और उत्तम स्वास्थ्य लाए।',
+      'body_de':
+          'Wir wünschen Ihnen und Ihren Lieben ein frohes, strahlendes und gesegnetes Diwali-Fest! Möge das Lichterfest Ihren Weg mit Freude, Frieden, Gesundheit und Erfolg erhellen.',
+      'body_fr':
+          'Joyeuse fête de Diwali à vous et à vos proches ! Que ce festival des lumières illumine votre chemin de joie, de paix, de santé et de succès.',
+      'body_ja':
+          'あなたと大切な方々に、喜びと繁栄に満ちた素晴らしいディワリをお祈り申し上げます。光の祭典が皆様の歩みを平和と健康、成功で照らしますように。',
+      'body_ru':
+          'Желаем вам и вашим близким счастливого, светлого и благополучного Дивали! Пусть этот праздник огней наполнит вашу жизнь радостью, миром, здоровьем и успехом.',
+      'image_url':
+          'https://raw.githubusercontent.com/dheeraz101/Notekar-Android/main/notice_image/happy_diwali.jpg',
+      'aspect_ratio': '16:9',
+      'image_caption': 'Happy Diwali from NoteKar',
+      'priority': 'normal',
+      'channels': ['stable', 'beta', 'experiment'],
+      'platforms': ['android'],
+      'minVersion': '7.0.0',
+      'maxVersion': '9.9.9',
+      'maxShows': 5,
+      'cooldownHours': 24,
+    },
   ];
 
   HttpClient _createHttpClient({
     Duration timeout = const Duration(seconds: 6),
   }) {
     return HttpClient()..connectionTimeout = timeout;
+  }
+
+  /// Parses JSON content (List or Map) into a list of AppNotice.
+  List<AppNotice> _parseNoticesFromJson(
+    dynamic rawJson, {
+    DateTime? receivedAt,
+  }) {
+    List<dynamic> list;
+    if (rawJson is List) {
+      list = rawJson;
+    } else if (rawJson is Map<String, dynamic>) {
+      if (rawJson['notices'] is List) {
+        list = rawJson['notices'] as List<dynamic>;
+      } else {
+        list = [rawJson];
+      }
+    } else {
+      list = [];
+    }
+
+    final ts = receivedAt ?? DateTime.now();
+    return list.whereType<Map<String, dynamic>>().map((map) {
+      final copy = Map<String, dynamic>.from(map);
+      copy['receivedAt'] ??= ts.toIso8601String();
+      return AppNotice.fromJson(copy);
+    }).toList();
+  }
+
+  /// Attempts to load bundled local asset notices from notice_image/notice.json.
+  Future<List<AppNotice>> _loadBundledNotices() async {
+    // 1. Try rootBundle (app asset bundle)
+    try {
+      final jsonStr = await rootBundle.loadString('notice_image/notice.json');
+      if (jsonStr.trim().isNotEmpty) {
+        final dynamic raw = jsonDecode(jsonStr);
+        return _parseNoticesFromJson(raw);
+      }
+    } catch (_) {}
+
+    // 2. Try direct local file (test / dev fallback)
+    try {
+      final file = File('notice_image/notice.json');
+      if (file.existsSync()) {
+        final jsonStr = await file.readAsString();
+        if (jsonStr.trim().isNotEmpty) {
+          final dynamic raw = jsonDecode(jsonStr);
+          return _parseNoticesFromJson(raw);
+        }
+      }
+    } catch (_) {}
+
+    return [];
   }
 
   /// Fetches latest notices from notificationFeed, caches them locally, and returns the filtered list.
@@ -120,18 +209,15 @@ class NoticeService {
         final bodyStr = await response.transform(utf8.decoder).join();
         final dynamic rawJson = jsonDecode(bodyStr);
 
-        if (rawJson is List) {
-          final now = DateTime.now();
-          final notices = rawJson.whereType<Map<String, dynamic>>().map((map) {
-            final copy = Map<String, dynamic>.from(map);
-            copy['receivedAt'] ??= now.toIso8601String();
-            return AppNotice.fromJson(copy);
-          }).toList();
+        final now = DateTime.now();
+        final notices = _parseNoticesFromJson(rawJson, receivedAt: now);
 
+        if (notices.isNotEmpty) {
           final existingIds = notices.map((n) => n.id).toSet();
           for (final def in defaultNotices) {
             if (!existingIds.contains(def['id'])) {
               notices.add(AppNotice.fromJson(def));
+              existingIds.add(def['id'] as String);
             }
           }
 
@@ -155,48 +241,47 @@ class NoticeService {
 
   /// Reads cached notices directly from local disk storage with zero latency.
   Future<List<AppNotice>> getCachedNotices() async {
+    List<AppNotice> cachedNotices = [];
+    bool hasValidCache = false;
+
     try {
       final prefs = await SharedPreferences.getInstance();
       final cachedStr = prefs.getString(_cachedNoticesKey);
-      if (cachedStr == null || cachedStr.trim().isEmpty) {
-        return _filterApplicableNotices(
-          defaultNotices.map((map) => AppNotice.fromJson(map)).toList(),
-        );
-      }
-
-      final dynamic rawJson = jsonDecode(cachedStr);
-      if (rawJson is List) {
-        final notices = rawJson
-            .whereType<Map<String, dynamic>>()
-            .map((map) => AppNotice.fromJson(map))
-            .toList();
-
-        final existingIds = notices.map((n) => n.id).toSet();
-        for (final def in defaultNotices) {
-          if (!existingIds.contains(def['id'])) {
-            notices.add(AppNotice.fromJson(def));
-          }
+      if (cachedStr != null && cachedStr.trim().isNotEmpty) {
+        try {
+          final dynamic rawJson = jsonDecode(cachedStr);
+          cachedNotices = _parseNoticesFromJson(rawJson);
+          hasValidCache = true;
+        } catch (_) {
+          // Corrupted cache format - wipe
+          await prefs.remove(_cachedNoticesKey);
         }
-
-        return _filterApplicableNotices(notices);
-      } else {
-        // Corrupted cache format - wipe
-        await prefs.remove(_cachedNoticesKey);
       }
     } catch (e, stack) {
-      _logger.warn(
-        'Failed to read cached notices, purging corrupted key',
-        e,
-        stack,
-      );
-      try {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.remove(_cachedNoticesKey);
-      } catch (_) {}
+      _logger.warn('Failed to read cached notices: $e', e, stack);
     }
-    return _filterApplicableNotices(
-      defaultNotices.map((map) => AppNotice.fromJson(map)).toList(),
-    );
+
+    if (hasValidCache && cachedNotices.isNotEmpty) {
+      final existingIds = cachedNotices.map((n) => n.id).toSet();
+      for (final def in defaultNotices) {
+        if (!existingIds.contains(def['id'])) {
+          cachedNotices.add(AppNotice.fromJson(def));
+          existingIds.add(def['id'] as String);
+        }
+      }
+      return _filterApplicableNotices(cachedNotices);
+    }
+
+    // Fallback: bundled local asset notices + defaultNotices
+    final notices = await _loadBundledNotices();
+    final existingIds = notices.map((n) => n.id).toSet();
+    for (final def in defaultNotices) {
+      if (!existingIds.contains(def['id'])) {
+        notices.add(AppNotice.fromJson(def));
+        existingIds.add(def['id'] as String);
+      }
+    }
+    return _filterApplicableNotices(notices);
   }
 
   /// Performs a silent background check if notices haven't been checked in [maxAge].

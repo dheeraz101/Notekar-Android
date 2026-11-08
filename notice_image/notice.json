@@ -1,0 +1,36 @@
+[
+  {
+    "id": "diwali_2026",
+    "enabled": true,
+    "title": "Notice",
+    "title_hi": "सूचना",
+    "title_es": "Aviso",
+    "title_de": "Hinweis",
+    "title_fr": "Avis",
+    "title_ja": "お知らせ",
+    "title_ru": "Уведомление",
+    "body": "Wishing you and your loved ones a very Happy, Bright, and Prosperous Diwali! May this festival of lights illuminate your path with joy, peace, good health, and success.",
+    "body_hi": "आपको और आपके पूरे परिवार को दीपावली की हार्दिक शुभकामनाएं! रोशनी का यह पावन पर्व आपके जीवन में सुख, शांति, समृद्धि और उत्तम स्वास्थ्य लाए।",
+    "body_es": "¡Les deseamos a usted y a sus seres queridos un muy feliz, brillante y próspero Diwali! Que este festival de luces ilumine su camino con alegría, paz, salud y éxito.",
+    "body_de": "Wir wünschen Ihnen und Ihren Lieben ein frohes, strahlendes und gesegnetes Diwali-Fest! Möge das Lichterfest Ihren Weg mit Freude, Frieden, Gesundheit und Erfolg erhellen.",
+    "body_fr": "Joyeuse fête de Diwali à vous et à vos proches ! Que ce festival des lumières illumine votre chemin de joie, de paix, de santé et de succès.",
+    "body_ja": "あなたと大切な方々に、喜びと繁栄に満ちた素晴らしいディワリをお祈り申し上げます。光の祭典が皆様の歩みを平和と健康、成功で照らしますように。",
+    "body_ru": "Желаем вам и вашим близким счастливого, светлого и благополучного Дивали! Пусть этот праздник огней наполнит вашу жизнь радостью, миром, здоровьем и успехом.",
+    "imageUrl": "https://raw.githubusercontent.com/dheeraz101/Notekar-Android/main/notice_image/happy_diwali.jpg",
+    "aspectRatio": "16:9",
+    "imageCaption": "Happy Diwali from NoteKar",
+    "priority": "normal",
+    "channels": [
+      "stable",
+      "beta",
+      "experiment"
+    ],
+    "platforms": [
+      "android"
+    ],
+    "minVersion": "7.0.0",
+    "maxVersion": "9.9.9",
+    "maxShows": 5,
+    "cooldownHours": 24
+  }
+]

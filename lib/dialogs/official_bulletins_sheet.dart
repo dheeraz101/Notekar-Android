@@ -741,30 +741,67 @@ class _NoticeCard extends StatelessWidget {
                         child: Image.network(
                           notice.imageUrl!,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => Container(
-                            color: p.surface3,
-                            child: Center(
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    CupertinoIcons.photo,
-                                    size: 16,
-                                    color: p.text3,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Notice Image',
-                                    style: TextStyle(
-                                      color: p.text3,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
+                          errorBuilder: (_, _, _) {
+                            final uri = Uri.tryParse(notice.imageUrl ?? '');
+                            final fileName =
+                                uri != null && uri.pathSegments.isNotEmpty
+                                ? uri.pathSegments.last
+                                : '';
+                            if (fileName.isNotEmpty) {
+                              return Image.asset(
+                                'notice_image/$fileName',
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, _, _) => Container(
+                                  color: p.surface3,
+                                  child: Center(
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          CupertinoIcons.photo,
+                                          size: 16,
+                                          color: p.text3,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          'Notice Image',
+                                          style: TextStyle(
+                                            color: p.text3,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                ],
+                                ),
+                              );
+                            }
+                            return Container(
+                              color: p.surface3,
+                              child: Center(
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      CupertinoIcons.photo,
+                                      size: 16,
+                                      color: p.text3,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Notice Image',
+                                      style: TextStyle(
+                                        color: p.text3,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ),
+                            );
+                          },
                           loadingBuilder: (context, child, loadingProgress) {
                             if (loadingProgress == null) return child;
                             return Container(

@@ -222,6 +222,46 @@ void main() {
         expect(latest!.isImagePost, isTrue);
       },
     );
+
+    test('notice_image/notice.json file exists and is valid', () {
+      final file = File('notice_image/notice.json');
+      expect(file.existsSync(), isTrue);
+      final content = file.readAsStringSync();
+      final dynamic parsed = jsonDecode(content);
+      expect(parsed, isA<List<dynamic>>());
+      final list = parsed as List<dynamic>;
+      expect(list.isNotEmpty, isTrue);
+      final diwaliNoticeMap = list.firstWhere(
+        (e) => e['id'] == 'diwali_2026',
+        orElse: () => null,
+      );
+      expect(diwaliNoticeMap, isNotNull);
+      final notice = AppNotice.fromJson(
+        Map<String, dynamic>.from(diwaliNoticeMap as Map),
+      );
+      expect(notice.id, 'diwali_2026');
+      expect(notice.title, 'Notice');
+      expect(notice.aspectRatio, '16:9');
+      expect(notice.numericAspectRatio, closeTo(16.0 / 9.0, 0.001));
+      expect(
+        notice.imageUrl,
+        'https://raw.githubusercontent.com/dheeraz101/Notekar-Android/main/notice_image/happy_diwali.jpg',
+      );
+      expect(notice.isImagePost, isTrue);
+    });
+
+    test('NoticeService defaultNotices includes diwali_2026 notice', () {
+      final diwaliNotice = NoticeService.defaultNotices.firstWhere(
+        (n) => n['id'] == 'diwali_2026',
+        orElse: () => {},
+      );
+      expect(diwaliNotice, isNotEmpty);
+      expect(diwaliNotice['aspect_ratio'], '16:9');
+      expect(
+        diwaliNotice['image_url'],
+        'https://raw.githubusercontent.com/dheeraz101/Notekar-Android/main/notice_image/happy_diwali.jpg',
+      );
+    });
   });
 
   group('MediaStorageService Gallery Save Tests', () {
@@ -435,6 +475,89 @@ void main() {
         // Dialog is dismissed
         expect(find.byIcon(CupertinoIcons.xmark), findsNothing);
         expect(find.text('Open Notice'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Loads notice image from local bundled/workspace file when network URL is used',
+      (tester) async {
+        final notice = AppNotice.fromJson({
+          'id': 'diwali_2026',
+          'title': 'Notice',
+          'body': 'Wishing you and your loved ones a Happy Diwali!',
+          'image_url':
+              'https://raw.githubusercontent.com/dheeraz101/Notekar-Android/main/notice_image/happy_diwali.jpg',
+          'aspect_ratio': '16:9',
+        });
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: NoticeImagePostDialog(p: p, notice: notice),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        // Title and caption card
+        expect(find.text('Notice'), findsWidgets);
+        expect(
+          find.text('Wishing you and your loved ones a Happy Diwali!'),
+          findsOneWidget,
+        );
+        // Image widget is rendered
+        expect(find.byType(Image), findsOneWidget);
+        expect(find.text('Save to Gallery'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Tapping Save to Gallery saves image loaded via local fallback and displays Saved confirmation',
+      (tester) async {
+        const channel = MethodChannel('notekar/files');
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, (call) async {
+              if (call.method == 'saveImageToGallery') {
+                return 'content://media/external/images/media/9999';
+              }
+              return null;
+            });
+
+        final notice = AppNotice.fromJson({
+          'id': 'diwali_2026',
+          'title': 'Notice',
+          'body': 'Wishing you and your loved ones a Happy Diwali!',
+          'image_url':
+              'https://raw.githubusercontent.com/dheeraz101/Notekar-Android/main/notice_image/happy_diwali.jpg',
+          'aspect_ratio': '16:9',
+        });
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: NoticeImagePostDialog(p: p, notice: notice),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        // Tap Save to Gallery
+        final saveBtn = find.text('Save to Gallery');
+        expect(saveBtn, findsOneWidget);
+        await tester.tap(saveBtn);
+        await tester.pumpAndSettle();
+
+        // Verify Saved to Gallery confirmation pill appears
+        expect(find.text('Saved to Gallery'), findsWidgets);
+        expect(
+          find.byIcon(CupertinoIcons.checkmark_circle_fill),
+          findsOneWidget,
+        );
+
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, null);
       },
     );
   });
