@@ -57,6 +57,15 @@ jobs:
         if: matrix.language == 'java-kotlin'
         uses: gradle/actions/setup-gradle@v3
 
+      - name: Cache Gradle Wrapper
+        if: matrix.language == 'java-kotlin'
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/wrapper/dists
+          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('android/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-wrapper-
+
       - name: Install Flutter dependencies
         if: matrix.language == 'java-kotlin'
         run: flutter pub get
@@ -65,10 +74,11 @@ jobs:
       # Initialize CodeQL
       ####################################################
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
+        uses: github/codeql-action/init@v4.39.1
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.language == 'actions' && 'none' || 'manual' }}
+          tools: linked
 
       ####################################################
       # Build Flutter project
@@ -81,6 +91,6 @@ jobs:
       # Analyze
       ####################################################
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
+        uses: github/codeql-action/analyze@v4.39.1
         with:
           category: "/language:${{ matrix.language }}"
