@@ -81,6 +81,58 @@ jobs:
             echo "Gradle 9.1.0 wrapper successfully provisioned."
           fi
 
+      - name: Configure Resilient Gradle & Flutter SDK Mirrors
+        if: matrix.language == 'java-kotlin'
+        run: |
+          KOTLIN_CACHE="$HOME/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-compiler-embeddable/2.2.20/bb8331b7585e36ea311825b01a1c06860c055fd1"
+          mkdir -p "$KOTLIN_CACHE"
+          if [ ! -f "$KOTLIN_CACHE/kotlin-compiler-embeddable-2.2.20.jar" ]; then
+            echo "Pre-fetching kotlin-compiler-embeddable-2.2.20.jar..."
+            curl -f -L --retry 3 "https://mirrors.tencent.com/nexus/repository/maven-public/org/jetbrains/kotlin/kotlin-compiler-embeddable/2.2.20/kotlin-compiler-embeddable-2.2.20.jar" -o "$KOTLIN_CACHE/kotlin-compiler-embeddable-2.2.20.jar" || \
+            curl -f -L --retry 3 "https://maven.aliyun.com/repository/public/org/jetbrains/kotlin/kotlin-compiler-embeddable/2.2.20/kotlin-compiler-embeddable-2.2.20.jar" -o "$KOTLIN_CACHE/kotlin-compiler-embeddable-2.2.20.jar" || true
+          fi
+
+          if [ -n "$FLUTTER_ROOT" ] && [ -f "$FLUTTER_ROOT/packages/flutter_tools/gradle/settings.gradle.kts" ]; then
+            FLUTTER_SETTINGS="$FLUTTER_ROOT/packages/flutter_tools/gradle/settings.gradle.kts"
+            if ! grep -q "mirrors.tencent.com" "$FLUTTER_SETTINGS"; then
+              echo "Injecting mirror repositories into Flutter SDK Gradle settings..."
+              sed -i '/repositories {/a \        maven { url = java.net.URI.create("https://mirrors.tencent.com/nexus/repository/maven-public/") }\n        maven { url = java.net.URI.create("https://maven.aliyun.com/repository/public") }' "$FLUTTER_SETTINGS"
+            fi
+          fi
+
+          mkdir -p "$HOME/.gradle/init.d"
+          cat << 'EOF' > "$HOME/.gradle/init.d/01-mirrors.init.gradle"
+          allprojects {
+              buildscript {
+                  repositories {
+                      maven { url 'https://mirrors.tencent.com/nexus/repository/maven-public/' }
+                      maven { url 'https://maven.aliyun.com/repository/public' }
+                  }
+              }
+              repositories {
+                  maven { url 'https://mirrors.tencent.com/nexus/repository/maven-public/' }
+                  maven { url 'https://maven.aliyun.com/repository/public' }
+              }
+          }
+          gradle.settingsEvaluated { settings ->
+              settings.pluginManagement {
+                  repositories {
+                      maven { url 'https://mirrors.tencent.com/nexus/repository/maven-public/' }
+                      maven { url 'https://maven.aliyun.com/repository/public' }
+                  }
+              }
+              try {
+                  settings.dependencyResolutionManagement {
+                      repositories {
+                          maven { url 'https://mirrors.tencent.com/nexus/repository/maven-public/' }
+                          maven { url 'https://maven.aliyun.com/repository/public' }
+                      }
+                  }
+              } catch (Throwable ignored) {}
+          }
+          EOF
+          echo "Resilient Gradle and Flutter mirrors configured."
+
       - name: Install Flutter dependencies
         if: matrix.language == 'java-kotlin'
         run: flutter pub get
