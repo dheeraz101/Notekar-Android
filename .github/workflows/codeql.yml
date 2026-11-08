@@ -66,6 +66,21 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-wrapper-
 
+      - name: Pre-provision Gradle Wrapper Distribution
+        if: matrix.language == 'java-kotlin'
+        run: |
+          WRAPPER_DIR="$HOME/.gradle/wrapper/dists/gradle-9.1.0-bin/9agqghryom9wkf8r80qlhnts3"
+          if [ ! -f "$WRAPPER_DIR/gradle-9.1.0-bin.zip.ok" ]; then
+            mkdir -p "$WRAPPER_DIR"
+            echo "Pre-fetching Gradle 9.1.0 distribution with resilient retries..."
+            curl -L --retry 10 --retry-delay 3 --retry-all-errors \
+              "https://services.gradle.org/distributions/gradle-9.1.0-bin.zip" \
+              -o "$WRAPPER_DIR/gradle-9.1.0-bin.zip"
+            unzip -q -o "$WRAPPER_DIR/gradle-9.1.0-bin.zip" -d "$WRAPPER_DIR"
+            touch "$WRAPPER_DIR/gradle-9.1.0-bin.zip.ok"
+            echo "Gradle 9.1.0 wrapper successfully provisioned."
+          fi
+
       - name: Install Flutter dependencies
         if: matrix.language == 'java-kotlin'
         run: flutter pub get
