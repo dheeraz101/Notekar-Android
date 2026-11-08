@@ -38,18 +38,18 @@ class DataSafetySettingsPage extends StatelessWidget {
       children: [
         const SizedBox(height: spacing8),
 
-        // 1. Google Play Data Safety Breakdown Card
+        // 1. Google Play Data Safety Breakdown Card (Minimal & Powerful Apple HIG)
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(18),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: p.surface2.withValues(alpha: 0.65),
-            borderRadius: BorderRadius.circular(28),
+            color: p.surface2,
+            borderRadius: BorderRadius.circular(24),
             border: Border.all(
               color: p.border.withValues(
-                alpha: p.name == 'amoled' ? 0.5 : (!p.isDark ? 0.35 : 0.45),
+                alpha: p.name == 'amoled' ? 0.45 : (!p.isDark ? 0.35 : 0.40),
               ),
-              width: 0.6,
+              width: 0.5,
             ),
           ),
           child: Column(
@@ -59,15 +59,11 @@ class DataSafetySettingsPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Container(
-                    width: 36,
-                    height: 36,
+                    width: 38,
+                    height: 38,
                     decoration: BoxDecoration(
-                      color: p.green.withValues(alpha: 0.16),
-                      borderRadius: BorderRadius.circular(11),
-                      border: Border.all(
-                        color: p.green.withValues(alpha: 0.28),
-                        width: 0.8,
-                      ),
+                      color: p.green.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Center(
                       child: Icon(
@@ -87,61 +83,58 @@ class DataSafetySettingsPage extends StatelessWidget {
                           style: TextStyle(
                             color: p.green,
                             fontSize: 10.5,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 1.3,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.1,
                           ),
                         ),
                         const SizedBox(height: 2),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Google Play & Store Disclosures'.localized(
-                                  context,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: p.text,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: -0.3,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 9,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: p.green.withValues(alpha: 0.14),
-                                borderRadius: BorderRadius.circular(999),
-                                border: Border.all(
-                                  color: p.green.withValues(alpha: 0.35),
-                                  width: 0.8,
-                                ),
-                              ),
-                              child: Text(
-                                '100% On-Device',
-                                style: TextStyle(
-                                  color: p.green,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: -0.2,
-                                ),
-                              ),
-                            ),
-                          ],
+                        Text(
+                          'Google Play & Store Disclosures'.localized(context),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: p.text,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.3,
+                          ),
                         ),
                       ],
                     ),
                   ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: p.green.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: p.green.withValues(alpha: 0.25),
+                        width: 0.5,
+                      ),
+                    ),
+                    child: Text(
+                      '100% On-Device',
+                      style: TextStyle(
+                        color: p.green,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.1,
+                      ),
+                    ),
+                  ),
                 ],
               ),
-              const SizedBox(height: 14),
-              Divider(height: 1, color: p.border.withValues(alpha: 0.35)),
+              const SizedBox(height: 18),
+              Divider(
+                height: 0.5,
+                color: p.border.withValues(
+                  alpha: p.name == 'amoled' ? 0.35 : 0.25,
+                ),
+              ),
               const SizedBox(height: 14),
               _buildSafetyMetricRow(
                 context: context,
@@ -151,7 +144,7 @@ class DataSafetySettingsPage extends StatelessWidget {
                     'No personal info, identity, or financial details logged',
                 isSafe: true,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
               _buildSafetyMetricRow(
                 context: context,
                 title: 'Data Shared',
@@ -160,7 +153,7 @@ class DataSafetySettingsPage extends StatelessWidget {
                     'Zero third-party trackers, advertisers, or cloud brokers',
                 isSafe: true,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
               _buildSafetyMetricRow(
                 context: context,
                 title: 'Security Practices',

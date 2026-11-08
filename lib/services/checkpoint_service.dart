@@ -277,7 +277,15 @@ class CheckpointService extends ChangeNotifier {
     return moments.any((m) {
       if (m.date != today) return false;
       final cid = getCheckpointIdForMoment(m);
-      return cid == presetId;
+      if (cid != presetId) return false;
+      if (m.type == 'in') {
+        final hasOut = moments.any(
+          (o) =>
+              o.type == 'out' && o.date == today && o.timestamp >= m.timestamp,
+        );
+        return hasOut;
+      }
+      return true;
     });
   }
 

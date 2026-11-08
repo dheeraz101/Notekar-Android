@@ -227,74 +227,63 @@ class _AppPermissionsSettingsPageState extends State<AppPermissionsSettingsPage>
         const SizedBox(height: 20),
 
         // 2. Live Status Badge Banner
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-            decoration: BoxDecoration(
-              color: p.surface2.withValues(alpha: 0.65),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: p.border.withValues(alpha: 0.45)),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 18),
+          decoration: BoxDecoration(
+            color: p.surface2,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: p.border.withValues(
+                alpha: p.name == 'amoled' ? 0.45 : (!p.isDark ? 0.35 : 0.40),
+              ),
+              width: 0.5,
             ),
-            child: Row(
-              children: [
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: (_grantedCount == 7 ? p.green : p.accent).withValues(
-                      alpha: 0.15,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _isLoading
+                          ? 'Inspecting Permissions...'.localized(context)
+                          : '$_grantedCount of 7 Permissions Granted'.localized(
+                              context,
+                            ),
+                      style: TextStyle(
+                        color: p.text,
+                        fontSize: 15.5,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.2,
+                      ),
                     ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: Icon(
+                    const SizedBox(height: 3),
+                    Text(
                       _grantedCount == 7
-                          ? CupertinoIcons.checkmark_seal_fill
-                          : CupertinoIcons.slider_horizontal_3,
-                      color: _grantedCount == 7 ? p.green : p.accent,
-                      size: 20,
+                          ? 'All capabilities fully operational'.localized(
+                              context,
+                            )
+                          : 'Tap any ungranted permission to enable'.localized(
+                              context,
+                            ),
+                      style: TextStyle(
+                        color: p.text3,
+                        fontSize: 13,
+                        height: 1.35,
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _isLoading
-                            ? 'Inspecting Permissions...'.localized(context)
-                            : '$_grantedCount of 7 Permissions Granted'
-                                  .localized(context),
-                        style: TextStyle(
-                          color: p.text,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: -0.2,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        _grantedCount == 7
-                            ? 'All capabilities fully operational'.localized(
-                                context,
-                              )
-                            : 'Tap any ungranted permission to enable'
-                                  .localized(context),
-                        style: TextStyle(color: p.text3, fontSize: 12.5),
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(CupertinoIcons.arrow_clockwise, size: 18),
-                  color: p.text2,
-                  tooltip: 'Refresh Status',
-                  onPressed: _checkAllPermissions,
-                ),
-              ],
-            ),
+              ),
+              IconButton(
+                icon: const Icon(CupertinoIcons.arrow_clockwise, size: 18),
+                color: p.text2,
+                tooltip: 'Refresh Status',
+                onPressed: _checkAllPermissions,
+              ),
+            ],
           ),
         ),
 

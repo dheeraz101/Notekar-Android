@@ -251,6 +251,7 @@ void main() {
                 p: testPalette,
                 betaTrack: false,
                 currentChannel: 'stable',
+                isExperimentalUnlocked: true,
                 onSaveTrackPreference: (_) {},
                 onLearnMoreBeta: () {},
               ),

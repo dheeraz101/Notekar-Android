@@ -197,7 +197,10 @@ void main() {
       SharedPreferences.setMockInitialValues({});
     });
 
-    Widget buildTestSettingsDialog({String? initialCategory}) {
+    Widget buildTestSettingsDialog({
+      String? initialCategory,
+      Future<bool> Function(bool)? onPrivacyLock,
+    }) {
       final entriesNotifier = ValueNotifier<List<Moment>>([]);
       final trashNotifier = ValueNotifier<List<Moment>>([]);
 
@@ -251,7 +254,7 @@ void main() {
             onAppIconStyle: (_) async => true,
             onHapticStyle: (_) {},
             onHistoryDensity: (_) {},
-            onPrivacyLock: (_) async => true,
+            onPrivacyLock: onPrivacyLock ?? (_) async => true,
             onResetPrivacyPin: () async {},
             onBackupReminderDays: (_) {},
             onRemoteNotices: (_) {},
@@ -786,6 +789,36 @@ void main() {
         expect(find.text('Open Bulletins'), findsOneWidget);
         expect(find.text('Official Bulletins'), findsNothing);
         expect(targetAction, isNull);
+      },
+    );
+
+    testWidgets(
+      'App Lock switch cancels cleanly without showing switch enabled when setup returns false',
+      (tester) async {
+        await tester.pumpWidget(
+          buildTestSettingsDialog(
+            initialCategory: 'App Lock',
+            onPrivacyLock: (_) async => false, // User cancels setup!
+          ),
+        );
+
+        await pumpFrames(tester);
+
+        expect(find.text('App Lock'), findsWidgets);
+
+        // Find the App Lock NkIosSwitch
+        final switchFinder = find.byType(NkIosSwitch);
+        expect(switchFinder, findsOneWidget);
+        final initialSwitch = tester.widget<NkIosSwitch>(switchFinder);
+        expect(initialSwitch.value, isFalse);
+
+        // Tap the App Lock row / switch
+        await tester.tap(find.text('App Lock').first);
+        await pumpFrames(tester);
+
+        // Switch MUST remain false (not enabled)
+        final postCancelSwitch = tester.widget<NkIosSwitch>(switchFinder);
+        expect(postCancelSwitch.value, isFalse);
       },
     );
   });

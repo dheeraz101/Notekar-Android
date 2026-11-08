@@ -6,6 +6,7 @@ import 'package:notekar/models/checkpoint.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/checkpoint_service.dart';
+import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/apple_hig_action_sheet.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
@@ -22,6 +23,9 @@ class CheckpointsQuickBar extends StatefulWidget {
     required this.onLogCheckpoint,
     this.onOpenDashboard,
     this.onHabitsChanged,
+    this.onOpenSettings,
+    this.onStopSession,
+    this.isSessionActive = false,
     this.initialCollapsed = false,
   });
 
@@ -30,6 +34,9 @@ class CheckpointsQuickBar extends StatefulWidget {
   final void Function(CheckpointPreset preset) onLogCheckpoint;
   final VoidCallback? onOpenDashboard;
   final VoidCallback? onHabitsChanged;
+  final VoidCallback? onOpenSettings;
+  final VoidCallback? onStopSession;
+  final bool isSessionActive;
   final bool initialCollapsed;
 
   @override
@@ -103,6 +110,12 @@ class _CheckpointsQuickBarState extends State<CheckpointsQuickBar> {
               children: [
                 PressableScale(
                   onTap: _toggleCollapsed,
+                  onLongPress: widget.onOpenSettings != null
+                      ? () {
+                          HapticFeedback.mediumImpact();
+                          widget.onOpenSettings!();
+                        }
+                      : null,
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(
                       minHeight: 44,
@@ -126,7 +139,17 @@ class _CheckpointsQuickBarState extends State<CheckpointsQuickBar> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.flag_rounded, size: 12, color: p.accent),
+                            Icon(
+                              Icons.flag_rounded,
+                              size: 12,
+                              color:
+                                  (p.bg.computeLuminance() -
+                                              p.accent.computeLuminance())
+                                          .abs() >
+                                      0.20
+                                  ? p.accent
+                                  : p.text,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               'Habits ($completedCount/${presets.length})'
@@ -151,6 +174,48 @@ class _CheckpointsQuickBarState extends State<CheckpointsQuickBar> {
                     ),
                   ),
                 ),
+                if (widget.isSessionActive && widget.onStopSession != null) ...[
+                  const SizedBox(width: 8),
+                  PressableScale(
+                    onTap: () {
+                      HapticFeedback.mediumImpact();
+                      widget.onStopSession?.call();
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: p.red.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: p.red.withValues(alpha: 0.45),
+                          width: 0.5,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            CupertinoIcons.stop_fill,
+                            size: 10,
+                            color: p.red,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Stop'.localized(context),
+                            style: TextStyle(
+                              color: p.red,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
                 const Spacer(),
                 if (widget.onOpenDashboard != null)
                   PressableScale(
@@ -210,6 +275,32 @@ class _CheckpointsQuickBarState extends State<CheckpointsQuickBar> {
                       preset.id,
                       widget.moments,
                     );
+                    final habitColor = getCategoryMeta(
+                      preset.category,
+                      p,
+                    ).color;
+                    final chipBg = isDone
+                        ? Color.alphaBlend(
+                            habitColor.withValues(alpha: 0.16),
+                            p.surface2,
+                          )
+                        : p.surface2;
+                    final Color textColor;
+                    if (isDone) {
+                      final chipLum = chipBg.computeLuminance();
+                      final habitLum = habitColor.computeLuminance();
+                      final bgLum = p.bg.computeLuminance();
+                      final hasGoodContrast =
+                          (chipLum - habitLum).abs() > 0.22 &&
+                          (bgLum - habitLum).abs() > 0.22;
+                      if (hasGoodContrast) {
+                        textColor = habitColor;
+                      } else {
+                        textColor = p.text;
+                      }
+                    } else {
+                      textColor = p.text;
+                    }
 
                     return Padding(
                       padding: const EdgeInsets.only(right: 7),
@@ -309,13 +400,11 @@ class _CheckpointsQuickBarState extends State<CheckpointsQuickBar> {
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: isDone
-                                    ? p.accent.withValues(alpha: 0.12)
-                                    : p.surface2,
+                                color: chipBg,
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
                                   color: isDone
-                                      ? p.accent.withValues(alpha: 0.45)
+                                      ? habitColor.withValues(alpha: 0.50)
                                       : p.border.withValues(alpha: 0.5),
                                   width: isDone ? 0.8 : 0.5,
                                 ),
@@ -331,7 +420,7 @@ class _CheckpointsQuickBarState extends State<CheckpointsQuickBar> {
                                   Text(
                                     preset.label,
                                     style: TextStyle(
-                                      color: isDone ? p.accent : p.text,
+                                      color: textColor,
                                       fontSize: 11,
                                       fontWeight: isDone
                                           ? FontWeight.w700
@@ -343,7 +432,7 @@ class _CheckpointsQuickBarState extends State<CheckpointsQuickBar> {
                                     Icon(
                                       Icons.check_circle_rounded,
                                       size: 11.5,
-                                      color: p.accent,
+                                      color: textColor,
                                     ),
                                   ],
                                 ],
@@ -369,38 +458,49 @@ class _CheckpointsQuickBarState extends State<CheckpointsQuickBar> {
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(minHeight: 44),
                         child: Center(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: p.surface2,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: p.accent.withValues(alpha: 0.5),
-                                width: 0.5,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  CupertinoIcons.plus,
-                                  size: 11.5,
-                                  color: p.accent,
+                          child: Builder(
+                            builder: (context) {
+                              final addAccent =
+                                  (p.bg.computeLuminance() -
+                                              p.accent.computeLuminance())
+                                          .abs() >
+                                      0.20
+                                  ? p.accent
+                                  : p.text;
+                              return Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
                                 ),
-                                const SizedBox(width: 4.5),
-                                Text(
-                                  'Add Habit'.localized(context),
-                                  style: TextStyle(
-                                    color: p.accent,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
+                                decoration: BoxDecoration(
+                                  color: p.surface2,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: addAccent.withValues(alpha: 0.5),
+                                    width: 0.5,
                                   ),
                                 ),
-                              ],
-                            ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      CupertinoIcons.plus,
+                                      size: 11.5,
+                                      color: addAccent,
+                                    ),
+                                    const SizedBox(width: 4.5),
+                                    Text(
+                                      'Add Habit'.localized(context),
+                                      style: TextStyle(
+                                        color: addAccent,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
                           ),
                         ),
                       ),

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/changelog_dialog.dart';
+import 'package:notekar/dialogs/experimental_build_unlocked_sheet.dart';
 import 'package:notekar/dialogs/feature_conflict_dialog.dart';
 import 'package:notekar/dialogs/note_dialog.dart';
 import 'package:notekar/dialogs/official_bulletins_sheet.dart';
@@ -427,6 +428,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
   bool _betaTrack = false;
   String _selectedUpdateChannel = 'stable';
+  bool _isExperimentalUnlocked = false;
   bool _autoDeleteUpdateCache = false;
   bool _autoDownloadUpdates = false;
   bool obfuscateInRecents = false;
@@ -795,6 +797,29 @@ class _SettingsDialogState extends State<SettingsDialog> {
       _selectedUpdateChannel =
           _prefs?.getString('m-update-channel') ??
           (_betaTrack ? 'beta' : 'stable');
+      final isBetaChannel = _selectedUpdateChannel == 'beta' || _betaTrack;
+      final enrolledAt = _prefs?.getInt('notekar.beta_enrolled_at_ms');
+      bool isExpUnlocked =
+          _prefs?.getBool('notekar.experimental_builds_unlocked') ?? false;
+      if (isBetaChannel) {
+        if (enrolledAt == null) {
+          unawaited(
+            _prefs?.setInt(
+              'notekar.beta_enrolled_at_ms',
+              DateTime.now().millisecondsSinceEpoch,
+            ),
+          );
+        } else {
+          final elapsed = DateTime.now().millisecondsSinceEpoch - enrolledAt;
+          if (elapsed >= 2592000000) {
+            unawaited(
+              _prefs?.setBool('notekar.experimental_builds_unlocked', true),
+            );
+            isExpUnlocked = true;
+          }
+        }
+      }
+      _isExperimentalUnlocked = isExpUnlocked;
       _autoDeleteUpdateCache =
           _prefs?.getBool('auto_delete_update_cache') ?? false;
       _autoDownloadUpdates =
@@ -877,6 +902,25 @@ class _SettingsDialogState extends State<SettingsDialog> {
       _monthlyReminderBody =
           _prefs?.getString('reminder_monthly_body') ?? 'Time to log a moment!';
     });
+    if (_isExperimentalUnlocked &&
+        (_prefs?.getBool('notekar.experimental_popup_shown') != true)) {
+      unawaited(_prefs?.setBool('notekar.experimental_popup_shown', true));
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          final p = paletteFor(
+            theme,
+            highContrast: highContrast,
+            accentName: accentColor,
+          );
+          ExperimentalBuildUnlockedSheet.show(
+            context,
+            p: p,
+            onNavigateToBuildChoose: () =>
+                _openCategory('Build Choose', parent: 'Updates & Notices'),
+          );
+        }
+      });
+    }
     try {
       final granted =
           await _fileChannel.invokeMethod<bool>('canScheduleExactAlarms') ??
@@ -1453,6 +1497,20 @@ class _SettingsDialogState extends State<SettingsDialog> {
       category = initial;
       _categoryStack.clear();
       _categoryStack.addAll(_getAncestors(initial));
+      if (initial == 'Capture') {
+        final c = _getScrollController('Capture');
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Future.delayed(const Duration(milliseconds: 150), () {
+            if (mounted && c.hasClients) {
+              c.animateTo(
+                c.position.maxScrollExtent,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOutCubic,
+              );
+            }
+          });
+        });
+      }
     }
 
     widget.entriesNotifier.addListener(_onEntriesChanged);
@@ -1704,6 +1762,21 @@ class _SettingsDialogState extends State<SettingsDialog> {
     });
     if (_prefs != null) {
       await _prefs!.setBool('m-update-track-beta', beta);
+      if (beta) {
+        if (_prefs!.getInt('notekar.beta_enrolled_at_ms') == null) {
+          await _prefs!.setInt(
+            'notekar.beta_enrolled_at_ms',
+            DateTime.now().millisecondsSinceEpoch,
+          );
+        }
+      } else {
+        await _prefs!.remove('notekar.beta_enrolled_at_ms');
+        if (!(_prefs!.getBool('god_mode_unlocked') ?? false)) {
+          await _prefs!.setBool('notekar.experimental_builds_unlocked', false);
+          await _prefs!.remove('notekar.experimental_popup_shown');
+          setState(() => _isExperimentalUnlocked = false);
+        }
+      }
     }
     await _runCheckUpdates();
   }
@@ -1724,6 +1797,21 @@ class _SettingsDialogState extends State<SettingsDialog> {
     if (_prefs != null) {
       await _prefs!.setString('m-update-channel', channel);
       await _prefs!.setBool('m-update-track-beta', isBetaOrExp);
+      if (channel == 'beta') {
+        if (_prefs!.getInt('notekar.beta_enrolled_at_ms') == null) {
+          await _prefs!.setInt(
+            'notekar.beta_enrolled_at_ms',
+            DateTime.now().millisecondsSinceEpoch,
+          );
+        }
+      } else if (channel == 'stable') {
+        await _prefs!.remove('notekar.beta_enrolled_at_ms');
+        if (!(_prefs!.getBool('god_mode_unlocked') ?? false)) {
+          await _prefs!.setBool('notekar.experimental_builds_unlocked', false);
+          await _prefs!.remove('notekar.experimental_popup_shown');
+          setState(() => _isExperimentalUnlocked = false);
+        }
+      }
     }
 
     if (!mounted) return;
@@ -4253,6 +4341,8 @@ $cleanStack
                                   p: p,
                                   betaTrack: _betaTrack,
                                   currentChannel: _selectedUpdateChannel,
+                                  isExperimentalUnlocked:
+                                      _isExperimentalUnlocked,
                                   onSaveTrackPreference: _saveTrackPreference,
                                   onSaveChannelPreference:
                                       _saveChannelPreference,
@@ -4556,8 +4646,8 @@ $cleanStack
                                     final changed = await widget.onPrivacyLock(
                                       true,
                                     );
-                                    if (changed && mounted) {
-                                      setState(() => privacyLock = true);
+                                    if (mounted) {
+                                      setState(() => privacyLock = changed);
                                     }
                                   },
                                   onResetPrivacyPin: () async {
@@ -4609,8 +4699,8 @@ $cleanStack
                                     final changed = await widget.onPrivacyLock(
                                       true,
                                     );
-                                    if (changed && mounted) {
-                                      setState(() => privacyLock = true);
+                                    if (mounted) {
+                                      setState(() => privacyLock = changed);
                                     }
                                   },
                                   onResetPrivacyPin: () async {
@@ -4874,6 +4964,25 @@ $cleanStack
                                         'god_mode_game_enabled',
                                         false,
                                       );
+                                      if ((_prefs?.getInt(
+                                                'notekar.beta_enrolled_at_ms',
+                                              ) ==
+                                              null) ||
+                                          (DateTime.now()
+                                                      .millisecondsSinceEpoch -
+                                                  (_prefs?.getInt(
+                                                        'notekar.beta_enrolled_at_ms',
+                                                      ) ??
+                                                      0) <
+                                              2592000000)) {
+                                        await _prefs!.setBool(
+                                          'notekar.experimental_builds_unlocked',
+                                          false,
+                                        );
+                                        setState(
+                                          () => _isExperimentalUnlocked = false,
+                                        );
+                                      }
                                     }
 
                                     if (theme == 'matrix' || theme == 'eink') {
@@ -4902,6 +5011,28 @@ $cleanStack
                                     'App Icons',
                                     parent: 'God Mode',
                                   ),
+                                  onUnlockBuilds: () async {
+                                    if (_prefs != null) {
+                                      await _prefs!.setBool(
+                                        'notekar.experimental_builds_unlocked',
+                                        true,
+                                      );
+                                    }
+                                    setState(() {
+                                      _isExperimentalUnlocked = true;
+                                    });
+                                    if (context.mounted) {
+                                      ExperimentalBuildUnlockedSheet.show(
+                                        context,
+                                        p: p,
+                                        onNavigateToBuildChoose: () =>
+                                            _openCategory(
+                                              'Build Choose',
+                                              parent: 'Updates & Notices',
+                                            ),
+                                      );
+                                    }
+                                  },
                                 ),
                               ),
                           ],

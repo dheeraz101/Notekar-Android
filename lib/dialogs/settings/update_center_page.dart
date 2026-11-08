@@ -1610,6 +1610,7 @@ class BuildTrackSelectPage extends StatelessWidget {
     this.onSaveChannelPreference,
     this.onExportBackup,
     required this.onLearnMoreBeta,
+    this.isExperimentalUnlocked,
   });
 
   final Palette p;
@@ -1619,9 +1620,12 @@ class BuildTrackSelectPage extends StatelessWidget {
   final ValueChanged<String>? onSaveChannelPreference;
   final VoidCallback? onExportBackup;
   final VoidCallback onLearnMoreBeta;
+  final bool? isExperimentalUnlocked;
 
   String get _activeChannel =>
       currentChannel ?? (betaTrack ? 'beta' : 'stable');
+
+  bool get _canShowExperiment => isExperimentalUnlocked ?? false;
 
   Future<void> _handleChannelSelect(
     BuildContext context,
@@ -1683,17 +1687,18 @@ class BuildTrackSelectPage extends StatelessWidget {
                   : const SizedBox.shrink(),
               onTap: () => _handleChannelSelect(context, 'beta'),
             ),
-            SettingsRow(
-              p: p,
-              title: 'Developer Experiments',
-              subtitle:
-                  'Immediate access to cutting-edge features. Intended for early testing.'
-                      .localized(context),
-              trailing: _activeChannel == 'experiment'
-                  ? Icon(CupertinoIcons.checkmark, color: p.red, size: 18)
-                  : const SizedBox.shrink(),
-              onTap: () => _handleChannelSelect(context, 'experiment'),
-            ),
+            if (_canShowExperiment)
+              SettingsRow(
+                p: p,
+                title: 'Developer Experiments',
+                subtitle:
+                    'Immediate access to cutting-edge features. Intended for early testing.'
+                        .localized(context),
+                trailing: _activeChannel == 'experiment'
+                    ? Icon(CupertinoIcons.checkmark, color: p.red, size: 18)
+                    : const SizedBox.shrink(),
+                onTap: () => _handleChannelSelect(context, 'experiment'),
+              ),
           ],
         ),
         Padding(

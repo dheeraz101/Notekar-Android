@@ -282,7 +282,7 @@ void main() {
 
   group('6. Factory Reset Zero-Knowledge Legal Notice', () {
     testWidgets(
-      'ResetAllConfirmSheet displays Apple-style zero-knowledge local storage legal notice',
+      'ResetAllConfirmSheet omits zero-knowledge notice from reset popups',
       (tester) async {
         await tester.pumpWidget(
           MaterialApp(
@@ -298,12 +298,12 @@ void main() {
           ),
         );
 
-        expect(find.text('Zero-Knowledge Notice'), findsOneWidget);
+        expect(find.text('Zero-Knowledge Notice'), findsNothing);
         expect(
           find.textContaining(
             'NoteKar does not collect or sync data to any cloud',
           ),
-          findsOneWidget,
+          findsNothing,
         );
       },
     );

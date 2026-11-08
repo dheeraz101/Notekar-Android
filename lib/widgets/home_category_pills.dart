@@ -235,6 +235,34 @@ class _CategoryPillItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final meta = getCategoryMeta(category, p);
+    final bgLum = p.bg.computeLuminance();
+    final metaLum = meta.color.computeLuminance();
+    final isBgMatchingMeta = (bgLum - metaLum).abs() < 0.22;
+
+    final Color pillTextColor;
+    if (isSelected) {
+      pillTextColor = isBgMatchingMeta ? p.text : meta.color;
+    } else {
+      pillTextColor = p.text2;
+    }
+
+    final Color pillBorderColor;
+    if (isSelected) {
+      pillBorderColor = isBgMatchingMeta
+          ? p.text.withValues(alpha: 0.5)
+          : meta.color.withValues(alpha: 0.5);
+    } else {
+      pillBorderColor = p.border.withValues(alpha: 0.4);
+    }
+
+    final Color pillBgColor;
+    if (isSelected) {
+      pillBgColor = isBgMatchingMeta
+          ? p.surface3
+          : meta.color.withValues(alpha: 0.16);
+    } else {
+      pillBgColor = p.surface2.withValues(alpha: 0.6);
+    }
 
     return Semantics(
       button: true,
@@ -248,20 +276,15 @@ class _CategoryPillItem extends StatelessWidget {
           curve: Curves.easeOutCubic,
           padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
           decoration: BoxDecoration(
-            color: isSelected
-                ? meta.color.withValues(alpha: 0.16)
-                : p.surface2.withValues(alpha: 0.6),
+            color: pillBgColor,
             borderRadius: BorderRadius.circular(999),
-            border: Border.all(
-              color: isSelected
-                  ? meta.color.withValues(alpha: 0.5)
-                  : p.border.withValues(alpha: 0.4),
-              width: 1.0,
-            ),
+            border: Border.all(color: pillBorderColor, width: 1.0),
             boxShadow: [
               if (isSelected)
                 BoxShadow(
-                  color: meta.color.withValues(alpha: 0.12),
+                  color: (isBgMatchingMeta ? p.text : meta.color).withValues(
+                    alpha: 0.12,
+                  ),
                   blurRadius: 6,
                   offset: const Offset(0, 1),
                 ),
@@ -273,13 +296,13 @@ class _CategoryPillItem extends StatelessWidget {
               Icon(
                 meta.icon,
                 size: 13,
-                color: isSelected ? meta.color : p.text3,
+                color: isSelected ? pillTextColor : p.text3,
               ),
               const SizedBox(width: 5),
               Text(
                 category,
                 style: TextStyle(
-                  color: isSelected ? meta.color : p.text2,
+                  color: pillTextColor,
                   fontSize: 12,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 ),

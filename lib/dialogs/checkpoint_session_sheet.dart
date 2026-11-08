@@ -19,6 +19,7 @@ class CheckpointSessionSheet extends StatefulWidget {
     required this.preset,
     required this.onLogSession,
     this.onStartLive,
+    this.onStartLiveWithDuration,
     this.onLogSingle,
   });
 
@@ -32,6 +33,12 @@ class CheckpointSessionSheet extends StatefulWidget {
   onLogSession;
   final Future<void> Function({required DateTime start, String? note})?
   onStartLive;
+  final Future<void> Function({
+    required DateTime start,
+    String? note,
+    int? targetDurationMinutes,
+  })?
+  onStartLiveWithDuration;
   final Future<void> Function({required DateTime timestamp, String? note})?
   onLogSingle;
 
@@ -46,6 +53,12 @@ class CheckpointSessionSheet extends StatefulWidget {
     })
     onLogSession,
     Future<void> Function({required DateTime start, String? note})? onStartLive,
+    Future<void> Function({
+      required DateTime start,
+      String? note,
+      int? targetDurationMinutes,
+    })?
+    onStartLiveWithDuration,
     Future<void> Function({required DateTime timestamp, String? note})?
     onLogSingle,
   }) {
@@ -62,6 +75,7 @@ class CheckpointSessionSheet extends StatefulWidget {
         preset: preset,
         onLogSession: onLogSession,
         onStartLive: onStartLive,
+        onStartLiveWithDuration: onStartLiveWithDuration,
         onLogSingle: onLogSingle,
       ),
     );
@@ -242,10 +256,18 @@ class _CheckpointSessionSheetState extends State<CheckpointSessionSheet> {
     setState(() => _isSaving = true);
     HapticFeedback.mediumImpact();
     try {
-      await widget.onStartLive?.call(
-        start: _startPoint,
-        note: _noteController.text.trim(),
-      );
+      if (widget.onStartLiveWithDuration != null) {
+        await widget.onStartLiveWithDuration!(
+          start: DateTime.now(),
+          note: _noteController.text.trim(),
+          targetDurationMinutes: _selectedDurationMinutes,
+        );
+      } else if (widget.onStartLive != null) {
+        await widget.onStartLive!(
+          start: DateTime.now(),
+          note: _noteController.text.trim(),
+        );
+      }
       if (mounted) {
         Navigator.pop(context);
       }
@@ -608,7 +630,8 @@ class _CheckpointSessionSheetState extends State<CheckpointSessionSheet> {
             ],
           ),
 
-          if (widget.onStartLive != null) ...[
+          if (widget.onStartLive != null ||
+              widget.onStartLiveWithDuration != null) ...[
             const SizedBox(height: 8),
             Row(
               children: [

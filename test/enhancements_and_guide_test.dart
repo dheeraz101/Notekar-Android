@@ -36,6 +36,7 @@ void main() {
                 p: darkPalette,
                 betaTrack: false,
                 currentChannel: 'stable',
+                isExperimentalUnlocked: true,
                 onSaveTrackPreference: (_) {},
                 onLearnMoreBeta: () {},
               ),

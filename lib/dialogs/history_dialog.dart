@@ -55,6 +55,7 @@ class HistoryDialog extends StatefulWidget {
     required this.onUpdateNote,
     this.onUpdateNoteWithTags,
     this.onUpdateMomentNote,
+    this.onMomentsUpdated,
     required this.onDuration,
     this.onOpenTrash,
     this.onClearAll,
@@ -96,6 +97,7 @@ class HistoryDialog extends StatefulWidget {
     bool updateMedia,
   ])?
   onUpdateMomentNote;
+  final Future<void> Function(List<Moment> moments)? onMomentsUpdated;
   final void Function(Moment a, Moment b) onDuration;
   final VoidCallback? onOpenTrash;
   final Future<void> Function()? onClearAll;
@@ -277,6 +279,16 @@ class _HistoryDialogState extends State<HistoryDialog> {
           }
         }
       });
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant HistoryDialog oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.entries, widget.entries)) {
+      _entries = List<Moment>.from(widget.entries);
+      _availableDateKeys = _entries.map((item) => item.date).toSet();
+      _rebuildMemoizedLists();
     }
   }
 
@@ -1114,425 +1126,438 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                 height:
                                     56.0 + (_selected.isNotEmpty ? 52.0 : 0.0),
                                 child: Container(
-                                  color: widget.p.surface.withValues(
-                                    alpha: widget.blur ? 0.65 : 1.0,
+                                  clipBehavior: Clip.hardEdge,
+                                  decoration: BoxDecoration(
+                                    color: widget.p.surface.withValues(
+                                      alpha: widget.blur ? 0.65 : 1.0,
+                                    ),
                                   ),
                                   padding: const EdgeInsets.only(
                                     bottom: spacing8,
                                   ),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: SingleChildScrollView(
-                                              scrollDirection: Axis.horizontal,
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 2.0,
-                                                  ),
-                                              child: Row(
-                                                children: [
-                                                  for (final f in const [
-                                                    'all',
-                                                    'sessions',
-                                                    'single',
-                                                  ])
-                                                    Padding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                            right: spacing8,
-                                                          ),
-                                                      child: ChipButton(
-                                                        p: widget.p,
-                                                        label: f == 'date'
-                                                            ? (_selectedDateKey !=
-                                                                          null &&
-                                                                      _selectedDateKey !=
-                                                                          dateKey(
-                                                                            DateTime.now(),
-                                                                          )
-                                                                  ? fullDateLabel(
-                                                                      _selectedDateKey!,
-                                                                    )
-                                                                  : null)
-                                                            : switch (f) {
-                                                                'all' =>
-                                                                  'All'
-                                                                      .localized(
-                                                                        context,
-                                                                      ),
-                                                                'sessions' =>
-                                                                  'Sessions'
-                                                                      .localized(
-                                                                        context,
-                                                                      ),
-                                                                'single' =>
-                                                                  'Singles'
-                                                                      .localized(
-                                                                        context,
-                                                                      ),
-                                                                'notes' =>
-                                                                  'With Notes'
-                                                                      .localized(
-                                                                        context,
-                                                                      ),
-                                                                'checkpoints' =>
-                                                                  'Checkpoints'
-                                                                      .localized(
-                                                                        context,
-                                                                      ),
-                                                                'consolidate' =>
-                                                                  'Grouped'
-                                                                      .localized(
-                                                                        context,
-                                                                      ),
-                                                                'media' =>
-                                                                  'Media'
-                                                                      .localized(
-                                                                        context,
-                                                                      ),
-                                                                _ => f,
-                                                              },
-                                                        icon: f == 'date'
-                                                            ? Icons
-                                                                  .calendar_today_rounded
-                                                            : (f == 'checkpoints'
-                                                                  ? Icons
-                                                                        .flag_rounded
-                                                                  : (f == 'consolidate'
-                                                                        ? Icons
-                                                                              .folder_copy_rounded
-                                                                        : null)),
-                                                        active: _filter == f,
-                                                        onTap: f == 'date'
-                                                            ? () =>
-                                                                  _openDateFilter()
-                                                            : () {
-                                                                setState(() {
-                                                                  _filter = f;
-                                                                  _selectedDateKey =
-                                                                      null;
-                                                                  _visibleCount =
-                                                                      _pageSize;
-                                                                  _rebuildMemoizedLists();
-                                                                });
-                                                                if (_scrollController
-                                                                    .hasClients) {
-                                                                  _scrollController
-                                                                      .jumpTo(
-                                                                        0.0,
-                                                                      );
-                                                                }
-                                                              },
-                                                        onLongPress: f == 'date'
-                                                            ? _openDateFilter
-                                                            : null,
-                                                      ),
-                                                    ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: spacing8),
-                                          ChipButton(
-                                            p: widget.p,
-
-                                            semanticLabel:
-                                                _secondaryFilterSemanticsLabel,
-                                            icon: _hasSecondaryHistoryFilter
-                                                ? Icons.filter_alt_rounded
-                                                : Icons.tune_rounded,
-                                            active: _hasSecondaryHistoryFilter,
-                                            onTap: _openFilterSheet,
-                                          ),
-
-                                          const SizedBox(width: 4),
-                                        ],
-                                      ),
-                                      AnimatedSize(
-                                        duration: const Duration(
-                                          milliseconds: 160,
-                                        ),
-                                        curve: Curves.easeOutCubic,
-                                        child: _selected.isEmpty
-                                            ? const SizedBox.shrink()
-                                            : Padding(
+                                  child: SingleChildScrollView(
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: SingleChildScrollView(
+                                                scrollDirection:
+                                                    Axis.horizontal,
                                                 padding:
-                                                    const EdgeInsets.fromLTRB(
-                                                      0,
-                                                      spacing8,
-                                                      0,
-                                                      0,
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 2.0,
                                                     ),
                                                 child: Row(
                                                   children: [
-                                                    if (_selected.length <
-                                                        2) ...[
-                                                      Expanded(
-                                                        child: PressableScale(
-                                                          onTap: () => setState(
-                                                            () => _selected
-                                                                .clear(),
-                                                          ),
-                                                          child: Container(
-                                                            padding:
-                                                                const EdgeInsets.symmetric(
-                                                                  vertical: 7,
-                                                                  horizontal:
-                                                                      14,
-                                                                ),
-                                                            decoration: BoxDecoration(
-                                                              color: widget
-                                                                  .p
-                                                                  .accent
-                                                                  .withValues(
-                                                                    alpha: 0.12,
-                                                                  ),
-                                                              borderRadius:
-                                                                  BorderRadius.circular(
-                                                                    999,
-                                                                  ),
-                                                              border: Border.all(
-                                                                color: widget
-                                                                    .p
-                                                                    .accent
-                                                                    .withValues(
-                                                                      alpha:
-                                                                          0.20,
+                                                    for (final f in const [
+                                                      'all',
+                                                      'sessions',
+                                                      'single',
+                                                    ])
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets.only(
+                                                              right: spacing8,
+                                                            ),
+                                                        child: ChipButton(
+                                                          p: widget.p,
+                                                          label: f == 'date'
+                                                              ? (_selectedDateKey !=
+                                                                            null &&
+                                                                        _selectedDateKey !=
+                                                                            dateKey(
+                                                                              DateTime.now(),
+                                                                            )
+                                                                    ? fullDateLabel(
+                                                                        _selectedDateKey!,
+                                                                      )
+                                                                    : null)
+                                                              : switch (f) {
+                                                                  'all' =>
+                                                                    'All'.localized(
+                                                                      context,
                                                                     ),
-                                                              ),
-                                                            ),
-                                                            child: Text(
-                                                              '1 selected (tap another to pair)'
-                                                                  .localized(
-                                                                    context,
-                                                                  ),
-                                                              textAlign:
-                                                                  TextAlign
-                                                                      .center,
-                                                              style: TextStyle(
-                                                                color: widget
-                                                                    .p
-                                                                    .accent,
-                                                                fontSize: 12,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w800,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ] else ...[
-                                                      Expanded(
-                                                        child: PressableScale(
-                                                          onTap: () {
-                                                            final a =
-                                                                _selected[0];
-                                                            final b =
-                                                                _selected[1];
-                                                            setState(
-                                                              () => _selected
-                                                                  .clear(),
-                                                            );
-                                                            widget.onDuration(
-                                                              a,
-                                                              b,
-                                                            );
-                                                          },
-                                                          child: Container(
-                                                            padding:
-                                                                const EdgeInsets.symmetric(
-                                                                  vertical: 7,
-                                                                  horizontal:
-                                                                      10,
-                                                                ),
-                                                            decoration: BoxDecoration(
-                                                              color: widget
-                                                                  .p
-                                                                  .accent
-                                                                  .withValues(
-                                                                    alpha: 0.14,
-                                                                  ),
-                                                              borderRadius:
-                                                                  BorderRadius.circular(
-                                                                    999,
-                                                                  ),
-                                                              border: Border.all(
-                                                                color: widget
-                                                                    .p
-                                                                    .accent
-                                                                    .withValues(
-                                                                      alpha:
-                                                                          0.24,
-                                                                    ),
-                                                              ),
-                                                            ),
-                                                            child: Row(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .center,
-                                                              children: [
-                                                                Icon(
-                                                                  Icons
-                                                                      .timer_outlined,
-                                                                  size: 13,
-                                                                  color: widget
-                                                                      .p
-                                                                      .accent,
-                                                                ),
-                                                                const SizedBox(
-                                                                  width: 4,
-                                                                ),
-                                                                Flexible(
-                                                                  child: Text(
-                                                                    'Duration'
+                                                                  'sessions' =>
+                                                                    'Sessions'
                                                                         .localized(
                                                                           context,
                                                                         ),
-                                                                    maxLines: 1,
-                                                                    overflow:
-                                                                        TextOverflow
-                                                                            .ellipsis,
-                                                                    style: TextStyle(
-                                                                      color: widget
-                                                                          .p
-                                                                          .accent,
-                                                                      fontSize:
-                                                                          11.5,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w800,
-                                                                    ),
-                                                                  ),
+                                                                  'single' =>
+                                                                    'Singles'
+                                                                        .localized(
+                                                                          context,
+                                                                        ),
+                                                                  'notes' =>
+                                                                    'With Notes'
+                                                                        .localized(
+                                                                          context,
+                                                                        ),
+                                                                  'checkpoints' =>
+                                                                    'Checkpoints'
+                                                                        .localized(
+                                                                          context,
+                                                                        ),
+                                                                  'consolidate' =>
+                                                                    'Grouped'
+                                                                        .localized(
+                                                                          context,
+                                                                        ),
+                                                                  'media' =>
+                                                                    'Media'
+                                                                        .localized(
+                                                                          context,
+                                                                        ),
+                                                                  _ => f,
+                                                                },
+                                                          icon: f == 'date'
+                                                              ? Icons
+                                                                    .calendar_today_rounded
+                                                              : (f == 'checkpoints'
+                                                                    ? Icons
+                                                                          .flag_rounded
+                                                                    : (f == 'consolidate'
+                                                                          ? Icons.folder_copy_rounded
+                                                                          : null)),
+                                                          active: _filter == f,
+                                                          onTap: f == 'date'
+                                                              ? () =>
+                                                                    _openDateFilter()
+                                                              : () {
+                                                                  setState(() {
+                                                                    _filter = f;
+                                                                    _selectedDateKey =
+                                                                        null;
+                                                                    _visibleCount =
+                                                                        _pageSize;
+                                                                    _rebuildMemoizedLists();
+                                                                  });
+                                                                  if (_scrollController
+                                                                      .hasClients) {
+                                                                    _scrollController
+                                                                        .jumpTo(
+                                                                          0.0,
+                                                                        );
+                                                                  }
+                                                                },
+                                                          onLongPress:
+                                                              f == 'date'
+                                                              ? _openDateFilter
+                                                              : null,
+                                                        ),
+                                                      ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: spacing8),
+                                            ChipButton(
+                                              p: widget.p,
+
+                                              semanticLabel:
+                                                  _secondaryFilterSemanticsLabel,
+                                              icon: _hasSecondaryHistoryFilter
+                                                  ? Icons.filter_alt_rounded
+                                                  : Icons.tune_rounded,
+                                              active:
+                                                  _hasSecondaryHistoryFilter,
+                                              onTap: _openFilterSheet,
+                                            ),
+
+                                            const SizedBox(width: 4),
+                                          ],
+                                        ),
+                                        AnimatedSize(
+                                          duration: const Duration(
+                                            milliseconds: 160,
+                                          ),
+                                          curve: Curves.easeOutCubic,
+                                          child: _selected.isEmpty
+                                              ? const SizedBox.shrink()
+                                              : Padding(
+                                                  padding:
+                                                      const EdgeInsets.fromLTRB(
+                                                        0,
+                                                        spacing8,
+                                                        0,
+                                                        0,
+                                                      ),
+                                                  child: Row(
+                                                    children: [
+                                                      if (_selected.length <
+                                                          2) ...[
+                                                        Expanded(
+                                                          child: PressableScale(
+                                                            onTap: () =>
+                                                                setState(
+                                                                  () => _selected
+                                                                      .clear(),
                                                                 ),
-                                                              ],
+                                                            child: Container(
+                                                              padding:
+                                                                  const EdgeInsets.symmetric(
+                                                                    vertical: 7,
+                                                                    horizontal:
+                                                                        14,
+                                                                  ),
+                                                              decoration: BoxDecoration(
+                                                                color: widget
+                                                                    .p
+                                                                    .accent
+                                                                    .withValues(
+                                                                      alpha:
+                                                                          0.12,
+                                                                    ),
+                                                                borderRadius:
+                                                                    BorderRadius.circular(
+                                                                      999,
+                                                                    ),
+                                                                border: Border.all(
+                                                                  color: widget
+                                                                      .p
+                                                                      .accent
+                                                                      .withValues(
+                                                                        alpha:
+                                                                            0.20,
+                                                                      ),
+                                                                ),
+                                                              ),
+                                                              child: Text(
+                                                                '1 selected (tap another to pair)'
+                                                                    .localized(
+                                                                      context,
+                                                                    ),
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .center,
+                                                                style: TextStyle(
+                                                                  color: widget
+                                                                      .p
+                                                                      .accent,
+                                                                  fontSize: 12,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w800,
+                                                                ),
+                                                              ),
                                                             ),
                                                           ),
                                                         ),
-                                                      ),
-                                                      const SizedBox(width: 6),
-                                                      Expanded(
-                                                        child: PressableScale(
-                                                          onTap:
-                                                              _mergeSelectedEntries,
-                                                          child: Container(
-                                                            padding:
-                                                                const EdgeInsets.symmetric(
-                                                                  vertical: 7,
-                                                                  horizontal:
-                                                                      10,
+                                                      ] else ...[
+                                                        Expanded(
+                                                          child: PressableScale(
+                                                            onTap: () {
+                                                              final a =
+                                                                  _selected[0];
+                                                              final b =
+                                                                  _selected[1];
+                                                              setState(
+                                                                () => _selected
+                                                                    .clear(),
+                                                              );
+                                                              widget.onDuration(
+                                                                a,
+                                                                b,
+                                                              );
+                                                            },
+                                                            child: Container(
+                                                              padding:
+                                                                  const EdgeInsets.symmetric(
+                                                                    vertical: 7,
+                                                                    horizontal:
+                                                                        10,
+                                                                  ),
+                                                              decoration: BoxDecoration(
+                                                                color: widget
+                                                                    .p
+                                                                    .accent
+                                                                    .withValues(
+                                                                      alpha:
+                                                                          0.14,
+                                                                    ),
+                                                                borderRadius:
+                                                                    BorderRadius.circular(
+                                                                      999,
+                                                                    ),
+                                                                border: Border.all(
+                                                                  color: widget
+                                                                      .p
+                                                                      .accent
+                                                                      .withValues(
+                                                                        alpha:
+                                                                            0.24,
+                                                                      ),
                                                                 ),
-                                                            decoration: BoxDecoration(
-                                                              color: widget
-                                                                  .p
-                                                                  .green
-                                                                  .withValues(
-                                                                    alpha: 0.16,
+                                                              ),
+                                                              child: Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .center,
+                                                                children: [
+                                                                  Icon(
+                                                                    Icons
+                                                                        .timer_outlined,
+                                                                    size: 13,
+                                                                    color: widget
+                                                                        .p
+                                                                        .accent,
                                                                   ),
-                                                              borderRadius:
-                                                                  BorderRadius.circular(
-                                                                    999,
+                                                                  const SizedBox(
+                                                                    width: 4,
                                                                   ),
-                                                              border: Border.all(
+                                                                  Flexible(
+                                                                    child: Text(
+                                                                      'Duration'
+                                                                          .localized(
+                                                                            context,
+                                                                          ),
+                                                                      maxLines:
+                                                                          1,
+                                                                      overflow:
+                                                                          TextOverflow
+                                                                              .ellipsis,
+                                                                      style: TextStyle(
+                                                                        color: widget
+                                                                            .p
+                                                                            .accent,
+                                                                        fontSize:
+                                                                            11.5,
+                                                                        fontWeight:
+                                                                            FontWeight.w800,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        const SizedBox(
+                                                          width: 6,
+                                                        ),
+                                                        Expanded(
+                                                          child: PressableScale(
+                                                            onTap:
+                                                                _mergeSelectedEntries,
+                                                            child: Container(
+                                                              padding:
+                                                                  const EdgeInsets.symmetric(
+                                                                    vertical: 7,
+                                                                    horizontal:
+                                                                        10,
+                                                                  ),
+                                                              decoration: BoxDecoration(
                                                                 color: widget
                                                                     .p
                                                                     .green
                                                                     .withValues(
                                                                       alpha:
-                                                                          0.30,
+                                                                          0.16,
                                                                     ),
-                                                              ),
-                                                            ),
-                                                            child: Row(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .center,
-                                                              children: [
-                                                                Icon(
-                                                                  Icons
-                                                                      .merge_type_rounded,
-                                                                  size: 13,
+                                                                borderRadius:
+                                                                    BorderRadius.circular(
+                                                                      999,
+                                                                    ),
+                                                                border: Border.all(
                                                                   color: widget
                                                                       .p
-                                                                      .green,
+                                                                      .green
+                                                                      .withValues(
+                                                                        alpha:
+                                                                            0.30,
+                                                                      ),
                                                                 ),
-                                                                const SizedBox(
-                                                                  width: 4,
-                                                                ),
-                                                                Flexible(
-                                                                  child: Text(
-                                                                    'Merge Session'
-                                                                        .localized(
-                                                                          context,
-                                                                        ),
-                                                                    maxLines: 1,
-                                                                    overflow:
-                                                                        TextOverflow
-                                                                            .ellipsis,
-                                                                    style: TextStyle(
-                                                                      color: widget
-                                                                          .p
-                                                                          .green,
-                                                                      fontSize:
-                                                                          11.5,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w800,
+                                                              ),
+                                                              child: Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .center,
+                                                                children: [
+                                                                  Icon(
+                                                                    Icons
+                                                                        .merge_type_rounded,
+                                                                    size: 13,
+                                                                    color: widget
+                                                                        .p
+                                                                        .green,
+                                                                  ),
+                                                                  const SizedBox(
+                                                                    width: 4,
+                                                                  ),
+                                                                  Flexible(
+                                                                    child: Text(
+                                                                      'Merge Session'
+                                                                          .localized(
+                                                                            context,
+                                                                          ),
+                                                                      maxLines:
+                                                                          1,
+                                                                      overflow:
+                                                                          TextOverflow
+                                                                              .ellipsis,
+                                                                      style: TextStyle(
+                                                                        color: widget
+                                                                            .p
+                                                                            .green,
+                                                                        fontSize:
+                                                                            11.5,
+                                                                        fontWeight:
+                                                                            FontWeight.w800,
+                                                                      ),
                                                                     ),
                                                                   ),
-                                                                ),
-                                                              ],
+                                                                ],
+                                                              ),
                                                             ),
                                                           ),
                                                         ),
-                                                      ),
-                                                    ],
-                                                    const SizedBox(width: 6),
-                                                    PressableScale(
-                                                      onTap: () => setState(
-                                                        () => _selected.clear(),
-                                                      ),
-                                                      child: Container(
-                                                        width: 30,
-                                                        height: 30,
-                                                        alignment:
-                                                            Alignment.center,
-                                                        decoration:
-                                                            BoxDecoration(
+                                                      ],
+                                                      const SizedBox(width: 6),
+                                                      PressableScale(
+                                                        onTap: () => setState(
+                                                          () =>
+                                                              _selected.clear(),
+                                                        ),
+                                                        child: Container(
+                                                          width: 30,
+                                                          height: 30,
+                                                          alignment:
+                                                              Alignment.center,
+                                                          decoration: BoxDecoration(
+                                                            color: widget
+                                                                .p
+                                                                .accent
+                                                                .withValues(
+                                                                  alpha: 0.14,
+                                                                ),
+                                                            shape:
+                                                                BoxShape.circle,
+                                                            border: Border.all(
                                                               color: widget
                                                                   .p
                                                                   .accent
                                                                   .withValues(
-                                                                    alpha: 0.14,
+                                                                    alpha: 0.22,
                                                                   ),
-                                                              shape: BoxShape
-                                                                  .circle,
-                                                              border: Border.all(
-                                                                color: widget
-                                                                    .p
-                                                                    .accent
-                                                                    .withValues(
-                                                                      alpha:
-                                                                          0.22,
-                                                                    ),
-                                                              ),
                                                             ),
-                                                        child: Icon(
-                                                          Icons.close_rounded,
-                                                          size: 15,
-                                                          color:
-                                                              widget.p.accent,
+                                                          ),
+                                                          child: Icon(
+                                                            Icons.close_rounded,
+                                                            size: 15,
+                                                            color:
+                                                                widget.p.accent,
+                                                          ),
                                                         ),
                                                       ),
-                                                    ),
-                                                  ],
+                                                    ],
+                                                  ),
                                                 ),
-                                              ),
-                                      ),
-                                    ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
@@ -3459,25 +3484,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
               _rebuildMemoizedLists();
             });
 
-            if (widget.onUpdateMomentNote != null) {
-              await widget.onUpdateMomentNote!(
-                startMoment.id,
-                startMoment.note,
-                startMoment.tags,
-                startMoment.imagePath,
-                startMoment.voicePath,
-                startMoment.voiceDurationMs,
-                false,
-              );
-              await widget.onUpdateMomentNote!(
-                endMoment.id,
-                endMoment.note,
-                endMoment.tags,
-                endMoment.imagePath,
-                endMoment.voicePath,
-                endMoment.voiceDurationMs,
-                false,
-              );
+            if (widget.onMomentsUpdated != null) {
+              await widget.onMomentsUpdated!([startMoment, endMoment]);
             }
 
             if (mounted) {
@@ -3614,8 +3622,176 @@ class _HistoryDialogState extends State<HistoryDialog> {
           Navigator.pop(context);
           _handleSelection(entry, false);
         },
+        onChangeCategory: () => _changeMomentCategory(entry),
       ),
     );
+  }
+
+  Future<void> _changeMomentCategory(Moment entry) async {
+    Navigator.pop(context);
+    final categories = await CategoryService().getCategories();
+    if (!mounted) return;
+    final allCategories = <String>['General Mode'];
+    for (final c in categories) {
+      if (c != 'General Mode' && !allCategories.contains(c)) {
+        allCategories.add(c);
+      }
+    }
+    final selectedCat = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => AppSheet(
+        p: widget.p,
+        title: 'Select Mode'.localized(ctx),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: allCategories.map((cat) {
+            final isGeneral = cat == 'General Mode';
+            final isSelected = isGeneral
+                ? (entry.category == null || entry.category!.isEmpty)
+                : (entry.category == cat);
+            final meta = isGeneral
+                ? CategoryMeta(
+                    name: 'General Mode',
+                    icon: Icons.all_inclusive_rounded,
+                    color: widget.p.text2,
+                  )
+                : getCategoryMeta(cat, widget.p);
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: PressableScale(
+                onTap: () => Navigator.pop(ctx, cat),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? widget.p.accent.withValues(alpha: 0.16)
+                        : widget.p.surface2,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isSelected
+                          ? widget.p.accent
+                          : widget.p.border.withValues(alpha: 0.4),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(meta.icon, size: 16, color: meta.color),
+                      const SizedBox(width: 10),
+                      Text(
+                        cat,
+                        style: TextStyle(
+                          color: isSelected ? widget.p.text : widget.p.text2,
+                          fontWeight: isSelected
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                        ),
+                      ),
+                      const Spacer(),
+                      if (isSelected)
+                        Icon(
+                          CupertinoIcons.checkmark,
+                          size: 16,
+                          color: widget.p.accent,
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+
+    if (selectedCat == null || !mounted) return;
+    final isGeneral = selectedCat == 'General Mode';
+    final newCategory = isGeneral ? null : selectedCat;
+
+    final List<Moment> momentsToUpdate = [];
+    TimelineSessionItem? pairedSession;
+    for (final day in _daySections) {
+      for (final item in day.items) {
+        if (item is TimelineSessionItem) {
+          if (item.inMoment.id == entry.id || item.outMoment?.id == entry.id) {
+            pairedSession = item;
+            break;
+          }
+        }
+      }
+      if (pairedSession != null) break;
+    }
+
+    if (pairedSession != null) {
+      momentsToUpdate.add(
+        pairedSession.inMoment.copyWith(
+          category: newCategory,
+          clearCategory: isGeneral,
+        ),
+      );
+      if (pairedSession.outMoment != null) {
+        momentsToUpdate.add(
+          pairedSession.outMoment!.copyWith(
+            category: newCategory,
+            clearCategory: isGeneral,
+          ),
+        );
+      }
+    } else if (entry.type == 'in') {
+      final outs =
+          _entries
+              .where((m) => m.type == 'out' && m.timestamp >= entry.timestamp)
+              .toList()
+            ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+      final matchingOut = outs.firstOrNull;
+      momentsToUpdate.add(
+        entry.copyWith(category: newCategory, clearCategory: isGeneral),
+      );
+      if (matchingOut != null) {
+        momentsToUpdate.add(
+          matchingOut.copyWith(category: newCategory, clearCategory: isGeneral),
+        );
+      }
+    } else if (entry.type == 'out') {
+      final ins =
+          _entries
+              .where((m) => m.type == 'in' && m.timestamp <= entry.timestamp)
+              .toList()
+            ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      final matchingIn = ins.firstOrNull;
+      momentsToUpdate.add(
+        entry.copyWith(category: newCategory, clearCategory: isGeneral),
+      );
+      if (matchingIn != null) {
+        momentsToUpdate.add(
+          matchingIn.copyWith(category: newCategory, clearCategory: isGeneral),
+        );
+      }
+    } else {
+      momentsToUpdate.add(
+        entry.copyWith(category: newCategory, clearCategory: isGeneral),
+      );
+    }
+
+    await MomentRepository.instance.saveMoments(momentsToUpdate);
+    setState(() {
+      for (final m in momentsToUpdate) {
+        final idx = _entries.indexWhere((e) => e.id == m.id);
+        if (idx != -1) _entries[idx] = m;
+      }
+      _rebuildMemoizedLists();
+    });
+
+    if (widget.onMomentsUpdated != null) {
+      await widget.onMomentsUpdated!(momentsToUpdate);
+    }
+
+    if (mounted) {
+      _showNotice('Mode updated to $selectedCat'.localized(context));
+    }
   }
 }
 
@@ -3629,6 +3805,7 @@ class MomentActionsDialog extends StatefulWidget {
     required this.onDeleteMoment,
     this.onDeleteNote,
     this.onSelectForPairing,
+    this.onChangeCategory,
     this.minimal = false,
   });
 
@@ -3639,6 +3816,7 @@ class MomentActionsDialog extends StatefulWidget {
   final VoidCallback? onDeleteNote;
   final VoidCallback onDeleteMoment;
   final VoidCallback? onSelectForPairing;
+  final VoidCallback? onChangeCategory;
   final bool minimal;
 
   @override
@@ -3720,6 +3898,15 @@ class _MomentActionsDialogState extends State<MomentActionsDialog> {
                     color: p.accent,
                     onTap: widget.onAddOrEditNote,
                   ),
+                  if (widget.onChangeCategory != null) ...[
+                    const SizedBox(width: 20),
+                    _MinimalActionButton(
+                      p: p,
+                      icon: Icons.category_rounded,
+                      color: p.accent,
+                      onTap: widget.onChangeCategory!,
+                    ),
+                  ],
                   if (widget.onSelectForPairing != null) ...[
                     const SizedBox(width: 20),
                     _MinimalActionButton(
@@ -3830,6 +4017,17 @@ class _MomentActionsDialogState extends State<MomentActionsDialog> {
                 ],
               ],
             ),
+            if (widget.onChangeCategory != null) ...[
+              const SizedBox(height: 10),
+              MomentOptionPill(
+                p: p,
+                icon: Icons.category_rounded,
+                label: 'Change Mode / Category'.localized(context),
+                color: p.accent,
+                fullWidth: true,
+                onTap: widget.onChangeCategory!,
+              ),
+            ],
             if (widget.onSelectForPairing != null) ...[
               const SizedBox(height: 10),
               MomentOptionPill(

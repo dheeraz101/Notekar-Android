@@ -464,7 +464,7 @@ class _ModesCategoriesSettingsPageState
     Color selectedColor = currentMeta.color;
     IconData selectedIcon = currentMeta.icon;
 
-    final changed = await showDialog<bool>(
+    final result = await showDialog<String>(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => CupertinoTheme(
@@ -580,13 +580,17 @@ class _ModesCategoriesSettingsPageState
             ),
             actions: [
               CupertinoDialogAction(
+                child: Text('Reset to Default'.localized(ctx)),
+                onPressed: () => Navigator.pop(ctx, 'reset'),
+              ),
+              CupertinoDialogAction(
                 child: Text('Cancel'.localized(ctx)),
-                onPressed: () => Navigator.pop(ctx, false),
+                onPressed: () => Navigator.pop(ctx, 'cancel'),
               ),
               CupertinoDialogAction(
                 isDefaultAction: true,
                 child: Text('Save'.localized(ctx)),
-                onPressed: () => Navigator.pop(ctx, true),
+                onPressed: () => Navigator.pop(ctx, 'save'),
               ),
             ],
           ),
@@ -594,7 +598,13 @@ class _ModesCategoriesSettingsPageState
       ),
     );
 
-    if (changed == true) {
+    if (result == 'reset') {
+      await _categoryService.resetCategoryColor(category);
+      await _categoryService.resetCategoryIcon(category);
+      HapticFeedback.mediumImpact();
+      await _loadCategories();
+      widget.onCategoriesChanged?.call();
+    } else if (result == 'save') {
       await _categoryService.setCategoryColor(category, selectedColor);
       await _categoryService.setCategoryIcon(category, selectedIcon);
       HapticFeedback.mediumImpact();
@@ -993,6 +1003,29 @@ class _ModeDetailSettingsPageState extends State<ModeDetailSettingsPage> {
                       ),
                     ),
                     const Spacer(),
+                    GestureDetector(
+                      onTap: () async {
+                        HapticFeedback.selectionClick();
+                        await CategoryService().resetCategoryColor(
+                          _currentCategoryName,
+                        );
+                        final defaultMeta = getCategoryMeta(
+                          _currentCategoryName,
+                          widget.p,
+                        );
+                        setState(() => _currentColor = defaultMeta.color);
+                        widget.onCategoriesChanged?.call();
+                      },
+                      child: Text(
+                        'Reset'.localized(context),
+                        style: TextStyle(
+                          color: p.accent,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
                     Container(
                       width: 12,
                       height: 12,

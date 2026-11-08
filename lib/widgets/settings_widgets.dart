@@ -445,6 +445,8 @@ class SettingsSwitchRow extends StatefulWidget {
 }
 
 class _SettingsSwitchRowState extends State<SettingsSwitchRow> {
+  bool _isRowPressed = false;
+
   void _handleToggle() {
     if (!widget.enabled) {
       final message = widget.disabledMessage;
@@ -491,6 +493,15 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow> {
       onTap: enabled ? _handleToggle : null,
       child: ExcludeSemantics(
         child: GestureDetector(
+          onTapDown: (_) {
+            if (widget.enabled) setState(() => _isRowPressed = true);
+          },
+          onTapUp: (_) {
+            if (widget.enabled) setState(() => _isRowPressed = false);
+          },
+          onTapCancel: () {
+            if (widget.enabled) setState(() => _isRowPressed = false);
+          },
           onTap: _handleToggle,
           behavior: HitTestBehavior.opaque,
           child: Container(
@@ -561,6 +572,7 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow> {
                       onChanged: enabled ? _onSwitchChanged : null,
                       activeColor: switchColor,
                       enabled: enabled,
+                      isPressed: _isRowPressed,
                       onHaptic: widget.isSecurity
                           ? HapticFeedback.heavyImpact
                           : null,

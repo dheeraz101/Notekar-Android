@@ -2272,8 +2272,8 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
             return;
           }
           widget.onPrivacyLock(true).then((changed) {
-            if (changed && mounted) {
-              update(() => privacyLock = true);
+            if (mounted) {
+              update(() => privacyLock = changed);
             }
           });
         },

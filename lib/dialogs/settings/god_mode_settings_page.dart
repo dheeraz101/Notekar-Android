@@ -15,6 +15,7 @@ class GodModeSettingsPage extends StatelessWidget {
     required this.streakDays,
     required this.onRelockGodMode,
     this.onOpenAppIcons,
+    this.onUnlockBuilds,
   });
 
   final Palette p;
@@ -24,6 +25,7 @@ class GodModeSettingsPage extends StatelessWidget {
   final int streakDays;
   final VoidCallback onRelockGodMode;
   final VoidCallback? onOpenAppIcons;
+  final VoidCallback? onUnlockBuilds;
 
   Future<void> _confirmRevocation(BuildContext context) async {
     HapticFeedback.mediumImpact();
@@ -141,6 +143,30 @@ class GodModeSettingsPage extends StatelessWidget {
               onTap: () {
                 HapticFeedback.selectionClick();
                 onOpenAppIcons?.call();
+              },
+            ),
+          ],
+        ),
+
+        const SizedBox(height: spacing12),
+
+        // Direct Tester Access: Unlock Builds
+        SettingsGroup(
+          p: p,
+          title: 'Direct Tester Access'.localized(context),
+          children: [
+            SettingsRow(
+              p: p,
+              icon: CupertinoIcons.sparkles,
+              title: 'Unlock Builds'.localized(context),
+              subtitle: 'Unlock experimental build choose option directly'
+                  .localized(context),
+              status: 'Tester'.localized(context),
+              color: const Color(0xFFFFD700),
+              softIcon: true,
+              onTap: () {
+                HapticFeedback.selectionClick();
+                onUnlockBuilds?.call();
               },
             ),
           ],

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/l10n/app_localizations.dart';
 import 'package:notekar/models/palette.dart';
@@ -80,6 +81,7 @@ class UndoToast extends StatefulWidget {
     this.onAddNote,
     this.noteLabel,
     this.onDismiss,
+    this.onStop,
     this.persistent = false,
   });
 
@@ -90,6 +92,7 @@ class UndoToast extends StatefulWidget {
   final VoidCallback? onAddNote;
   final String? noteLabel;
   final VoidCallback? onDismiss;
+  final VoidCallback? onStop;
   final bool persistent;
 
   @override
@@ -201,6 +204,37 @@ class _UndoToastState extends State<UndoToast>
                             ),
                           ),
                         ),
+                        if (widget.onStop != null) ...[
+                          const SizedBox(width: 10),
+                          Container(
+                            width: 1,
+                            height: 12,
+                            color: widget.p.border.withValues(alpha: 0.5),
+                          ),
+                          const SizedBox(width: 10),
+                          PressableScale(
+                            onTap: widget.onStop,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  CupertinoIcons.stop_fill,
+                                  size: 11,
+                                  color: widget.p.red,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  "Stop".localized(context),
+                                  style: TextStyle(
+                                    color: widget.p.red,
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),

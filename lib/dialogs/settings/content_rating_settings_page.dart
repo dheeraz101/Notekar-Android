@@ -103,26 +103,29 @@ class ContentRatingSettingsPage extends StatelessWidget {
         const SizedBox(height: 22),
 
         // 2. Global Standards Badges Grid
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-            decoration: BoxDecoration(
-              color: p.surface2.withValues(alpha: 0.65),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: p.border.withValues(alpha: 0.45)),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+          decoration: BoxDecoration(
+            color: p.surface2,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: p.border.withValues(
+                alpha: p.name == 'amoled' ? 0.45 : (!p.isDark ? 0.35 : 0.40),
+              ),
+              width: 0.5,
             ),
-            child: Row(
-              children: [
-                Expanded(child: _buildAuthorityPill('IARC', 'Everyone', p)),
-                _buildDivider(p),
-                Expanded(child: _buildAuthorityPill('ESRB', 'Everyone (E)', p)),
-                _buildDivider(p),
-                Expanded(child: _buildAuthorityPill('PEGI', '3', p)),
-                _buildDivider(p),
-                Expanded(child: _buildAuthorityPill('USK', '0', p)),
-              ],
-            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(child: _buildAuthorityPill('IARC', 'Everyone', p)),
+              _buildDivider(p),
+              Expanded(child: _buildAuthorityPill('ESRB', 'Everyone (E)', p)),
+              _buildDivider(p),
+              Expanded(child: _buildAuthorityPill('PEGI', '3', p)),
+              _buildDivider(p),
+              Expanded(child: _buildAuthorityPill('USK', '0', p)),
+            ],
           ),
         ),
 
@@ -140,7 +143,7 @@ class ContentRatingSettingsPage extends StatelessWidget {
               title: 'Violence & Gore'.localized(context),
               subtitle: 'No physical violence, combat, or blood',
               color: p.green,
-              status: 'None',
+              trailing: _buildMinimalStatusBadge('None', p.green, p),
               softIcon: true,
             ),
             SettingsRow(
@@ -149,7 +152,7 @@ class ContentRatingSettingsPage extends StatelessWidget {
               title: 'Sexual Content & Nudity'.localized(context),
               subtitle: 'No provocative themes or depictions',
               color: p.green,
-              status: 'None',
+              trailing: _buildMinimalStatusBadge('None', p.green, p),
               softIcon: true,
             ),
             SettingsRow(
@@ -158,7 +161,7 @@ class ContentRatingSettingsPage extends StatelessWidget {
               title: 'Profanity & Crude Humor'.localized(context),
               subtitle: 'Zero offensive language or slurs',
               color: p.green,
-              status: 'None',
+              trailing: _buildMinimalStatusBadge('None', p.green, p),
               softIcon: true,
             ),
             SettingsRow(
@@ -167,7 +170,7 @@ class ContentRatingSettingsPage extends StatelessWidget {
               title: 'Drugs, Alcohol & Tobacco'.localized(context),
               subtitle: 'Includes sobriety support & milestone logging',
               color: p.green,
-              status: 'None',
+              trailing: _buildMinimalStatusBadge('None', p.green, p),
               softIcon: true,
             ),
             SettingsRow(
@@ -176,13 +179,13 @@ class ContentRatingSettingsPage extends StatelessWidget {
               title: 'Gambling & Simulated Betting'.localized(context),
               subtitle: 'Zero gambling mechanisms or coin wagering',
               color: p.green,
-              status: 'None',
+              trailing: _buildMinimalStatusBadge('None', p.green, p),
               softIcon: true,
             ),
           ],
         ),
 
-        const SizedBox(height: 18),
+        const SizedBox(height: 20),
 
         // 4. Interactive Elements & Safety
         SettingsGroup(
@@ -196,7 +199,7 @@ class ContentRatingSettingsPage extends StatelessWidget {
               title: 'User-Generated Content'.localized(context),
               subtitle: 'Strictly on-device personal journaling',
               color: p.accent,
-              status: '100% Offline',
+              trailing: _buildMinimalStatusBadge('100% Offline', p.accent, p),
               softIcon: true,
             ),
             SettingsRow(
@@ -205,7 +208,7 @@ class ContentRatingSettingsPage extends StatelessWidget {
               title: 'Location Sharing'.localized(context),
               subtitle: 'No GPS tracking, geofences, or maps',
               color: p.green,
-              status: 'None',
+              trailing: _buildMinimalStatusBadge('None', p.green, p),
               softIcon: true,
             ),
             SettingsRow(
@@ -214,7 +217,7 @@ class ContentRatingSettingsPage extends StatelessWidget {
               title: 'In-App Purchases'.localized(context),
               subtitle: 'Completely free with zero paywalls or subscriptions',
               color: p.green,
-              status: 'None',
+              trailing: _buildMinimalStatusBadge('None', p.green, p),
               softIcon: true,
             ),
             SettingsRow(
@@ -223,7 +226,7 @@ class ContentRatingSettingsPage extends StatelessWidget {
               title: 'Third-Party Ad SDKs'.localized(context),
               subtitle: 'Zero ad banners, interstitials, or tracking tokens',
               color: p.green,
-              status: 'None',
+              trailing: _buildMinimalStatusBadge('None', p.green, p),
               softIcon: true,
             ),
           ],
@@ -278,6 +281,26 @@ class ContentRatingSettingsPage extends StatelessWidget {
       width: 1,
       height: 22,
       color: p.border.withValues(alpha: 0.4),
+    );
+  }
+
+  static Widget _buildMinimalStatusBadge(String label, Color color, Palette p) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3.5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: color.withValues(alpha: 0.25), width: 0.5),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 11.5,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.1,
+        ),
+      ),
     );
   }
 }

@@ -23,6 +23,7 @@ class NkIosSwitch extends StatefulWidget {
     this.useAppleGreen = false,
     this.enableHaptics = true,
     this.onHaptic,
+    this.isPressed,
   });
 
   final bool value;
@@ -33,6 +34,7 @@ class NkIosSwitch extends StatefulWidget {
   final bool useAppleGreen;
   final bool enableHaptics;
   final VoidCallback? onHaptic;
+  final bool? isPressed;
 
   @override
   State<NkIosSwitch> createState() => _NkIosSwitchState();
@@ -85,6 +87,13 @@ class _NkIosSwitchState extends State<NkIosSwitch>
   @override
   void didUpdateWidget(covariant NkIosSwitch oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.isPressed != null && widget.isPressed != oldWidget.isPressed) {
+      if (widget.isPressed!) {
+        _stretchController.forward();
+      } else if (!_isDragging) {
+        _stretchController.reverse();
+      }
+    }
     if (!_isDragging) {
       final target = widget.value ? 1.0 : 0.0;
       final isMismatched =
@@ -124,11 +133,6 @@ class _NkIosSwitchState extends State<NkIosSwitch>
     if (!widget.enabled || widget.onChanged == null) return;
     final newValue = !widget.value;
     _triggerHaptic(newValue);
-    _positionController.animateTo(
-      newValue ? 1.0 : 0.0,
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeInOut,
-    );
     widget.onChanged!(newValue);
   }
 
@@ -252,17 +256,20 @@ class _NkIosSwitchState extends State<NkIosSwitch>
                 builder: (context, _) {
                   final pos = _positionAnimation.value;
                   final stretch = _stretchAnimation.value * 10.0;
-                  final currentTrackColor =
-                      Color.lerp(offColor, onColor, pos) ?? offColor;
-                  final currentBorderColor =
-                      Color.lerp(p.border, onColor, pos) ?? p.border;
-
-                  final thumbOffset =
-                      _thumbPadding + (_maxTravel * pos) - (stretch * pos);
+                  final currentTrackColor = _isDragging
+                      ? (Color.lerp(offColor, onColor, pos) ?? offColor)
+                      : (widget.value ? onColor : offColor);
+                  final currentBorderColor = _isDragging
+                      ? (Color.lerp(p.border, onColor, pos) ?? p.border)
+                      : (widget.value ? onColor : p.border);
 
                   return Opacity(
                     opacity: widget.enabled ? 1.0 : 0.45,
-                    child: Container(
+                    child: AnimatedContainer(
+                      duration: _isDragging
+                          ? Duration.zero
+                          : const Duration(milliseconds: 200),
+                      curve: Curves.easeInOut,
                       width: _trackWidth,
                       height: _trackHeight,
                       padding: const EdgeInsets.all(_thumbPadding),
@@ -278,8 +285,13 @@ class _NkIosSwitchState extends State<NkIosSwitch>
                         child: Stack(
                           children: [
                             // "On" Indicator (Apple HIG Accessibility '|' Bar)
-                            Opacity(
-                              opacity: pos.clamp(0.0, 1.0),
+                            AnimatedOpacity(
+                              duration: _isDragging
+                                  ? Duration.zero
+                                  : const Duration(milliseconds: 200),
+                              opacity: _isDragging
+                                  ? pos.clamp(0.0, 1.0)
+                                  : (widget.value ? 1.0 : 0.0),
                               child: Align(
                                 alignment: const Alignment(-0.58, 0),
                                 child: Container(
@@ -293,8 +305,13 @@ class _NkIosSwitchState extends State<NkIosSwitch>
                               ),
                             ),
                             // "Off" Indicator (Apple HIG Accessibility 'O' Ring)
-                            Opacity(
-                              opacity: (1.0 - pos).clamp(0.0, 1.0),
+                            AnimatedOpacity(
+                              duration: _isDragging
+                                  ? Duration.zero
+                                  : const Duration(milliseconds: 200),
+                              opacity: _isDragging
+                                  ? (1.0 - pos).clamp(0.0, 1.0)
+                                  : (!widget.value ? 1.0 : 0.0),
                               child: Align(
                                 alignment: const Alignment(0.72, 0),
                                 child: Container(
@@ -310,24 +327,34 @@ class _NkIosSwitchState extends State<NkIosSwitch>
                                 ),
                               ),
                             ),
-                            // Pill thumb with inward-expanding touch stretch
-                            Transform.translate(
-                              offset: Offset(thumbOffset - _thumbPadding, 0),
-                              child: Container(
-                                width: _thumbBaseWidth + stretch,
-                                height: _thumbHeight,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(999),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.15,
+                            AnimatedAlign(
+                              duration: _isDragging
+                                  ? Duration.zero
+                                  : const Duration(milliseconds: 200),
+                              curve: Curves.easeInOut,
+                              alignment: _isDragging
+                                  ? Alignment(-1.0 + (pos * 2.0), 0.0)
+                                  : (widget.value
+                                        ? Alignment.centerRight
+                                        : Alignment.centerLeft),
+                              child: Transform.translate(
+                                offset: Offset.zero,
+                                child: Container(
+                                  width: _thumbBaseWidth + stretch,
+                                  height: _thumbHeight,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(999),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(
+                                          alpha: 0.15,
+                                        ),
+                                        blurRadius: 8.0,
+                                        offset: const Offset(0, 2),
                                       ),
-                                      blurRadius: 8.0,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),

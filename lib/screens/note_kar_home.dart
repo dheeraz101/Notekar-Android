@@ -21,6 +21,7 @@ import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/backup_dialogs.dart';
 import 'package:notekar/dialogs/changelog_dialog.dart';
 import 'package:notekar/dialogs/checkpoint_session_sheet.dart';
+import 'package:notekar/dialogs/experimental_build_unlocked_sheet.dart';
 import 'package:notekar/dialogs/history_dialog.dart';
 import 'package:notekar/dialogs/manual_entry_dialog.dart';
 import 'package:notekar/dialogs/note_dialog.dart';
@@ -130,6 +131,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
   String _inout = 'in';
   String _locale = 'system';
   int? _sessionStart;
+  Duration? _sessionTargetDuration;
+  String? _activeHabitSessionPresetId;
   bool _isPaused = false;
   int? _pausedAt;
   int _tapDelay = 0;
@@ -329,13 +332,48 @@ class _NoteKarHomeState extends State<NoteKarHome>
     final adaptive = _activeAdaptiveColor;
     if (adaptive != null) {
       final lum = adaptive.computeLuminance();
-      final contrastClock = lum > 0.45
+      final isLightBg = lum > 0.45;
+      final contrastClock = isLightBg
           ? const Color(0xFF000000)
           : const Color(0xFFFFFFFF);
+      final contrastText = isLightBg
+          ? const Color(0xFF000000)
+          : const Color(0xFFFFFFFF);
+      final contrastText2 = isLightBg
+          ? const Color(0xFF3C3C43)
+          : const Color(0xFFEBEBF5);
+      final contrastText3 = isLightBg
+          ? const Color(0xFF6C6C70)
+          : const Color(0xFF8E8E93);
+      final contrastSurface = isLightBg
+          ? const Color(0xFFFFFFFF).withValues(alpha: 0.85)
+          : const Color(0xFF1C1C1E).withValues(alpha: 0.85);
+      final contrastSurface2 = isLightBg
+          ? const Color(0xFFF2F2F7).withValues(alpha: 0.90)
+          : const Color(0xFF2C2C2E).withValues(alpha: 0.90);
+      final contrastSurface3 = isLightBg
+          ? const Color(0xFFE5E5EA).withValues(alpha: 0.95)
+          : const Color(0xFF3A3A3C).withValues(alpha: 0.95);
+      final contrastBorder = isLightBg
+          ? const Color(0xFF000000).withValues(alpha: 0.15)
+          : const Color(0xFFFFFFFF).withValues(alpha: 0.20);
+      final accentLum = base.accent.computeLuminance();
+      final accentContrast = (lum - accentLum).abs();
+      final safeAccent = accentContrast > 0.25
+          ? base.accent
+          : (isLightBg ? const Color(0xFF0055B3) : const Color(0xFF64D2FF));
+
       return base.copyWith(
         bg: adaptive,
         clock: contrastClock,
-        accent: adaptive,
+        text: contrastText,
+        text2: contrastText2,
+        text3: contrastText3,
+        surface: contrastSurface,
+        surface2: contrastSurface2,
+        surface3: contrastSurface3,
+        border: contrastBorder,
+        accent: safeAccent,
       );
     }
     return base;
@@ -722,6 +760,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _theme = prefs.getString('m-theme') ?? 'dark';
       _defaultMode = prefs.getString('m-default-mode') ?? 'two-way';
       _sessionStart = prefs.getInt('m-ses');
+      final targetMins = prefs.getInt('m-session-target-duration-mins');
+      _sessionTargetDuration = targetMins != null && targetMins > 0
+          ? Duration(minutes: targetMins)
+          : null;
+      _activeHabitSessionPresetId = prefs.getString('m-active-habit-preset-id');
       _resetModeOnClose = prefs.getBool('m-reset-mode-on-close') ?? false;
       if (_resetModeOnClose && _sessionStart == null) {
         _activeCategory = 'All';
@@ -734,6 +777,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
       } else {
         _isPaused = false;
         _pausedAt = null;
+        _sessionTargetDuration = null;
+        _activeHabitSessionPresetId = null;
         if (_defaultMode == 'single') {
           _mode = 'single';
         } else if (_defaultMode == 'two-way') {
@@ -1132,6 +1177,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     }
 
     _maybeShowBackupReminder();
+    unawaited(_checkBetaUnlockedOnStartup(prefs));
     try {
       unawaited(_handlePendingLaunchAction());
     } catch (e, stack) {
@@ -1146,6 +1192,38 @@ class _NoteKarHomeState extends State<NoteKarHome>
       }
     }
     startupTask.finish();
+  }
+
+  Future<void> _checkBetaUnlockedOnStartup(SharedPreferences prefs) async {
+    final trackBeta = prefs.getBool('m-update-track-beta') ?? false;
+    final updateChannel =
+        prefs.getString('m-update-channel') ?? (trackBeta ? 'beta' : 'stable');
+    final isBeta = updateChannel == 'beta' || trackBeta;
+    if (!isBeta) return;
+    final enrolledAt = prefs.getInt('notekar.beta_enrolled_at_ms');
+    if (enrolledAt == null) return;
+    final elapsed = DateTime.now().millisecondsSinceEpoch - enrolledAt;
+    if (elapsed >= 2592000000) {
+      await prefs.setBool('notekar.experimental_builds_unlocked', true);
+      if (prefs.getBool('notekar.experimental_popup_shown') != true &&
+          mounted) {
+        await prefs.setBool('notekar.experimental_popup_shown', true);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          final p = paletteFor(
+            _theme,
+            accentName: _accentColor,
+            highContrast: _highContrast,
+          );
+          ExperimentalBuildUnlockedSheet.show(
+            context,
+            p: p,
+            onNavigateToBuildChoose: () =>
+                _openSettings(initialCategory: 'Build Choose'),
+          );
+        });
+      }
+    }
   }
 
   void _maybeShowBackupReminder() {
@@ -1367,6 +1445,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
     var type = forcedType ?? 'single';
     final oldInOut = _inout;
     final oldSessionStart = _sessionStart;
+    final oldActiveCategory = _activeCategory;
+    final oldSessionTargetDuration = _sessionTargetDuration;
+    final oldActiveHabitPresetId = _activeHabitSessionPresetId;
 
     if (forcedType == null && _mode == 'two-way') {
       type = _inout;
@@ -1400,6 +1481,16 @@ class _NoteKarHomeState extends State<NoteKarHome>
         _pausedAt = null;
         unawaited(_prefs?.setBool('m-paused', false));
         unawaited(_prefs?.remove('m-paused-at'));
+        if (_activeHabitSessionPresetId != null ||
+            _sessionTargetDuration != null) {
+          _activeHabitSessionPresetId = null;
+          _sessionTargetDuration = null;
+          _activeCategory = 'All';
+          unawaited(_prefs?.remove('m-active-habit-preset-id'));
+          unawaited(_prefs?.remove('m-session-target-duration-mins'));
+          unawaited(_prefs?.remove('m-active-cat'));
+          _applySystemUiStyle();
+        }
       }
     } else if (forcedType != null) {
       if (forcedType == 'in') {
@@ -1432,6 +1523,16 @@ class _NoteKarHomeState extends State<NoteKarHome>
         _pausedAt = null;
         unawaited(_prefs?.setBool('m-paused', false));
         unawaited(_prefs?.remove('m-paused-at'));
+        if (_activeHabitSessionPresetId != null ||
+            _sessionTargetDuration != null) {
+          _activeHabitSessionPresetId = null;
+          _sessionTargetDuration = null;
+          _activeCategory = 'All';
+          unawaited(_prefs?.remove('m-active-habit-preset-id'));
+          unawaited(_prefs?.remove('m-session-target-duration-mins'));
+          unawaited(_prefs?.remove('m-active-cat'));
+          _applySystemUiStyle();
+        }
       }
     }
 
@@ -1520,11 +1621,25 @@ class _NoteKarHomeState extends State<NoteKarHome>
         : (note?.trim() ?? '');
 
     final resolvedCategory =
-        _activeCategory != 'All' && _activeCategory.trim().isNotEmpty
-        ? _activeCategory.trim()
-        : null;
+        (type == 'out' &&
+            oldActiveHabitPresetId != null &&
+            oldActiveCategory != 'All' &&
+            oldActiveCategory.trim().isNotEmpty)
+        ? oldActiveCategory.trim()
+        : (_activeCategory != 'All' && _activeCategory.trim().isNotEmpty
+              ? _activeCategory.trim()
+              : null);
 
     final effectiveTags = List<String>.from(tags ?? const []);
+    if (type == 'out' && oldActiveHabitPresetId != null) {
+      if (!effectiveTags.contains('checkpoint')) {
+        effectiveTags.add('checkpoint');
+      }
+      final tag = 'checkpoint:$oldActiveHabitPresetId';
+      if (!effectiveTags.contains(tag)) {
+        effectiveTags.add(tag);
+      }
+    }
     final autoTagEnabled = _prefs?.getBool('goals_autotag_enabled') ?? true;
     if (autoTagEnabled) {
       if (_activeGoalId != null) {
@@ -1754,6 +1869,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
           _lastId = null;
           _inout = oldInOut;
           _sessionStart = oldSessionStart;
+          _activeCategory = oldActiveCategory;
+          _sessionTargetDuration = oldSessionTargetDuration;
+          _activeHabitSessionPresetId = oldActiveHabitPresetId;
         });
         _showToast('Storage error: Moment not saved', warning: true);
       }
@@ -2919,12 +3037,14 @@ class _NoteKarHomeState extends State<NoteKarHome>
             end: end,
             note: note,
           ),
-      onStartLive: ({required start, note}) =>
-          _handleStartLiveCheckpointSession(
-            preset: preset,
-            start: start,
-            note: note,
-          ),
+      onStartLiveWithDuration:
+          ({required start, note, targetDurationMinutes}) =>
+              _handleStartLiveCheckpointSession(
+                preset: preset,
+                start: start,
+                note: note,
+                targetDurationMinutes: targetDurationMinutes,
+              ),
       onLogSingle: ({required timestamp, note}) => _handleLogSingleCheckpoint(
         preset: preset,
         timestamp: timestamp,
@@ -2973,6 +3093,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     required CheckpointPreset preset,
     required DateTime start,
     String? note,
+    int? targetDurationMinutes,
   }) async {
     HapticFeedback.mediumImpact();
     final inMoment = await CheckpointService.instance
@@ -2986,10 +3107,29 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _entries.insert(0, inMoment);
       _entries.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       _sessionStart = inMoment.timestamp;
+      _sessionTargetDuration =
+          targetDurationMinutes != null && targetDurationMinutes > 0
+          ? Duration(minutes: targetDurationMinutes)
+          : null;
+      _activeHabitSessionPresetId = preset.id;
       _mode = 'two-way';
       _inout = 'out';
       _activeCategory = preset.category;
     });
+    if (_sessionTargetDuration != null) {
+      unawaited(
+        _prefs?.setInt(
+          'm-session-target-duration-mins',
+          _sessionTargetDuration!.inMinutes,
+        ),
+      );
+    }
+    unawaited(_prefs?.setString('m-active-habit-preset-id', preset.id));
+    unawaited(_saveSetting('m-ses', inMoment.timestamp));
+    unawaited(_saveSetting('m-inout', 'out'));
+    unawaited(_saveSetting('m-mode', 'two-way'));
+    unawaited(_saveSetting('m-active-cat', preset.category));
+    _applySystemUiStyle();
     AppSound.click();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -3002,6 +3142,22 @@ class _NoteKarHomeState extends State<NoteKarHome>
           duration: const Duration(seconds: 2),
         ),
       );
+    }
+  }
+
+  Future<void> _handleStopHabitSession() async {
+    HapticFeedback.mediumImpact();
+    await _logEntry(forcedType: 'out');
+    if (mounted) {
+      setState(() {
+        _activeHabitSessionPresetId = null;
+        _sessionTargetDuration = null;
+        _activeCategory = 'All';
+      });
+      unawaited(_prefs?.remove('m-active-habit-preset-id'));
+      unawaited(_prefs?.remove('m-session-target-duration-mins'));
+      unawaited(_prefs?.remove('m-active-cat'));
+      _applySystemUiStyle();
     }
   }
 
@@ -3042,6 +3198,22 @@ class _NoteKarHomeState extends State<NoteKarHome>
       onLogCheckpoint: _handleLogCheckpoint,
       initialPresetId: initialPresetId,
     );
+  }
+
+  Future<void> _handleMomentsUpdated(List<Moment> moments) async {
+    setState(() {
+      for (final m in moments) {
+        final idx = _entries.indexWhere((e) => e.id == m.id);
+        if (idx != -1) {
+          _entries[idx] = m;
+        } else {
+          _entries.insert(0, m);
+        }
+      }
+      _entries.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    });
+    await _repository.saveMoments(moments);
+    unawaited(_updateAndroidWidget());
   }
 
   Future<void> _openHistory({
@@ -3088,6 +3260,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         onUpdateNote: _updateMomentNote,
         onUpdateNoteWithTags: _updateMomentNote,
         onUpdateMomentNote: _updateMomentNote,
+        onMomentsUpdated: _handleMomentsUpdated,
         confirmDelete: _confirmDelete,
         onDuration: _showDuration,
         onOpenTrash: _showRecentlyDeleted,
@@ -5022,6 +5195,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
                         highlightSeconds: _highlightSeconds,
                         use24HourFormat: _use24HourFormat,
                         sessionStart: _mode == 'two-way' ? _sessionStart : null,
+                        targetDuration: _mode == 'two-way'
+                            ? _sessionTargetDuration
+                            : null,
                         isPaused: _isPaused,
                         pausedAt: _pausedAt,
                         fontFamily: _clockFont,
@@ -5155,6 +5331,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
                     moments: _entries,
                     onLogCheckpoint: _handleLogCheckpoint,
                     onOpenDashboard: () => _openCheckpointsDashboard(),
+                    onOpenSettings: () =>
+                        _openSettings(initialCategory: 'Capture'),
+                    onStopSession: _handleStopHabitSession,
+                    isSessionActive:
+                        _mode == 'two-way' &&
+                        (_sessionStart != null || _inout == 'out'),
                     onHabitsChanged: () => setState(() {}),
                   ),
                 ],
@@ -5228,6 +5410,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
                       }
                     }
                   }
+                  final isLiveSession =
+                      _mode == 'two-way' &&
+                      (_sessionStart != null || _inout == 'out');
                   return UndoToast(
                     p: palette,
                     onUndo: _undoLast,
@@ -5235,9 +5420,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
                     message: message,
                     onAddNote: _openNoteForLastCapture,
                     noteLabel: noteLabel,
-                    persistent:
-                        _mode == 'two-way' &&
-                        (_sessionStart != null || _inout == 'out'),
+                    persistent: isLiveSession,
+                    onStop: isLiveSession ? _logEntry : null,
                     onDismiss: () {
                       if (mounted) {
                         setState(() => _lastId = null);

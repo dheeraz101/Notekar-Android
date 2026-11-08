@@ -265,6 +265,42 @@ class CategoryService {
     await p.setString(keyCustomCategoryIcons, jsonEncode(map));
   }
 
+  Future<void> resetCategoryColor(
+    String name, {
+    SharedPreferences? prefs,
+  }) async {
+    final clean = name.trim();
+    if (clean.isEmpty) return;
+    _customColorCache.remove(clean.toLowerCase());
+    final p = await _getPrefs(prefs: prefs);
+    final raw = p.getString(keyCustomCategoryColors);
+    if (raw != null && raw.isNotEmpty) {
+      try {
+        final map = jsonDecode(raw) as Map<String, dynamic>;
+        map.remove(clean.toLowerCase());
+        await p.setString(keyCustomCategoryColors, jsonEncode(map));
+      } catch (_) {}
+    }
+  }
+
+  Future<void> resetCategoryIcon(
+    String name, {
+    SharedPreferences? prefs,
+  }) async {
+    final clean = name.trim();
+    if (clean.isEmpty) return;
+    _customIconCache.remove(clean.toLowerCase());
+    final p = await _getPrefs(prefs: prefs);
+    final raw = p.getString(keyCustomCategoryIcons);
+    if (raw != null && raw.isNotEmpty) {
+      try {
+        final map = jsonDecode(raw) as Map<String, dynamic>;
+        map.remove(clean.toLowerCase());
+        await p.setString(keyCustomCategoryIcons, jsonEncode(map));
+      } catch (_) {}
+    }
+  }
+
   Future<List<String>> getCategories({SharedPreferences? prefs}) async {
     await ensureColorsLoaded(prefs: prefs);
     final p = await _getPrefs(prefs: prefs);

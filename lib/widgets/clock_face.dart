@@ -14,6 +14,7 @@ class LiveClockFace extends StatefulWidget {
     required this.highlightSeconds,
     this.use24HourFormat = true,
     this.sessionStart,
+    this.targetDuration,
     this.isPaused = false,
     this.pausedAt,
     this.fontFamily = 'BebasNeue',
@@ -26,6 +27,7 @@ class LiveClockFace extends StatefulWidget {
   final bool highlightSeconds;
   final bool use24HourFormat;
   final int? sessionStart;
+  final Duration? targetDuration;
   final bool isPaused;
   final int? pausedAt;
   final String fontFamily;
@@ -86,6 +88,7 @@ class _LiveClockFaceState extends State<LiveClockFace> {
       highlightSeconds: widget.highlightSeconds,
       use24HourFormat: widget.use24HourFormat,
       sessionElapsed: sessionElapsed,
+      targetDuration: widget.targetDuration,
       isPaused: widget.isPaused,
       fontFamily: widget.fontFamily,
     );
@@ -105,6 +108,7 @@ class ClockFace extends StatefulWidget {
     this.use24HourFormat = true,
     this.showPeriod = false,
     this.sessionElapsed,
+    this.targetDuration,
     this.isPaused = false,
     this.fontFamily = 'BebasNeue',
   });
@@ -119,6 +123,7 @@ class ClockFace extends StatefulWidget {
   final bool use24HourFormat;
   final bool showPeriod;
   final Duration? sessionElapsed;
+  final Duration? targetDuration;
   final bool isPaused;
   final String fontFamily;
 
@@ -158,15 +163,35 @@ class _ClockFaceState extends State<ClockFace> {
     if (isSessionActive) {
       period = '';
       final elapsed = widget.sessionElapsed!;
-      if (elapsed.inHours > 0) {
-        final hours = elapsed.inHours.toString().padLeft(2, '0');
-        final mins = (elapsed.inMinutes % 60).toString().padLeft(2, '0');
-        final secs = (elapsed.inSeconds % 60).toString().padLeft(2, '0');
+      final Duration displayDuration;
+      if (widget.targetDuration != null) {
+        if (elapsed < widget.targetDuration!) {
+          displayDuration = widget.targetDuration! - elapsed;
+        } else {
+          displayDuration = Duration.zero;
+        }
+      } else {
+        displayDuration = elapsed;
+      }
+
+      if (displayDuration.inHours > 0) {
+        final hours = displayDuration.inHours.toString().padLeft(2, '0');
+        final mins = (displayDuration.inMinutes % 60).toString().padLeft(
+          2,
+          '0',
+        );
+        final secs = (displayDuration.inSeconds % 60).toString().padLeft(
+          2,
+          '0',
+        );
         hm = '$hours:$mins';
         sec = '.$secs';
       } else {
-        final mins = elapsed.inMinutes.toString().padLeft(2, '0');
-        final secs = (elapsed.inSeconds % 60).toString().padLeft(2, '0');
+        final mins = displayDuration.inMinutes.toString().padLeft(2, '0');
+        final secs = (displayDuration.inSeconds % 60).toString().padLeft(
+          2,
+          '0',
+        );
         hm = '$mins:$secs';
         sec = '';
       }

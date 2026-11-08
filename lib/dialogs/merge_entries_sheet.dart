@@ -76,9 +76,10 @@ class _MergeEntriesSheetState extends State<MergeEntriesSheet> {
   late Duration _duration;
   late String _selectedCategory;
   late TextEditingController _noteController;
-  List<String> _categories = List<String>.from(
-    CategoryService.defaultCategories,
-  );
+  List<String> _categories = [
+    'General Mode',
+    ...CategoryService.defaultCategories,
+  ];
   bool _unifyNotes = false;
   bool _isSaving = false;
 
@@ -96,12 +97,25 @@ class _MergeEntriesSheetState extends State<MergeEntriesSheet> {
     final diff = _endMoment.timestamp - _startMoment.timestamp;
     _duration = Duration(milliseconds: diff > 0 ? diff : 0);
 
-    _selectedCategory = _startMoment.category ?? _endMoment.category ?? 'Work';
+    final initialCat = _startMoment.category ?? _endMoment.category;
+    _selectedCategory = (initialCat != null && initialCat.trim().isNotEmpty)
+        ? initialCat.trim()
+        : 'General Mode';
 
     CategoryService().getCategories().then((cats) {
       if (mounted) {
+        final all = <String>['General Mode'];
+        for (final c in cats) {
+          if (c != 'General Mode' && !all.contains(c)) {
+            all.add(c);
+          }
+        }
+        if (_selectedCategory != 'General Mode' &&
+            !all.contains(_selectedCategory)) {
+          all.add(_selectedCategory);
+        }
         setState(() {
-          _categories = cats;
+          _categories = all;
         });
       }
     });
@@ -141,9 +155,14 @@ class _MergeEntriesSheetState extends State<MergeEntriesSheet> {
 
     try {
       final combinedNote = _noteController.text.trim();
+      final isGeneral =
+          _selectedCategory == 'General Mode' || _selectedCategory == 'General';
+      final resolvedCategory = isGeneral ? null : _selectedCategory;
+
       final updatedStart = _startMoment.copyWith(
         type: 'in',
-        category: _selectedCategory,
+        category: resolvedCategory,
+        clearCategory: isGeneral,
         note: _unifyNotes
             ? combinedNote
             : (_startMoment.note.trim().isNotEmpty
@@ -152,14 +171,15 @@ class _MergeEntriesSheetState extends State<MergeEntriesSheet> {
       );
       final updatedEnd = _endMoment.copyWith(
         type: 'out',
-        category: _selectedCategory,
+        category: resolvedCategory,
+        clearCategory: isGeneral,
         note: _unifyNotes ? '' : _endMoment.note,
       );
 
       await widget.onConfirmMerge(
         startMoment: updatedStart,
         endMoment: updatedEnd,
-        category: _selectedCategory,
+        category: resolvedCategory,
         combinedNote: combinedNote,
         unifyNotes: _unifyNotes,
       );
