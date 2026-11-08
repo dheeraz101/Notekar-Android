@@ -6,6 +6,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [7.5.14E1] - 2026-11-08 (versionCode 26ER1108)
+
+### What's New
+- Wire Diwali 2026 notice feed with bundled fallback and gallery save
+- Audit repo cleanup and introduce full-screen Apple HIG Notice image post viewer with gallery save
+
+### Bug Fixes
+- Harden byte offset decoding, dynamic mime detection, and bundled fallback cascading
+
 ## [7.5.14] - 2026-11-08 (versionCode 26BR1108) [Beta]
 
 ### What's New

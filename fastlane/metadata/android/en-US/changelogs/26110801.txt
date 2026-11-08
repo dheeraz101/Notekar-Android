@@ -1,7 +1,4 @@
-Update to 7.5.14 (build 26BR1108):
-- Classic iOS Switch Toggles: Authentic 62x32 track, fluid stretch & Apple HIG markings
-- Habit Live Sessions: Reverse countdown (15m, 30m, 45m), dedicated Stop action & auto-reset
-- Session Merging: Merged IN/OUT moments persist across reloads; reassign modes in History
-- Hierarchical Navigation: Deep settings back-navigation returns to parent category
-- Apple HIG Design: Minimal Data Safety, full-width permissions & content rating polish
-- 100k PBKDF2 Vault: Zero-knowledge hardened security
+Update to 7.5.14E1 (build 26ER1108):
+- New: Wire Diwali 2026 notice feed with bundled fallback and gallery save
+- New: Audit repo cleanup and introduce full-screen Apple HIG Notice image post viewer with gallery save
+- Fix: Harden byte offset decoding, dynamic mime detection, and bundled fallback cascading

@@ -28,7 +28,7 @@ class ChangelogDialog extends StatefulWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.5.14',
+    version: '7.5.14E1',
     date: 'November 08, 2026',
     edition:
         'Classic iOS Switches, Habit Sessions & Permanent Merge Architecture',
