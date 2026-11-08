@@ -81,57 +81,26 @@ jobs:
             echo "Gradle 9.1.0 wrapper successfully provisioned."
           fi
 
-      - name: Configure Resilient Gradle & Flutter SDK Mirrors
+      - name: Pre-cache Kotlin Compiler Embeddable Artifact
         if: matrix.language == 'java-kotlin'
         run: |
-          KOTLIN_CACHE="$HOME/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-compiler-embeddable/2.2.20/bb8331b7585e36ea311825b01a1c06860c055fd1"
-          mkdir -p "$KOTLIN_CACHE"
-          if [ ! -f "$KOTLIN_CACHE/kotlin-compiler-embeddable-2.2.20.jar" ]; then
-            echo "Pre-fetching kotlin-compiler-embeddable-2.2.20.jar..."
-            curl -f -L --retry 3 "https://mirrors.tencent.com/nexus/repository/maven-public/org/jetbrains/kotlin/kotlin-compiler-embeddable/2.2.20/kotlin-compiler-embeddable-2.2.20.jar" -o "$KOTLIN_CACHE/kotlin-compiler-embeddable-2.2.20.jar" || \
-            curl -f -L --retry 3 "https://maven.aliyun.com/repository/public/org/jetbrains/kotlin/kotlin-compiler-embeddable/2.2.20/kotlin-compiler-embeddable-2.2.20.jar" -o "$KOTLIN_CACHE/kotlin-compiler-embeddable-2.2.20.jar" || true
+          KOTLIN_DIR="$HOME/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-compiler-embeddable/2.2.20"
+          JAR_DIR="$KOTLIN_DIR/bb8331b7585e36ea311825b01a1c06860c055fd1"
+          POM_DIR="$KOTLIN_DIR/b0e635c9dc54ff7f8bee3ffe88a6e0947332d14b"
+          mkdir -p "$JAR_DIR" "$POM_DIR"
+
+          if [ ! -f "$JAR_DIR/kotlin-compiler-embeddable-2.2.20.jar" ]; then
+            echo "Pre-fetching kotlin-compiler-embeddable-2.2.20.jar from resilient mirrors..."
+            curl -f -L --retry 3 "https://mirrors.tencent.com/nexus/repository/maven-public/org/jetbrains/kotlin/kotlin-compiler-embeddable/2.2.20/kotlin-compiler-embeddable-2.2.20.jar" -o "$JAR_DIR/kotlin-compiler-embeddable-2.2.20.jar" || \
+            curl -f -L --retry 3 "https://maven.aliyun.com/repository/public/org/jetbrains/kotlin/kotlin-compiler-embeddable/2.2.20/kotlin-compiler-embeddable-2.2.20.jar" -o "$JAR_DIR/kotlin-compiler-embeddable-2.2.20.jar"
           fi
 
-          if [ -n "$FLUTTER_ROOT" ] && [ -f "$FLUTTER_ROOT/packages/flutter_tools/gradle/settings.gradle.kts" ]; then
-            FLUTTER_SETTINGS="$FLUTTER_ROOT/packages/flutter_tools/gradle/settings.gradle.kts"
-            if ! grep -q "mirrors.tencent.com" "$FLUTTER_SETTINGS"; then
-              echo "Injecting mirror repositories into Flutter SDK Gradle settings..."
-              sed -i '/repositories {/a \        maven { url = java.net.URI.create("https://mirrors.tencent.com/nexus/repository/maven-public/") }\n        maven { url = java.net.URI.create("https://maven.aliyun.com/repository/public") }' "$FLUTTER_SETTINGS"
-            fi
+          if [ ! -f "$POM_DIR/kotlin-compiler-embeddable-2.2.20.pom" ]; then
+            echo "Pre-fetching kotlin-compiler-embeddable-2.2.20.pom from resilient mirrors..."
+            curl -f -L --retry 3 "https://mirrors.tencent.com/nexus/repository/maven-public/org/jetbrains/kotlin/kotlin-compiler-embeddable/2.2.20/kotlin-compiler-embeddable-2.2.20.pom" -o "$POM_DIR/kotlin-compiler-embeddable-2.2.20.pom" || \
+            curl -f -L --retry 3 "https://maven.aliyun.com/repository/public/org/jetbrains/kotlin/kotlin-compiler-embeddable/2.2.20/kotlin-compiler-embeddable-2.2.20.pom" -o "$POM_DIR/kotlin-compiler-embeddable-2.2.20.pom"
           fi
-
-          mkdir -p "$HOME/.gradle/init.d"
-          cat << 'EOF' > "$HOME/.gradle/init.d/01-mirrors.init.gradle"
-          allprojects {
-              buildscript {
-                  repositories {
-                      maven { url 'https://mirrors.tencent.com/nexus/repository/maven-public/' }
-                      maven { url 'https://maven.aliyun.com/repository/public' }
-                  }
-              }
-              repositories {
-                  maven { url 'https://mirrors.tencent.com/nexus/repository/maven-public/' }
-                  maven { url 'https://maven.aliyun.com/repository/public' }
-              }
-          }
-          gradle.settingsEvaluated { settings ->
-              settings.pluginManagement {
-                  repositories {
-                      maven { url 'https://mirrors.tencent.com/nexus/repository/maven-public/' }
-                      maven { url 'https://maven.aliyun.com/repository/public' }
-                  }
-              }
-              try {
-                  settings.dependencyResolutionManagement {
-                      repositories {
-                          maven { url 'https://mirrors.tencent.com/nexus/repository/maven-public/' }
-                          maven { url 'https://maven.aliyun.com/repository/public' }
-                      }
-                  }
-              } catch (Throwable ignored) {}
-          }
-          EOF
-          echo "Resilient Gradle and Flutter mirrors configured."
+          echo "Kotlin compiler embeddable pre-cached successfully."
 
       - name: Install Flutter dependencies
         if: matrix.language == 'java-kotlin'
