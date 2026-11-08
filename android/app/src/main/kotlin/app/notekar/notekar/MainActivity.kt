@@ -140,6 +140,22 @@ class MainActivity : FlutterActivity() {
                     }
                 }
 
+                "saveImageToGallery" -> {
+                    val bytes = call.argument<ByteArray>("bytes")
+                    val fileName = call.argument<String>("fileName") ?: "notekar_notice_${System.currentTimeMillis()}.jpg"
+                    val mimeType = call.argument<String>("mimeType") ?: "image/jpeg"
+                    if (bytes == null || bytes.isEmpty()) {
+                        result.error("INVALID_BYTES", "No image bytes provided", null)
+                        return@setMethodCallHandler
+                    }
+                    try {
+                        val savedUri = saveImageToGallery(fileName, bytes, mimeType)
+                        result.success(savedUri)
+                    } catch (error: Exception) {
+                        result.error("SAVE_FAILED", error.message, null)
+                    }
+                }
+
                 "openTextFile" -> {
                     if (pendingOpenResult != null) {
                         try {
@@ -1199,6 +1215,39 @@ class MainActivity : FlutterActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             values.clear()
             values.put(MediaStore.MediaColumns.IS_PENDING, 0)
+            resolver.update(uri, values, null, null)
+        }
+
+        return uri.toString()
+    }
+
+    private fun saveImageToGallery(fileName: String, bytes: ByteArray, mimeType: String): String {
+        val resolver = applicationContext.contentResolver
+        val values = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+            put(MediaStore.Images.Media.MIME_TYPE, mimeType)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/NoteKar")
+                put(MediaStore.Images.Media.IS_PENDING, 1)
+            }
+        }
+
+        val collection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+        } else {
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        }
+
+        val uri = resolver.insert(collection, values)
+            ?: throw IllegalStateException("Could not create gallery image entry")
+
+        resolver.openOutputStream(uri)?.use { stream ->
+            stream.write(bytes)
+        } ?: throw IllegalStateException("Could not open gallery image output stream")
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            values.clear()
+            values.put(MediaStore.Images.Media.IS_PENDING, 0)
             resolver.update(uri, values, null, null)
         }
 

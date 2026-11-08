@@ -10,6 +10,7 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/notice_service.dart';
 import 'package:notekar/widgets/common_elements.dart';
+import 'package:notekar/widgets/notice_image_post_dialog.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
 class OfficialBulletinsSheet extends StatelessWidget {
@@ -722,38 +723,173 @@ class _NoticeCard extends StatelessWidget {
             notice.localizedBody(context),
             style: TextStyle(color: p.text2, fontSize: 13, height: 1.45),
           ),
-          if (hasAction) ...[
+          if (notice.isImagePost) ...[
             const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerRight,
-              child: PressableScale(
-                onTap: handleActionTap,
+            PressableScale(
+              onTap: () {
+                NoticeImagePostDialog.show(context, p: p, notice: notice);
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(14),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 7.5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: bwBg,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+                  color: Colors.black.withValues(alpha: 0.15),
+                  child: Stack(
+                    alignment: Alignment.center,
                     children: [
-                      Text(
-                        notice.actionLabel(context),
-                        style: TextStyle(
-                          color: bwFg,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
+                      AspectRatio(
+                        aspectRatio: notice.numericAspectRatio ?? (16 / 9),
+                        child: Image.network(
+                          notice.imageUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => Container(
+                            color: p.surface3,
+                            child: Center(
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    CupertinoIcons.photo,
+                                    size: 16,
+                                    color: p.text3,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Notice Image',
+                                    style: TextStyle(
+                                      color: p.text3,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Container(
+                              color: p.surface3,
+                              child: const Center(
+                                child: CupertinoActivityIndicator(radius: 9),
+                              ),
+                            );
+                          },
                         ),
                       ),
-                      const SizedBox(width: 5),
-                      Icon(getActionIcon(), color: bwFg, size: 13),
+                      Positioned(
+                        right: 8,
+                        bottom: 8,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 9,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.65),
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.2),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                CupertinoIcons.fullscreen,
+                                size: 11,
+                                color: Colors.white,
+                              ),
+                              SizedBox(width: 4),
+                              Text(
+                                'Full Screen',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ),
+            ),
+          ],
+          if (notice.isImagePost || hasAction) ...[
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (notice.isImagePost)
+                  PressableScale(
+                    onTap: () {
+                      NoticeImagePostDialog.show(context, p: p, notice: notice);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 7.5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: bwBg,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            CupertinoIcons.fullscreen,
+                            color: bwFg,
+                            size: 13,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'View Notice',
+                            style: TextStyle(
+                              color: bwFg,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                if (notice.isImagePost && hasAction) const SizedBox(width: 8),
+                if (hasAction)
+                  PressableScale(
+                    onTap: handleActionTap,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 7.5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: bwBg,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            notice.actionLabel(context),
+                            style: TextStyle(
+                              color: bwFg,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          Icon(getActionIcon(), color: bwFg, size: 13),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ],
         ],

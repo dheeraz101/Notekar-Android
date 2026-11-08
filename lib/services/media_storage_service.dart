@@ -348,6 +348,48 @@ class MediaStorageService {
     return '${num.toStringAsFixed(i == 0 ? 0 : 1)} ${suffixes[i]}';
   }
 
+  /// Saves an image (raw bytes) directly into the device's public photo gallery / MediaStore.
+  ///
+  /// On Android, saves to `Pictures/NoteKar` via Android's MediaStore API.
+  /// Gracefully falls back to internal app storage when running on other platforms, in tests,
+  /// or if native MediaStore fails.
+  Future<String?> saveImageToGallery({
+    required Uint8List bytes,
+    String? fileName,
+    String mimeType = 'image/jpeg',
+  }) async {
+    final effectiveName =
+        fileName ??
+        'notekar_notice_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    try {
+      final uri = await _fileChannel.invokeMethod<String>(
+        'saveImageToGallery',
+        {'bytes': bytes, 'fileName': effectiveName, 'mimeType': mimeType},
+      );
+      if (uri != null && uri.isNotEmpty) {
+        _logger.info('Saved image to gallery via MediaStore: $uri');
+        return uri;
+      }
+    } catch (e, stack) {
+      _logger.warn(
+        'Native saveImageToGallery fallback triggered: $e',
+        e,
+        stack,
+      );
+    }
+
+    try {
+      final imagesDir = await getImagesDirectory();
+      final target = File('${imagesDir.path}/$effectiveName');
+      await target.writeAsBytes(bytes);
+      _logger.info('Saved image in persistent fallback: ${target.path}');
+      return target.path;
+    } catch (e, stack) {
+      _logger.error('Failed saving image to fallback storage', e, stack);
+      return null;
+    }
+  }
+
   /// Deletes all media files on factory reset.
   Future<void> clearAllMedia() async {
     try {

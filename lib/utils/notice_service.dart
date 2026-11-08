@@ -53,6 +53,41 @@ class NoticeService {
       'maxShows': 5,
       'cooldownHours': 12,
     },
+    {
+      'enabled': true,
+      'id': 'notekar-visual-bulletin-notice',
+      'title': 'NoteKar Visual Bulletin: Version 7.5',
+      'title_es': 'Boletín visual de NoteKar: Versión 7.5',
+      'title_hi': 'NoteKar दृश्य बुलेटिन: संस्करण 7.5',
+      'title_de': 'NoteKar Visuelles Bulletin: Version 7.5',
+      'title_fr': 'Bulletin visuel NoteKar : Version 7.5',
+      'title_ja': 'NoteKar ビジュアル掲示板：バージョン 7.5',
+      'title_ru': 'Визуальный бюллетень NoteKar: Версия 7.5',
+      'body':
+          'Experience fluid full-screen visual announcements, official updates, and releases rendered directly in pure Apple HIG clarity.',
+      'body_es':
+          'Experimente anuncios visuales a pantalla completa, actualizaciones oficiales y versiones con claridad Apple HIG.',
+      'body_hi':
+          'शुद्ध Apple HIG स्पष्टता में सीधे प्रस्तुत पूर्ण-स्क्रीन दृश्य घोषणाओं, आधिकारिक अपडेट और रिलीज़ का अनुभव करें।',
+      'body_de':
+          'Erleben Sie visuelle Ankündigungen im Vollbildmodus, offizielle Updates und Releases in reiner Apple HIG-Klarheit.',
+      'body_fr':
+          'Découvrez des annonces visuelles en plein écran, des mises à jour officielles et des versions avec la clarté Apple HIG.',
+      'body_ja':
+          'Apple HIGの洗練されたデザインで、フルスクリーンのビジュアル告知、公式アップデート、リリースを直接ご覧いただけます。',
+      'body_ru':
+          'Полноэкранные визуальные объявления, официальные обновления и релизы в непревзойденном стиле Apple HIG.',
+      'image_url':
+          'https://raw.githubusercontent.com/dheeraz101/Notekar-Android/main/screenshot/notekar_banner.png',
+      'aspect_ratio': '16:9',
+      'priority': 'feature',
+      'channels': ['stable', 'beta'],
+      'platforms': ['android'],
+      'minVersion': '7.0.0',
+      'maxVersion': '9.0.0',
+      'maxShows': 5,
+      'cooldownHours': 24,
+    },
   ];
 
   HttpClient _createHttpClient({
@@ -204,6 +239,19 @@ class NoticeService {
       }
     }
     return null;
+  }
+
+  /// Returns all active notices that contain an image post.
+  Future<List<AppNotice>> getImageNotices() async {
+    final notices = await getCachedNotices();
+    return notices.where((n) => n.isImagePost && n.enabled).toList();
+  }
+
+  /// Returns the most recent active image notice post.
+  Future<AppNotice?> getLatestImageNotice() async {
+    final imageNotices = await getImageNotices();
+    if (imageNotices.isEmpty) return null;
+    return imageNotices.first;
   }
 
   Future<Set<String>> getDismissedNoticeIds() async {

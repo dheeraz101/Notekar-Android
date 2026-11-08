@@ -32,6 +32,9 @@ class AppNotice {
     this.receivedAt,
     this.startsAt,
     this.expiresAt,
+    this.imageUrl,
+    this.aspectRatio,
+    this.imageCaption,
   });
 
   final String id;
@@ -62,6 +65,34 @@ class AppNotice {
   final DateTime? receivedAt;
   final DateTime? startsAt;
   final DateTime? expiresAt;
+  final String? imageUrl;
+  final String? aspectRatio;
+  final String? imageCaption;
+
+  bool get isImagePost => imageUrl != null && imageUrl!.trim().isNotEmpty;
+
+  double? get numericAspectRatio {
+    if (aspectRatio == null || aspectRatio!.trim().isEmpty) return null;
+    final clean = aspectRatio!.trim().toLowerCase();
+    if (clean == '9:16' || clean == '9/16') return 9.0 / 16.0;
+    if (clean == '16:9' || clean == '16/9') return 16.0 / 9.0;
+    if (clean == '1:1' || clean == '1/1') return 1.0;
+    if (clean == '4:3' || clean == '4/3') return 4.0 / 3.0;
+    if (clean == '3:4' || clean == '3/4') return 3.0 / 4.0;
+    if (clean.contains(':')) {
+      final parts = clean.split(':');
+      final w = double.tryParse(parts[0]);
+      final h = double.tryParse(parts[1]);
+      if (w != null && h != null && h > 0) return w / h;
+    }
+    if (clean.contains('/')) {
+      final parts = clean.split('/');
+      final w = double.tryParse(parts[0]);
+      final h = double.tryParse(parts[1]);
+      if (w != null && h != null && h > 0) return w / h;
+    }
+    return double.tryParse(clean);
+  }
 
   bool get isCritical {
     final p = priority.toLowerCase().trim();
@@ -339,6 +370,16 @@ class AppNotice {
       receivedAt: parseDate(json['receivedAt']),
       startsAt: parseDate(json['startsAt'] ?? json['showAfter']),
       expiresAt: parseDate(json['expiresAt'] ?? json['showUntil']),
+      imageUrl:
+          (json['image_url'] ??
+                  json['imageUrl'] ??
+                  json['image'] ??
+                  json['img'])
+              as String?,
+      aspectRatio: (json['aspect_ratio'] ?? json['aspectRatio']) as String?,
+      imageCaption:
+          (json['image_caption'] ?? json['imageCaption'] ?? json['caption'])
+              as String?,
     );
   }
 
@@ -372,6 +413,9 @@ class AppNotice {
       if (receivedAt != null) 'receivedAt': receivedAt!.toIso8601String(),
       if (startsAt != null) 'startsAt': startsAt!.toIso8601String(),
       if (expiresAt != null) 'expiresAt': expiresAt!.toIso8601String(),
+      if (imageUrl != null) 'image_url': imageUrl,
+      if (aspectRatio != null) 'aspect_ratio': aspectRatio,
+      if (imageCaption != null) 'image_caption': imageCaption,
     };
   }
 }
