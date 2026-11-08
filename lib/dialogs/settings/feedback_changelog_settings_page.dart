@@ -23,112 +23,110 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.5.13',
-    date: 'November 07, 2026',
-    edition: 'Quick Settings Tile, Canvas Habits & Apple HIG Surgery',
+    version: '7.5.14',
+    date: 'November 08, 2026',
+    edition: 'Classic iOS Switches, Habit Countdown & Merge Persistence',
     badgeColor: Color(0xFFFF9F0A),
     innovations: [
       (
-        title: 'Quick Settings Notification Tile',
-        category: 'SYSTEM OVERLAY & CONVENIENCE',
-        headline: 'Instant Bubble Toggle. Zero App Open Required.',
+        title: 'Classic iOS Custom Switch Toggles',
+        category: 'PRECISION CONTROLS & APPLE HIG',
+        headline: 'Tactile 62×32 Geometry. +10px Fluid Kinetic Stretch.',
         desc:
-            'Control your floating timer overlay directly from Android\'s system status bar Quick Settings shade. Tap the NoteKar tile anytime to reveal or hide the floating bubble without switching away from your current activity.',
-        icon: CupertinoIcons.bell_fill,
-        badgeColor: Color(0xFF34C759),
-        specs:
-            'Quick Settings TileService · Background Broadcast Receiver · 1-Tap Overlay Toggle · System Shade Integration',
-      ),
-      (
-        title: 'Interactive Bubble Dismissal Target',
-        category: 'GESTURAL OVERLAYS & CONTROLS',
-        headline: 'Bottom "✕" Drop Target. Drag-to-Dismiss.',
-        desc:
-            'Drag the floating bubble to the bottom of the screen to reveal an animated "✕" dismissal drop-target. Releasing dismisses the bubble cleanly, while the Quick Settings Tile or home widget instantly brings it back.',
-        icon: CupertinoIcons.xmark_circle_fill,
-        badgeColor: Color(0xFFFF3B30),
-        specs:
-            'Bottom Screen Drop Target · Magnetic Snapping · Haptic Drag Feedback · Quick Re-summoning',
-      ),
-      (
-        title: 'Canvas Habit Creator & Editor',
-        category: 'HABIT TRACKING & CHECKPOINTS',
-        headline: 'Interactive Authoring. Emoji Selector & Cadence.',
-        desc:
-            'Add and customize habits directly on the home canvas. Tap "+ Add Habit" to open the Apple HIG habit creator with custom emoji selection, custom cadence intervals, and deletion confirmation safeguards.',
-        icon: CupertinoIcons.add_circled_solid,
+            'Restored the beloved classic iOS toggle geometry from commit 7.5.11 (62×32 track, 34×28 pill thumb, +10px fluid mechanical stretch, soft drop shadow, and official Apple HIG "|" and "O" accessibility indicators). Tapping anywhere on the settings row fluidly elongates the thumb, and switch states strictly mirror parent permissions with zero desynchronization or stuck visuals on cancelled PIN prompts.',
+        icon: CupertinoIcons.switch_camera,
         badgeColor: Color(0xFF007AFF),
         specs:
-            'AddEditHabitSheet · Emoji Customization · Cadence Intervals · Core Preset Protection · Deletion Alerts',
+            '62x32 Track · 34x28 Thumb · +10px Stretch · "|" & "O" Accessibility Markings · App Lock Desync Protection',
       ),
       (
-        title: 'Media Symmetry in Note Previews',
-        category: 'MULTIMODAL NOTE REVIEWS',
-        headline: 'Inline Audio Playback. Instant Photo Lightbox.',
+        title: 'Habit Live Sessions & Reverse Countdown',
+        category: 'HABIT TRACKING & CHECKPOINTS',
+        headline: 'Intentional Time Horizons. Reverse Chronometer Flow.',
         desc:
-            'Reviewing logged moments now supports rich multimedia directly in the NotePreviewSheet modal. Listen to audio memos via TimelineVoicePlayerPill with real-time progress and inspect photo moments seamlessly.',
-        icon: CupertinoIcons.waveform,
-        badgeColor: Color(0xFFAF52DE),
-        specs:
-            'TimelineVoicePlayerPill Integration · Photo Attachment Cards · Swipe-to-Navigate · Full Media Symmetry',
-      ),
-      (
-        title: 'Sovereign App Permissions Dashboard',
-        category: 'SECURITY & HARDWARE CAPABILITIES',
-        headline: '7 Device Capabilities. Zero Telemetry Guarantee.',
-        desc:
-            'Inspect microphone, camera, notification, overlay, exact alarm, battery optimization, and usage access capabilities in real-time. Full-width decoupled titles and monospace chips prevent truncation, paired with iOS "Enable ›" action pills.',
-        icon: CupertinoIcons.lock_shield_fill,
+            'Start live sessions from routine habits with 15m, 30m, 45m, or custom duration targets. The home screen chronometer counts down in reverse towards completion, accompanied by a dedicated Apple HIG stop action, high-contrast canvas text rendering, and automatic return to neutral default mode when the session concludes.',
+        icon: CupertinoIcons.timer,
         badgeColor: Color(0xFFFF9500),
         specs:
-            'AppPermissionsSettingsPage · Decoupled Titles · Monospace Identifier Chips · iOS Action Pills · Zero Data Leakage',
+            'Reverse Countdown Chronometer · Target Durations · Dedicated Stop Control · Dynamic Text Contrast · Canvas Auto-Reset',
       ),
       (
-        title: 'Global Content Rating Disclosures',
-        category: 'FAMILY SAFETY & CERTIFICATIONS',
-        headline: 'IARC 3+ Rated. 0/5 Mature Topics Scorecard.',
+        title: 'Permanent Session Merging & Mode Switching',
+        category: 'TIMELINE & SESSION MANAGEMENT',
+        headline: 'Seamless Pairing. 100% Database Persistence.',
         desc:
-            'Official ratings across global certification bodies (IARC Everyone, ESRB Everyone, PEGI 3, and USK 0). Features a 0/5 mature topics scorecard with Apple soft-tinted squircle glyph badges (softIcon: true).',
-        icon: CupertinoIcons.checkmark_shield_fill,
-        badgeColor: Color(0xFF30D158),
+            'Merge standalone timestamps into structured IN/OUT focus sessions directly from your History timeline. Merged sessions now persist permanently in SQLite across sheet reloads and restarts, with instant reclassification to Work, Deep Focus, or General Mode without reverting or breaking pairing.',
+        icon: CupertinoIcons.arrow_merge,
+        badgeColor: Color(0xFF34C759),
         specs:
-            'ContentRatingSettingsPage · IARC 3+ Certification · Soft-Tinted Squircles · 0/5 Mature Topics Scorecard',
+            'Permanent SQLite Persistence · Direct Mode Reassignment · General Mode Support · Session Pairing Integrity',
       ),
       (
-        title: 'Data Safety Sovereignty Nutrition Card',
-        category: 'STORE COMPLIANCE & PRIVACY',
-        headline: 'Google Play Disclosures. 100% On-Device Nutrition.',
+        title: 'Hierarchical Settings Navigation & Predictive Back',
+        category: 'NAVIGATION ARCHITECTURE',
+        headline: 'Ancestral Stack Memory. Intuitive Parent Navigation.',
         desc:
-            'Redesigned top disclosure card in a continuous 24pt squircle with whisper-thin borders and 20x20 circular checkmark pills. Verifies 0 KB data collection, zero third-party sharing, and local Isar database encryption.',
-        icon: CupertinoIcons.shield_fill,
-        badgeColor: Color(0xFF5856D6),
+            'Deeply nested settings subpages now remember their lineage. Swiping from the screen edge or tapping the back button ascends smoothly to the immediate parent category (e.g. Moments, App Lock, Developer Options) rather than abruptly collapsing to root settings, fully integrated with Android 14/15 predictive back gestures.',
+        icon: CupertinoIcons.arrow_left_to_line,
+        badgeColor: Color(0xFFAF52DE),
         specs:
-            'DataSafetySettingsPage · 24pt Continuous Squircle · 20x20 Checkmark Badges · Isar DB Verification',
+            '3-Tier Category Stack · Predictive Back Peek · Canonical Ancestor Resolution · Rapid Double-Tap Handling',
       ),
       (
-        title: 'Apple HIG Visual Surgery & Typography',
-        category: 'ERGONOMICS & DESIGN EXCELLENCE',
-        headline: '44pt Touch Targets. Zero Text Truncation.',
+        title: 'Apple HIG & BitChord Precision Design System',
+        category: 'DESIGN SYSTEM & TYPOGRAPHY',
+        headline: 'Continuous Squircles. Minimal Elevated Surfaces.',
         desc:
-            'Comprehensive design surgery across NoteKar. Checkpoints bar touch targets reinforced to Apple 44pt minimum, responsive App Icons header withstanding 200% accessibility scaling, and optical SF Pro typography.',
+            'Deep visual refinement featuring continuous 60.7% squircle corner smoothing, positive SF Pro micro-typography tracking (+0.05 to +0.2), redesigned full-width Data Safety and App Permissions cards, and sleek minimal Content Rating scorecard badges.',
         icon: CupertinoIcons.sparkles,
         badgeColor: Color(0xFFFF2D55),
         specs:
-            '44pt Touch Targets · Responsive Icon Header Wrap · Clamped Text Scaler · Zero Truncation · WCAG AA Contrast',
+            '60.7% Continuous Squircles · Positive Tracking · Full-Width Hero Cards · Minimal Status Capsules',
+      ),
+      (
+        title: '1-Month Beta Milestone & Gated Experimental Builds',
+        category: 'RELEASE TRACKS & MILESTONES',
+        headline: '30-Day Testing Milestone. Bleeding-Edge Access.',
+        desc:
+            'Dedicated beta testers who use NoteKar continuously for 30 days receive an authentic Apple HIG milestone popup unlocking early access to Developer Experiments. Testers with God Mode unlocked can also reveal experimental builds instantly with a single tap.',
+        icon: CupertinoIcons.rosette,
+        badgeColor: Color(0xFFFFD700),
+        specs:
+            '30-Day Beta Milestone · Apple HIG Modal Notification · God Mode Direct Unlock · Developer Experiments Track',
+      ),
+      (
+        title: 'Timeline Rich Markdown & Expandable Notes',
+        category: 'NOTE TAKING & MULTIMEDIA',
+        headline: 'Expressive Formatting. Show More / Show Less Cards.',
+        desc:
+            'Express ideas naturally with inline bold, italic, code blocks, blockquotes, and bulleted lists rendered directly on timeline cards. Extended thoughts feature an intuitive "Show more / Show less" expansion toggle and debounced 120Hz audio scrubbers.',
+        icon: CupertinoIcons.doc_text,
+        badgeColor: Color(0xFF5856D6),
+        specs:
+            'Inline Markdown Engine · Expandable Note Cards · Debounced Audio Seeking · High-Performance Repaint Boundaries',
+      ),
+      (
+        title: 'Hardened Zero-Knowledge Vault (100k PBKDF2 Iterations)',
+        category: 'SECURITY & ENCRYPTION',
+        headline: 'Military-Grade Key Derivation. Continuous Draft Protection.',
+        desc:
+            'Vault key derivation upgraded to OWASP-standard 100,000 PBKDF2 iterations for impenetrable on-device encryption. Note drafts now auto-save continuously to prevent lost reflections, paired with dynamic recent-apps window obfuscation.',
+        icon: CupertinoIcons.lock_shield_fill,
+        badgeColor: Color(0xFF30B0C7),
+        specs:
+            '100,000 PBKDF2 Iterations · Note Draft Auto-Saving · PopScope Discard Guard · Dynamic Recents Obfuscation',
       ),
     ],
     items: [
-      '• Quick Settings Tile, Canvas Habits, Media Symmetry, App Permissions & Global Content Rating.',
-      '+ Quick Settings Tile: Added FloatingBubbleTileService to toggle floating timer bubble directly from Android notification shade',
-      '+ Interactive Bubble Dismissal: Bottom screen "✕" drop-target dismissal with drag-to-delete gesture and quick re-summon via tile or widget',
-      '+ Canvas Habit Creator: Added AddEditHabitSheet with custom emoji picker, interval cadences, and deletion confirmation safeguards',
-      '+ Media Symmetry: TimelineVoicePlayerPill audio playback and TimelineMediaAttachmentCard photo previews inside NotePreviewSheet',
-      '+ App Permissions Dashboard: Added AppPermissionsSettingsPage inspecting all 7 device permissions with decoupled full-width titles and monospace chips',
-      '+ Content Rating Disclosures: Added ContentRatingSettingsPage with IARC 3+, ESRB E, PEGI 3, USK 0 certifications and 0/5 mature topics scorecard',
-      '+ Data Safety Nutrition Card: Redesigned DataSafetySettingsPage top card with 24pt squircle curvature, 20x20 checkmark pills, and Isar local encryption disclosures',
-      '+ App Icons Header: Redesigned AppIconsSettingsPage instruction card with responsive adaptive Wrap header supporting up to 200% font scaling',
-      '+ Touch Target Enforcement: Checkpoints quick bar touch targets reinforced to Apple HIG 44pt minimum',
-      '+ Pre-commit Code Quality: 100% codebase formatted with dart format, 0 analyzer issues, and 422 passing automated tests',
+      '• Classic iOS Switches, Habit Live Countdown, Merge Persistence & Apple HIG Architecture',
+      '+ Classic iOS Switch Toggles: Restored 62x32 custom switch with +10px mechanical stretch, Apple HIG "|" and "O" markings, and row-touch stretch',
+      '+ Habit Live Sessions & Countdown: Target duration mode (15m, 30m, 45m) with reverse chronometer, dedicated Stop action, and default auto-reset',
+      '+ Permanent Session Merging: Merged IN/OUT sessions persist permanently across sheet reloads; reassign session modes directly in History',
+      '+ Hierarchical Navigation: Swiping back in deep settings subpages ascends to the immediate parent category instead of root',
+      '+ Apple HIG Design Polish: Minimal Data Safety hero card, full-width App Permissions status card, and clean Content Rating badges',
+      '+ Gated Developer Experiments: 30-day continuous beta milestone unlock notification, plus 1-tap God Mode tester access',
+      '+ Timeline Rich Markdown: Inline formatting for bold, italic, code, quotes, and bullet lists with "Show more / Show less" expansion',
+      '+ Zero-Knowledge Vault Hardening: Key derivation hardened to 100,000 PBKDF2 iterations, note draft auto-saving, and discard protection',
     ],
   );
 

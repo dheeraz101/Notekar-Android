@@ -28,44 +28,58 @@ class ChangelogDialog extends StatefulWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.5.13',
-    date: 'November 07, 2026',
+    version: '7.5.14',
+    date: 'November 08, 2026',
     edition:
-        'Classic iOS Switches, Hierarchical Navigation & Apple HIG Architecture',
+        'Classic iOS Switches, Habit Sessions & Permanent Merge Architecture',
     badgeColor: Color(0xFFFF9F0A),
     highlights: [
       (
         title: 'Classic iOS Custom Switch Toggles',
         desc:
-            'Restored authentic custom iOS switch (commit 9a166b26) with 62x32 track, 34x28 white pill thumb, fluid +10px mechanical stretch, drop shadow, and Apple HIG Accessibility indicators ("|" and "O").',
+            'Restored authentic custom iOS switch (commit 7.5.11) with 62x32 track, 34x28 white pill thumb, fluid +10px mechanical stretch, drop shadow, and Apple HIG Accessibility indicators ("|" and "O"). Row-touch kinetic stretching with zero desynchronization on cancelled PIN prompts.',
         icon: Icons.toggle_on_rounded,
         tag: 'Controls',
       ),
       (
-        title: 'Hierarchical Settings Back-Navigation',
+        title: 'Habit Live Sessions & Reverse Countdown',
         desc:
-            'Full 3-tier navigation stack and canonical parent resolution. Swiping back or tapping Back ascends to the immediate parent category rather than popping all the way back to root settings.',
+            'Start live sessions from routine habits with 15m, 30m, 45m, or custom duration targets. Chronometer counts down in reverse towards completion, accompanied by a dedicated Stop action, high-contrast canvas text, and auto-reset to default.',
+        icon: Icons.timer_rounded,
+        tag: 'Habits',
+      ),
+      (
+        title: 'Permanent Session Merging & Mode Switching',
+        desc:
+            'Seamlessly merge individual timestamps into structured IN/OUT focus sessions directly from your History timeline. Merged sessions persist permanently in SQLite across sheet reloads, with instant reclassification to Work, Deep Focus, or General Mode.',
+        icon: Icons.merge_type_rounded,
+        tag: 'Timeline',
+      ),
+      (
+        title: 'Hierarchical Settings Navigation & Predictive Back',
+        desc:
+            'Full 3-tier navigation stack and canonical parent resolution. Swiping back or tapping Back ascends smoothly to the immediate parent category rather than popping all the way back to root settings.',
         icon: Icons.account_tree_rounded,
         tag: 'Navigation',
       ),
       (
         title: 'Apple HIG & BitChord Precision Architecture',
         desc:
-            'Continuous squircle tokens with 60.7% corner smoothing, positive SF Pro micro-typography tracking (+0.05 to +0.2), lifted pill segmented controls, and de-pilled action buttons.',
+            'Continuous squircle tokens with 60.7% corner smoothing, positive SF Pro micro-typography tracking (+0.05 to +0.2), redesigned full-width Data Safety and App Permissions cards, and sleek minimal Content Rating badges.',
         icon: Icons.auto_awesome_rounded,
         tag: 'Design',
       ),
       (
-        title: 'Routine Habit Checkpoints & Custom Categories',
+        title: '1-Month Beta Milestone & Gated Experimental Builds',
         desc:
-            'Edit or delete any habit checkpoint (including default routines) with confirmation safeguards. Create custom categories with dedicated color palettes and emojis with instant moment migration.',
-        icon: Icons.playlist_add_check_rounded,
-        tag: 'Habits',
+            'Dedicated beta testers who use NoteKar continuously for 30 days receive an authentic Apple HIG milestone popup unlocking early access to Developer Experiments. Testers with God Mode can also unlock builds instantly with one tap.',
+        icon: Icons.military_tech_rounded,
+        tag: 'Milestones',
       ),
       (
         title: 'Timeline Rich Markdown & Expandable Notes',
         desc:
-            'Formatted bold, italic, code, blockquotes, and bullet lists rendered directly on timeline cards with inline "Show more / Show less" expansion toggle and debounced audio scrubbing.',
+            'Formatted bold, italic, code, blockquotes, and bullet lists rendered directly on timeline cards with inline "Show more / Show less" expansion toggle and debounced 120Hz audio scrubbing.',
         icon: Icons.notes_rounded,
         tag: 'Timeline',
       ),
@@ -76,34 +90,17 @@ class ChangelogDialog extends StatefulWidget {
         icon: Icons.lock_outline_rounded,
         tag: 'Security',
       ),
-      (
-        title: 'Android 14/15 Parity: Predictive Back & Themed Icons',
-        desc:
-            'Predictive Back gesture support across modal sheets and Material You themed adaptive monochrome launcher icons (android:roundIcon) for dynamic system theming.',
-        icon: Icons.android_rounded,
-        tag: 'Platform',
-      ),
-      (
-        title: 'Universal Ledger & Analytics Performance',
-        desc:
-            'Duration-weighted time-slot bias with cross-midnight interval slicing and GPU-accelerated annual activity heatmap CustomPainter replacing 425 nested widgets.',
-        icon: Icons.analytics_rounded,
-        tag: 'Analytics',
-      ),
     ],
     items: [
-      'Classic iOS Switches, Hierarchical Navigation, Apple HIG Architecture & 505 Micro-Improvements.',
-      '+ Classic iOS Switch Toggles: Restored 62x32 custom switch with +10px mechanical stretch, Apple HIG "|" and "O" markings, and velocity fling snapping',
-      '+ Hierarchical Settings Back-Navigation: 3-tier navigation stack ensuring swipe-back and back buttons ascend to the immediate parent page',
-      '+ Apple HIG & BitChord Precision Design System: Continuous squircle tokens (60.7% smoothing), SF Pro tracking physics, and lifted pill segmented controls',
-      '+ Routine Habit Checkpoints: Universal habit deletion, inline editing, and dynamic custom category authoring with color palettes and emoji pickers',
-      '+ Timeline Rich Markdown & Expandable Notes: Formatted inline markdown rendering and "Show more / Show less" expandable note cards',
-      '+ Zero-Knowledge Vault Hardening: Upgraded key derivation to OWASP-standard 100,000 PBKDF2 iterations and note composer draft auto-saving',
-      '+ Android 14/15 System Parity: Predictive Back gesture support across modal sheets and Material You themed adaptive monochrome launcher icons',
-      '+ 120Hz Parallax Motion: Hardware-synced Vsync Ticker parallax tilt smoothing with lifecycle backgrounding pause',
-      '+ System Overlay Recovery: Auto-detects floating bubble permission grant upon returning from Android system settings',
-      '+ Universal Ledger & Analytics: Duration-weighted time-slot bias with cross-midnight interval slicing and GPU heatmap CustomPainter',
-      '+ Bug Fixes: Fixed duplicate PopScope invocation, predictive edge swipe threshold, controlled switch reconciliation, and bulletin modal dismissal',
+      'Classic iOS Switches, Habit Live Countdown, Merge Persistence & Apple HIG Architecture',
+      '+ Classic iOS Switch Toggles: Restored 62x32 custom switch with +10px mechanical stretch, Apple HIG "|" and "O" markings, and row-touch kinetic stretch',
+      '+ Habit Live Sessions & Countdown: Target duration mode (15m, 30m, 45m) with reverse chronometer, dedicated Stop action, and default auto-reset',
+      '+ Permanent Session Merging: Merged IN/OUT sessions persist permanently across sheet reloads; reassign session modes directly in History',
+      '+ Hierarchical Navigation: Swiping back in deep settings subpages ascends to the immediate parent category instead of root',
+      '+ Apple HIG Design Polish: Minimal Data Safety hero card, full-width App Permissions status card, and clean Content Rating badges',
+      '+ Gated Developer Experiments: 30-day continuous beta milestone unlock notification, plus 1-tap God Mode tester access',
+      '+ Timeline Rich Markdown: Inline formatting for bold, italic, code, quotes, and bullet lists with "Show more / Show less" expansion',
+      '+ Zero-Knowledge Vault Hardening: Key derivation hardened to 100,000 PBKDF2 iterations, note draft auto-saving, and discard protection',
     ],
   );
 

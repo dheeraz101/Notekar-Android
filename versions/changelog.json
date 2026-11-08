@@ -1,5 +1,70 @@
 [
     {
+        "version": "7.5.14",
+        "buildNumber": "26BR1108",
+        "releaseDate": "2026-11-08",
+        "channel": "beta",
+        "channelTag": "[Beta]",
+        "isBeta": true,
+        "edition": "Classic iOS Switches & Habit Sessions",
+        "badgeColor": "#FF9F0A",
+        "isLatest": true,
+        "highlights": [
+            {
+                "title": "Classic iOS Switch Toggles",
+                "description": "Restored 62×32 custom iOS switch toggles with 34×28 pill thumb, +10px fluid mechanical stretch, drop shadow, and official Apple HIG '|' and 'O' accessibility indicators.",
+                "icon": "toggle_on_rounded"
+            },
+            {
+                "title": "Habit Live Sessions & Reverse Countdown",
+                "description": "Start habit live sessions with 15m, 30m, 45m, or custom duration targets and watch the chronometer count down in reverse with a tactile Stop control and auto-reset.",
+                "icon": "timer_rounded"
+            },
+            {
+                "title": "Permanent Session Merging & Mode Switching",
+                "description": "Merge individual timestamps into paired IN/OUT sessions with 100% database persistence across reloads. Reassign session modes directly from History.",
+                "icon": "merge_type_rounded"
+            },
+            {
+                "title": "Hierarchical Settings Navigation",
+                "description": "Full 3-tier navigation stack and ancestral resolution. Swiping back ascends to the immediate parent category instead of popping all the way back to root.",
+                "icon": "account_tree_rounded"
+            },
+            {
+                "title": "Apple HIG & BitChord Design Language",
+                "description": "Continuous squircle tokens with 60.7% corner smoothing, positive SF Pro micro-typography tracking (+0.05 to +0.2), full-width hero cards, and minimal badges.",
+                "icon": "auto_awesome_rounded"
+            },
+            {
+                "title": "1-Month Beta Milestone & Gated Builds",
+                "description": "Loyal beta testers unlocking 30 days of continuous testing receive an Apple HIG milestone notification unlocking Developer Experiments. 1-tap God Mode tester access.",
+                "icon": "military_tech_rounded"
+            },
+            {
+                "title": "Timeline Rich Markdown & Expandable Notes",
+                "description": "Inline bold, italic, code blocks, blockquotes, and bulleted lists formatted directly in timeline cards with 'Show more / Show less' expansion and debounced audio scrubbers.",
+                "icon": "notes_rounded"
+            },
+            {
+                "title": "Hardened Zero-Knowledge Vault (100k PBKDF2)",
+                "description": "Vault key derivation upgraded to OWASP-standard 100,000 PBKDF2 iterations, continuous note draft auto-saving with discard protection, and dynamic window obfuscation.",
+                "icon": "lock_outline_rounded"
+            }
+        ],
+        "items": [
+            "Classic iOS Switches, Habit Live Countdown, Merge Persistence & Apple HIG Architecture",
+            "+ Classic iOS Switch Toggles: Restored 62x32 custom switch with +10px mechanical stretch, Apple HIG '|' and 'O' markings, and row-touch stretch",
+            "+ Habit Live Sessions & Countdown: Target duration mode (15m, 30m, 45m) with reverse chronometer, dedicated Stop action, and default auto-reset",
+            "+ Permanent Session Merging: Merged IN/OUT sessions persist permanently across sheet reloads; reassign session modes directly in History",
+            "+ Hierarchical Navigation: Swiping back in deep settings subpages ascends to the immediate parent category instead of root",
+            "+ Apple HIG Design Polish: Minimal Data Safety hero card, full-width App Permissions status card, and clean Content Rating badges",
+            "+ Gated Developer Experiments: 30-day continuous beta milestone unlock notification, plus 1-tap God Mode tester access",
+            "+ Timeline Rich Markdown: Inline formatting for bold, italic, code, quotes, and bullet lists with 'Show more / Show less' expansion",
+            "+ Zero-Knowledge Vault Hardening: Key derivation hardened to 100,000 PBKDF2 iterations, note draft auto-saving, and discard protection"
+        ],
+        "downloadUrl": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.5.14/NoteKar-v7.5.14-beta.apk"
+    },
+    {
         "version": "7.5.13",
         "buildNumber": "26BR1107",
         "releaseDate": "2026-11-07",
@@ -8,7 +73,7 @@
         "isBeta": true,
         "edition": "Classic iOS Switches, Hierarchical Navigation & Apple HIG Architecture",
         "badgeColor": "#FF9F0A",
-        "isLatest": true,
+        "isLatest": false,
         "highlights": [
             {
                 "title": "Classic iOS Custom Switch Toggles",

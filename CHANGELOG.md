@@ -6,6 +6,26 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [7.5.14] - 2026-11-08 (versionCode 26BR1108) [Beta]
+
+### What's New
+- **Classic iOS Custom Switch Toggles**: Restored authentic 62×32 custom switch toggle geometry from commit 7.5.11 with 34×28 pill thumb, +10px fluid mechanical stretch, drop shadow, and official Apple HIG '|' and 'O' accessibility indicators.
+- **Habit Live Sessions & Reverse Countdown**: Set 15m, 30m, 45m, or custom duration targets and watch the chronometer count down in reverse. Features a prominent Stop control, automatic canvas reset to default on completion, and high-contrast text rendering across all themes.
+- **Permanent Session Merging & Mode Switching**: Seamlessly merge individual timestamps into structured IN/OUT focus sessions directly from History. Merged sessions persist permanently in SQLite across sheet reloads, with instant reclassification to Work, Deep Focus, or General Mode without reverting.
+- **Hierarchical Settings Navigation & Predictive Back**: Deeply nested settings subpages now remember their lineage. Swiping back or pressing the back arrow returns smoothly to the immediate parent category rather than popping all the way back to root settings.
+- **Apple HIG & BitChord Precision Design Language**: Elevated visual harmony with continuous 60.7% squircle smoothing, positive SF Pro micro-typography tracking (+0.05 to +0.2), redesigned full-width Data Safety and App Permissions cards, and sleek minimal Content Rating badges.
+- **1-Month Beta Milestone & Gated Experimental Builds**: Beta testers with 30 days of continuous testing receive an Apple HIG milestone notification unlocking cutting-edge Developer Experiments. Testers with God Mode can unlock builds instantly with one tap.
+- **Timeline Markdown & Expandable Notes**: Express thoughts with bold, italic, code blocks, blockquotes, and bulleted lists formatted directly on timeline cards. Long notes feature a seamless "Show more / Show less" expansion toggle and debounced audio scrubbers.
+- **Hardened Zero-Knowledge Vault (100k PBKDF2 Iterations)**: Vault key derivation upgraded to OWASP-standard 100,000 iterations for bulletproof on-device security. Note drafts auto-save continuously to prevent lost reflections, with dynamic app switcher obfuscation.
+
+### Improvements & Bug Fixes
+- **App Lock Switch Protection**: Bound switch alignment and colors strictly to verified controller state, preventing optimistic visual toggle stickiness when canceling PIN/biometric setup.
+- **Habit Category Restorations**: Completed checkpoints display in their respective category colors rather than turning blue. Long-pressing the Habits title pill routes directly to Capture settings.
+- **Factory Reset Streamlining**: Removed the redundant Zero-Knowledge notice container from all factory reset dialogs.
+- **Performance & Vsync**: 120Hz Vsync Ticker parallax tilt smoothing with automatic background suspension for optimal battery endurance.
+
+---
+
 ## [7.5.13] - 2026-11-07 (versionCode 26BR1107) [Beta]
 
 ### What's New
