@@ -327,7 +327,18 @@ class AppNotice {
     DateTime? parseDate(dynamic val) {
       if (val == null) return null;
       if (val is DateTime) return val;
+      if (val is int) {
+        return DateTime.fromMillisecondsSinceEpoch(
+          val > 10000000000 ? val : val * 1000,
+        );
+      }
       if (val is String && val.trim().isNotEmpty) {
+        final parsedInt = int.tryParse(val.trim());
+        if (parsedInt != null && parsedInt > 100000000) {
+          return DateTime.fromMillisecondsSinceEpoch(
+            parsedInt > 10000000000 ? parsedInt : parsedInt * 1000,
+          );
+        }
         return DateTime.tryParse(val.trim());
       }
       return null;
@@ -353,20 +364,27 @@ class AppNotice {
       url: json['url'] as String?,
       action: json['action'] as String?,
       priority: json['priority'] as String? ?? 'normal',
-      channels:
-          (json['channels'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          const ['stable', 'beta'],
-      platforms:
-          (json['platforms'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          const ['android'],
-      minVersion: json['minVersion'] as String?,
-      maxVersion: json['maxVersion'] as String?,
-      maxShows: json['maxShows'] as int?,
-      cooldownHours: json['cooldownHours'] as int?,
+      channels: () {
+        final c = json['channels'];
+        if (c is List) return c.map((e) => e.toString()).toList();
+        if (c is String && c.trim().isNotEmpty) {
+          return c.split(',').map((e) => e.trim()).toList();
+        }
+        return const ['stable', 'beta'];
+      }(),
+      platforms: () {
+        final p = json['platforms'];
+        if (p is List) return p.map((e) => e.toString()).toList();
+        if (p is String && p.trim().isNotEmpty) {
+          return p.split(',').map((e) => e.trim()).toList();
+        }
+        return const ['android'];
+      }(),
+      minVersion: (json['minVersion'] ?? json['min_version']) as String?,
+      maxVersion: (json['maxVersion'] ?? json['max_version']) as String?,
+      maxShows: ((json['maxShows'] ?? json['max_shows']) as num?)?.toInt(),
+      cooldownHours: ((json['cooldownHours'] ?? json['cooldown_hours']) as num?)
+          ?.toInt(),
       receivedAt: parseDate(json['receivedAt']),
       startsAt: parseDate(json['startsAt'] ?? json['showAfter']),
       expiresAt: parseDate(json['expiresAt'] ?? json['showUntil']),

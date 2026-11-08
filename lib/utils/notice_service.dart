@@ -141,7 +141,7 @@ class NoticeService {
     List<dynamic> list;
     if (rawJson is List) {
       list = rawJson;
-    } else if (rawJson is Map<String, dynamic>) {
+    } else if (rawJson is Map) {
       if (rawJson['notices'] is List) {
         list = rawJson['notices'] as List<dynamic>;
       } else {
@@ -152,7 +152,7 @@ class NoticeService {
     }
 
     final ts = receivedAt ?? DateTime.now();
-    return list.whereType<Map<String, dynamic>>().map((map) {
+    return list.whereType<Map<dynamic, dynamic>>().map((map) {
       final copy = Map<String, dynamic>.from(map);
       copy['receivedAt'] ??= ts.toIso8601String();
       return AppNotice.fromJson(copy);
@@ -170,17 +170,23 @@ class NoticeService {
       }
     } catch (_) {}
 
-    // 2. Try direct local file (test / dev fallback)
-    try {
-      final file = File('notice_image/notice.json');
-      if (file.existsSync()) {
-        final jsonStr = await file.readAsString();
-        if (jsonStr.trim().isNotEmpty) {
-          final dynamic raw = jsonDecode(jsonStr);
-          return _parseNoticesFromJson(raw);
+    // 2. Try direct local files (test / dev fallback)
+    final candidateFiles = [
+      File('notice_image/notice.json'),
+      File('../notice_image/notice.json'),
+      File('assets/notice.json'),
+    ];
+    for (final file in candidateFiles) {
+      try {
+        if (file.existsSync()) {
+          final jsonStr = await file.readAsString();
+          if (jsonStr.trim().isNotEmpty) {
+            final dynamic raw = jsonDecode(jsonStr);
+            return _parseNoticesFromJson(raw);
+          }
         }
-      }
-    } catch (_) {}
+      } catch (_) {}
+    }
 
     return [];
   }
@@ -387,10 +393,16 @@ class NoticeService {
 
       // Version bounds check
       if (n.minVersion != null &&
+          n.minVersion != '*' &&
+          n.minVersion != 'all' &&
+          n.minVersion!.trim().isNotEmpty &&
           _compareVersion(appVersion, n.minVersion!) < 0) {
         return false;
       }
       if (n.maxVersion != null &&
+          n.maxVersion != '*' &&
+          n.maxVersion != 'all' &&
+          n.maxVersion!.trim().isNotEmpty &&
           _compareVersion(appVersion, n.maxVersion!) > 0) {
         return false;
       }

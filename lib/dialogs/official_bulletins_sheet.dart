@@ -738,80 +738,81 @@ class _NoticeCard extends StatelessWidget {
                     children: [
                       AspectRatio(
                         aspectRatio: notice.numericAspectRatio ?? (16 / 9),
-                        child: Image.network(
-                          notice.imageUrl!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) {
-                            final uri = Uri.tryParse(notice.imageUrl ?? '');
-                            final fileName =
-                                uri != null && uri.pathSegments.isNotEmpty
-                                ? uri.pathSegments.last
-                                : '';
-                            if (fileName.isNotEmpty) {
-                              return Image.asset(
-                                'notice_image/$fileName',
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, _, _) => Container(
-                                  color: p.surface3,
-                                  child: Center(
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          CupertinoIcons.photo,
-                                          size: 16,
-                                          color: p.text3,
-                                        ),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          'Notice Image',
-                                          style: TextStyle(
-                                            color: p.text3,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ],
+                        child: () {
+                          Widget buildPlaceholder() => Container(
+                            color: p.surface3,
+                            child: Center(
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    CupertinoIcons.photo,
+                                    size: 16,
+                                    color: p.text3,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Notice Image',
+                                    style: TextStyle(
+                                      color: p.text3,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
+                                ],
+                              ),
+                            ),
+                          );
+
+                          final imgUrl = notice.imageUrl ?? '';
+                          if (imgUrl.startsWith('assets/') ||
+                              imgUrl.startsWith('notice_image/') ||
+                              imgUrl.startsWith('screenshot/')) {
+                            return Image.asset(
+                              imgUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, _, _) => buildPlaceholder(),
+                            );
+                          }
+
+                          return Image.network(
+                            imgUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, _, _) {
+                              final uri = Uri.tryParse(imgUrl);
+                              final fileName =
+                                  uri != null && uri.pathSegments.isNotEmpty
+                                  ? uri.pathSegments.last
+                                  : '';
+                              if (fileName.isNotEmpty) {
+                                return Image.asset(
+                                  'notice_image/$fileName',
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, _, _) => Image.asset(
+                                    'screenshot/$fileName',
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, _, _) => Image.asset(
+                                      'assets/images/$fileName',
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, _, _) =>
+                                          buildPlaceholder(),
+                                    ),
+                                  ),
+                                );
+                              }
+                              return buildPlaceholder();
+                            },
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Container(
+                                color: p.surface3,
+                                child: const Center(
+                                  child: CupertinoActivityIndicator(radius: 9),
                                 ),
                               );
-                            }
-                            return Container(
-                              color: p.surface3,
-                              child: Center(
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      CupertinoIcons.photo,
-                                      size: 16,
-                                      color: p.text3,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      'Notice Image',
-                                      style: TextStyle(
-                                        color: p.text3,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return Container(
-                              color: p.surface3,
-                              child: const Center(
-                                child: CupertinoActivityIndicator(radius: 9),
-                              ),
-                            );
-                          },
-                        ),
+                            },
+                          );
+                        }(),
                       ),
                       Positioned(
                         right: 8,

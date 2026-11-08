@@ -45,6 +45,7 @@ flutter:
     - app_icons/
     - assets/images/
     - notice_image/
+    - screenshot/
 
   fonts:
     - family: Inter

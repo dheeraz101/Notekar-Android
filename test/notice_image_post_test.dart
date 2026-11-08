@@ -560,5 +560,91 @@ void main() {
             .setMockMethodCallHandler(channel, null);
       },
     );
+
+    testWidgets(
+      'Tapping Save to Gallery on PNG image detects image/png MIME type and .png extension',
+      (tester) async {
+        const channel = MethodChannel('notekar/files');
+        String? capturedMime;
+        String? capturedFileName;
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, (call) async {
+              if (call.method == 'saveImageToGallery') {
+                final args = call.arguments as Map?;
+                capturedMime = args?['mimeType'] as String?;
+                capturedFileName = args?['fileName'] as String?;
+                return 'content://media/external/images/media/8888';
+              }
+              return null;
+            });
+
+        final notice = AppNotice.fromJson({
+          'id': 'png-banner-test',
+          'title': 'PNG Banner',
+          'body': 'Testing PNG mime detection',
+          'image_url': 'https://github.com/banner.png',
+          'aspect_ratio': '16:9',
+        });
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: NoticeImagePostDialog(
+                p: p,
+                notice: notice,
+                initialBytes: kTestPngBytes,
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        final saveBtn = find.text('Save to Gallery');
+        await tester.tap(saveBtn);
+        await tester.pumpAndSettle();
+
+        expect(capturedMime, 'image/png');
+        expect(capturedFileName, endsWith('.png'));
+        expect(capturedFileName, contains('notekar_png-banner-test_'));
+
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, null);
+      },
+    );
+
+    test(
+      'NoticeService correctly handles wildcard * versions and Map<dynamic, dynamic>',
+      () async {
+        final prefs = await SharedPreferences.getInstance();
+        final rawData = [
+          <dynamic, dynamic>{
+            'id': 'wildcard-notice',
+            'enabled': true,
+            'title': 'Wildcard Notice',
+            'body': 'This notice has wildcard bounds',
+            'minVersion': '*',
+            'maxVersion': '*',
+            'channels': 'stable,beta',
+            'platforms': 'android',
+            'max_shows': 3,
+            'cooldown_hours': 12,
+          },
+        ];
+        await prefs.setString('cached_app_notices', jsonEncode(rawData));
+
+        final cached = await NoticeService.instance.getCachedNotices();
+        final wildcardNotice = cached.firstWhere(
+          (n) => n.id == 'wildcard-notice',
+          orElse: () =>
+              AppNotice(id: 'missing', enabled: false, title: '', body: ''),
+        );
+        expect(wildcardNotice.id, 'wildcard-notice');
+        expect(wildcardNotice.maxShows, 3);
+        expect(wildcardNotice.cooldownHours, 12);
+        expect(wildcardNotice.channels, contains('stable'));
+        expect(wildcardNotice.platforms, contains('android'));
+      },
+    );
   });
 }

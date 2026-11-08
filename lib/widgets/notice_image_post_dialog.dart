@@ -11,6 +11,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/media_storage_service.dart';
 import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/network_logger.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
 /// Full-screen Apple HIG / iOS-style Notice Image Post Viewer.
@@ -251,12 +252,17 @@ class _NoticeImagePostDialogState extends State<NoticeImagePostDialog>
 
     try {
       // 1. Direct asset path check
-      if (url.startsWith('assets/') || url.startsWith('notice_image/')) {
+      if (url.startsWith('assets/') ||
+          url.startsWith('notice_image/') ||
+          url.startsWith('screenshot/')) {
         try {
           final assetData = await rootBundle.load(url);
           if (mounted) {
             setState(() {
-              _imageBytes = assetData.buffer.asUint8List();
+              _imageBytes = assetData.buffer.asUint8List(
+                assetData.offsetInBytes,
+                assetData.lengthInBytes,
+              );
               _isLoading = false;
             });
           }
@@ -286,6 +292,16 @@ class _NoticeImagePostDialogState extends State<NoticeImagePostDialog>
               .get(Uri.parse(url))
               .timeout(const Duration(seconds: 8));
 
+          await NetworkLogger.log(
+            url: url,
+            method: 'GET',
+            statusCode: response.statusCode,
+            purpose: 'Notice Image Asset Download',
+            size: response.bodyBytes.isNotEmpty
+                ? '${(response.bodyBytes.lengthInBytes / 1024).toStringAsFixed(2)} KB'
+                : 'Unknown',
+          );
+
           if (response.statusCode == 200 && response.bodyBytes.isNotEmpty) {
             if (mounted) {
               setState(() {
@@ -312,7 +328,25 @@ class _NoticeImagePostDialogState extends State<NoticeImagePostDialog>
           final assetData = await rootBundle.load('notice_image/$fileName');
           if (mounted) {
             setState(() {
-              _imageBytes = assetData.buffer.asUint8List();
+              _imageBytes = assetData.buffer.asUint8List(
+                assetData.offsetInBytes,
+                assetData.lengthInBytes,
+              );
+              _isLoading = false;
+            });
+          }
+          return;
+        } catch (_) {}
+
+        // Try bundled asset under screenshot/
+        try {
+          final assetData = await rootBundle.load('screenshot/$fileName');
+          if (mounted) {
+            setState(() {
+              _imageBytes = assetData.buffer.asUint8List(
+                assetData.offsetInBytes,
+                assetData.lengthInBytes,
+              );
               _isLoading = false;
             });
           }
@@ -324,7 +358,10 @@ class _NoticeImagePostDialogState extends State<NoticeImagePostDialog>
           final assetData = await rootBundle.load('assets/images/$fileName');
           if (mounted) {
             setState(() {
-              _imageBytes = assetData.buffer.asUint8List();
+              _imageBytes = assetData.buffer.asUint8List(
+                assetData.offsetInBytes,
+                assetData.lengthInBytes,
+              );
               _isLoading = false;
             });
           }
@@ -332,7 +369,13 @@ class _NoticeImagePostDialogState extends State<NoticeImagePostDialog>
         } catch (_) {}
 
         // Try relative local file paths
-        final candidateFiles = [File('notice_image/$fileName'), File(fileName)];
+        final candidateFiles = [
+          File('notice_image/$fileName'),
+          File('screenshot/$fileName'),
+          File('assets/images/$fileName'),
+          File('../notice_image/$fileName'),
+          File(fileName),
+        ];
         for (final cand in candidateFiles) {
           if (cand.existsSync()) {
             final bytes = await cand.readAsBytes();
@@ -401,13 +444,44 @@ class _NoticeImagePostDialogState extends State<NoticeImagePostDialog>
     try {
       final noticeId = widget.notice?.id ?? 'notice';
       final cleanId = noticeId.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_');
+
+      // Detect correct MIME type and file extension from bytes and URL
+      String mimeType = 'image/jpeg';
+      String ext = 'jpg';
+      final bytes = _imageBytes!;
+      if (bytes.length >= 8 &&
+          bytes[0] == 0x89 &&
+          bytes[1] == 0x50 &&
+          bytes[2] == 0x4E &&
+          bytes[3] == 0x47) {
+        mimeType = 'image/png';
+        ext = 'png';
+      } else if (bytes.length >= 12 &&
+          bytes[0] == 0x52 &&
+          bytes[1] == 0x49 &&
+          bytes[2] == 0x46 &&
+          bytes[3] == 0x46) {
+        mimeType = 'image/webp';
+        ext = 'webp';
+      } else {
+        final urlLower = (widget.imageUrl ?? widget.notice?.imageUrl ?? '')
+            .toLowerCase();
+        if (urlLower.endsWith('.png')) {
+          mimeType = 'image/png';
+          ext = 'png';
+        } else if (urlLower.endsWith('.webp')) {
+          mimeType = 'image/webp';
+          ext = 'webp';
+        }
+      }
+
       final fileName =
-          'notekar_${cleanId}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+          'notekar_${cleanId}_${DateTime.now().millisecondsSinceEpoch}.$ext';
 
       final savedUri = await MediaStorageService.instance.saveImageToGallery(
         bytes: _imageBytes!,
         fileName: fileName,
-        mimeType: 'image/jpeg',
+        mimeType: mimeType,
       );
 
       if (mounted) {
