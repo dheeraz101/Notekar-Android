@@ -85,6 +85,7 @@ class Goal {
     required this.title,
     this.description = '',
     this.category,
+    this.categories = const [],
     this.mode,
     required this.targetMinutes,
     this.dailyTargetMinutes,
@@ -102,6 +103,7 @@ class Goal {
   final String title;
   final String description;
   final String? category; // null = all categories
+  final List<String> categories; // Multi-category support (MAJ-03)
   final String? mode; // 'two-way' or null = sessions
   final int targetMinutes;
   final int? dailyTargetMinutes; // Optional daily pacing target for month/year
@@ -113,6 +115,14 @@ class Goal {
   final int? completedAt;
   final List<GoalMilestone> milestones;
   final String? colorHex;
+
+  List<String> get effectiveCategories {
+    if (categories.isNotEmpty) return categories;
+    if (category != null && category!.trim().isNotEmpty) {
+      return [category!.trim()];
+    }
+    return const [];
+  }
 
   Duration get targetDuration => Duration(minutes: targetMinutes);
   int get targetHours => (targetMinutes / 60).round();
@@ -133,6 +143,7 @@ class Goal {
     String? title,
     String? description,
     String? category,
+    List<String>? categories,
     String? mode,
     int? targetMinutes,
     int? dailyTargetMinutes,
@@ -156,6 +167,7 @@ class Goal {
       title: title ?? this.title,
       description: description ?? this.description,
       category: category ?? this.category,
+      categories: categories ?? this.categories,
       mode: mode ?? this.mode,
       targetMinutes: targetMinutes ?? this.targetMinutes,
       dailyTargetMinutes: dailyTargetMinutes ?? this.dailyTargetMinutes,
@@ -175,6 +187,7 @@ class Goal {
     'title': title,
     'description': description,
     'category': category,
+    if (categories.isNotEmpty) 'categories': categories,
     'mode': mode,
     'targetMinutes': targetMinutes,
     'dailyTargetMinutes': dailyTargetMinutes,
@@ -198,11 +211,23 @@ class Goal {
               .toList()
         : const <GoalMilestone>[];
 
+    final rawCategories = json['categories'] as List<dynamic>?;
+    final parsedCategories = rawCategories != null
+        ? rawCategories
+              .map((e) => e.toString().trim())
+              .where((e) => e.isNotEmpty)
+              .toList()
+        : (json['category'] != null &&
+                  (json['category'] as String).trim().isNotEmpty
+              ? [(json['category'] as String).trim()]
+              : const <String>[]);
+
     return Goal(
       id: json['id'] as String? ?? UniqueKey().toString(),
       title: _clampTitle(json['title'] as String? ?? 'Target'),
       description: (json['description'] as String?) ?? '',
       category: json['category'] as String?,
+      categories: parsedCategories,
       mode: json['mode'] as String?,
       targetMinutes: (json['targetMinutes'] as num?)?.toInt() ?? 600,
       dailyTargetMinutes: (json['dailyTargetMinutes'] as num?)?.toInt(),

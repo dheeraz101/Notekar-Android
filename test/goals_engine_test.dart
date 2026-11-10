@@ -358,5 +358,109 @@ void main() {
         expect(progress.sessionCount, 1);
       },
     );
+
+    test(
+      'MAJ-03: Multi-category goal aggregates tracked time across all bound categories',
+      () {
+        final service = GoalsService.instance;
+        final refTime = DateTime(2026, 9, 25, 14, 0);
+        final refMs = refTime.millisecondsSinceEpoch;
+
+        final multiGoal = Goal(
+          id: 'multi_cat_goal',
+          title: 'Work + Deep Focus',
+          categories: const ['Work', 'Deep Focus'],
+          targetMinutes: 240,
+          timeframe: GoalTimeframe.none,
+          createdAt: refMs - 86400000,
+        );
+
+        final moments = [
+          // 60m session in 'Work'
+          Moment(
+            id: 30,
+            timestamp: refMs - 7200000,
+            type: 'in',
+            category: 'Work',
+            date: '2026-09-25',
+          ),
+          Moment(
+            id: 31,
+            timestamp: refMs - 3600000,
+            type: 'out',
+            category: 'Work',
+            date: '2026-09-25',
+          ),
+          // 60m session in 'Deep Focus'
+          Moment(
+            id: 32,
+            timestamp: refMs - 3600000,
+            type: 'in',
+            category: 'Deep Focus',
+            date: '2026-09-25',
+          ),
+          Moment(
+            id: 33,
+            timestamp: refMs,
+            type: 'out',
+            category: 'Deep Focus',
+            date: '2026-09-25',
+          ),
+          // 30m session in unrelated category 'Play' (should NOT count)
+          Moment(
+            id: 34,
+            timestamp: refMs,
+            type: 'in',
+            category: 'Play',
+            date: '2026-09-25',
+          ),
+          Moment(
+            id: 35,
+            timestamp: refMs + 1800000,
+            type: 'out',
+            category: 'Play',
+            date: '2026-09-25',
+          ),
+        ];
+
+        final progress = service.calculateProgress(multiGoal, moments);
+        // 60m (Work) + 60m (Deep Focus) = 120m total
+        expect(progress.trackedMinutes, 120);
+        expect(progress.sessionCount, 2);
+      },
+    );
+
+    test(
+      'Goal effectiveCategories fallback and JSON serialization roundtrip',
+      () {
+        // 1. Goal with single category fallback
+        final singleCatGoal = Goal(
+          id: 'single_1',
+          title: 'Single Category Target',
+          targetMinutes: 300,
+          createdAt: 1700000000000,
+          category: 'Gym',
+        );
+        expect(singleCatGoal.effectiveCategories, ['Gym']);
+
+        final singleJson = singleCatGoal.toJson();
+        final restoredSingle = Goal.fromJson(singleJson);
+        expect(restoredSingle.effectiveCategories, ['Gym']);
+
+        // 2. Goal with multi-category
+        final multiCatGoal = Goal(
+          id: 'multi_1',
+          title: 'Multi Category Target',
+          targetMinutes: 600,
+          createdAt: 1700000000000,
+          categories: ['Work', 'Deep Focus'],
+        );
+        expect(multiCatGoal.effectiveCategories, ['Work', 'Deep Focus']);
+
+        final multiJson = multiCatGoal.toJson();
+        final restoredMulti = Goal.fromJson(multiJson);
+        expect(restoredMulti.effectiveCategories, ['Work', 'Deep Focus']);
+      },
+    );
   });
 }

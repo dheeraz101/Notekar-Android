@@ -17,3 +17,10 @@
 
 # Flutter Play Store split / deferred components (ignore warnings for unused Play Core SDK)
 -dontwarn com.google.android.play.core.**
+
+# NoteKar Native App Classes & Receivers
+-keep class app.notekar.notekar.** { *; }
+
+# Isar Database Engine & Collection Schemas
+-keep class * extends isar.CollectionSchema { *; }
+-keep class * implements isar.IsarCollection { *; }

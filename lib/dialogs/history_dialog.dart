@@ -21,6 +21,7 @@ import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/theme/app_tokens.dart';
 import 'package:notekar/screens/checkpoints_dashboard_screen.dart';
 import 'package:notekar/services/checkpoint_service.dart';
 import 'package:notekar/services/goals_service.dart';
@@ -1515,6 +1516,56 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                           ),
                                                         ),
                                                       ],
+                                                      const SizedBox(width: 6),
+                                                      PressableScale(
+                                                        onTap:
+                                                            _deleteSelectedEntries,
+                                                        child: SizedBox(
+                                                          width: NkTokens
+                                                              .touchTarget
+                                                              .minInteractive,
+                                                          height: NkTokens
+                                                              .touchTarget
+                                                              .minInteractive,
+                                                          child: Center(
+                                                            child: Container(
+                                                              width: 30,
+                                                              height: 30,
+                                                              alignment:
+                                                                  Alignment
+                                                                      .center,
+                                                              decoration: BoxDecoration(
+                                                                color: widget
+                                                                    .p
+                                                                    .red
+                                                                    .withValues(
+                                                                      alpha:
+                                                                          0.14,
+                                                                    ),
+                                                                shape: BoxShape
+                                                                    .circle,
+                                                                border: Border.all(
+                                                                  color: widget
+                                                                      .p
+                                                                      .red
+                                                                      .withValues(
+                                                                        alpha:
+                                                                            0.28,
+                                                                      ),
+                                                                ),
+                                                              ),
+                                                              child: Icon(
+                                                                CupertinoIcons
+                                                                    .trash,
+                                                                size: 14,
+                                                                color: widget
+                                                                    .p
+                                                                    .red,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
                                                       const SizedBox(width: 6),
                                                       PressableScale(
                                                         onTap: () => setState(
@@ -3500,6 +3551,28 @@ class _HistoryDialogState extends State<HistoryDialog> {
             }
           },
     );
+  }
+
+  Future<void> _deleteSelectedEntries() async {
+    if (_selected.isEmpty) return;
+    final toDelete = List<Moment>.from(_selected);
+    HapticFeedback.mediumImpact();
+    setState(() {
+      _selected.clear();
+      final idsToRemove = toDelete.map((m) => m.id).toSet();
+      _entries = _entries.where((e) => !idsToRemove.contains(e.id)).toList();
+      _availableDateKeys = _entries.map((item) => item.date).toSet();
+      _rebuildMemoizedLists();
+    });
+    for (final m in toDelete) {
+      await widget.onDelete(m.id);
+    }
+    await _loadGoals();
+    if (mounted) {
+      _showNotice(
+        '${toDelete.length} moments moved to Trash'.localized(context),
+      );
+    }
   }
 
   Future<void> _showMomentDetails(Moment entry) async {

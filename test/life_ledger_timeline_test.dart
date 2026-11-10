@@ -8,6 +8,7 @@ import 'package:notekar/dialogs/settings/search_notes_settings_page.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/services/universal_interval_ledger.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/timeline_session_card.dart';
@@ -839,6 +840,173 @@ void main() {
           find.text('Reviewed pull request #ios', findRichText: true),
           findsOneWidget,
         );
+      },
+    );
+
+    test(
+      'MAJ-02: UniversalIntervalLedger heals overlapping session collision boundaries',
+      () {
+        final t0 = DateTime(2026, 9, 5, 9, 0).millisecondsSinceEpoch;
+        final t1 = DateTime(
+          2026,
+          9,
+          5,
+          10,
+          30,
+        ).millisecondsSinceEpoch; // 9:00 - 10:30 (90m)
+        final tOverlapStart = DateTime(
+          2026,
+          9,
+          5,
+          10,
+          0,
+        ).millisecondsSinceEpoch; // Collision: starts at 10:00!
+        final t2 = DateTime(
+          2026,
+          9,
+          5,
+          11,
+          30,
+        ).millisecondsSinceEpoch; // 10:00 - 11:30 (90m)
+
+        final rawIntervals = [
+          CanonicalInterval(
+            id: 'sess_1',
+            startMs: t0,
+            endMs: t1,
+            dateKey: '2026-09-05',
+            category: 'Work',
+            isSession: true,
+          ),
+          CanonicalInterval(
+            id: 'sess_2',
+            startMs: tOverlapStart,
+            endMs: t2,
+            dateKey: '2026-09-05',
+            category: 'Work',
+            isSession: true,
+          ),
+        ];
+
+        final reconciled = UniversalIntervalLedger.reconcileOverlappingSessions(
+          rawIntervals,
+        );
+        expect(reconciled.length, 2);
+
+        // Earlier session's endMs must be healed to match subsequent session's startMs (10:00)
+        expect(reconciled[0].startMs, t0);
+        expect(reconciled[0].endMs, tOverlapStart);
+        expect(
+          reconciled[0].durationMs,
+          const Duration(hours: 1).inMilliseconds,
+        ); // Healed from 90m to 60m
+
+        // Second session remains intact from 10:00 to 11:30
+        expect(reconciled[1].startMs, tOverlapStart);
+        expect(reconciled[1].endMs, t2);
+        expect(
+          reconciled[1].durationMs,
+          const Duration(minutes: 90).inMilliseconds,
+        );
+      },
+    );
+
+    test(
+      'reconcileOverlappingSessions filters out collapsed zero-duration sessions',
+      () {
+        final t0 = DateTime(2026, 9, 5, 10, 0).millisecondsSinceEpoch;
+        final t1 = DateTime(2026, 9, 5, 10, 30).millisecondsSinceEpoch;
+        final t2 = DateTime(2026, 9, 5, 12, 0).millisecondsSinceEpoch;
+
+        final intervals = [
+          CanonicalInterval(
+            id: 'duplicate_same_start',
+            startMs: t0,
+            endMs: t1,
+            dateKey: '2026-09-05',
+            category: 'Work',
+            isSession: true,
+          ),
+          CanonicalInterval(
+            id: 'primary_session',
+            startMs: t0,
+            endMs: t2,
+            dateKey: '2026-09-05',
+            category: 'Work',
+            isSession: true,
+          ),
+        ];
+
+        final healed = UniversalIntervalLedger.reconcileOverlappingSessions(
+          intervals,
+        );
+        // Duplicate starting at exact same time collapses to 0-duration and is purged
+        expect(healed.length, 1);
+        expect(healed.first.id, 'primary_session');
+        expect(
+          healed.first.durationMs,
+          const Duration(hours: 2).inMilliseconds,
+        );
+      },
+    );
+
+    test(
+      'computeIntervals with reconcileCollisions: true performs automated boundary reconciliation',
+      () {
+        final t0 = DateTime(2026, 9, 5, 9, 0).millisecondsSinceEpoch;
+        final tOverlapStart = DateTime(
+          2026,
+          9,
+          5,
+          10,
+          0,
+        ).millisecondsSinceEpoch;
+        final t1 = DateTime(2026, 9, 5, 10, 30).millisecondsSinceEpoch;
+        final t2 = DateTime(2026, 9, 5, 11, 30).millisecondsSinceEpoch;
+
+        final moments = [
+          Moment(
+            id: 1,
+            timestamp: t0,
+            type: 'in',
+            date: '2026-09-05',
+            category: 'Work',
+          ),
+          Moment(
+            id: 2,
+            timestamp: tOverlapStart,
+            type: 'in',
+            date: '2026-09-05',
+            category: 'Work',
+          ),
+          Moment(
+            id: 3,
+            timestamp: t1,
+            type: 'out',
+            date: '2026-09-05',
+            category: 'Work',
+          ),
+          Moment(
+            id: 4,
+            timestamp: t2,
+            type: 'out',
+            date: '2026-09-05',
+            category: 'Work',
+          ),
+        ];
+
+        final intervals = UniversalIntervalLedger.instance.computeIntervals(
+          moments,
+          reconcileCollisions: true,
+        );
+        expect(intervals.isNotEmpty, isTrue);
+        // All intervals in the reconciled output are contiguous and non-overlapping
+        for (int i = 0; i < intervals.length - 1; i++) {
+          expect(
+            intervals[i].endMs,
+            lessThanOrEqualTo(intervals[i + 1].startMs),
+          );
+        }
       },
     );
   });

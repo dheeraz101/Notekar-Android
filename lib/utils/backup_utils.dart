@@ -133,11 +133,17 @@ BackupValidationResult validateNoteKarBackupContent(String content) {
     final projectId = item['projectId'] is String
         ? item['projectId'] as String
         : null;
-    final imagePath = item['imagePath'] is String
+    final rawImagePath = item['imagePath'] is String
         ? item['imagePath'] as String
         : null;
-    final voicePath = item['voicePath'] is String
+    final rawVoicePath = item['voicePath'] is String
         ? item['voicePath'] as String
+        : null;
+    final imagePath = (rawImagePath != null && !rawImagePath.contains('..'))
+        ? rawImagePath
+        : null;
+    final voicePath = (rawVoicePath != null && !rawVoicePath.contains('..'))
+        ? rawVoicePath
         : null;
     final voiceDurationMs = item['voiceDurationMs'] is num
         ? (item['voiceDurationMs'] as num).toInt()

@@ -711,7 +711,7 @@ class MomentRepository {
     try {
       _logger.info('Performing daily background maintenance...');
       await triggerAutoSnapshotIfNeeded(force: true);
-      await _autoPurgeOldTrash();
+      await purgeExpiredTrash(const Duration(days: 30));
       _logger.info('Daily background maintenance completed successfully');
     } catch (e, stack) {
       _logger.error('Failed executing daily background maintenance', e, stack);
@@ -1055,6 +1055,70 @@ class MomentRepository {
     } catch (e, stack) {
       _logger.error('Failed to migrate legacy data', e, stack);
       return [];
+    }
+  }
+
+  /// Queries all moments created or modified on or after [timestampMs] (MAJ-06).
+  List<Moment> querySince(int timestampMs) {
+    final all = getAllMoments();
+    return all.where((m) => m.timestamp >= timestampMs).toList();
+  }
+
+  /// Compacts database memory caches and triggers redundant disk snapshot verification (MAJ-16).
+  Future<void> compactDatabase() async {
+    if (!_isInitialized) await ensureInitialized();
+    try {
+      _cachedMoments = null;
+      _cachedTrashMoments = null;
+      _momentIdIndex = null;
+      getAllMoments();
+      getTrashMoments();
+      await triggerAutoSnapshotIfNeeded(force: true);
+      _logger.info('Database compaction completed successfully');
+    } catch (e, stack) {
+      _logger.error('Database compaction failed', e, stack);
+    }
+  }
+
+  /// Public API to purge expired trash entries older than [retention] (SEC-09).
+  Future<void> purgeExpiredTrash([
+    Duration retention = const Duration(days: 30),
+  ]) async {
+    if (!_isInitialized) await ensureInitialized();
+    try {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final threshold = now - retention.inMilliseconds;
+
+      if (_trashIsar != null && _trashIsar!.isOpen) {
+        final oldTrash = _trashIsar!.moments
+            .filter()
+            .timestampLessThan(threshold)
+            .findAllSync();
+        if (oldTrash.isNotEmpty) {
+          for (final m in oldTrash) {
+            unawaited(MediaStorageService.instance.deleteMediaForMoment(m));
+          }
+          await _trashIsar!.writeTxn(() async {
+            await _trashIsar!.moments.deleteAll(
+              oldTrash.map((e) => e.id).toList(),
+            );
+          });
+          _cachedTrashMoments = null;
+          _logger.info(
+            'Purged ${oldTrash.length} expired trash entries older than ${retention.inDays} days',
+          );
+        }
+      } else if (_cachedTrashMoments != null) {
+        final oldTrash = _cachedTrashMoments!
+            .where((m) => m.timestamp < threshold)
+            .toList();
+        for (final m in oldTrash) {
+          unawaited(MediaStorageService.instance.deleteMediaForMoment(m));
+        }
+        _cachedTrashMoments!.removeWhere((m) => m.timestamp < threshold);
+      }
+    } catch (e, stack) {
+      _logger.error('Failed purging expired trash entries', e, stack);
     }
   }
 }

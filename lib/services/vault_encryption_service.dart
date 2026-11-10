@@ -22,6 +22,7 @@ class VaultEncryptionService {
   static final VaultEncryptionService instance = VaultEncryptionService._();
 
   static const int defaultPbkdf2Iterations = 100000;
+  static const int hardenedPbkdf2Iterations = 200000;
   static const int saltLength = 16;
   static const int nonceLength = 12;
   static const int keyLength = 32; // 256-bit AES
@@ -117,6 +118,68 @@ class VaultEncryptionService {
 
     final vaultPayload = {
       'notekar_vault_version': 1,
+      'kdf': {
+        'algorithm': 'PBKDF2-HMAC-SHA256',
+        'salt': base64Encode(salt),
+        'iterations': iterations,
+      },
+      'cipher': {
+        'algorithm': 'AES-256-GCM',
+        'nonce': base64Encode(nonce),
+        'tag': base64Encode(encrypted.tag),
+      },
+      'ciphertext': base64Encode(encrypted.ciphertext),
+      'created_at': DateTime.now().toIso8601String(),
+    };
+
+    return const JsonEncoder.withIndent('  ').convert(vaultPayload);
+  }
+
+  /// Encrypts an incremental delta snapshot of moments created since [sinceTimestamp] (MAJ-06).
+  String encryptVaultDelta({
+    required String plaintext,
+    required String password,
+    required int sinceTimestamp,
+    int iterations = defaultPbkdf2Iterations,
+    Uint8List? customSalt,
+    Uint8List? customNonce,
+  }) {
+    if (password.isEmpty) {
+      throw ArgumentError('Password cannot be empty.');
+    }
+
+    final secureRandom = Random.secure();
+    final salt = customSalt ?? Uint8List(saltLength);
+    if (customSalt == null) {
+      for (int i = 0; i < salt.length; i++) {
+        salt[i] = secureRandom.nextInt(256);
+      }
+    }
+
+    final nonce = customNonce ?? Uint8List(nonceLength);
+    if (customNonce == null) {
+      for (int i = 0; i < nonce.length; i++) {
+        nonce[i] = secureRandom.nextInt(256);
+      }
+    }
+
+    final key = deriveKey(
+      password: password,
+      salt: salt,
+      iterations: iterations,
+    );
+    final plaintextBytes = Uint8List.fromList(utf8.encode(plaintext));
+
+    final gcmCipher = _AesGcmCipher(key: key);
+    final encrypted = gcmCipher.encrypt(
+      plaintext: plaintextBytes,
+      nonce: nonce,
+    );
+
+    final vaultPayload = {
+      'notekar_vault_version': 1,
+      'delta': true,
+      'since_timestamp': sinceTimestamp,
       'kdf': {
         'algorithm': 'PBKDF2-HMAC-SHA256',
         'salt': base64Encode(salt),

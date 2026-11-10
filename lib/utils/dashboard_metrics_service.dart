@@ -187,6 +187,7 @@ class ExecutiveDashboardData {
     this.flowStateQuality,
     this.restGapRecovery,
     this.dynamicPacing,
+    this.productivityScore = 0,
   });
 
   final DashboardTimeframe timeframe;
@@ -203,6 +204,9 @@ class ExecutiveDashboardData {
   final FlowStateQualityData? flowStateQuality;
   final RestGapRecoveryData? restGapRecovery;
   final DynamicPacingBurnDownData? dynamicPacing;
+  final int productivityScore; // Focus Quality Score (0-100) (MAJ-08)
+
+  int get focusQualityScore => productivityScore;
 
   RestGapRecoveryData? get restRecovery => restGapRecovery;
   FlowStateQualityData? get flowQuality => flowStateQuality;
@@ -462,6 +466,23 @@ class DashboardMetricsService {
           : 'Need ${dailyNeeded ~/ 60}h ${dailyNeeded % 60}m/day to hit timeframe benchmark',
     );
 
+    // 13. Focus Quality Score (Productivity Score: 0-100) (MAJ-08)
+    // Formula: 0.4 * Continuity (deep focus %) + 0.3 * GoalProgress/Pacing + 0.3 * Rhythm Consistency
+    final double continuityScore = flowStateQuality.deepFocusPercentage.isNaN
+        ? 0.0
+        : flowStateQuality.deepFocusPercentage.toDouble().clamp(0.0, 100.0);
+    final double pacingScore = ringRatio.isNaN
+        ? 0.0
+        : (ringRatio * 100).clamp(0.0, 100.0);
+    final double rhythmScore = gridStats.habitStrength.isNaN
+        ? 0.0
+        : gridStats.habitStrength.toDouble().clamp(0.0, 100.0);
+    final double rawProductivity =
+        (0.4 * continuityScore + 0.3 * pacingScore + 0.3 * rhythmScore);
+    final int productivityScore = rawProductivity.isNaN
+        ? 0
+        : rawProductivity.round().clamp(0, 100);
+
     return ExecutiveDashboardData(
       timeframe: timeframe,
       totalTracked: totalTracked,
@@ -477,6 +498,7 @@ class DashboardMetricsService {
       flowStateQuality: flowStateQuality,
       restGapRecovery: restGapRecovery,
       dynamicPacing: dynamicPacing,
+      productivityScore: productivityScore,
     );
   }
 

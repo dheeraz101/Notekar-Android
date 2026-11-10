@@ -11,6 +11,8 @@ import 'package:notekar/dialogs/settings/sobriety_companion_settings_page.dart';
 import 'package:notekar/dialogs/smart_trim_sheet.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/audio_service.dart';
+import 'package:notekar/services/media_storage_service.dart';
+import 'package:notekar/utils/backup_utils.dart';
 import 'package:notekar/widgets/markdown_text.dart';
 
 void main() {
@@ -347,6 +349,52 @@ Here is **bold text** and `inline code` and [NoteKar Web](https://notekar.app)
             }
           } catch (_) {}
         }
+      },
+    );
+
+    test(
+      'MediaStorageService and backup validator block directory traversal (SEC-05)',
+      () async {
+        final mediaStorage = MediaStorageService.instance;
+
+        // resolveFile should return empty File when path contains ..
+        final maliciousFile1 = await mediaStorage.resolveFile(
+          '../../../../etc/passwd',
+        );
+        expect(maliciousFile1.path, isEmpty);
+
+        final maliciousFile2 = await mediaStorage.resolveFile(
+          'images/../../shadow',
+        );
+        expect(maliciousFile2.path, isEmpty);
+
+        final syncFile = mediaStorage.resolveFileSync(
+          '..\\..\\windows\\system32\\cmd.exe',
+        );
+        expect(syncFile.path, isEmpty);
+
+        // Validate that backup importer strips/sanitizes paths with ..
+        final testJson = '''
+{
+  "app": "NoteKar",
+  "kind": "backup",
+  "version": "7.5.14",
+  "entries": [
+    {
+      "timestamp": 1700000000000,
+      "type": "single",
+      "note": "Traversal test",
+      "imagePath": "../../traversal_attack.png",
+      "voicePath": "../../../etc/voice.m4a"
+    }
+  ]
+}
+''';
+        final result = validateNoteKarBackupContent(testJson);
+        expect(result.isValid, isTrue);
+        expect(result.entries.length, 1);
+        expect(result.entries.first.imagePath, isNull);
+        expect(result.entries.first.voicePath, isNull);
       },
     );
   });

@@ -9,6 +9,7 @@ class CheckpointPreset {
     this.targetMinuteOfDay,
     this.category = 'Routine',
     this.iconCodePoint,
+    this.activeDays,
   });
 
   final String id;
@@ -17,6 +18,13 @@ class CheckpointPreset {
   final int? targetMinuteOfDay; // Minutes from midnight (e.g. 8:00 AM -> 480)
   final String category;
   final int? iconCodePoint;
+  final List<int>?
+  activeDays; // 1 = Monday ... 7 = Sunday; null or empty means all days
+
+  bool isActiveOn(int weekday) {
+    if (activeDays == null || activeDays!.isEmpty) return true;
+    return activeDays!.contains(weekday);
+  }
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -25,6 +33,7 @@ class CheckpointPreset {
     'targetMinuteOfDay': targetMinuteOfDay,
     'category': category,
     'iconCodePoint': iconCodePoint,
+    'activeDays': activeDays,
   };
 
   factory CheckpointPreset.fromJson(Map<String, dynamic> json) {
@@ -35,6 +44,10 @@ class CheckpointPreset {
       targetMinuteOfDay: json['targetMinuteOfDay'] as int?,
       category: json['category'] as String? ?? 'Routine',
       iconCodePoint: json['iconCodePoint'] as int?,
+      activeDays: (json['activeDays'] as List<dynamic>?)
+          ?.map((e) => (e as num).toInt())
+          .where((d) => d >= 1 && d <= 7)
+          .toList(),
     );
   }
 
@@ -45,6 +58,7 @@ class CheckpointPreset {
     int? targetMinuteOfDay,
     String? category,
     int? iconCodePoint,
+    List<int>? activeDays,
   }) {
     return CheckpointPreset(
       id: id ?? this.id,
@@ -53,6 +67,7 @@ class CheckpointPreset {
       targetMinuteOfDay: targetMinuteOfDay ?? this.targetMinuteOfDay,
       category: category ?? this.category,
       iconCodePoint: iconCodePoint ?? this.iconCodePoint,
+      activeDays: activeDays ?? this.activeDays,
     );
   }
 

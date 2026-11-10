@@ -315,6 +315,7 @@ class _TimelineVoicePlayerPillState extends State<TimelineVoicePlayerPill> {
                         },
                         child: Container(
                           color: Colors.transparent,
+                          constraints: const BoxConstraints(minHeight: 48.0),
                           padding: const EdgeInsets.symmetric(vertical: 6),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,

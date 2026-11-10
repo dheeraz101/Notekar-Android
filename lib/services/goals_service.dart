@@ -331,10 +331,10 @@ class GoalsService {
     // 4. For time-bounded goals (week, month, etc.) with "All Categories",
     // only sessions explicitly started for this goal count (handled above).
     // This prevents a newly created weekly/monthly goal from instantly completing.
-    final isAllCategories =
-        goal.category == null ||
-        goal.category!.trim().isEmpty ||
-        goal.category!.toLowerCase() == 'all';
+    final categories = goal.effectiveCategories
+        .map((c) => c.toLowerCase())
+        .toList();
+    final isAllCategories = categories.isEmpty || categories.contains('all');
 
     if (goal.timeframe != GoalTimeframe.none && isAllCategories) {
       return false;
@@ -351,17 +351,19 @@ class GoalsService {
       return true;
     }
 
-    // 7. Match by specific category, tag, or hashtag note
-    final cat = goal.category!.trim().toLowerCase();
+    // 7. Match by specific category, tag, or hashtag note across effective categories
     final mCat = (m.category ?? '').trim().toLowerCase();
-    if (mCat == cat) return true;
+    if (categories.contains(mCat)) return true;
     if (m.tags.any((t) {
       final tl = t.trim().toLowerCase();
-      return tl == cat || tl == '#$cat';
+      return categories.any((cat) => tl == cat || tl == '#$cat');
     })) {
       return true;
     }
-    if (m.note.toLowerCase().contains('#$cat')) return true;
+    final noteLower = m.note.toLowerCase();
+    for (final cat in categories) {
+      if (noteLower.contains('#$cat')) return true;
+    }
 
     return false;
   }

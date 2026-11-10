@@ -269,5 +269,65 @@ void main() {
         expect(paceTop, greaterThanOrEqualTo(logsBottom));
       },
     );
+
+    test(
+      'MAJ-08: Executive Intelligence Hub computes Focus Quality / Productivity Score (0-100)',
+      () {
+        final now = DateTime.now();
+        final inTime = DateTime(now.year, now.month, now.day, 9, 0);
+        final outTime = DateTime(
+          now.year,
+          now.month,
+          now.day,
+          10,
+          30,
+        ); // 90m deep focus block
+
+        final entries = [
+          Moment(
+            id: 1,
+            timestamp: inTime.millisecondsSinceEpoch,
+            type: 'in',
+            date: dateKey(now),
+            note: 'Deep focus coding',
+            category: 'Work',
+          ),
+          Moment(
+            id: 2,
+            timestamp: outTime.millisecondsSinceEpoch,
+            type: 'out',
+            date: dateKey(now),
+            note: '',
+            category: 'Work',
+          ),
+        ];
+
+        final data = DashboardMetricsService.calculate(
+          entries: entries,
+          timeframe: DashboardTimeframe.today,
+          p: p,
+        );
+
+        expect(data.productivityScore, greaterThanOrEqualTo(0));
+        expect(data.productivityScore, lessThanOrEqualTo(100));
+        expect(data.focusQualityScore, equals(data.productivityScore));
+        // With a continuous 90m session, deepFocusPercentage is 100%, so productivityScore should be high (>35)
+        expect(data.productivityScore, greaterThan(35));
+      },
+    );
+
+    test(
+      'Computes productivity score safely on empty moments with zero NaN crashes',
+      () {
+        final data = DashboardMetricsService.calculate(
+          entries: const [],
+          timeframe: DashboardTimeframe.today,
+          p: p,
+        );
+
+        expect(data.productivityScore, equals(0));
+        expect(data.focusQualityScore, equals(0));
+      },
+    );
   });
 }

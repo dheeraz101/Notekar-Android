@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/main.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/services/circuit_breaker_service.dart';
 import 'package:notekar/widgets/top_fade_blur.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -106,6 +107,70 @@ void main() {
           find.textContaining('Simulated GPU or Shader Failure'),
           findsOneWidget,
         );
+      },
+    );
+
+    test(
+      'CircuitBreakerService trips open after 3 failures and protects loop',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+        final prefs = await SharedPreferences.getInstance();
+        final cb = CircuitBreakerService.instance;
+        cb.init(prefs);
+        await cb.resetAll();
+
+        const serviceKey = 'fragile_render_task';
+        expect(cb.isOpen(serviceKey), isFalse);
+        expect(cb.getFailureCount(serviceKey), 0);
+
+        // Failure 1
+        final res1 = await cb.run<String>(
+          serviceId: serviceKey,
+          action: () async => throw Exception('GPU Buffer Alloc Failed 1'),
+          fallback: 'fallback_1',
+        );
+        expect(res1, equals('fallback_1'));
+        expect(cb.getFailureCount(serviceKey), 1);
+        expect(cb.isOpen(serviceKey), isFalse);
+
+        // Failure 2
+        final res2 = await cb.run<String>(
+          serviceId: serviceKey,
+          action: () async => throw Exception('GPU Buffer Alloc Failed 2'),
+          fallback: 'fallback_2',
+        );
+        expect(res2, equals('fallback_2'));
+        expect(cb.getFailureCount(serviceKey), 2);
+        expect(cb.isOpen(serviceKey), isFalse);
+
+        // Failure 3 -> Trips open
+        final res3 = await cb.run<String>(
+          serviceId: serviceKey,
+          action: () async => throw Exception('GPU Buffer Alloc Failed 3'),
+          fallback: 'fallback_3',
+        );
+        expect(res3, equals('fallback_3'));
+        expect(cb.getFailureCount(serviceKey), 3);
+        expect(cb.isOpen(serviceKey), isTrue);
+        expect(cb.hasAnyTripped(), isTrue);
+
+        // Subsequent call is bypassed safely without calling action
+        var actionCalled = false;
+        final bypassed = await cb.run<String>(
+          serviceId: serviceKey,
+          action: () async {
+            actionCalled = true;
+            return 'should_not_run';
+          },
+          fallback: 'safe_mode_fallback',
+        );
+        expect(bypassed, equals('safe_mode_fallback'));
+        expect(actionCalled, isFalse);
+
+        // Reset restores normal operation
+        await cb.reset(serviceKey);
+        expect(cb.isOpen(serviceKey), isFalse);
+        expect(cb.getFailureCount(serviceKey), 0);
       },
     );
   });

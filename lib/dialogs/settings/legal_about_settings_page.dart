@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/theme/app_tokens.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
 class LegalAboutSettingsPage extends StatelessWidget {
@@ -42,12 +43,7 @@ class LegalAboutSettingsPage extends StatelessWidget {
         const SizedBox(height: spacing8),
         Text(
           'Your Privacy Matters'.localized(context),
-          style: TextStyle(
-            color: p.text,
-            fontSize: 20,
-            fontWeight: FontWeight.w900,
-            letterSpacing: -0.5,
-          ),
+          style: NkTokens.typography.title2(p.text),
         ),
         const SizedBox(height: spacing12),
         Text(
@@ -114,12 +110,7 @@ class LegalAboutSettingsPage extends StatelessWidget {
         const SizedBox(height: spacing8),
         Text(
           'Terms of Use'.localized(context),
-          style: TextStyle(
-            color: p.text,
-            fontSize: 20,
-            fontWeight: FontWeight.w900,
-            letterSpacing: -0.5,
-          ),
+          style: NkTokens.typography.title2(p.text),
         ),
         const SizedBox(height: spacing12),
         Text(

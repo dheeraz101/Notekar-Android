@@ -430,4 +430,81 @@ void main() {
       expect(updated.label, 'Hydration Champion');
     });
   });
+
+  group('MAJ-14: Checkpoint Habit Frequency (activeDays) & Streak Tests', () {
+    test('CheckpointPreset preserves and serializes activeDays correctly', () {
+      const preset = CheckpointPreset(
+        id: 'gym_alt',
+        label: 'Gym 3x',
+        emoji: '🏋️',
+        activeDays: [1, 3, 5], // Mon, Wed, Fri
+      );
+      expect(preset.isActiveOn(1), isTrue);
+      expect(preset.isActiveOn(2), isFalse);
+      expect(preset.isActiveOn(3), isTrue);
+      expect(preset.isActiveOn(7), isFalse);
+
+      final json = preset.toJson();
+      expect(json['activeDays'], [1, 3, 5]);
+
+      final restored = CheckpointPreset.fromJson(json);
+      expect(restored.activeDays, [1, 3, 5]);
+      expect(restored.isActiveOn(5), isTrue);
+      expect(restored.isActiveOn(6), isFalse);
+    });
+
+    test('calculateStats streak counter ignores non-active rest days', () async {
+      const gymPreset = CheckpointPreset(
+        id: 'gym_custom',
+        label: 'Gym Custom',
+        emoji: '🏋️',
+        activeDays: [1, 3, 5], // Mon, Wed, Fri
+      );
+      await CheckpointService.instance.addPreset(gymPreset);
+
+      final now = DateTime.now();
+      // Find the most recent active day among [1, 3, 5]
+      // Build moments for the past 2 active days
+      final List<Moment> moments = [];
+      DateTime d = DateTime(now.year, now.month, now.day);
+      int activeDaysFound = 0;
+      while (activeDaysFound < 3) {
+        if (gymPreset.isActiveOn(d.weekday)) {
+          moments.add(
+            Moment(
+              id: moments.length + 1,
+              timestamp: d.millisecondsSinceEpoch + 36000000,
+              type: 'single',
+              date: dateKey(d),
+              note: '🏋️ Gym Custom',
+              tags: ['checkpoint', 'checkpoint:gym_custom'],
+            ),
+          );
+          activeDaysFound++;
+        }
+        d = d.subtract(const Duration(days: 1));
+      }
+
+      final stats = CheckpointService.instance.calculateStats(
+        'gym_custom',
+        moments,
+      );
+      // Even with rest days in between, all 3 active days were completed, so streak should be 3
+      expect(stats.streakDays, 3);
+    });
+
+    test('Safely handles dynamic num types and filters invalid weekdays', () {
+      final json = {
+        'id': 'meditation',
+        'label': 'Meditation',
+        'activeDays': [1.0, 2, 7.0, 0, 8, -1], // doubles and out of range
+      };
+
+      final preset = CheckpointPreset.fromJson(json);
+      expect(preset.activeDays, [1, 2, 7]);
+      expect(preset.isActiveOn(1), isTrue);
+      expect(preset.isActiveOn(7), isTrue);
+      expect(preset.isActiveOn(3), isFalse);
+    });
+  });
 }

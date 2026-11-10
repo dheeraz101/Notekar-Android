@@ -4735,7 +4735,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
           false;
       if (ok) {
         _privacyPausedAt = null;
-        _privacyAuthGraceUntil = DateTime.now().add(const Duration(seconds: 2));
+        _privacyAuthGraceUntil = DateTime.now().add(
+          const Duration(seconds: 15),
+        );
       }
       if (mounted) {
         setState(() => _privacyUnlocked = ok);

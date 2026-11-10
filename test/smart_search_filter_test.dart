@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
+import 'package:notekar/services/search_index_service.dart';
 import 'package:notekar/services/smart_search_filter.dart';
 
 void main() {
@@ -253,6 +254,64 @@ void main() {
         expect(results.contains(uncompletedInCheckpoint), isFalse);
         // The completed pair is included
         expect(results.contains(completedInCheckpoint), isTrue);
+      },
+    );
+  });
+
+  group('MAJ-11: SearchIndexService Fuzzy Token Matching Tests', () {
+    test('Finds moments despite minor typo with Levenshtein distance 1', () {
+      final service = SearchIndexService.instance;
+      service.clear();
+
+      final moments = [
+        Moment(
+          id: 1,
+          timestamp: 1700000000000,
+          type: 'single',
+          date: '2026-10-24',
+          note: 'Daily gym exercise and physical fitness training',
+          category: 'Health',
+        ),
+        Moment(
+          id: 2,
+          timestamp: 1700001000000,
+          type: 'single',
+          date: '2026-10-24',
+          note: 'Database architecture migration',
+          category: 'Work',
+        ),
+      ];
+
+      service.buildIndex(moments);
+
+      // "exercize" (typo for "exercise", distance 1, length 8 >= 5)
+      final results = service.search(allMoments: moments, query: 'exercize');
+      expect(results.length, 1);
+      expect(results.first.id, 1);
+    });
+
+    test(
+      'Handles non-BMP unicode runes and emojis without surrogate pair corruption',
+      () {
+        final service = SearchIndexService.instance;
+        service.clear();
+
+        final moments = [
+          Moment(
+            id: 10,
+            timestamp: 1700000000000,
+            type: 'single',
+            date: '2026-10-24',
+            note: 'Rocket 🚀 launch countdown mission',
+            category: 'Work',
+          ),
+        ];
+
+        service.buildIndex(moments);
+
+        final results = service.search(allMoments: moments, query: 'countdown');
+        expect(results.length, 1);
+        expect(results.first.id, 10);
       },
     );
   });

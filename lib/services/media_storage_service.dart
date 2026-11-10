@@ -91,6 +91,12 @@ class MediaStorageService {
     if (relativeOrAbsolutePath == null || relativeOrAbsolutePath.isEmpty) {
       return File('');
     }
+    if (relativeOrAbsolutePath.contains('..')) {
+      _logger.warn(
+        'Blocked directory traversal attempt: $relativeOrAbsolutePath',
+      );
+      return File('');
+    }
 
     final originalFile = File(relativeOrAbsolutePath);
     final mediaDir = await getMediaDirectory();
@@ -175,6 +181,12 @@ class MediaStorageService {
   /// Includes multi-path existence fallback.
   File resolveFileSync(String? relativeOrAbsolutePath) {
     if (relativeOrAbsolutePath == null || relativeOrAbsolutePath.isEmpty) {
+      return File('');
+    }
+    if (relativeOrAbsolutePath.contains('..')) {
+      _logger.warn(
+        'Blocked directory traversal attempt: $relativeOrAbsolutePath',
+      );
       return File('');
     }
     final originalFile = File(relativeOrAbsolutePath);

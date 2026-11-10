@@ -1489,6 +1489,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
   late GoalTimeframe _timeframe;
   int? _targetDate;
   String? _category;
+  Set<String> _categories = {};
   int? _dailyTargetMinutes;
   String? _colorHex;
 
@@ -1552,6 +1553,12 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
     _timeframe = widget.goal?.timeframe ?? GoalTimeframe.week;
     _targetDate = widget.goal?.targetDate;
     _category = widget.goal?.category;
+    _categories = Set<String>.from(
+      widget.goal?.effectiveCategories ?? const [],
+    );
+    if (_category != null && _category!.trim().isNotEmpty) {
+      _categories.add(_category!.trim());
+    }
     _colorHex = widget.goal?.colorHex;
     _dailyTargetMinutes =
         widget.goal?.dailyTargetMinutes ??
@@ -1753,7 +1760,8 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
       id: id,
       title: title,
       description: desc,
-      category: _category,
+      category: _categories.isNotEmpty ? _categories.first : _category,
+      categories: _categories.toList(),
       mode: 'two-way',
       targetMinutes: _targetHours * 60,
       dailyTargetMinutes:
@@ -2660,7 +2668,10 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                   PressableScale(
                     onTap: () {
                       HapticFeedback.selectionClick();
-                      setState(() => _category = null);
+                      setState(() {
+                        _category = null;
+                        _categories.clear();
+                      });
                     },
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 140),
@@ -2669,12 +2680,20 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                         vertical: 7,
                       ),
                       decoration: BoxDecoration(
-                        color: _category == null
+                        color:
+                            (_categories.isEmpty &&
+                                (_category == null ||
+                                    _category!.isEmpty ||
+                                    _category!.toLowerCase() == 'all'))
                             ? widget.p.accent
                             : widget.p.surface3,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: _category == null
+                          color:
+                              (_categories.isEmpty &&
+                                  (_category == null ||
+                                      _category!.isEmpty ||
+                                      _category!.toLowerCase() == 'all'))
                               ? widget.p.accent
                               : widget.p.border.withValues(alpha: 0.5),
                         ),
@@ -2685,7 +2704,11 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                           Icon(
                             CupertinoIcons.square_grid_2x2,
                             size: 13,
-                            color: _category == null
+                            color:
+                                (_categories.isEmpty &&
+                                    (_category == null ||
+                                        _category!.isEmpty ||
+                                        _category!.toLowerCase() == 'all'))
                                 ? Colors.white
                                 : widget.p.text2,
                           ),
@@ -2693,11 +2716,19 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                           Text(
                             'All Categories'.localized(context),
                             style: TextStyle(
-                              color: _category == null
+                              color:
+                                  (_categories.isEmpty &&
+                                      (_category == null ||
+                                          _category!.isEmpty ||
+                                          _category!.toLowerCase() == 'all'))
                                   ? Colors.white
                                   : widget.p.text,
                               fontSize: 12,
-                              fontWeight: _category == null
+                              fontWeight:
+                                  (_categories.isEmpty &&
+                                      (_category == null ||
+                                          _category!.isEmpty ||
+                                          _category!.toLowerCase() == 'all'))
                                   ? FontWeight.w700
                                   : FontWeight.w500,
                             ),
@@ -2707,12 +2738,23 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                     ),
                   ),
                   ..._availableCategories.map((cat) {
-                    final isSelected = _category == cat;
+                    final isSelected =
+                        _categories.contains(cat) || _category == cat;
                     final meta = getCategoryMeta(cat, widget.p);
                     return PressableScale(
                       onTap: () {
                         HapticFeedback.selectionClick();
-                        setState(() => _category = isSelected ? null : cat);
+                        setState(() {
+                          if (_categories.contains(cat)) {
+                            _categories.remove(cat);
+                            _category = _categories.isNotEmpty
+                                ? _categories.last
+                                : null;
+                          } else {
+                            _categories.add(cat);
+                            _category = cat;
+                          }
+                        });
                       },
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 140),

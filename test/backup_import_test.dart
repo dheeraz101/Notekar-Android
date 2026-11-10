@@ -122,4 +122,40 @@ void main() {
     expect(result.isValid, isTrue);
     expect(result.entries.first.type, 'single');
   });
+
+  test(
+    'SEC-29: seamlessly validates and imports NoteKar Web PWA JSON export',
+    () {
+      final webExport = jsonEncode({
+        'app': 'NoteKar',
+        'version': '4.0.0',
+        'channel': 'stable',
+        'exportedAt': '2026-11-10T12:00:00.000Z',
+        'entries': [
+          {
+            'id': 101,
+            'timestamp': firstTs,
+            'type': 'single',
+            'date': '2024-06-10',
+            'note': 'Logged on NoteKar Web PWA',
+            'iso': '2024-06-10T05:46:40.000Z',
+          },
+          {
+            'id': 102,
+            'timestamp': secondTs,
+            'type': 'in',
+            'date': '2024-06-11',
+            'note': 'Web deep work session',
+            'iso': '2024-06-11T05:46:40.000Z',
+          },
+        ],
+      });
+
+      final result = validateNoteKarBackupContent(webExport);
+      expect(result.isValid, isTrue);
+      expect(result.entries, hasLength(2));
+      expect(result.entries.first.note, 'Web deep work session');
+      expect(result.entries.last.note, 'Logged on NoteKar Web PWA');
+    },
+  );
 }

@@ -38,6 +38,38 @@ class CanonicalInterval {
   int get durationMs => math.max(0, endMs - startMs);
   Duration get duration => Duration(milliseconds: durationMs);
 
+  CanonicalInterval copyWith({
+    String? id,
+    int? startMs,
+    int? endMs,
+    String? dateKey,
+    String? category,
+    String? goalId,
+    bool? isSession,
+    String? note,
+    List<String>? tags,
+    int? inMomentId,
+    int? outMomentId,
+    bool? isOngoing,
+    bool? isAutoRecovered,
+  }) {
+    return CanonicalInterval(
+      id: id ?? this.id,
+      startMs: startMs ?? this.startMs,
+      endMs: endMs ?? this.endMs,
+      dateKey: dateKey ?? this.dateKey,
+      category: category ?? this.category,
+      goalId: goalId ?? this.goalId,
+      isSession: isSession ?? this.isSession,
+      note: note ?? this.note,
+      tags: tags ?? this.tags,
+      inMomentId: inMomentId ?? this.inMomentId,
+      outMomentId: outMomentId ?? this.outMomentId,
+      isOngoing: isOngoing ?? this.isOngoing,
+      isAutoRecovered: isAutoRecovered ?? this.isAutoRecovered,
+    );
+  }
+
   /// Slices this interval across day boundaries so no interval crosses midnight.
   List<CanonicalInterval> sliceAtMidnights() {
     if (endMs <= startMs) return [];
@@ -92,7 +124,17 @@ class UniversalIntervalLedger {
   List<CanonicalInterval> computeIntervals(
     List<Moment> rawMoments, {
     DateTime? referenceNow,
-  }) => reconstructAndSlice(rawMoments, referenceNow: referenceNow);
+    bool reconcileCollisions = false,
+  }) {
+    final intervals = reconstructAndSlice(
+      rawMoments,
+      referenceNow: referenceNow,
+    );
+    if (reconcileCollisions) {
+      return reconcileOverlappingSessions(intervals);
+    }
+    return intervals;
+  }
 
   /// and midnight boundary slicing.
   static List<CanonicalInterval> reconstructAndSlice(
@@ -303,6 +345,47 @@ class UniversalIntervalLedger {
     // Sort chronologically ascending
     sliced.sort((a, b) => a.startMs.compareTo(b.startMs));
     return sliced;
+  }
+
+  /// Surgical boundary reconciliation for overlapping session intervals (MAJ-02).
+  ///
+  /// Detects collision ($Start_B < End_A$) between session intervals, healing boundary overlap
+  /// by clamping $End_A = \min(End_A, Start_B)$ so sessions remain contiguous and non-overlapping
+  /// without mutating raw underlying moments.
+  static List<CanonicalInterval> reconcileOverlappingSessions(
+    List<CanonicalInterval> intervals, {
+    bool sameCategoryOnly = false,
+  }) {
+    if (intervals.length <= 1) return intervals;
+
+    final sorted = List<CanonicalInterval>.from(intervals)
+      ..sort((a, b) => a.startMs.compareTo(b.startMs));
+
+    final healed = <CanonicalInterval>[];
+
+    for (int i = 0; i < sorted.length; i++) {
+      var current = sorted[i];
+
+      if (current.isSession && i + 1 < sorted.length) {
+        for (int j = i + 1; j < sorted.length; j++) {
+          final next = sorted[j];
+          if (!next.isSession) continue;
+          if (next.startMs >= current.endMs) break;
+          if (!sameCategoryOnly ||
+              current.category.toLowerCase() == next.category.toLowerCase()) {
+            final clampedEnd = math.max(current.startMs, next.startMs);
+            current = current.copyWith(endMs: clampedEnd);
+            break;
+          }
+        }
+      }
+
+      if (!current.isSession || current.durationMs > 0) {
+        healed.add(current);
+      }
+    }
+
+    return healed;
   }
 
   /// Computes interval duration-weighted time slot distribution across:

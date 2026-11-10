@@ -253,7 +253,7 @@ class TimelineSessionCard extends StatelessWidget {
                           child: ConstrainedBox(
                             constraints: const BoxConstraints(
                               minWidth: 48,
-                              minHeight: 44,
+                              minHeight: 48,
                             ),
                             child: Center(
                               child: Container(

@@ -271,5 +271,40 @@ void main() {
         throwsA(isA<VaultAuthException>()),
       );
     });
+    test(
+      'Default PBKDF2 iterations is 100k+ and hardened is 200k for NIST/OWASP hardening',
+      () {
+        expect(
+          VaultEncryptionService.defaultPbkdf2Iterations,
+          greaterThanOrEqualTo(100000),
+        );
+        expect(VaultEncryptionService.hardenedPbkdf2Iterations, equals(200000));
+      },
+    );
+
+    test('MAJ-06: Incremental snapshot vault delta encryption roundtrip', () {
+      final service = VaultEncryptionService.instance;
+      const sampleDelta =
+          '{"delta_moments":[{"id":100,"note":"new delta moment"}]}';
+      const password = 'DeltaPassword#2026';
+      const sinceTimestamp = 1718000000000;
+
+      final encryptedDelta = service.encryptVaultDelta(
+        plaintext: sampleDelta,
+        password: password,
+        sinceTimestamp: sinceTimestamp,
+        iterations: 500,
+      );
+
+      final parsed = jsonDecode(encryptedDelta) as Map<String, dynamic>;
+      expect(parsed['delta'], isTrue);
+      expect(parsed['since_timestamp'], equals(sinceTimestamp));
+
+      final decrypted = service.decryptVault(
+        vaultContent: encryptedDelta,
+        password: password,
+      );
+      expect(decrypted, equals(sampleDelta));
+    });
   });
 }

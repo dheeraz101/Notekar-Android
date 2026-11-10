@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/utils/app_logger.dart';
 
@@ -260,6 +262,17 @@ class SearchIndexService {
           }
         }
 
+        // If tokenMatches is empty, evaluate fuzzy spelling tolerance for tokens >= 5 chars (MAJ-11)
+        if (tokenMatches.isEmpty && token.length >= 5) {
+          for (final entry in _tokenInvertedIndex.entries) {
+            if ((entry.key.length - token.length).abs() <= 1) {
+              if (_levenshteinDistance(entry.key, token) <= 1) {
+                tokenMatches.addAll(entry.value);
+              }
+            }
+          }
+        }
+
         if (tokenMatches.isEmpty) {
           // No moments match this token
           return const [];
@@ -310,6 +323,15 @@ class SearchIndexService {
         if (noteLower.contains(token)) {
           score += 150;
           if (noteLower.startsWith(token)) score += 50;
+        } else if (token.length >= 5) {
+          final noteWords = tokenize(noteLower);
+          for (final w in noteWords) {
+            if ((w.length - token.length).abs() <= 1 &&
+                _levenshteinDistance(w, token) <= 1) {
+              score += 100;
+              break;
+            }
+          }
         }
         if (moment.category != null &&
             moment.category!.toLowerCase().contains(token)) {
@@ -318,6 +340,10 @@ class SearchIndexService {
         if (moment.type.toLowerCase().contains(token)) {
           score += 40;
         }
+      }
+
+      if (score == 0 && candidateIds != null && candidateIds.contains(id)) {
+        score = 50;
       }
 
       if (score > 0 || tokens.isEmpty) {
@@ -332,5 +358,30 @@ class SearchIndexService {
     });
 
     return scored.map((s) => s.moment).toList();
+  }
+
+  /// Calculates Levenshtein edit distance between strings [s] and [t].
+  static int _levenshteinDistance(String s, String t) {
+    if (s == t) return 0;
+    if (s.isEmpty) return t.runes.length;
+    if (t.isEmpty) return s.runes.length;
+
+    final sRunes = s.runes.toList(growable: false);
+    final tRunes = t.runes.toList(growable: false);
+
+    List<int> v0 = List<int>.generate(tRunes.length + 1, (i) => i);
+    List<int> v1 = List<int>.filled(tRunes.length + 1, 0);
+
+    for (int i = 0; i < sRunes.length; i++) {
+      v1[0] = i + 1;
+      for (int j = 0; j < tRunes.length; j++) {
+        final cost = (sRunes[i] == tRunes[j]) ? 0 : 1;
+        v1[j + 1] = math.min(v1[j] + 1, math.min(v0[j + 1] + 1, v0[j] + cost));
+      }
+      for (int j = 0; j <= tRunes.length; j++) {
+        v0[j] = v1[j];
+      }
+    }
+    return v1[tRunes.length];
   }
 }

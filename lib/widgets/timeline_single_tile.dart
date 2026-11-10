@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/note_preview_sheet.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/theme/app_tokens.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
@@ -302,8 +303,10 @@ class TimelineSingleTile extends StatelessWidget {
                                   PressableScale(
                                     onTap: onEditNote,
                                     child: SizedBox(
-                                      width: 44,
-                                      height: 44,
+                                      width:
+                                          NkTokens.touchTarget.minInteractive,
+                                      height:
+                                          NkTokens.touchTarget.minInteractive,
                                       child: Center(
                                         child: Icon(
                                           hasNote

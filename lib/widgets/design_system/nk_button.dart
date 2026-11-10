@@ -173,13 +173,13 @@ class NkButton extends StatelessWidget {
       onTap: isEnabled ? onPressed : null,
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          minHeight: isSmall ? 44.0 : 48.0,
+          minHeight: isSmall ? 44.0 : 52.0,
           minWidth: isSmall ? 48.0 : 72.0,
         ),
         child: Center(
           child: Container(
             width: fullWidth ? double.infinity : null,
-            constraints: BoxConstraints(minHeight: isSmall ? 36.0 : 48.0),
+            constraints: BoxConstraints(minHeight: isSmall ? 36.0 : 52.0),
             padding: EdgeInsets.symmetric(
               horizontal: horizontalPadding,
               vertical: verticalPadding,

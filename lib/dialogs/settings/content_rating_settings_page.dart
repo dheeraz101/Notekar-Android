@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/theme/app_tokens.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
 class ContentRatingSettingsPage extends StatelessWidget {
@@ -79,12 +80,7 @@ class ContentRatingSettingsPage extends StatelessWidget {
               Text(
                 'Rated for Everyone / Age 3+'.localized(context),
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: p.text,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.6,
-                ),
+                style: NkTokens.typography.title2(p.text),
               ),
               const SizedBox(height: 8),
               Padding(

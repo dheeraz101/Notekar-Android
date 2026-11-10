@@ -356,22 +356,47 @@ class CheckpointService extends ChangeNotifier {
       }
     }
 
-    // Check continuous streak
+    // Check continuous streak honoring custom activeDays
+    final preset = _presets.where((p) => p.id == presetId).firstOrNull;
+    final bool hasCustomDays =
+        preset != null &&
+        preset.activeDays != null &&
+        preset.activeDays!.isNotEmpty;
+
     int streak = 0;
     DateTime checkDate = DateTime(now.year, now.month, now.day);
     // If today is completed, start from today, else start from yesterday
     final todayKey = dateKey(checkDate);
     final isTodayCompleted = presetMoments.any((m) => m.date == todayKey);
     if (!isTodayCompleted) {
-      checkDate = checkDate.subtract(const Duration(days: 1));
+      checkDate = DateTime(checkDate.year, checkDate.month, checkDate.day - 1);
     }
 
-    while (true) {
+    int safetyCounter = 0;
+    while (safetyCounter < 3650) {
+      safetyCounter++;
+      final isDayActive = hasCustomDays
+          ? preset.isActiveOn(checkDate.weekday)
+          : true;
       final dk = dateKey(checkDate);
-      if (presetMoments.any((m) => m.date == dk)) {
+      final wasCompleted = presetMoments.any((m) => m.date == dk);
+
+      if (wasCompleted) {
         streak++;
-        checkDate = checkDate.subtract(const Duration(days: 1));
+        checkDate = DateTime(
+          checkDate.year,
+          checkDate.month,
+          checkDate.day - 1,
+        );
+      } else if (!isDayActive) {
+        // Non-active rest day without completion does not break streak
+        checkDate = DateTime(
+          checkDate.year,
+          checkDate.month,
+          checkDate.day - 1,
+        );
       } else {
+        // Active day was missed! Streak breaks.
         break;
       }
     }

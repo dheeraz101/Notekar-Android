@@ -166,7 +166,10 @@ class _AppSheetState extends State<AppSheet> {
     Widget content = GestureDetector(
       onVerticalDragStart: (_) => _dragOffset = 0.0,
       onVerticalDragUpdate: (details) {
-        _dragOffset += details.primaryDelta ?? 0.0;
+        _dragOffset = (_dragOffset + (details.primaryDelta ?? 0.0)).clamp(
+          0.0,
+          800.0,
+        );
       },
       onVerticalDragEnd: (details) {
         final velocity = details.primaryVelocity ?? 0.0;
@@ -180,10 +183,10 @@ class _AppSheetState extends State<AppSheet> {
       child: Glass(
         p: p,
         blur: widget.blur,
-        radius: NkTokens.radii.sheetVal,
+        radius: NkTokens.radii.squircleSheetVal,
         borderRadius: widget.docked
             ? BorderRadius.vertical(
-                top: Radius.circular(NkTokens.radii.sheetVal),
+                top: Radius.circular(NkTokens.radii.squircleSheetVal),
               )
             : null,
         padding: EdgeInsets.fromLTRB(
