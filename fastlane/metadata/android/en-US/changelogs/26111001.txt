@@ -1,0 +1,7 @@
+NoteKar 7.5.15 (Next-Generation Evolution):
+• On-Device Auto-Categorization: 100% offline classification trained on your local notes
+• Multi-Category Goals: Track composite focus targets across multiple categories
+• Habit Frequency Customizer: Configure active days with DST-immune streak progression
+• Ledger Boundary Healing: Auto-reconciliation of overlapping session intervals
+• Sovereign Vault 200k PBKDF2: Hardened key derivation with path traversal protection
+• Apple HIG & 48dp Touch Target Polish

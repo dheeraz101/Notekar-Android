@@ -6,6 +6,28 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [7.5.15] - 2026-11-10 (versionCode 26BR1110) [Beta]
+
+### What's New
+- **On-Device Offline Auto-Categorization Engine (`MAJ-01`)**: 100% air-gapped Naive Bayes classifier trained exclusively on local notes. Features Unicode-aware tokenization (`\p{L}`, `\p{M}`, `\p{N}`) preserving diacritics and matras across English, French, German, Spanish, Hindi/Devanagari, and CJK text. Manual tags and hashtags always take precedence.
+- **Universal Interval Ledger Boundary Healing (`MAJ-02`)**: Mathematical reconciliation of overlapping sessions ($Start_B < End_A$) in `UniversalIntervalLedger`, eliminating impossible chronological overlaps and filtering zero-duration collapsed intervals without mutating raw timestamp moments.
+- **Multi-Category Target Allocations (`MAJ-03`)**: Define composite focus targets spanning multiple categories simultaneously in Goals & Targets. Category editing in `CreateOrEditGoalView` preserves multi-category selection without data loss.
+- **Habit Checkpoint Custom Frequencies & DST Immunity (`MAJ-14`)**: Choose specific active days of week (`1..7`) for routine habits. Day progression calculations use calendar-exact `DateTime(year, month, day - 1)`, eliminating Daylight Savings Time clock drift. Deserialization hardened against dynamic numbers.
+- **Rune-Safe Full-Text Search with Fuzzy Tolerance (`MAJ-11`)**: Levenshtein distance 1 comparison comparing Unicode `Runes` preventing surrogate-pair corruption when searching text containing non-BMP Unicode runes and emojis.
+- **Sovereign Vault Cryptographic Hardening (`SEC-01` & `SEC-05`)**: Elevated key derivation to 200,000 PBKDF2-HMAC-SHA256 iterations for new sovereign `.notekar-vault` backups with backward-compatible 100k iteration decryption. Added sandbox boundary path validation preventing `../` traversal in imported archives.
+- **Apple HIG Design & Squircle Token Unification (`MIC-01`–`MIC-06`)**: Standardized `SettingsGroup` on continuous superellipse squircles (`ContinuousSquircleBorder`), enforced 56.0pt inset dividers, 52pt button heights, OpenType tabular figures on all live session chronometers, and expanded all compact tap targets to meet or exceed the 48×48dp accessibility standard (`NkTouchTarget.minInteractive`).
+- **Android 15 Platform Authenticity & Hardening (`SEC-14`, `SEC-22`, `SEC-28`)**: Native C library 16KB memory page alignment verification, runtime exact alarm guards (`canScheduleExactAlarms()`), and internal broadcast receiver protection (`RECEIVER_NOT_EXPORTED`).
+- **Midnight Background Maintenance & Compaction (`SEC-09` & `MAJ-16`)**: Integrated automated 30-day trash purging and Isar database compaction into background `Workmanager` midnight worker (`requiresBatteryNotLow: true`).
+
+### Improvements & Bug Fixes
+- Added tactile selection clicks on mode/category pill toggles and distinct medium impact bursts on timer start/stop (`MIC-07`, `MIC-08`).
+- Preserved scroll position per category key during timeline filter switching using `PageStorageKey` (`MIC-22`).
+- Enforced bottom `SafeArea` on edge-to-edge transparent navigation bar across all bottom sheets (`MIC-23`).
+- Added defensive `isNaN` guards in composite productivity score calculation (`MAJ-08`).
+- Filtered collapsed zero-duration intervals in interval ledger collision resolution (`MAJ-02`).
+- Added touch slop expansion (48×48dp) to batch trash action button in timeline multi-selection toolbar (`MIC-05`).
+- Passed 580/580 automated tests across 75 test suites with 0 static analysis warnings.
+
 ## [7.5.14E1] - 2026-11-08 (versionCode 26ER1108)
 
 ### What's New

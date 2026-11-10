@@ -1,5 +1,73 @@
 [
     {
+        "version":  "7.5.15",
+        "buildNumber":  "26BR1110",
+        "releaseDate":  "2026-11-10",
+        "channel":  "beta",
+        "channelTag":  "[Beta]",
+        "isBeta":  true,
+        "edition":  "Next-Generation Evolution: 100 Refinements \u0026 Sovereign Intelligence",
+        "badgeColor":  "#30D158",
+        "isLatest":  true,
+        "highlights":  [
+                           {
+                               "title":  "On-Device Offline Auto-Categorization",
+                               "description":  "100% air-gapped Naive Bayes classifier trained exclusively on local notes with Unicode-aware multilingual tokenization.",
+                               "icon":  "auto_awesome_rounded"
+                           },
+                           {
+                               "title":  "Universal Ledger Boundary Healing",
+                               "description":  "Mathematical reconciliation of overlapping session intervals eliminating chronological collisions and filtering zero-duration collapsed intervals.",
+                               "icon":  "merge_type_rounded"
+                           },
+                           {
+                               "title":  "Multi-Category Target Allocations",
+                               "description":  "Define composite focus targets spanning multiple categories simultaneously in Goals \u0026 Targets without data loss.",
+                               "icon":  "track_changes_rounded"
+                           },
+                           {
+                               "title":  "Habit Checkpoints \u0026 DST Immunity",
+                               "description":  "Choose specific active days of week (1..7) for routine habits with DST-immune calendar-exact streak calculations.",
+                               "icon":  "event_repeat_rounded"
+                           },
+                           {
+                               "title":  "Rune-Safe Full-Text Search with Fuzzy Matching",
+                               "description":  "Rune-safe Levenshtein distance 1 comparison comparing Unicode Runes, preventing surrogate-pair emoji corruption.",
+                               "icon":  "search_rounded"
+                           },
+                           {
+                               "title":  "Sovereign Vault Cryptographic Hardening (200k PBKDF2)",
+                               "description":  "Elevated key derivation to 200,000 PBKDF2 iterations for new backups and strict path traversal defense.",
+                               "icon":  "lock_shield_rounded"
+                           },
+                           {
+                               "title":  "Apple HIG Design \u0026 Squircle Token Unification",
+                               "description":  "Standardized ContinuousSquircleBorder, 56pt dividers, 52pt buttons, tabular figures, and 48x48dp touch slop.",
+                               "icon":  "brush_rounded"
+                           },
+                           {
+                               "title":  "Android 15 Platform Parity \u0026 System Maintenance",
+                               "description":  "16KB memory page alignment verification, exact alarm runtime checks, protected receivers, and midnight database vacuuming.",
+                               "icon":  "phone_android_rounded"
+                           }
+                       ],
+        "fullChangelog":  [
+                              "Next-Generation Evolution: 100 Refinements, Sovereign Intelligence \u0026 Apple HIG Architecture",
+                              "+ On-Device Auto-Categorization: 100% offline Naive Bayes classifier trained on local notes with Unicode-aware multilingual tokenization",
+                              "+ Universal Interval Ledger: Boundary collision healing for overlapping sessions and zero-duration interval collapse",
+                              "+ Multi-Category Target Allocations: Composite duration tracking across multiple categories in Goals \u0026 Targets without data loss",
+                              "+ Habit Frequency Customizer: Custom active days of week with DST-immune calendar-exact streak calculations",
+                              "+ Rune-Safe Fuzzy Search: Levenshtein distance 1 comparison comparing Unicode Runes preventing surrogate-pair emoji corruption",
+                              "+ Sovereign Vault 200k PBKDF2: OWASP-grade 200,000 iterations for new backups and sandbox traversal injection protection",
+                              "+ Apple HIG \u0026 Touch Ergonomics: ContinuousSquircleBorder, 56pt dividers, 52pt buttons, tabular chronometer figures, and 48x48dp touch slop",
+                              "+ Android 15 \u0026 System Security: 16KB ELF alignment, exact alarm runtime checks, and automated midnight database vacuuming"
+                          ],
+        "downloads":  {
+                          "universalApk":  "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.5.15/NoteKar-v7.5.15-universal-release.apk",
+                          "arm64Apk":  "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.5.15/NoteKar-v7.5.15-arm64-v8a-release.apk"
+                      }
+    },
+    {
         "version":  "7.5.14E1",
         "buildNumber":  "26ER1108",
         "releaseDate":  "2026-11-08",
@@ -8,7 +76,7 @@
         "isBeta":  true,
         "edition":  "Experimental Architecture \u0026 Sensory Refinements",
         "badgeColor":  "#FF3B30",
-        "isLatest":  true,
+        "isLatest":  false,
         "highlights":  [
                            {
                                "title":  "Wire Diwali 2026 notice feed with bundled fallback and gallery save",

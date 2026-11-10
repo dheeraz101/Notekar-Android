@@ -23,110 +23,113 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.5.14E1',
-    date: 'November 08, 2026',
-    edition: 'Classic iOS Switches, Habit Countdown & Merge Persistence',
-    badgeColor: Color(0xFFFF9F0A),
+    version: '7.5.15',
+    date: 'November 10, 2026',
+    edition:
+        'Next-Generation Evolution: 100 Refinements & Sovereign Intelligence',
+    badgeColor: Color(0xFF30D158),
     innovations: [
       (
-        title: 'Classic iOS Custom Switch Toggles',
-        category: 'PRECISION CONTROLS & APPLE HIG',
-        headline: 'Tactile 62×32 Geometry. +10px Fluid Kinetic Stretch.',
+        title: 'On-Device Offline Auto-Categorization',
+        category: 'MACHINE INTELLIGENCE & PRIVACY',
+        headline: '100% Air-Gapped Classification. Multilingual Tokenization.',
         desc:
-            'Restored the beloved classic iOS toggle geometry from commit 7.5.11 (62×32 track, 34×28 pill thumb, +10px fluid mechanical stretch, soft drop shadow, and official Apple HIG "|" and "O" accessibility indicators). Tapping anywhere on the settings row fluidly elongates the thumb, and switch states strictly mirror parent permissions with zero desynchronization or stuck visuals on cancelled PIN prompts.',
-        icon: CupertinoIcons.switch_camera,
+            '100% air-gapped Naive Bayes classifier trained exclusively on local notes. Features Unicode-aware tokenization preserving diacritics and matras across English, French, German, Spanish, Hindi/Devanagari, and CJK text without sending a single byte to external servers.',
+        icon: CupertinoIcons.sparkles,
         badgeColor: Color(0xFF007AFF),
         specs:
-            '62x32 Track · 34x28 Thumb · +10px Stretch · "|" & "O" Accessibility Markings · App Lock Desync Protection',
+            'Naive Bayes Engine · Zero-Network Air-Gap · Multilingual Tokenizer · Diacritics & Matras Preserved · Instant Category Suggestions',
       ),
       (
-        title: 'Habit Live Sessions & Reverse Countdown',
-        category: 'HABIT TRACKING & CHECKPOINTS',
-        headline: 'Intentional Time Horizons. Reverse Chronometer Flow.',
+        title: 'Universal Ledger Boundary Healing',
+        category: 'CHRONOLOGY & DATA INTEGRITY',
+        headline:
+            'Mathematical Collision Healing. Non-Destructive Reconciliation.',
         desc:
-            'Start live sessions from routine habits with 15m, 30m, 45m, or custom duration targets. The home screen chronometer counts down in reverse towards completion, accompanied by a dedicated Apple HIG stop action, high-contrast canvas text rendering, and automatic return to neutral default mode when the session concludes.',
-        icon: CupertinoIcons.timer,
-        badgeColor: Color(0xFFFF9500),
-        specs:
-            'Reverse Countdown Chronometer · Target Durations · Dedicated Stop Control · Dynamic Text Contrast · Canvas Auto-Reset',
-      ),
-      (
-        title: 'Permanent Session Merging & Mode Switching',
-        category: 'TIMELINE & SESSION MANAGEMENT',
-        headline: 'Seamless Pairing. 100% Database Persistence.',
-        desc:
-            'Merge standalone timestamps into structured IN/OUT focus sessions directly from your History timeline. Merged sessions now persist permanently in SQLite across sheet reloads and restarts, with instant reclassification to Work, Deep Focus, or General Mode without reverting or breaking pairing.',
+            'Mathematical reconciliation of overlapping session intervals in UniversalIntervalLedger, eliminating impossible chronological collisions and filtering zero-duration collapsed intervals without mutating raw moment records.',
         icon: CupertinoIcons.arrow_merge,
         badgeColor: Color(0xFF34C759),
         specs:
-            'Permanent SQLite Persistence · Direct Mode Reassignment · General Mode Support · Session Pairing Integrity',
+            'Mathematical Boundary Healing · Non-Destructive Raw Moments · Zero-Duration Interval Collapse · Interval Reconciliation',
       ),
       (
-        title: 'Hierarchical Settings Navigation & Predictive Back',
-        category: 'NAVIGATION ARCHITECTURE',
-        headline: 'Ancestral Stack Memory. Intuitive Parent Navigation.',
+        title: 'Multi-Category Target Allocations',
+        category: 'GOALS & TARGETS',
+        headline: 'Composite Focus Allocations. Zero Data-Loss Editing.',
         desc:
-            'Deeply nested settings subpages now remember their lineage. Swiping from the screen edge or tapping the back button ascends smoothly to the immediate parent category (e.g. Moments, App Lock, Developer Options) rather than abruptly collapsing to root settings, fully integrated with Android 14/15 predictive back gestures.',
-        icon: CupertinoIcons.arrow_left_to_line,
+            'Define composite focus targets spanning multiple categories simultaneously in Goals & Targets. Category editing in CreateOrEditGoalView preserves multi-category selection cleanly without data loss.',
+        icon: CupertinoIcons.scope,
+        badgeColor: Color(0xFFFF9500),
+        specs:
+            'Multi-Category Selections · Composite Time Tracking · Safe Category Editing · Zero Data-Loss Schema',
+      ),
+      (
+        title: 'Habit Checkpoints & DST Immunity',
+        category: 'HABIT TRACKING & CHECKPOINTS',
+        headline: 'Active Weekday Customization. Calendar-Exact Stepping.',
+        desc:
+            'Choose specific active days of week (1..7) for routine habits. Day progression calculations use calendar-exact stepping, eliminating Daylight Savings Time clock drift with hardened number deserialization.',
+        icon: CupertinoIcons.calendar_badge_plus,
         badgeColor: Color(0xFFAF52DE),
         specs:
-            '3-Tier Category Stack · Predictive Back Peek · Canonical Ancestor Resolution · Rapid Double-Tap Handling',
+            'Weekday Customizer (1..7) · DST-Immune Calendar Stepping · Robust Deserialization · Checkpoint Integrity',
       ),
       (
-        title: 'Apple HIG & BitChord Precision Design System',
-        category: 'DESIGN SYSTEM & TYPOGRAPHY',
-        headline: 'Continuous Squircles. Minimal Elevated Surfaces.',
+        title: 'Rune-Safe Full-Text Search with Fuzzy Matching',
+        category: 'SEARCH & INFORMATION RETRIEVAL',
+        headline:
+            'Unicode-Safe Levenshtein Distance. Surrogate-Pair Protection.',
         desc:
-            'Deep visual refinement featuring continuous 60.7% squircle corner smoothing, positive SF Pro micro-typography tracking (+0.05 to +0.2), redesigned full-width Data Safety and App Permissions cards, and sleek minimal Content Rating scorecard badges.',
-        icon: CupertinoIcons.sparkles,
+            'Rune-safe Levenshtein distance 1 comparison comparing Unicode Runes, preventing surrogate-pair corruption when searching text containing non-BMP characters, regional scripts, and emojis.',
+        icon: CupertinoIcons.search,
         badgeColor: Color(0xFFFF2D55),
         specs:
-            '60.7% Continuous Squircles · Positive Tracking · Full-Width Hero Cards · Minimal Status Capsules',
+            'Levenshtein Distance 1 · Unicode Rune Comparison · Emoji & Non-BMP Protection · Zero Surrogate Corruption',
       ),
       (
-        title: '1-Month Beta Milestone & Gated Experimental Builds',
-        category: 'RELEASE TRACKS & MILESTONES',
-        headline: '30-Day Testing Milestone. Bleeding-Edge Access.',
+        title: 'Sovereign Vault Cryptographic Hardening (200k PBKDF2)',
+        category: 'SECURITY & SOVEREIGN ENCRYPTION',
+        headline: 'OWASP-Grade Key Derivation. Strict Path Traversal Defense.',
         desc:
-            'Dedicated beta testers who use NoteKar continuously for 30 days receive an authentic Apple HIG milestone popup unlocking early access to Developer Experiments. Testers with God Mode unlocked can also reveal experimental builds instantly with a single tap.',
-        icon: CupertinoIcons.rosette,
-        badgeColor: Color(0xFFFFD700),
-        specs:
-            '30-Day Beta Milestone · Apple HIG Modal Notification · God Mode Direct Unlock · Developer Experiments Track',
-      ),
-      (
-        title: 'Timeline Rich Markdown & Expandable Notes',
-        category: 'NOTE TAKING & MULTIMEDIA',
-        headline: 'Expressive Formatting. Show More / Show Less Cards.',
-        desc:
-            'Express ideas naturally with inline bold, italic, code blocks, blockquotes, and bulleted lists rendered directly on timeline cards. Extended thoughts feature an intuitive "Show more / Show less" expansion toggle and debounced 120Hz audio scrubbers.',
-        icon: CupertinoIcons.doc_text,
-        badgeColor: Color(0xFF5856D6),
-        specs:
-            'Inline Markdown Engine · Expandable Note Cards · Debounced Audio Seeking · High-Performance Repaint Boundaries',
-      ),
-      (
-        title: 'Hardened Zero-Knowledge Vault (100k PBKDF2 Iterations)',
-        category: 'SECURITY & ENCRYPTION',
-        headline: 'Military-Grade Key Derivation. Continuous Draft Protection.',
-        desc:
-            'Vault key derivation upgraded to OWASP-standard 100,000 PBKDF2 iterations for impenetrable on-device encryption. Note drafts now auto-save continuously to prevent lost reflections, paired with dynamic recent-apps window obfuscation.',
+            'Elevated key derivation to 200,000 PBKDF2-HMAC-SHA256 iterations for new sovereign .notekar-vault backups with backward-compatible 100k decryption. Enforced sandbox boundary path validation preventing "../" traversal.',
         icon: CupertinoIcons.lock_shield_fill,
         badgeColor: Color(0xFF30B0C7),
         specs:
-            '100,000 PBKDF2 Iterations · Note Draft Auto-Saving · PopScope Discard Guard · Dynamic Recents Obfuscation',
+            '200,000 PBKDF2 Iterations · AES-256-GCM Sovereign Backups · Sandbox Boundary Validation · Backward-Compatible Decryption',
+      ),
+      (
+        title: 'Apple HIG Design & Squircle Token Unification',
+        category: 'APPLE HIG & ERGONOMICS',
+        headline: 'Continuous Squircle Borders. 48×48dp Minimum Touch Slop.',
+        desc:
+            'Standardized SettingsGroup on ContinuousSquircleBorder, enforced 56.0pt inset dividers, 52pt button heights, OpenType tabular figures on live chronometers, and expanded all compact tap targets to meet or exceed 48×48dp.',
+        icon: CupertinoIcons.slider_horizontal_3,
+        badgeColor: Color(0xFF5856D6),
+        specs:
+            'ContinuousSquircleBorder · 56pt Inset Dividers · 52pt Button Height · Tabular Numbers · 48x48dp Touch Targets',
+      ),
+      (
+        title: 'Android 15 Platform Parity & Background Maintenance',
+        category: 'ANDROID NATIVE ARCHITECTURE',
+        headline: '16KB Memory Page Parity. Automated Midnight Compaction.',
+        desc:
+            'Native C library 16KB memory page alignment verification, runtime exact alarm guards, internal broadcast receiver protection, and automated 30-day trash purging with database compaction during midnight maintenance.',
+        icon: CupertinoIcons.device_phone_portrait,
+        badgeColor: Color(0xFFFFD700),
+        specs:
+            '16KB ELF Alignment · Exact Alarm Runtime Guards · Protected Receivers · Automated Midnight DB Compaction',
       ),
     ],
     items: [
-      '• Classic iOS Switches, Habit Live Countdown, Merge Persistence & Apple HIG Architecture',
-      '+ Classic iOS Switch Toggles: Restored 62x32 custom switch with +10px mechanical stretch, Apple HIG "|" and "O" markings, and row-touch stretch',
-      '+ Habit Live Sessions & Countdown: Target duration mode (15m, 30m, 45m) with reverse chronometer, dedicated Stop action, and default auto-reset',
-      '+ Permanent Session Merging: Merged IN/OUT sessions persist permanently across sheet reloads; reassign session modes directly in History',
-      '+ Hierarchical Navigation: Swiping back in deep settings subpages ascends to the immediate parent category instead of root',
-      '+ Apple HIG Design Polish: Minimal Data Safety hero card, full-width App Permissions status card, and clean Content Rating badges',
-      '+ Gated Developer Experiments: 30-day continuous beta milestone unlock notification, plus 1-tap God Mode tester access',
-      '+ Timeline Rich Markdown: Inline formatting for bold, italic, code, quotes, and bullet lists with "Show more / Show less" expansion',
-      '+ Zero-Knowledge Vault Hardening: Key derivation hardened to 100,000 PBKDF2 iterations, note draft auto-saving, and discard protection',
+      '• Next-Generation Evolution: 100 Refinements, Sovereign Intelligence & Apple HIG Architecture',
+      '+ On-Device Auto-Categorization: 100% offline Naive Bayes classifier trained on local notes with Unicode-aware multilingual tokenization',
+      '+ Universal Interval Ledger: Boundary collision healing for overlapping sessions and zero-duration interval collapse',
+      '+ Multi-Category Target Allocations: Composite duration tracking across multiple categories in Goals & Targets without data loss',
+      '+ Habit Frequency Customizer: Custom active days of week with DST-immune calendar-exact streak calculations',
+      '+ Rune-Safe Fuzzy Search: Levenshtein distance 1 comparison comparing Unicode Runes preventing surrogate-pair emoji corruption',
+      '+ Sovereign Vault 200k PBKDF2: OWASP-grade 200,000 iterations for new backups and sandbox traversal injection protection',
+      '+ Apple HIG & Touch Ergonomics: ContinuousSquircleBorder, 56pt dividers, 52pt buttons, tabular chronometer figures, and 48x48dp touch slop',
+      '+ Android 15 & System Security: 16KB ELF alignment, exact alarm runtime checks, and automated midnight database vacuuming',
     ],
   );
 

@@ -28,79 +28,79 @@ class ChangelogDialog extends StatefulWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.5.14E1',
-    date: 'November 08, 2026',
+    version: '7.5.15',
+    date: 'November 10, 2026',
     edition:
-        'Classic iOS Switches, Habit Sessions & Permanent Merge Architecture',
-    badgeColor: Color(0xFFFF9F0A),
+        'Next-Generation Evolution: 100 Refinements & Sovereign Intelligence',
+    badgeColor: Color(0xFF30D158),
     highlights: [
       (
-        title: 'Classic iOS Custom Switch Toggles',
+        title: 'On-Device Offline Auto-Categorization',
         desc:
-            'Restored authentic custom iOS switch (commit 7.5.11) with 62x32 track, 34x28 white pill thumb, fluid +10px mechanical stretch, drop shadow, and Apple HIG Accessibility indicators ("|" and "O"). Row-touch kinetic stretching with zero desynchronization on cancelled PIN prompts.',
-        icon: Icons.toggle_on_rounded,
-        tag: 'Controls',
+            '100% air-gapped Naive Bayes classifier trained exclusively on local notes. Features Unicode-aware tokenization preserving diacritics and matras across English, French, German, Spanish, Hindi/Devanagari, and CJK text.',
+        icon: Icons.auto_awesome_rounded,
+        tag: 'Intelligence',
       ),
       (
-        title: 'Habit Live Sessions & Reverse Countdown',
+        title: 'Universal Ledger Boundary Healing',
         desc:
-            'Start live sessions from routine habits with 15m, 30m, 45m, or custom duration targets. Chronometer counts down in reverse towards completion, accompanied by a dedicated Stop action, high-contrast canvas text, and auto-reset to default.',
-        icon: Icons.timer_rounded,
+            'Mathematical reconciliation of overlapping session intervals in UniversalIntervalLedger, eliminating impossible chronological collisions and filtering zero-duration collapsed intervals without mutating raw moments.',
+        icon: Icons.merge_type_rounded,
+        tag: 'Ledger',
+      ),
+      (
+        title: 'Multi-Category Target Allocations',
+        desc:
+            'Define composite focus targets spanning multiple categories simultaneously in Goals & Targets. Category editing in CreateOrEditGoalView preserves multi-category selection without data loss.',
+        icon: Icons.track_changes_rounded,
+        tag: 'Goals',
+      ),
+      (
+        title: 'Habit Checkpoints & DST Immunity',
+        desc:
+            'Choose specific active days of week (1..7) for routine habits. Day progression calculations use calendar-exact stepping, eliminating Daylight Savings Time clock drift. Hardened number deserialization.',
+        icon: Icons.event_repeat_rounded,
         tag: 'Habits',
       ),
       (
-        title: 'Permanent Session Merging & Mode Switching',
+        title: 'Rune-Safe Full-Text Search with Fuzzy Matching',
         desc:
-            'Seamlessly merge individual timestamps into structured IN/OUT focus sessions directly from your History timeline. Merged sessions persist permanently in SQLite across sheet reloads, with instant reclassification to Work, Deep Focus, or General Mode.',
-        icon: Icons.merge_type_rounded,
-        tag: 'Timeline',
+            'Rune-safe Levenshtein distance 1 comparison comparing Unicode Runes, preventing surrogate-pair corruption when searching text containing non-BMP characters and emojis.',
+        icon: Icons.search_rounded,
+        tag: 'Search',
       ),
       (
-        title: 'Hierarchical Settings Navigation & Predictive Back',
+        title: 'Sovereign Vault Cryptographic Hardening (200k PBKDF2)',
         desc:
-            'Full 3-tier navigation stack and canonical parent resolution. Swiping back or tapping Back ascends smoothly to the immediate parent category rather than popping all the way back to root settings.',
-        icon: Icons.account_tree_rounded,
-        tag: 'Navigation',
+            'Elevated key derivation to 200,000 PBKDF2-HMAC-SHA256 iterations for new sovereign .notekar-vault backups with backward-compatible 100k decryption. Enforced sandbox boundary path validation preventing "../" traversal.',
+        icon: Icons.security_rounded,
+        tag: 'Security',
       ),
       (
-        title: 'Apple HIG & BitChord Precision Architecture',
+        title: 'Apple HIG Design & Squircle Token Unification',
         desc:
-            'Continuous squircle tokens with 60.7% corner smoothing, positive SF Pro micro-typography tracking (+0.05 to +0.2), redesigned full-width Data Safety and App Permissions cards, and sleek minimal Content Rating badges.',
-        icon: Icons.auto_awesome_rounded,
+            'Standardized SettingsGroup on ContinuousSquircleBorder, enforced 56.0pt inset dividers, 52pt button heights, OpenType tabular figures on live chronometers, and expanded all compact tap targets to meet or exceed 48×48dp.',
+        icon: Icons.brush_rounded,
         tag: 'Design',
       ),
       (
-        title: '1-Month Beta Milestone & Gated Experimental Builds',
+        title: 'Android 15 Platform Parity & Background Maintenance',
         desc:
-            'Dedicated beta testers who use NoteKar continuously for 30 days receive an authentic Apple HIG milestone popup unlocking early access to Developer Experiments. Testers with God Mode can also unlock builds instantly with one tap.',
-        icon: Icons.military_tech_rounded,
-        tag: 'Milestones',
-      ),
-      (
-        title: 'Timeline Rich Markdown & Expandable Notes',
-        desc:
-            'Formatted bold, italic, code, blockquotes, and bullet lists rendered directly on timeline cards with inline "Show more / Show less" expansion toggle and debounced 120Hz audio scrubbing.',
-        icon: Icons.notes_rounded,
-        tag: 'Timeline',
-      ),
-      (
-        title: 'Zero-Knowledge Vault 100k Hardening',
-        desc:
-            'Upgraded key derivation to OWASP-standard 100,000 PBKDF2 iterations, note composer draft auto-saving with discard protection, and dynamic window obfuscation.',
-        icon: Icons.lock_outline_rounded,
-        tag: 'Security',
+            'Native C library 16KB memory page alignment verification, runtime exact alarm guards, internal broadcast receiver protection, and automated 30-day trash purging with database compaction during midnight maintenance.',
+        icon: Icons.phone_android_rounded,
+        tag: 'System',
       ),
     ],
     items: [
-      'Classic iOS Switches, Habit Live Countdown, Merge Persistence & Apple HIG Architecture',
-      '+ Classic iOS Switch Toggles: Restored 62x32 custom switch with +10px mechanical stretch, Apple HIG "|" and "O" markings, and row-touch kinetic stretch',
-      '+ Habit Live Sessions & Countdown: Target duration mode (15m, 30m, 45m) with reverse chronometer, dedicated Stop action, and default auto-reset',
-      '+ Permanent Session Merging: Merged IN/OUT sessions persist permanently across sheet reloads; reassign session modes directly in History',
-      '+ Hierarchical Navigation: Swiping back in deep settings subpages ascends to the immediate parent category instead of root',
-      '+ Apple HIG Design Polish: Minimal Data Safety hero card, full-width App Permissions status card, and clean Content Rating badges',
-      '+ Gated Developer Experiments: 30-day continuous beta milestone unlock notification, plus 1-tap God Mode tester access',
-      '+ Timeline Rich Markdown: Inline formatting for bold, italic, code, quotes, and bullet lists with "Show more / Show less" expansion',
-      '+ Zero-Knowledge Vault Hardening: Key derivation hardened to 100,000 PBKDF2 iterations, note draft auto-saving, and discard protection',
+      'Next-Generation Evolution: 100 Refinements, Sovereign Intelligence & Apple HIG Architecture',
+      '+ On-Device Auto-Categorization: 100% offline Naive Bayes classifier trained on local notes with Unicode-aware multilingual tokenization',
+      '+ Universal Interval Ledger: Boundary collision healing for overlapping sessions and zero-duration interval collapse',
+      '+ Multi-Category Target Allocations: Composite duration tracking across multiple categories in Goals & Targets without data loss',
+      '+ Habit Frequency Customizer: Custom active days of week with DST-immune calendar-exact streak calculations',
+      '+ Rune-Safe Fuzzy Search: Levenshtein distance 1 comparison comparing Unicode Runes preventing surrogate-pair emoji corruption',
+      '+ Sovereign Vault 200k PBKDF2: OWASP-grade 200,000 iterations for new backups and sandbox traversal injection protection',
+      '+ Apple HIG & Touch Ergonomics: ContinuousSquircleBorder, 56pt dividers, 52pt buttons, tabular chronometer figures, and 48x48dp touch slop',
+      '+ Android 15 & System Security: 16KB ELF alignment, exact alarm runtime checks, and automated midnight database vacuuming',
     ],
   );
 
