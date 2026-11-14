@@ -332,50 +332,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
     );
     final adaptive = _activeAdaptiveColor;
     if (adaptive != null) {
-      final lum = adaptive.computeLuminance();
-      final isLightBg = lum > 0.45;
-      final contrastClock = isLightBg
-          ? const Color(0xFF000000)
-          : const Color(0xFFFFFFFF);
-      final contrastText = isLightBg
-          ? const Color(0xFF000000)
-          : const Color(0xFFFFFFFF);
-      final contrastText2 = isLightBg
-          ? const Color(0xFF3C3C43)
-          : const Color(0xFFEBEBF5);
-      final contrastText3 = isLightBg
-          ? const Color(0xFF6C6C70)
-          : const Color(0xFF8E8E93);
-      final contrastSurface = isLightBg
-          ? const Color(0xFFFFFFFF).withValues(alpha: 0.85)
-          : const Color(0xFF1C1C1E).withValues(alpha: 0.85);
-      final contrastSurface2 = isLightBg
-          ? const Color(0xFFF2F2F7).withValues(alpha: 0.90)
-          : const Color(0xFF2C2C2E).withValues(alpha: 0.90);
-      final contrastSurface3 = isLightBg
-          ? const Color(0xFFE5E5EA).withValues(alpha: 0.95)
-          : const Color(0xFF3A3A3C).withValues(alpha: 0.95);
-      final contrastBorder = isLightBg
-          ? const Color(0xFF000000).withValues(alpha: 0.15)
-          : const Color(0xFFFFFFFF).withValues(alpha: 0.20);
-      final accentLum = base.accent.computeLuminance();
-      final accentContrast = (lum - accentLum).abs();
-      final safeAccent = accentContrast > 0.25
-          ? base.accent
-          : (isLightBg ? const Color(0xFF0055B3) : const Color(0xFF64D2FF));
-
-      return base.copyWith(
-        bg: adaptive,
-        clock: contrastClock,
-        text: contrastText,
-        text2: contrastText2,
-        text3: contrastText3,
-        surface: contrastSurface,
-        surface2: contrastSurface2,
-        surface3: contrastSurface3,
-        border: contrastBorder,
-        accent: safeAccent,
-      );
+      // In dark and AMOLED themes, preserve the pristine dark canvas and surfaces.
+      // Modulate the interactive accent token cleanly without inverting surfaces to white.
+      return base.copyWith(accent: adaptive);
     }
     return base;
   }
@@ -2102,12 +2061,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
   void _showUndo() {
     _undoTimer?.cancel();
-    // In live sessions, keep undo visible until user closes/ends the session
-    final isLiveSession =
-        _mode == 'two-way' && (_sessionStart != null || _inout == 'out');
-    if (isLiveSession) {
-      return;
-    }
     _undoTimer = Timer(const Duration(milliseconds: 4500), () {
       if (mounted) setState(() => _lastId = null);
     });
@@ -5044,13 +4997,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
   void _applySystemUiStyle() {
     final light = _theme == 'light';
-    final adaptive = _activeAdaptiveColor;
-    final bool isDarkIcons;
-    if (adaptive != null) {
-      isDarkIcons = adaptive.computeLuminance() > 0.45;
-    } else {
-      isDarkIcons = light;
-    }
+    // System status bar icon brightness strictly tracks the actual theme canvas,
+    // never being misled by an active session accent color.
+    final isDarkIcons = light;
 
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
@@ -5364,6 +5313,58 @@ class _NoteKarHomeState extends State<NoteKarHome>
                         (_sessionStart != null || _inout == 'out'),
                     onHabitsChanged: () => setState(() {}),
                   ),
+                ] else if (!_headerExpanded &&
+                    !_showCheckpointsOnHome &&
+                    (_mode == 'two-way' &&
+                        (_sessionStart != null || _inout == 'out'))) ...[
+                  const SizedBox(height: 8),
+                  Center(
+                    child: PressableScale(
+                      onTap: _handleStopHabitSession,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(
+                          minHeight: 48,
+                          minWidth: 48,
+                        ),
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 7,
+                            ),
+                            decoration: BoxDecoration(
+                              color: palette.red.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: palette.red.withValues(alpha: 0.45),
+                                width: 0.8,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  CupertinoIcons.stop_fill,
+                                  size: 11,
+                                  color: palette.red,
+                                ),
+                                const SizedBox(width: 5),
+                                Text(
+                                  'Stop'.localized(context),
+                                  style: TextStyle(
+                                    color: palette.red,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: -0.2,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ],
             ),
@@ -5399,7 +5400,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
                 ),
               ),
             ),
-          if (lastSaved && _showLastSavedHint)
+          if (lastSaved &&
+              _showLastSavedHint &&
+              !(_mode == 'two-way' &&
+                  (_sessionStart != null || _inout == 'out')))
             Positioned(
               left: 0,
               right: 0,
@@ -5416,28 +5420,20 @@ class _NoteKarHomeState extends State<NoteKarHome>
                       message = 'Moment saved';
                       if (lastEntry.note.isNotEmpty) noteLabel = 'Edit Note';
                     } else {
-                      if (lastEntry.type == 'in') {
-                        message = 'Session started';
-                        if (lastEntry.note.isNotEmpty) noteLabel = 'Edit Note';
-                      } else {
-                        message = 'Session ended';
-                        final matchingIn = _entries
-                            .where(
-                              (e) =>
-                                  e.type == 'in' &&
-                                  e.timestamp <= lastEntry.timestamp,
-                            )
-                            .firstOrNull;
-                        final hasNote =
-                            lastEntry.note.isNotEmpty ||
-                            (matchingIn != null && matchingIn.note.isNotEmpty);
-                        if (hasNote) noteLabel = 'Edit Note';
-                      }
+                      message = 'Session ended';
+                      final matchingIn = _entries
+                          .where(
+                            (e) =>
+                                e.type == 'in' &&
+                                e.timestamp <= lastEntry.timestamp,
+                          )
+                          .firstOrNull;
+                      final hasNote =
+                          lastEntry.note.isNotEmpty ||
+                          (matchingIn != null && matchingIn.note.isNotEmpty);
+                      if (hasNote) noteLabel = 'Edit Note';
                     }
                   }
-                  final isLiveSession =
-                      _mode == 'two-way' &&
-                      (_sessionStart != null || _inout == 'out');
                   return UndoToast(
                     p: palette,
                     onUndo: _undoLast,
@@ -5445,8 +5441,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
                     message: message,
                     onAddNote: _openNoteForLastCapture,
                     noteLabel: noteLabel,
-                    persistent: isLiveSession,
-                    onStop: isLiveSession ? _logEntry : null,
+                    persistent: false,
                     onDismiss: () {
                       if (mounted) {
                         setState(() => _lastId = null);

@@ -59,6 +59,16 @@
                 "title": "iOS Top Pill Toasts & Routine Alarm",
                 "description": "Floating top pill toasts for habit actions, audio-tactile routine completion alerts, and 1-tap official bulletin dismissal.",
                 "icon": "notifications_active_rounded"
+            },
+            {
+                "title": "Dark Mode Session & Surface Integrity",
+                "description": "Prevented session colors from inverting Dark/AMOLED surfaces to white. Status bar icons strictly track theme canvas.",
+                "icon": "dark_mode_rounded"
+            },
+            {
+                "title": "Streamlined 2-Way Session Controls",
+                "description": "Removed persistent bottom toast in favor of top stop pill, including centered pill when habits are disabled.",
+                "icon": "stop_circle_rounded"
             }
         ],
         "fullChangelog": [
@@ -75,7 +85,11 @@
             "+ iOS Top Pill Toasts: Floating notifications for habit checkpoint logging & session start",
             "+ Routine Completion Alarm: Audio chime and tactile feedback upon routine countdown completion",
             "+ Bulletins 1-Tap Dismissal: Instant removal of image notices from the active bulletins list",
-            "+ Apple HIG Squircle Geometry: 24pt rounded radii on habit cards & clean subtle depth shadows"
+            "+ Apple HIG Squircle Geometry: 24pt rounded radii on habit cards & clean subtle depth shadows",
+            "+ Dark Mode Session Integrity: Preserved pristine dark/AMOLED surfaces during live sessions",
+            "+ Centered Stop Pill: Accessible Stop pill below intentional capsule when habits are disabled",
+            "+ Strongly-Typed PrefKeys: Centralized storage keys preventing string typos and duplicate lookups",
+            "+ POSIX Cross-Platform Tooling: verify.sh and test-all.sh scripts for macOS/Linux developers"
         ],
         "downloads": {
             "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.5.15/NoteKar-v7.5.15-universal-release.apk",

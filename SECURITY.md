@@ -16,6 +16,25 @@ Security updates and patches are provided for the following active channels:
 
 ---
 
+## 🛡️ Air-Gap & Cryptographic Verification Protocol
+
+For third-party security auditors, privacy advocates, and open-source contributors, NoteKar provides verifiable guarantees:
+
+### 1. Zero Network Telemetry (100% Air-Gapped)
+- NoteKar does not declare the `android.permission.INTERNET` permission in its production AndroidManifest.
+- **Audit Verification Command**:
+  ```bash
+  grep -i "android.permission.INTERNET" android/app/src/main/AndroidManifest.xml
+  # Returns 0 results
+  ```
+- Zero third-party analytics SDKs, zero crash reporters, zero remote tracking pixels.
+
+### 2. Sovereign Vault Encryption
+- Encrypted `.notekar-vault` exports utilize **PBKDF2-HMAC-SHA256** with $\ge 100,000$ iterations (200,000 iterations for new vaults) and **AES-256-GCM** authenticated ciphertext.
+- All restored attachments undergo strict sandbox boundary checks preventing directory traversal (`../`) injection.
+
+---
+
 ## Reporting a Vulnerability
 
 If you discover a security vulnerability or privacy leak in NoteKar Android, please **do not open a public issue on GitHub**. Report it privately to the maintainer:

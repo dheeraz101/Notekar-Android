@@ -20,6 +20,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Midnight Background Maintenance & Compaction (`SEC-09` & `MAJ-16`)**: Integrated automated 30-day trash purging and Isar database compaction into background `Workmanager` midnight worker (`requiresBatteryNotLow: true`).
 
 ### Improvements & Bug Fixes
+- **Dark Mode Session Surface Integrity**: Prevented active session colors from inverting Dark and AMOLED surfaces to white or canvas to neon blocks. Active session colors now modulate the interactive `accent` token cleanly.
+- **System Status Bar Visibility**: Ensured status bar icon brightness strictly tracks the true theme canvas, preventing icons from turning black and invisible on dark session backdrops.
+- **Streamlined 2-Way Session Controls**: Suppressed persistent bottom undo/stop toast during active 2-way live sessions. Transient moment save and session end toasts continue to auto-dismiss cleanly after 4.5 seconds.
+- **Centered Stop Pill When Habits Disabled**: Rendered an accessible centered Stop pill with 48×48dp minimum touch slop (`NkTouchTarget.minInteractive`) directly below the intentional capsule when habits are disabled in settings.
+- **Strongly-Typed Preferences Contract (`PrefKeys`)**: Centralized local storage keys into `lib/constants/pref_keys.dart` with compile-time checks and backward-compatibility fallbacks.
+- **POSIX Developer Tooling**: Provided `scripts/verify.sh` and `scripts/test-all.sh` bash mirrors for macOS and Linux developers and CI environments.
+- **Security & Contributing Standards**: Documented mandatory local verification quality gates in `CONTRIBUTING.md` and formal air-gap and cryptographic audit procedures in `SECURITY.md`.
 - **Bottom Navigation Contrast Restoration**: Calculated background luminance (`p.bg.computeLuminance() < 0.45`) in navigation capsule decorations and action buttons, guaranteeing >= 4.5:1 WCAG contrast on active colored session backdrops.
 - **Habit Checkpoints Theme Isolation**: Decoupled Checkpoints Insights dashboard canvas from active habit session palette, eliminating color bleed onto insights cards and calendar matrices.
 - **Apple iOS Top Pill Toast Integration**: Converted habit checkpoint logging and live session commencement notifications from bottom snackbars to floating top pill toasts (`showIosPillToast`).

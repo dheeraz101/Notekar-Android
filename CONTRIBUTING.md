@@ -33,16 +33,37 @@ Please review and follow our **[Code of Conduct](CODE_OF_CONDUCT.md)** in all re
 
 ## 🚀 How to Contribute
 
-### 1. Code Analysis, Formatting & Design System
-Before committing changes, ensure your code passes static analysis, formatting, and test verification:
+### 1. Code Analysis, Formatting & Quality Gate
+NoteKar enforces a strict **zero-lint, zero-warning quality gate**. All automated tests must pass 100% and formatting must be pristine before any commit or pull request is accepted.
+
+Run the local verification suite:
+- **Windows (PowerShell)**:
+  ```powershell
+  .\scripts\verify.ps1
+  ```
+- **macOS / Linux (Bash)**:
+  ```bash
+  ./scripts/verify.sh
+  ```
+
+Or run the individual commands directly:
 ```bash
-flutter analyze
-dart format lib/ test/
+# 1. Clean formatting verification
+dart format --output=none --set-exit-if-changed lib/ test/
+
+# 2. Strict static analysis (fatal on any warning or info)
+flutter analyze --fatal-infos --fatal-warnings
+
+# 3. Comprehensive test suite
 flutter test
 ```
 
 > [!IMPORTANT]
-> **Adhere to the NoteKar Design System**: Review **[DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)** before contributing UI components. All new interfaces must use standardized design tokens (`NkCard`, `NkListTile`, `NkButton`, `NkTokens`) and follow Apple Human Interface Guidelines adapted authentically for Android.
+> **Prime Directives for NoteKar Engineering**:
+> - **Code Preservation Over Code Generation**: Never delete, stub out, or rewrite working models or features. Changes must be strictly additive and surgical.
+> - **Apple HIG Design × Android Authenticity**: Continuous superellipse squircles (`NkTokens.radii.squircleCard`), 48×48dp minimum touch targets (`NkTouchTarget.minInteractive`), and tabular figures on chronometers.
+> - **Zero Telemetry & 100% Air-Gap**: NoteKar has zero network analytics, crash loggers, or telemetry SDKs. Keep all data strictly local.
+> - Review **[DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)** and **[AGENTS.md](AGENTS.md)** for detailed specifications.
 
 ### 2. Translating the App
 Want to add or improve a language translation? Check out our dedicated **[Translation Guide (TRANSLATIONS.md)](TRANSLATIONS.md)** for a 3-step walkthrough on working with `.arb` localization files.
