@@ -35,7 +35,9 @@ class Glass extends StatelessWidget {
   Widget build(BuildContext context) {
     final effectiveBlur = blur && AdaptiveEngine().supportsBlur;
     final resolvedRadius = borderRadius ?? BorderRadius.circular(radius);
-    final isLight = !p.isDark;
+    final bgLum = p.bg.computeLuminance();
+    final isDarkBg = bgLum < 0.45;
+    final isLight = !p.isDark && !isDarkBg;
     final isAmoled = p.name == 'amoled';
 
     // Base surface tint tuned for physical translucency

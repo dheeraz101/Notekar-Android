@@ -66,9 +66,9 @@ class SmartSearchChipsBar extends StatelessWidget {
                 boxShadow: isActive
                     ? [
                         BoxShadow(
-                          color: p.accent.withValues(alpha: 0.35),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
+                          color: Colors.black.withValues(alpha: 0.06),
+                          blurRadius: 4,
+                          offset: const Offset(0, 1),
                         ),
                       ]
                     : null,

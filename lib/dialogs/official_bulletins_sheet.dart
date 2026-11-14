@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/app_notice.dart';
 import 'package:notekar/models/palette.dart';
@@ -199,6 +200,22 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
         p: widget.p,
         message: 'Bulletins updated'.localized(context),
         icon: Icons.done_all_rounded,
+      );
+    }
+  }
+
+  Future<void> _handleDismissNotice(AppNotice notice) async {
+    HapticFeedback.mediumImpact();
+    await _service.dismissNotice(notice.id);
+    if (mounted) {
+      setState(() {
+        _notices.removeWhere((n) => n.id == notice.id);
+      });
+      showIosPillToast(
+        context: context,
+        p: widget.p,
+        message: 'Bulletin dismissed'.localized(context),
+        icon: CupertinoIcons.xmark_circle,
       );
     }
   }
@@ -437,6 +454,7 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
                 notice: n,
                 onOpenLink: widget.onOpenLink,
                 onNavigateAction: widget.onNavigateAction,
+                onDismiss: _handleDismissNotice,
               ),
             const SizedBox(height: spacing16),
           ],
@@ -455,6 +473,7 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
                 notice: n,
                 onOpenLink: widget.onOpenLink,
                 onNavigateAction: widget.onNavigateAction,
+                onDismiss: _handleDismissNotice,
               ),
             const SizedBox(height: spacing16),
           ],
@@ -473,6 +492,7 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
                 notice: n,
                 onOpenLink: widget.onOpenLink,
                 onNavigateAction: widget.onNavigateAction,
+                onDismiss: _handleDismissNotice,
               ),
             const SizedBox(height: spacing16),
           ],
@@ -491,6 +511,7 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
                 notice: n,
                 onOpenLink: widget.onOpenLink,
                 onNavigateAction: widget.onNavigateAction,
+                onDismiss: _handleDismissNotice,
               ),
             const SizedBox(height: spacing16),
           ],
@@ -509,6 +530,7 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
                 notice: n,
                 onOpenLink: widget.onOpenLink,
                 onNavigateAction: widget.onNavigateAction,
+                onDismiss: _handleDismissNotice,
               ),
           ],
         ],
@@ -561,12 +583,14 @@ class _NoticeCard extends StatelessWidget {
     required this.notice,
     required this.onOpenLink,
     this.onNavigateAction,
+    this.onDismiss,
   });
 
   final Palette p;
   final AppNotice notice;
   final void Function(String url) onOpenLink;
   final void Function(String actionRoute)? onNavigateAction;
+  final void Function(AppNotice notice)? onDismiss;
 
   @override
   Widget build(BuildContext context) {
@@ -865,7 +889,9 @@ class _NoticeCard extends StatelessWidget {
                 if (notice.isImagePost)
                   PressableScale(
                     onTap: () {
-                      NoticeImagePostDialog.show(context, p: p, notice: notice);
+                      if (onDismiss != null) {
+                        onDismiss!(notice);
+                      }
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(
@@ -879,14 +905,10 @@ class _NoticeCard extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            CupertinoIcons.fullscreen,
-                            color: bwFg,
-                            size: 13,
-                          ),
+                          Icon(CupertinoIcons.xmark, color: bwFg, size: 13),
                           const SizedBox(width: 6),
                           Text(
-                            'View Notice',
+                            'Cancel',
                             style: TextStyle(
                               color: bwFg,
                               fontSize: 12,

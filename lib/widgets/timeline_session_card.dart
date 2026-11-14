@@ -162,8 +162,8 @@ class TimelineSessionCard extends StatelessWidget {
               boxShadow: [
                 if (isOngoing)
                   BoxShadow(
-                    color: p.green.withValues(alpha: 0.12),
-                    blurRadius: 10,
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
               ],

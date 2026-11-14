@@ -246,12 +246,6 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
               decoration: BoxDecoration(
                 color: meta.color,
                 shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: meta.color.withValues(alpha: 0.6),
-                    blurRadius: 4,
-                  ),
-                ],
               ),
             ),
             const SizedBox(width: 7),
@@ -360,12 +354,6 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
                     decoration: BoxDecoration(
                       color: meta.color,
                       shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: meta.color.withValues(alpha: 0.5),
-                          blurRadius: 4,
-                        ),
-                      ],
                     ),
                   ),
                   const SizedBox(width: 7),
@@ -569,12 +557,6 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
                                 decoration: BoxDecoration(
                                   color: p.green,
                                   shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: p.green.withValues(alpha: 0.6),
-                                      blurRadius: 4,
-                                    ),
-                                  ],
                                 ),
                               ),
                             Text(

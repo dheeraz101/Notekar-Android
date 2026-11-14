@@ -20,6 +20,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Midnight Background Maintenance & Compaction (`SEC-09` & `MAJ-16`)**: Integrated automated 30-day trash purging and Isar database compaction into background `Workmanager` midnight worker (`requiresBatteryNotLow: true`).
 
 ### Improvements & Bug Fixes
+- **Bottom Navigation Contrast Restoration**: Calculated background luminance (`p.bg.computeLuminance() < 0.45`) in navigation capsule decorations and action buttons, guaranteeing >= 4.5:1 WCAG contrast on active colored session backdrops.
+- **Habit Checkpoints Theme Isolation**: Decoupled Checkpoints Insights dashboard canvas from active habit session palette, eliminating color bleed onto insights cards and calendar matrices.
+- **Apple iOS Top Pill Toast Integration**: Converted habit checkpoint logging and live session commencement notifications from bottom snackbars to floating top pill toasts (`showIosPillToast`).
+- **Routine Target Completion Alert**: Added completion chime (`AppSound.click()`), tactile haptic alert (`HapticFeedback.heavyImpact()`), and iOS top notification when a routine countdown reaches 00:00.
+- **Official Bulletins Image Post Dismissal**: Added 1-tap "Cancel" dismissal action with Cupertino xmark icon on image bulletin posts, permanently dismissing them from the active bulletins list via `NoticeService.dismissNotice()`.
+- **Apple HIG Card Geometry Unification**: Upgraded habit checkpoint breakdown and log cards to unified 24.0pt continuous squircle radii (`NkTokens.radii.squircleCard`), eliminating awkward boxy/square corners.
+- **Clean iOS Surface Aesthetics**: Removed neon `BoxShadow` color glow halos across header capsule dots, search chips, and timeline cards in favor of Apple HIG subtle neutral depth shadows.
+- **Centralized Text Copy Catalog (`lib/l10n/app_strings.dart`)**: Consolidated canonical UI strings, action labels, and system guidance into a centralized repository for streamlined copy edits and localization readiness.
 - Added tactile selection clicks on mode/category pill toggles and distinct medium impact bursts on timer start/stop (`MIC-07`, `MIC-08`).
 - Preserved scroll position per category key during timeline filter switching using `PageStorageKey` (`MIC-22`).
 - Enforced bottom `SafeArea` on edge-to-edge transparent navigation bar across all bottom sheets (`MIC-23`).

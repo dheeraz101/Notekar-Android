@@ -133,6 +133,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   int? _sessionStart;
   Duration? _sessionTargetDuration;
   String? _activeHabitSessionPresetId;
+  bool _hasTriggeredRoutineAlarm = false;
   bool _isPaused = false;
   int? _pausedAt;
   int _tapDelay = 0;
@@ -2667,6 +2668,31 @@ class _NoteKarHomeState extends State<NoteKarHome>
   Future<void> _checkMidSessionGoalCompletion() async {
     if (!mounted) return;
     if (_mode != 'two-way' || _sessionStart == null || _inout != 'out') return;
+
+    if (_sessionTargetDuration != null &&
+        _sessionStart != null &&
+        !_hasTriggeredRoutineAlarm) {
+      final elapsed = DateTime.now().difference(
+        DateTime.fromMillisecondsSinceEpoch(_sessionStart!),
+      );
+      if (elapsed >= _sessionTargetDuration!) {
+        _hasTriggeredRoutineAlarm = true;
+        AppSound.click();
+        HapticFeedback.heavyImpact();
+        if (mounted) {
+          showIosPillToast(
+            context: context,
+            p: _p,
+            message: 'Routine target reached! Tap to end session'.localized(
+              context,
+            ),
+            icon: CupertinoIcons.bell_fill,
+            duration: const Duration(milliseconds: 3500),
+          );
+        }
+      }
+    }
+
     if (_cachedGoals.isEmpty) return;
 
     // Filter strictly to goals that can be advanced by this active session
@@ -3077,14 +3103,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
     if (mounted) {
       final diff = end.difference(start);
       final durStr = durationLabel(diff, extended: false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '${preset.emoji} ${preset.label} session logged ($durStr)!'
-                .localized(context),
-          ),
-          duration: const Duration(seconds: 2),
-        ),
+      showIosPillToast(
+        context: context,
+        p: _p,
+        message: '${preset.emoji} ${preset.label} session logged ($durStr)!'
+            .localized(context),
+        icon: CupertinoIcons.check_mark_circled_solid,
       );
     }
   }
@@ -3112,6 +3136,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
           ? Duration(minutes: targetDurationMinutes)
           : null;
       _activeHabitSessionPresetId = preset.id;
+      _hasTriggeredRoutineAlarm = false;
       _mode = 'two-way';
       _inout = 'out';
       _activeCategory = preset.category;
@@ -3130,17 +3155,16 @@ class _NoteKarHomeState extends State<NoteKarHome>
     unawaited(_saveSetting('m-mode', 'two-way'));
     unawaited(_saveSetting('m-active-cat', preset.category));
     _applySystemUiStyle();
+    _startGoalCelebrationWatcher();
     AppSound.click();
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '${preset.emoji} ${preset.label} session started!'.localized(
-              context,
-            ),
-          ),
-          duration: const Duration(seconds: 2),
+      showIosPillToast(
+        context: context,
+        p: _p,
+        message: '${preset.emoji} ${preset.label} session started!'.localized(
+          context,
         ),
+        icon: CupertinoIcons.timer,
       );
     }
   }
@@ -3152,6 +3176,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       setState(() {
         _activeHabitSessionPresetId = null;
         _sessionTargetDuration = null;
+        _hasTriggeredRoutineAlarm = false;
         _activeCategory = 'All';
       });
       unawaited(_prefs?.remove('m-active-habit-preset-id'));
@@ -3179,13 +3204,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
     });
     AppSound.click();
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '${preset.emoji} ${preset.label} logged!'.localized(context),
-          ),
-          duration: const Duration(seconds: 2),
-        ),
+      showIosPillToast(
+        context: context,
+        p: _p,
+        message: '${preset.emoji} ${preset.label} logged!'.localized(context),
+        icon: CupertinoIcons.check_mark_circled_solid,
       );
     }
   }
@@ -3193,7 +3216,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   void _openCheckpointsDashboard({String? initialPresetId}) {
     CheckpointsDashboardScreen.show(
       context,
-      p: p,
+      p: _p,
       moments: _entries,
       onLogCheckpoint: _handleLogCheckpoint,
       initialPresetId: initialPresetId,

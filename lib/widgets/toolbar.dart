@@ -119,6 +119,13 @@ class _ToolbarState extends State<Toolbar> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final p = widget.p;
+    final bgLum = p.bg.computeLuminance();
+    final isDarkBg = bgLum < 0.45;
+    final isLight = !p.isDark && !isDarkBg;
+    final toolbarTextColor = isLight
+        ? const Color(0xFF1C1C1E)
+        : const Color(0xFFFFFFFF);
+
     final isGoalActive =
         widget.enableGoalSwitcher &&
         widget.activeGoalTitle != null &&
@@ -283,7 +290,7 @@ class _ToolbarState extends State<Toolbar> with SingleTickerProviderStateMixin {
                                       )
                                     : AnimatedHomeIcon(
                                         icon: Icons.access_time_rounded,
-                                        color: p.text,
+                                        color: toolbarTextColor,
                                         size: widget.largeControls ? 20 : 18,
                                         motionNotifier: widget.animateIcons
                                             ? widget.motionNotifier
@@ -308,7 +315,7 @@ class _ToolbarState extends State<Toolbar> with SingleTickerProviderStateMixin {
                                   historyLabel,
                                   key: ValueKey<String>(historyLabel),
                                   style: TextStyle(
-                                    color: p.text,
+                                    color: toolbarTextColor,
                                     fontWeight: FontWeight.w700,
                                     fontSize: 15,
                                     letterSpacing: -0.2,
@@ -329,7 +336,7 @@ class _ToolbarState extends State<Toolbar> with SingleTickerProviderStateMixin {
                               ),
                               child: AnimatedHomeIcon(
                                 icon: Icons.access_time_rounded,
-                                color: p.text,
+                                color: toolbarTextColor,
                                 size: widget.largeControls ? 20 : 18,
                                 motionNotifier: widget.animateIcons
                                     ? widget.motionNotifier
@@ -352,7 +359,7 @@ class _ToolbarState extends State<Toolbar> with SingleTickerProviderStateMixin {
           CircleToolButton(
             p: p,
             icon: Icons.settings_rounded,
-            color: p.text,
+            color: toolbarTextColor,
             label: widget.showLabels ? 'Settings' : null,
             size: widget.largeControls ? 56 : 48,
             blur: widget.blur,
@@ -393,7 +400,9 @@ class _ToolbarState extends State<Toolbar> with SingleTickerProviderStateMixin {
 }
 
 BoxDecoration _bottomNavDecoration(Palette p, bool blur) {
-  final isLight = !p.isDark;
+  final bgLum = p.bg.computeLuminance();
+  final isDarkBg = bgLum < 0.45;
+  final isLight = !p.isDark && !isDarkBg;
   final isAmoled = p.name == 'amoled';
 
   final surfaceColor = isLight
@@ -554,6 +563,13 @@ class TextToolButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bgLum = p.bg.computeLuminance();
+    final isDarkBg = bgLum < 0.45;
+    final isLight = !p.isDark && !isDarkBg;
+    final effectiveColor = isLight
+        ? const Color(0xFF1C1C1E)
+        : const Color(0xFFFFFFFF);
+
     return PressableScale(
       onTap: onTap,
       child: Glass(
@@ -568,12 +584,12 @@ class TextToolButton extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: p.text,
+                    color: effectiveColor,
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
                   ),
                 )
-              : Icon(icon, color: p.text, size: 18),
+              : Icon(icon, color: effectiveColor, size: 18),
         ),
       ),
     );
@@ -612,6 +628,13 @@ class CircleToolButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final isLarge = size >= 54;
     final innerSize = isLarge ? 36.0 : 32.0;
+    final bgLum = p.bg.computeLuminance();
+    final isDarkBg = bgLum < 0.45;
+    final isLight = !p.isDark && !isDarkBg;
+    final effectiveColor =
+        (color.computeLuminance() - (isLight ? 1.0 : 0.0)).abs() < 0.35
+        ? (isLight ? const Color(0xFF1C1C1E) : const Color(0xFFFFFFFF))
+        : color;
     return PressableScale(
       onTap: onTap,
       child: Glass(
@@ -634,7 +657,7 @@ class CircleToolButton extends StatelessWidget {
                     ),
                     child: AnimatedHomeIcon(
                       icon: icon,
-                      color: color,
+                      color: effectiveColor,
                       size: isLarge ? 20 : 18,
                       motionNotifier: motionNotifier,
                       motionX: motionX,
@@ -655,7 +678,7 @@ class CircleToolButton extends StatelessWidget {
                       ),
                       child: AnimatedHomeIcon(
                         icon: icon,
-                        color: color,
+                        color: effectiveColor,
                         size: isLarge ? 20 : 18,
                         motionNotifier: motionNotifier,
                         motionX: motionX,
@@ -666,7 +689,7 @@ class CircleToolButton extends StatelessWidget {
                     Text(
                       label!,
                       style: TextStyle(
-                        color: color,
+                        color: effectiveColor,
                         fontSize: 10,
                         fontWeight: FontWeight.w800,
                       ),
@@ -706,7 +729,10 @@ class ModeToolButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final single = mode == 'single';
-    final color = p.text;
+    final bgLum = p.bg.computeLuminance();
+    final isDarkBg = bgLum < 0.45;
+    final isLight = !p.isDark && !isDarkBg;
+    final color = isLight ? const Color(0xFF1C1C1E) : const Color(0xFFFFFFFF);
     final size = large ? 56.0 : 48.0;
     final innerSize = large ? 36.0 : 32.0;
     return PressableScale(

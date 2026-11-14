@@ -624,7 +624,7 @@ class _CheckpointsDashboardScreenState
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: p.surface2,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(24),
               border: Border.all(color: p.border.withValues(alpha: 0.5)),
             ),
             alignment: Alignment.center,
@@ -668,7 +668,7 @@ class _CheckpointsDashboardScreenState
                 ),
                 decoration: BoxDecoration(
                   color: p.surface2,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: p.border.withValues(alpha: 0.5)),
                 ),
                 child: Row(
@@ -912,20 +912,20 @@ class _CheckpointsDashboardScreenState
                 setState(() => _selectedPresetId = preset.id);
               },
               child: Container(
-                padding: const EdgeInsets.all(14),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: p.surface2,
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(24),
                   border: Border.all(color: p.border.withValues(alpha: 0.5)),
                 ),
                 child: Row(
                   children: [
                     Container(
-                      width: 40,
-                      height: 40,
+                      width: 44,
+                      height: 44,
                       decoration: BoxDecoration(
                         color: p.accent.withValues(alpha: 0.16),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       alignment: Alignment.center,
                       child: Text(
@@ -1022,7 +1022,7 @@ class _CheckpointsDashboardScreenState
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: p.surface2,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: p.border.withValues(alpha: 0.4)),
       ),
       child: Column(
