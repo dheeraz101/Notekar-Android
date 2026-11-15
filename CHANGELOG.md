@@ -32,7 +32,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Apple iOS Top Pill Toast Integration**: Converted habit checkpoint logging and live session commencement notifications from bottom snackbars to floating top pill toasts (`showIosPillToast`).
 - **Routine Target Completion Alert**: Added completion chime (`AppSound.click()`), tactile haptic alert (`HapticFeedback.heavyImpact()`), and iOS top notification when a routine countdown reaches 00:00.
 - **Official Bulletins Image Post Dismissal**: Added 1-tap "Cancel" dismissal action with Cupertino xmark icon on image bulletin posts, permanently dismissing them from the active bulletins list via `NoticeService.dismissNotice()`.
-- **Apple HIG Card Geometry Unification**: Upgraded habit checkpoint breakdown and log cards to unified 24.0pt continuous squircle radii (`NkTokens.radii.squircleCard`), eliminating awkward boxy/square corners.
+- **Apple HIG Card Geometry Unification**: Restored uniform 28pt rounded card radii across all `SettingsGroup` containers and habit dashboard cards, eliminating the Flutter `ContinuousRectangleBorder` squarish corner artifact.
+- **Apple HIG Minimalist Text Refinements**: Streamlined copy across Accent Color Sanctuary, App Icons dock header, Data Safety privacy nutrition labels, App Philosophy, and Upcoming Features.
+- **Personal Profile Customizations**: Added personal customization controls including Personal Intent Mantra, Core Focus Domain horizontal selector, and Share Mantra on Profile Card toggle.
+- **Official Bulletins & Changelog Redesign**: Removed redundant zero-tracking guarantee box from bulletins, streamlined What's New with clean, focused cards, and provided a direct "View Previous Versions" action tile on Changelog.
+- **Time-Awareness & Concurrency Segmented Control**: Upgraded logging concurrency configuration to an Apple HIG Cupertino sliding segmented control (`[ Auto-Pause | Parallel ]`).
+- **Settings Dark Theme Search Bar Artifact Fix**: Eliminated the rectangular container clipping artifact in Dark theme (`#0B0F19`).
+- **Settings & History Dialog Scroll Reset**: Dialog scroll offsets now automatically reset to top (`0.0`) upon dismissal or closing.
+- **Guide & Help Content Deduplication**: Deduplicated redundant content between Guide and FAQ with Apple HIG squircle icon badges and Cupertino accordions.
 - **Clean iOS Surface Aesthetics**: Removed neon `BoxShadow` color glow halos across header capsule dots, search chips, and timeline cards in favor of Apple HIG subtle neutral depth shadows.
 - **Centralized Text Copy Catalog (`lib/l10n/app_strings.dart`)**: Consolidated canonical UI strings, action labels, and system guidance into a centralized repository for streamlined copy edits and localization readiness.
 - Added tactile selection clicks on mode/category pill toggles and distinct medium impact bursts on timer start/stop (`MIC-07`, `MIC-08`).
@@ -41,7 +48,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added defensive `isNaN` guards in composite productivity score calculation (`MAJ-08`).
 - Filtered collapsed zero-duration intervals in interval ledger collision resolution (`MAJ-02`).
 - Added touch slop expansion (48×48dp) to batch trash action button in timeline multi-selection toolbar (`MIC-05`).
-- Passed 580/580 automated tests across 75 test suites with 0 static analysis warnings.
+- Passed 583/583 automated tests across 75 test suites with 0 static analysis warnings.
 
 ## [7.5.14E1] - 2026-11-08 (versionCode 26ER1108)
 

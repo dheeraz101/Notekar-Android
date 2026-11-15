@@ -52,7 +52,7 @@
             },
             {
                 "title": "Adaptive Bottom Nav & Apple HIG Surfaces",
-                "description": "Guaranteed high contrast navigation bar on active colored session backdrops, 24pt squircle radii, and eliminated neon glow halos.",
+                "description": "Guaranteed high contrast navigation bar on active colored session backdrops, uniform 28pt rounded card radii, and eliminated neon glow halos.",
                 "icon": "palette_rounded"
             },
             {
