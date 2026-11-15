@@ -320,6 +320,64 @@ class SettingsDialog extends StatefulWidget {
   State<SettingsDialog> createState() => _SettingsDialogState();
 }
 
+class _SettingsScrollPosition extends ScrollPositionWithSingleContext {
+  final String storageKey;
+
+  _SettingsScrollPosition({
+    required this.storageKey,
+    required super.physics,
+    required super.context,
+    super.initialPixels = 0.0,
+    super.keepScrollOffset = true,
+    super.oldPosition,
+  });
+
+  @override
+  void restoreScrollOffset() {
+    super.restoreScrollOffset();
+    if (!hasPixels) {
+      final saved = AppScrollState.get(storageKey);
+      if (saved > 0.0) {
+        correctPixels(saved);
+      }
+    }
+  }
+
+  @override
+  void saveScrollOffset() {
+    super.saveScrollOffset();
+    if (hasPixels) {
+      AppScrollState.save(storageKey, pixels);
+    }
+  }
+}
+
+class _SettingsScrollController extends ScrollController {
+  final String storageKey;
+
+  _SettingsScrollController({
+    required this.storageKey,
+    super.initialScrollOffset = 0.0,
+    super.keepScrollOffset = true,
+  });
+
+  @override
+  ScrollPosition createScrollPosition(
+    ScrollPhysics physics,
+    ScrollContext context,
+    ScrollPosition? oldPosition,
+  ) {
+    return _SettingsScrollPosition(
+      storageKey: storageKey,
+      physics: physics,
+      context: context,
+      initialPixels: AppScrollState.get(storageKey),
+      keepScrollOffset: keepScrollOffset,
+      oldPosition: oldPosition,
+    );
+  }
+}
+
 class _SettingsDialogState extends State<SettingsDialog> {
   String? category;
   final List<String> _categoryStack = [];
@@ -331,9 +389,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
     var c = _scrollControllers[key];
     if (c == null) {
       final initial = AppScrollState.get('settings_$key');
-      c = ScrollController(
+      c = _SettingsScrollController(
+        storageKey: 'settings_$key',
         initialScrollOffset: initial,
-        keepScrollOffset: false,
+        keepScrollOffset: true,
       );
       c.addListener(() {
         if (c!.hasClients) {

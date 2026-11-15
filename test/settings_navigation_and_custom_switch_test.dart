@@ -821,5 +821,402 @@ void main() {
         expect(postCancelSwitch.value, isFalse);
       },
     );
+
+    testWidgets(
+      'Navigating from Updates & Notices to "What\'s New" after scrolling down 300px, then popping back, preserves exact scroll offset',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1000);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        await tester.pumpWidget(
+          buildTestSettingsDialog(initialCategory: 'Updates & Notices'),
+        );
+        await pumpFrames(tester);
+
+        expect(find.text('Updates & Notices'), findsWidgets);
+
+        // Find the Scrollable on Updates & Notices and scroll down by 300px
+        final scrollableFinder = find.byType(Scrollable);
+        expect(scrollableFinder, findsWidgets);
+        final scrollable = tester.state<ScrollableState>(
+          scrollableFinder.first,
+        );
+        scrollable.position.jumpTo(300.0);
+        await pumpFrames(tester);
+        expect(scrollable.position.pixels, 300.0);
+
+        // Tap "What's New" row to navigate into sub-category
+        final whatsNewFinder = find.text("What's New");
+        expect(whatsNewFinder, findsOneWidget);
+        await tester.tap(whatsNewFinder);
+        await pumpFrames(tester);
+
+        // Verify we are on "What's New" category
+        expect(find.text("What's New"), findsWidgets);
+
+        // Tap back to pop back to Updates & Notices
+        await tester.tap(find.byTooltip('Back'));
+        await pumpFrames(tester);
+
+        // Verify we returned to Updates & Notices
+        expect(find.text('Updates & Notices'), findsWidgets);
+
+        // Verify the scroll offset on Updates & Notices was preserved at exactly 300.0
+        final restoredScrollable = tester.state<ScrollableState>(
+          find.byType(Scrollable).first,
+        );
+        expect(restoredScrollable.position.pixels, 300.0);
+      },
+    );
+
+    testWidgets(
+      'When user intentionally scrolls down and scrolls back to 0.0, navigating into sub-category and back preserves 0.0 offset',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1000);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        await tester.pumpWidget(
+          buildTestSettingsDialog(initialCategory: 'Updates & Notices'),
+        );
+        await pumpFrames(tester);
+
+        expect(find.text('Updates & Notices'), findsWidgets);
+
+        // Scroll down first
+        final scrollable = tester.state<ScrollableState>(
+          find.byType(Scrollable).first,
+        );
+        scrollable.position.jumpTo(250.0);
+        await pumpFrames(tester);
+        expect(scrollable.position.pixels, 250.0);
+
+        // Scroll back up to 0.0
+        scrollable.position.jumpTo(0.0);
+        await pumpFrames(tester);
+        expect(scrollable.position.pixels, 0.0);
+
+        // Navigate to sub-category Build Choose (via Build Channel row, visible at scroll 0.0)
+        final buildChannelFinder = find.text('Build Channel');
+        expect(buildChannelFinder, findsOneWidget);
+        await tester.tap(buildChannelFinder);
+        await pumpFrames(tester);
+        expect(find.text('Build Choose'), findsWidgets);
+
+        // Pop back to Updates & Notices
+        await tester.tap(find.byTooltip('Back'));
+        await pumpFrames(tester);
+        expect(find.text('Updates & Notices'), findsWidgets);
+
+        // Verify scroll position is still 0.0
+        final restoredScrollable = tester.state<ScrollableState>(
+          find.byType(Scrollable).first,
+        );
+        expect(restoredScrollable.position.pixels, 0.0);
+      },
+    );
+
+    testWidgets(
+      'Dismissing the entire settings dialog and reopening resets the scroll position to top (0.0)',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1000);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        bool showDialog = true;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: StatefulBuilder(
+                builder: (context, setState) {
+                  if (!showDialog) return const SizedBox();
+                  return buildTestSettingsDialog(
+                    initialCategory: 'Updates & Notices',
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+        await pumpFrames(tester);
+
+        expect(find.text('Updates & Notices'), findsWidgets);
+
+        // Scroll down 300px
+        final scrollable = tester.state<ScrollableState>(
+          find.byType(Scrollable).first,
+        );
+        scrollable.position.jumpTo(300.0);
+        await pumpFrames(tester);
+        expect(scrollable.position.pixels, 300.0);
+
+        // Dismiss the entire settings dialog (unmount / dispose)
+        showDialog = false;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: StatefulBuilder(
+                builder: (context, setState) {
+                  if (!showDialog) return const SizedBox();
+                  return buildTestSettingsDialog(
+                    initialCategory: 'Updates & Notices',
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+        await pumpFrames(tester);
+        expect(find.byType(SettingsDialog), findsNothing);
+
+        // Reopen the settings dialog
+        showDialog = true;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: StatefulBuilder(
+                builder: (context, setState) {
+                  if (!showDialog) return const SizedBox();
+                  return buildTestSettingsDialog(
+                    initialCategory: 'Updates & Notices',
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+        await pumpFrames(tester);
+        expect(find.byType(SettingsDialog), findsOneWidget);
+
+        // Verify the scroll offset cleanly reset to 0.0
+        final newScrollable = tester.state<ScrollableState>(
+          find.byType(Scrollable).first,
+        );
+        expect(newScrollable.position.pixels, 0.0);
+      },
+    );
+
+    testWidgets(
+      'Multi-tier navigation from root Settings -> Updates & Notices (scrolled) -> What\'s New -> back -> back preserves scroll offsets at all levels',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1000);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        await tester.pumpWidget(
+          buildTestSettingsDialog(), // Start at root Settings
+        );
+        await pumpFrames(tester);
+
+        expect(find.text('Settings'), findsWidgets);
+
+        // Scroll root settings down by 150px
+        final rootScrollable = tester.state<ScrollableState>(
+          find.byType(Scrollable).first,
+        );
+        rootScrollable.position.jumpTo(150.0);
+        await pumpFrames(tester);
+        expect(rootScrollable.position.pixels, 150.0);
+
+        // Tap Updates & Notices row
+        final updatesFinder = find.text('Updates & Notices');
+        expect(updatesFinder, findsOneWidget);
+        await tester.tap(updatesFinder);
+        await pumpFrames(tester);
+
+        // We are on Updates & Notices
+        expect(find.text('Updates & Notices'), findsWidgets);
+        final updatesScrollable = tester.state<ScrollableState>(
+          find.byType(Scrollable).first,
+        );
+        // Scroll Updates & Notices down by 300px
+        updatesScrollable.position.jumpTo(300.0);
+        await pumpFrames(tester);
+        expect(updatesScrollable.position.pixels, 300.0);
+
+        // Tap What's New
+        final whatsNewFinder = find.text("What's New");
+        expect(whatsNewFinder, findsOneWidget);
+        await tester.tap(whatsNewFinder);
+        await pumpFrames(tester);
+
+        // We are on What's New
+        expect(find.text("What's New"), findsWidgets);
+
+        // Pop back to Updates & Notices
+        await tester.tap(find.byTooltip('Back'));
+        await pumpFrames(tester);
+
+        // Verify Updates & Notices scroll offset is preserved at 300.0
+        final restoredUpdatesScrollable = tester.state<ScrollableState>(
+          find.byType(Scrollable).first,
+        );
+        expect(restoredUpdatesScrollable.position.pixels, 300.0);
+
+        // Pop back to root Settings
+        await tester.tap(find.byTooltip('Back'));
+        await pumpFrames(tester);
+
+        // Verify root Settings scroll offset is preserved at 150.0
+        final restoredRootScrollable = tester.state<ScrollableState>(
+          find.byType(Scrollable).first,
+        );
+        expect(restoredRootScrollable.position.pixels, 150.0);
+      },
+    );
+
+    testWidgets(
+      'Dismissing settings dialog while deep in a category clears all scroll states on subsequent reopen',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1000);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        bool showDialog = true;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: StatefulBuilder(
+                builder: (context, setState) {
+                  if (!showDialog) return const SizedBox();
+                  return buildTestSettingsDialog();
+                },
+              ),
+            ),
+          ),
+        );
+        await pumpFrames(tester);
+
+        // Navigate to Updates & Notices
+        await tester.tap(find.text('Updates & Notices'));
+        await pumpFrames(tester);
+
+        // Scroll down 250px on Updates & Notices
+        final updatesScrollable = tester.state<ScrollableState>(
+          find.byType(Scrollable).first,
+        );
+        updatesScrollable.position.jumpTo(250.0);
+        await pumpFrames(tester);
+        expect(updatesScrollable.position.pixels, 250.0);
+
+        // Dismiss the dialog directly while on Updates & Notices
+        showDialog = false;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: StatefulBuilder(
+                builder: (context, setState) {
+                  if (!showDialog) return const SizedBox();
+                  return buildTestSettingsDialog();
+                },
+              ),
+            ),
+          ),
+        );
+        await pumpFrames(tester);
+        expect(find.byType(SettingsDialog), findsNothing);
+
+        // Reopen dialog (starts at root)
+        showDialog = true;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: StatefulBuilder(
+                builder: (context, setState) {
+                  if (!showDialog) return const SizedBox();
+                  return buildTestSettingsDialog();
+                },
+              ),
+            ),
+          ),
+        );
+        await pumpFrames(tester);
+
+        // Root is at 0.0
+        final rootScrollable = tester.state<ScrollableState>(
+          find.byType(Scrollable).first,
+        );
+        expect(rootScrollable.position.pixels, 0.0);
+
+        // Navigate to Updates & Notices again
+        await tester.tap(find.text('Updates & Notices'));
+        await pumpFrames(tester);
+
+        // Verify Updates & Notices reset to 0.0
+        final newUpdatesScrollable = tester.state<ScrollableState>(
+          find.byType(Scrollable).first,
+        );
+        expect(newUpdatesScrollable.position.pixels, 0.0);
+      },
+    );
+
+    testWidgets(
+      'Rapid back taps across category tiers while animations are running restore root scroll offset without desync',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1000);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        await tester.pumpWidget(buildTestSettingsDialog());
+        await pumpFrames(tester);
+
+        // Scroll root 180px
+        final rootScrollable = tester.state<ScrollableState>(
+          find.byType(Scrollable).first,
+        );
+        rootScrollable.position.jumpTo(180.0);
+        await pumpFrames(tester);
+        expect(rootScrollable.position.pixels, 180.0);
+
+        // Open Updates & Notices
+        await tester.tap(find.text('Updates & Notices'));
+        await pumpFrames(tester);
+
+        // Scroll Updates & Notices 200px
+        final updatesScrollable = tester.state<ScrollableState>(
+          find.byType(Scrollable).first,
+        );
+        updatesScrollable.position.jumpTo(200.0);
+        await pumpFrames(tester);
+
+        // Open What's New
+        await tester.tap(find.text("What's New"));
+        await pumpFrames(tester);
+
+        // Rapid double tap back: pump only 16ms between taps
+        await tester.tap(find.byTooltip('Back'));
+        await tester.pump(const Duration(milliseconds: 16));
+        await tester.tap(find.byTooltip('Back'));
+        await pumpFrames(tester);
+
+        // Verify we are back on root Settings
+        expect(find.text('Settings'), findsWidgets);
+
+        // Verify root Settings preserved its 180.0 scroll offset cleanly
+        final restoredRootScrollable = tester.state<ScrollableState>(
+          find.byType(Scrollable).first,
+        );
+        expect(restoredRootScrollable.position.pixels, 180.0);
+      },
+    );
   });
 }
