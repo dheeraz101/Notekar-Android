@@ -1,0 +1,7 @@
+NoteKar 8.0.0 Major Stable Release (build 26SR1115):
+• On-Device Offline Auto-Categorization: 100% private multilingual classification.
+• Universal Interval Ledger: Boundary collision healing & multi-category targets.
+• Habit Checkpoints: Custom active weekdays & DST-immune streak progression.
+• Rune-Safe Fuzzy Search: Unicode-safe search protecting emojis & symbols.
+• Sovereign Vault: 200,000 PBKDF2 iterations & AES-256-GCM encryption.
+• Apple HIG: Uniform 28pt rounded card radii & robust scroll memory.

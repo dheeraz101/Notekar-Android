@@ -6,6 +6,43 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [8.0.0] - 2026-11-15 (versionCode 26SR1115) [Stable]
+
+### What's New
+- **On-Device Offline Auto-Categorization Engine (`MAJ-01`)**: 100% air-gapped Naive Bayes classifier trained exclusively on local notes. Features Unicode-aware tokenization (`\p{L}`, `\p{M}`, `\p{N}`) preserving diacritics and matras across English, French, German, Spanish, Hindi/Devanagari, and CJK text without sending a single byte to external servers. Manual tags and hashtags always take precedence.
+- **Universal Interval Ledger Boundary Healing (`MAJ-02`)**: Mathematical reconciliation of overlapping sessions ($Start_B < End_A$) in `UniversalIntervalLedger`, eliminating impossible chronological collisions and filtering zero-duration collapsed intervals without mutating raw timestamp moments.
+- **Multi-Category Target Allocations (`MAJ-03`)**: Define composite focus targets spanning multiple categories simultaneously in Goals & Targets. Category editing in `CreateOrEditGoalView` preserves multi-category selection without data loss.
+- **Habit Checkpoint Custom Frequencies & DST Immunity (`MAJ-14`)**: Choose specific active days of week (`1..7`) for routine habits. Day progression calculations use calendar-exact `DateTime(year, month, day - 1)`, eliminating Daylight Savings Time clock drift. Deserialization hardened against dynamic numbers.
+- **Rune-Safe Full-Text Search with Fuzzy Matching (`MAJ-11`)**: Levenshtein distance 1 comparison comparing Unicode `Runes`, preventing surrogate-pair corruption when searching text containing non-BMP characters and emojis.
+- **Sovereign Vault Cryptographic Hardening (`SEC-01` & `SEC-05`)**: Elevated key derivation to 200,000 PBKDF2-HMAC-SHA256 iterations for new sovereign `.notekar-vault` backups with backward-compatible 100k decryption. Enforced sandbox boundary path validation preventing `../` traversal in imported archives.
+- **Apple HIG Design & 28pt Card Geometry Unification (`MIC-01`–`MIC-06`)**: Restored uniform 28pt rounded card radii (`NkTokens.radii.card = 28pt`) across all `SettingsGroup` containers and habit dashboard cards, eliminating Flutter `ContinuousRectangleBorder` squarish corner artifacts. Enforced 56.0pt inset dividers, 52pt button heights, OpenType tabular figures on live chronometers, and expanded all compact tap targets to meet or exceed the 48×48dp accessibility standard (`NkTouchTarget.minInteractive`).
+- **Robust Intra-Dialog Scroll Memory & Dismissal Reset**: Specialized `_SettingsScrollController` and `_SettingsScrollPosition` providing synchronous dual-store restoration across in-dialog navigation tiers (e.g., Updates & Notices → What's New → Back) while cleanly resetting to top (`0.0`) on full dialog dismissal.
+- **Android 15 Platform Authenticity & Hardening (`SEC-14`, `SEC-22`, `SEC-28`)**: Native C library 16KB memory page alignment verification, runtime exact alarm guards (`canScheduleExactAlarms()`), and internal broadcast receiver protection (`RECEIVER_NOT_EXPORTED`).
+- **Midnight Background Maintenance & Compaction (`SEC-09` & `MAJ-16`)**: Integrated automated 30-day trash purging and Isar database compaction into background `Workmanager` midnight worker (`requiresBatteryNotLow: true`).
+
+### Improvements & Bug Fixes
+- **Dark Mode Session Surface Integrity**: Prevented active session colors from inverting Dark and AMOLED surfaces to white or canvas to neon blocks. Active session colors now modulate the interactive `accent` token cleanly.
+- **System Status Bar Visibility**: Ensured status bar icon brightness strictly tracks the true theme canvas, preventing icons from turning black and invisible on dark session backdrops.
+- **Streamlined 2-Way Session Controls**: Suppressed persistent bottom undo/stop toast during active 2-way live sessions. Transient moment save and session end toasts continue to auto-dismiss cleanly after 4.5 seconds.
+- **Centered Stop Pill When Habits Disabled**: Rendered an accessible centered Stop pill with 48×48dp minimum touch slop (`NkTouchTarget.minInteractive`) directly below the intentional capsule when habits are disabled in settings.
+- **Strongly-Typed Preferences Contract (`PrefKeys`)**: Centralized local storage keys into `lib/constants/pref_keys.dart` with compile-time checks and backward-compatibility fallbacks.
+- **POSIX Developer Tooling**: Provided `scripts/verify.sh` and `scripts/test-all.sh` bash mirrors for macOS and Linux developers and CI environments.
+- **Security & Contributing Standards**: Documented mandatory local verification quality gates in `CONTRIBUTING.md` and formal air-gap and cryptographic audit procedures in `SECURITY.md`.
+- **Bottom Navigation Contrast Restoration**: Calculated background luminance (`p.bg.computeLuminance() < 0.45`) in navigation capsule decorations and action buttons, guaranteeing >= 4.5:1 WCAG contrast on active colored session backdrops.
+- **Habit Checkpoints Theme Isolation**: Decoupled Checkpoints Insights dashboard canvas from active habit session palette, eliminating color bleed onto insights cards and calendar matrices.
+- **Apple iOS Top Pill Toast Integration**: Converted habit checkpoint logging and live session commencement notifications from bottom snackbars to floating top pill toasts (`showIosPillToast`).
+- **Routine Target Completion Alert**: Added completion chime (`AppSound.click()`), tactile haptic alert (`HapticFeedback.heavyImpact()`), and iOS top notification when a routine countdown reaches 00:00.
+- **Official Bulletins Image Post Dismissal**: Added 1-tap "Cancel" dismissal action with Cupertino xmark icon on image bulletin posts, permanently dismissing them from the active bulletins list via `NoticeService.dismissNotice()`.
+- **Apple HIG Minimalist Text Refinements**: Streamlined copy across Accent Color Sanctuary, App Icons dock header, Data Safety privacy nutrition labels, App Philosophy, and Upcoming Features.
+- **Personal Profile Customizations**: Added personal customization controls including Personal Intent Mantra, Core Focus Domain horizontal selector, and Share Mantra on Profile Card toggle with overflow-safe layout.
+- **Official Bulletins & Changelog Redesign**: Removed redundant zero-tracking guarantee box from bulletins, streamlined What's New with clean, focused cards, and provided a direct "View Previous Versions" action tile on Changelog.
+- **Time-Awareness & Concurrency Segmented Control**: Upgraded logging concurrency configuration to an Apple HIG Cupertino sliding segmented control (`[ Auto-Pause | Parallel ]`).
+- **Settings Dark Theme Search Bar Artifact Fix**: Eliminated the rectangular container clipping artifact behind the search pill in Dark theme (`#0B0F19`).
+- **Guide & Help Content Deduplication**: Deduplicated redundant content between Guide and FAQ with Apple HIG squircle icon badges and Cupertino accordions.
+- **Clean iOS Surface Aesthetics**: Removed neon `BoxShadow` color glow halos across header capsule dots, search chips, and timeline cards in favor of Apple HIG subtle neutral depth shadows.
+- **Centralized Text Copy Catalog (`lib/l10n/app_strings.dart`)**: Consolidated canonical UI strings, action labels, and system guidance into a centralized repository for streamlined copy edits and localization readiness.
+- Passed 589/589 automated tests across 75 test suites with 0 static analysis warnings.
+
 ## [7.5.15] - 2026-11-10 (versionCode 26BR1110) [Beta]
 
 ### What's New

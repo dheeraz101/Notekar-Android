@@ -22,10 +22,10 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.5.15',
-    date: 'November 10, 2026',
+    version: '8.0.0',
+    date: 'November 15, 2026',
     edition:
-        'Next-Generation Evolution: 100 Refinements & Sovereign Intelligence',
+        'NoteKar 8.0 Sovereign Edition: The Apple HIG & Sovereign Intelligence Milestone',
     badgeColor: Color(0xFF30D158),
     innovations: [
       (
@@ -97,15 +97,26 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
             '200,000 PBKDF2 Iterations · AES-256-GCM Sovereign Backups · Sandbox Boundary Validation · Backward-Compatible Decryption',
       ),
       (
-        title: 'Apple HIG Design & Squircle Token Unification',
+        title: 'Apple HIG Design & 28pt Card Geometry Unification',
         category: 'APPLE HIG & ERGONOMICS',
         headline: 'Continuous Squircle Borders. 48×48dp Minimum Touch Slop.',
         desc:
-            'Standardized SettingsGroup on ContinuousSquircleBorder, enforced 56.0pt inset dividers, 52pt button heights, OpenType tabular figures on live chronometers, and expanded all compact tap targets to meet or exceed 48×48dp.',
+            'Standardized SettingsGroup on ContinuousSquircleBorder with uniform 28pt rounded card radii, enforced 56.0pt inset dividers, 52pt button heights, OpenType tabular figures on live chronometers, and expanded all compact tap targets to meet or exceed 48×48dp.',
         icon: CupertinoIcons.slider_horizontal_3,
         badgeColor: Color(0xFF5856D6),
         specs:
-            'ContinuousSquircleBorder · 56pt Inset Dividers · 52pt Button Height · Tabular Numbers · 48x48dp Touch Targets',
+            'ContinuousSquircleBorder · 28pt Card Radii · 56pt Inset Dividers · 52pt Button Height · Tabular Numbers · 48x48dp Touch Targets',
+      ),
+      (
+        title: 'Robust Intra-Dialog Scroll Memory & Dismissal Reset',
+        category: 'NAVIGATION & ARCHITECTURE',
+        headline: 'Dual-Store Scroll Memory. Zero-Drift Sub-Tier Traversal.',
+        desc:
+            'Dual-store scroll offset restoration preserving exact scroll position when navigating into sub-settings and returning, with clean reset to top on full dialog dismissal.',
+        icon: CupertinoIcons.arrow_counterclockwise,
+        badgeColor: Color(0xFF34C759),
+        specs:
+            'Dual-Store Restoration · Intra-Dialog Navigation · Sub-Tier Traversal · Clean Dismissal Reset',
       ),
       (
         title: 'Android 15 Platform Parity & Background Maintenance',
@@ -120,14 +131,15 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
       ),
     ],
     items: [
-      '• Next-Generation Evolution: 100 Refinements, Sovereign Intelligence & Apple HIG Architecture',
+      '• NoteKar 8.0 Sovereign Edition: The Apple HIG & Sovereign Intelligence Milestone',
       '+ On-Device Auto-Categorization: 100% offline Naive Bayes classifier trained on local notes with Unicode-aware multilingual tokenization',
       '+ Universal Interval Ledger: Boundary collision healing for overlapping sessions and zero-duration interval collapse',
       '+ Multi-Category Target Allocations: Composite duration tracking across multiple categories in Goals & Targets without data loss',
       '+ Habit Frequency Customizer: Custom active days of week with DST-immune calendar-exact streak calculations',
       '+ Rune-Safe Fuzzy Search: Levenshtein distance 1 comparison comparing Unicode Runes preventing surrogate-pair emoji corruption',
       '+ Sovereign Vault 200k PBKDF2: OWASP-grade 200,000 iterations for new backups and sandbox traversal injection protection',
-      '+ Apple HIG & Touch Ergonomics: ContinuousSquircleBorder, 56pt dividers, 52pt buttons, tabular chronometer figures, and 48x48dp touch slop',
+      '+ Apple HIG 28pt Card Geometry: Uniform 28pt rounded radii, continuous squircle borders, 56pt dividers, 52pt buttons, and 48x48dp touch slop',
+      '+ Robust Intra-Dialog Scroll Memory: Dual-store scroll offset restoration across in-dialog navigation tiers with clean dismissal reset',
       '+ Android 15 & System Security: 16KB ELF alignment, exact alarm runtime checks, and automated midnight database vacuuming',
     ],
   );

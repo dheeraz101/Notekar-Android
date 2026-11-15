@@ -28,10 +28,10 @@ class ChangelogDialog extends StatefulWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.5.15',
-    date: 'November 10, 2026',
+    version: '8.0.0',
+    date: 'November 15, 2026',
     edition:
-        'Next-Generation Evolution: 100 Refinements & Sovereign Intelligence',
+        'NoteKar 8.0 Sovereign Edition: The Apple HIG & Sovereign Intelligence Milestone',
     badgeColor: Color(0xFF30D158),
     highlights: [
       (
@@ -77,11 +77,18 @@ class ChangelogDialog extends StatefulWidget {
         tag: 'Security',
       ),
       (
-        title: 'Apple HIG Design & Squircle Token Unification',
+        title: 'Apple HIG Design & 28pt Card Geometry Unification',
         desc:
-            'Standardized SettingsGroup on ContinuousSquircleBorder, enforced 56.0pt inset dividers, 52pt button heights, OpenType tabular figures on live chronometers, and expanded all compact tap targets to meet or exceed 48×48dp.',
+            'Restored uniform 28pt rounded card radii across all SettingsGroup containers and habit dashboard cards, continuous squircle borders, 56pt inset dividers, 52pt buttons, and 48x48dp minimum touch targets.',
         icon: Icons.brush_rounded,
         tag: 'Design',
+      ),
+      (
+        title: 'Robust Intra-Dialog Scroll Memory & Dismissal Reset',
+        desc:
+            'Dual-store scroll offset restoration preserving exact scroll position when navigating into sub-settings and returning, with clean reset to top on full dialog dismissal.',
+        icon: Icons.history_rounded,
+        tag: 'Navigation',
       ),
       (
         title: 'Android 15 Platform Parity & Background Maintenance',
@@ -92,14 +99,15 @@ class ChangelogDialog extends StatefulWidget {
       ),
     ],
     items: [
-      'Next-Generation Evolution: 100 Refinements, Sovereign Intelligence & Apple HIG Architecture',
+      'NoteKar 8.0 Sovereign Edition: The Apple HIG & Sovereign Intelligence Milestone',
       '+ On-Device Auto-Categorization: 100% offline Naive Bayes classifier trained on local notes with Unicode-aware multilingual tokenization',
       '+ Universal Interval Ledger: Boundary collision healing for overlapping sessions and zero-duration interval collapse',
       '+ Multi-Category Target Allocations: Composite duration tracking across multiple categories in Goals & Targets without data loss',
       '+ Habit Frequency Customizer: Custom active days of week with DST-immune calendar-exact streak calculations',
       '+ Rune-Safe Fuzzy Search: Levenshtein distance 1 comparison comparing Unicode Runes preventing surrogate-pair emoji corruption',
       '+ Sovereign Vault 200k PBKDF2: OWASP-grade 200,000 iterations for new backups and sandbox traversal injection protection',
-      '+ Apple HIG & Touch Ergonomics: ContinuousSquircleBorder, 56pt dividers, 52pt buttons, tabular chronometer figures, and 48x48dp touch slop',
+      '+ Apple HIG 28pt Card Geometry: Uniform 28pt rounded radii, continuous squircle borders, 56pt dividers, 52pt buttons, and 48x48dp touch slop',
+      '+ Robust Intra-Dialog Scroll Memory: Dual-store scroll offset restoration across in-dialog navigation tiers with clean dismissal reset',
       '+ Android 15 & System Security: 16KB ELF alignment, exact alarm runtime checks, and automated midnight database vacuuming',
     ],
   );
