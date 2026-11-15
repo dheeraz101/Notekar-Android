@@ -553,7 +553,6 @@ void main() {
 
         expect(find.text('Official Bulletins'), findsWidgets);
         expect(find.text('Check Now'), findsWidgets);
-        expect(find.text('ZERO-TRACKING GUARANTEE'), findsWidgets);
         expect(find.text('Security Update'), findsWidgets);
       },
     );
@@ -650,7 +649,6 @@ void main() {
           findsOneWidget,
         );
         expect(find.text('TIMELESS CRAFT'), findsWidgets);
-        expect(find.text('View Full Technical Changelog'), findsWidgets);
       },
     );
 
@@ -829,8 +827,7 @@ void main() {
         expect(find.text('Full-Fledged Language Support'), findsOneWidget);
         expect(find.text('Interactive Android Widgets'), findsOneWidget);
         expect(find.text('Performance & Cold Start'), findsOneWidget);
-        expect(find.text('Photo & Receipt Logging'), findsOneWidget);
-        expect(find.text('Hands-Free Voice Dictation'), findsOneWidget);
+        expect(find.text('Interactive Android Widgets'), findsOneWidget);
       },
     );
   });

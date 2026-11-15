@@ -104,123 +104,6 @@ class _LoggingSettingsPageState extends State<LoggingSettingsPage> {
     }
   }
 
-  Future<void> _showInplaceSelector({
-    required BuildContext anchorContext,
-    required String currentVal,
-    required List<({String key, String title, String? subtitle})> options,
-    required ValueChanged<String> onSelected,
-  }) async {
-    HapticFeedback.lightImpact();
-    final renderBox = anchorContext.findRenderObject() as RenderBox?;
-    final overlay =
-        Overlay.of(context).context.findRenderObject() as RenderBox?;
-    if (renderBox == null || overlay == null) return;
-
-    final translation = renderBox.getTransformTo(overlay).getTranslation();
-    final rowRect = Rect.fromLTWH(
-      translation.x,
-      translation.y,
-      renderBox.size.width,
-      renderBox.size.height,
-    );
-    final position = RelativeRect.fromRect(
-      Rect.fromPoints(
-        Offset(rowRect.right - 230, rowRect.bottom),
-        Offset(rowRect.right, rowRect.bottom),
-      ),
-      Offset.zero & overlay.size,
-    );
-
-    final selected = await showMenu<String>(
-      context: context,
-      position: position,
-      color: widget.p.surface2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: widget.p.border.withValues(alpha: 0.6),
-          width: 0.8,
-        ),
-      ),
-      elevation: 8,
-      items: [
-        for (final opt in options)
-          PopupMenuItem<String>(
-            value: opt.key,
-            height: opt.subtitle != null ? 50 : 42,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        opt.title.localized(context),
-                        style: TextStyle(
-                          color: opt.key == currentVal
-                              ? widget.p.accent
-                              : widget.p.text,
-                          fontSize: 13.5,
-                          fontWeight: opt.key == currentVal
-                              ? FontWeight.w700
-                              : FontWeight.w500,
-                        ),
-                      ),
-                      if (opt.subtitle != null) ...[
-                        const SizedBox(height: 1),
-                        Text(
-                          opt.subtitle!.localized(context),
-                          style: TextStyle(color: widget.p.text3, fontSize: 11),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                if (opt.key == currentVal) ...[
-                  const SizedBox(width: 8),
-                  Icon(
-                    CupertinoIcons.checkmark,
-                    size: 15,
-                    color: widget.p.accent,
-                  ),
-                ],
-              ],
-            ),
-          ),
-      ],
-    );
-
-    if (selected != null) {
-      HapticFeedback.selectionClick();
-      onSelected(selected);
-    }
-  }
-
-  Future<void> _selectConcurrencyMode(BuildContext anchorContext) async {
-    await _showInplaceSelector(
-      anchorContext: anchorContext,
-      currentVal: _concurrencyMode,
-      options: [
-        (
-          key: 'exclusive',
-          title: 'Auto-Pause (Exclusive)',
-          subtitle: 'Pause previous timer on mode switch',
-        ),
-        (
-          key: 'parallel',
-          title: 'Parallel Timers',
-          subtitle: 'Allow multiple simultaneous sessions',
-        ),
-      ],
-      onSelected: (newMode) async {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('timer_concurrency_mode', newMode);
-        if (mounted) setState(() => _concurrencyMode = newMode);
-      },
-    );
-  }
-
   void _openDailyWrapup() {
     final moments = MomentRepository().getAllMoments();
     DailyWrapupPage.open(
@@ -446,29 +329,29 @@ class _LoggingSettingsPageState extends State<LoggingSettingsPage> {
           p: p,
           title: 'Time-Awareness & Concurrency'.localized(context),
           children: [
-            Builder(
-              builder: (rowCtx) => SettingsRow(
-                p: p,
-                title: 'Timer Concurrency'.localized(context),
-                subtitle: 'Auto-pause previous timer on mode switch'.localized(
-                  context,
-                ),
-                status: _concurrencyMode == 'exclusive'
-                    ? 'Auto-Pause'
-                    : 'Parallel',
-                rowKind: 'none',
-                color: p.accent,
-                onTap: () => _selectConcurrencyMode(rowCtx),
+            SegmentedSetting(
+              p: p,
+              title: 'Timer Concurrency'.localized(context),
+              subtitle: 'Auto-pause previous timer on mode switch'.localized(
+                context,
               ),
+              value: _concurrencyMode,
+              values: const {'exclusive': 'Auto-Pause', 'parallel': 'Parallel'},
+              onChanged: (newMode) async {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setString('timer_concurrency_mode', newMode);
+                if (mounted) setState(() => _concurrencyMode = newMode);
+              },
             ),
             SettingsRow(
               p: p,
+              icon: CupertinoIcons.moon_stars_fill,
               title: 'Daily Wrap-up'.localized(context),
               subtitle: 'Seal open sessions and review today\'s conscious time'
                   .localized(context),
               status: 'Wrap Up'.localized(context),
-              rowKind: 'none',
-              color: p.green,
+              color: const Color(0xFF5856D6),
+              softIcon: true,
               onTap: _openDailyWrapup,
             ),
           ],

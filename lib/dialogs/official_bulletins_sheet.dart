@@ -344,51 +344,6 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
           ),
         ),
 
-        const SizedBox(height: 14),
-
-        // 2. Zero-Tracking Privacy Guarantee Box
-        Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: p.surface2,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: p.border.withValues(alpha: 0.5)),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(CupertinoIcons.lock_shield_fill, color: p.blue, size: 20),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'ZERO-TRACKING GUARANTEE'.localized(context),
-                      style: TextStyle(
-                        color: p.blue,
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.8,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      'Bulletins are fetched directly from a static public GitHub JSON feed. Zero telemetry, zero device identifiers, zero advertising IDs, and zero cookies are ever transmitted.'
-                          .localized(context),
-                      style: TextStyle(
-                        color: p.text2,
-                        fontSize: 12,
-                        height: 1.4,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-
         const SizedBox(height: spacing20),
 
         // 3. Hierarchical Notices List

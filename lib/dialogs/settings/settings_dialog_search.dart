@@ -3417,14 +3417,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         delegate: SliverStickyHeaderDelegate(
           height: 64,
           child: Container(
-            color: p.surface.withValues(
-              alpha:
-                  !reduceMotion &&
-                      enableTranslucency &&
-                      AdaptiveEngine().supportsBlur
-                  ? 0.65
-                  : 1.0,
-            ),
+            color: Colors.transparent,
             padding: const EdgeInsets.only(bottom: spacing8),
             child: SettingsSearchBox(
               p: p,

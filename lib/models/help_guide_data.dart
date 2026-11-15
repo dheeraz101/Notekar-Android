@@ -1119,13 +1119,6 @@ const List<HelpGuideItem> allHelpFaqItems = [
     ],
   ),
   HelpGuideItem(
-    title: 'What Android Home Screen Widgets are supported?',
-    content:
-        'NoteKar provides 3 dedicated widgets: Quick Log (1-tap IN/OUT/Moment capture & mode status), Sobriety Companion (clean streak & milestone progress), and Life Audit (daily waking focus ratio). Add them by long-pressing your home screen launcher and selecting Widgets > NoteKar.',
-    isFaq: true,
-    keywords: ['widgets', 'home screen', 'quick log', 'sobriety', 'life audit'],
-  ),
-  HelpGuideItem(
     title: 'How does Pinch-to-Density work in History?',
     content:
         'Simply pinch in or out with two fingers on the History timeline. The cards scale fluidly between compact information-dense tiles and comfortable expanded views with live tactile feedback.',
@@ -1153,13 +1146,6 @@ const List<HelpGuideItem> allHelpFaqItems = [
       'shhh',
       'sound',
     ],
-  ),
-  HelpGuideItem(
-    title: 'How does the Life Ledger Timeline work in History?',
-    content:
-        'History automatically pairs chronological Two-Way IN and OUT moments into connected session cards with elapsed duration calculations and start/finish nodes. Single moments show clean rail nodes with optional 00–99 badges. You can filter by All, Sessions, Singles, or With Notes without any layout overlapping.',
-    isFaq: true,
-    keywords: ['life ledger', 'timeline', 'history', 'sessions', 'filter'],
   ),
   HelpGuideItem(
     title: 'How do I end an ongoing live session?',
@@ -1259,13 +1245,6 @@ const List<HelpGuideItem> allHelpFaqItems = [
         'Upcoming capabilities on the roadmap include Hands-free Voice Notes with 100% offline multi-language speech transcription (English, Hindi, Spanish, French, German, Japanese, Russian), calendar-based day-swipe visual timeline, and adaptive mode-based color accents.',
     isFaq: true,
     keywords: ['roadmap', 'upcoming', 'voice notes', 'features'],
-  ),
-  HelpGuideItem(
-    title: 'Can I restore deleted moments?',
-    content:
-        'Yes! Deleted moments are moved to Trash Bin. You can restore individual moments or all moments anytime from History or Settings > Moments.',
-    isFaq: true,
-    keywords: ['restore', 'trash', 'recover', 'deleted moments'],
   ),
   HelpGuideItem(
     title: 'Can I view updates while offline?',
@@ -1418,13 +1397,6 @@ const List<HelpGuideItem> allHelpFaqItems = [
       'open source',
       'privacy',
     ],
-  ),
-  HelpGuideItem(
-    title: 'How do I add and use the home screen widget?',
-    content:
-        'Touch and hold an empty space on your phone\'s home screen, select Widgets, and drag NoteKar to your screen. You can log immediately using the quick-action buttons. Tapping the top history stack opens the main app.',
-    isFaq: true,
-    keywords: ['add widget', 'home screen widget', 'quick log'],
   ),
   HelpGuideItem(
     title: 'Is my Dashboard data uploaded?',

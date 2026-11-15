@@ -1,3 +1,4 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
@@ -47,6 +48,10 @@ class _PersonalProfileSettingsPageState
   int _mementoMoriYears = UserProfileService.defaultMementoMoriYears;
   bool _isSaving = false;
   PeerProfile? _savedPeer;
+  final TextEditingController _mantraController = TextEditingController();
+  String _focusDomain = 'Craft';
+  bool _shareMantra = true;
+  bool _shareHorizon = true;
 
   Palette get p => widget.p;
 
@@ -64,7 +69,16 @@ class _PersonalProfileSettingsPageState
 
   Future<void> _loadSavedPeer() async {
     final peer = await PeerProfileService.instance.getSavedPeerProfile();
-    if (mounted) setState(() => _savedPeer = peer);
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        _savedPeer = peer;
+        _mantraController.text = prefs.getString('profile_intent_mantra') ?? '';
+        _focusDomain = prefs.getString('profile_focus_domain') ?? 'Craft';
+        _shareMantra = prefs.getBool('profile_share_mantra') ?? true;
+        _shareHorizon = prefs.getBool('profile_share_horizon') ?? true;
+      });
+    }
   }
 
   Future<void> _openScanner() async {
@@ -83,6 +97,7 @@ class _PersonalProfileSettingsPageState
   @override
   void dispose() {
     _nameController.dispose();
+    _mantraController.dispose();
     super.dispose();
   }
 
@@ -164,6 +179,14 @@ class _PersonalProfileSettingsPageState
         presetIndex: _presetIndex,
         mementoMoriYears: _mementoMoriYears,
       );
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        'profile_intent_mantra',
+        _mantraController.text.trim(),
+      );
+      await prefs.setString('profile_focus_domain', _focusDomain);
+      await prefs.setBool('profile_share_mantra', _shareMantra);
+      await prefs.setBool('profile_share_horizon', _shareHorizon);
 
       if (mounted) {
         setState(() => _isSaving = false);
@@ -640,6 +663,141 @@ class _PersonalProfileSettingsPageState
                     ],
                   ),
                 ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // 2.5 Personal Intent & Focus Customization (Apple HIG Studio)
+        NkCard.container(
+          p: p,
+          margin: EdgeInsets.zero,
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(CupertinoIcons.sparkles, color: p.accent, size: 16),
+                  const SizedBox(width: 8),
+                  Text(
+                    'PERSONAL MANTRA & FOCUS'.localized(context),
+                    style: TextStyle(
+                      color: p.accent,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Container(
+                decoration: BoxDecoration(
+                  color: p.surface3.withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: p.border.withValues(alpha: 0.4)),
+                ),
+                child: CupertinoTextField(
+                  controller: _mantraController,
+                  placeholder: 'e.g. Focus deeply, live deliberately',
+                  placeholderStyle: TextStyle(color: p.text3),
+                  maxLength: 40,
+                  scrollPadding: const EdgeInsets.only(bottom: 140),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
+                  style: TextStyle(
+                    color: p.text,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  decoration: const BoxDecoration(color: Colors.transparent),
+                  onChanged: (_) => setState(() {}),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                'CORE FOCUS DOMAIN'.localized(context),
+                style: TextStyle(
+                  color: p.text3,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.8,
+                ),
+              ),
+              const SizedBox(height: 8),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                child: Row(
+                  children: [
+                    for (final domain in [
+                      'Craft',
+                      'Deep Work',
+                      'Mindfulness',
+                      'Health',
+                      'Engineering',
+                      'Creation',
+                    ]) ...[
+                      PressableScale(
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          setState(() => _focusDomain = domain);
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(right: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 7,
+                          ),
+                          decoration: BoxDecoration(
+                            color: _focusDomain == domain
+                                ? p.accent
+                                : p.surface3,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            domain.localized(context),
+                            style: TextStyle(
+                              color: _focusDomain == domain
+                                  ? p.onAccent
+                                  : p.text,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Divider(height: 1, color: p.border.withValues(alpha: 0.4)),
+              const SizedBox(height: 14),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Share Mantra on Profile Card'.localized(context),
+                      style: TextStyle(
+                        color: p.text,
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  CupertinoSwitch(
+                    value: _shareMantra,
+                    activeTrackColor: p.accent,
+                    onChanged: (val) => setState(() => _shareMantra = val),
+                  ),
+                ],
               ),
             ],
           ),

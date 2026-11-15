@@ -4,7 +4,6 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
-import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
 class FeedbackChangelogSettingsPage extends StatelessWidget {
@@ -472,37 +471,6 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
           ),
         ),
 
-        const SizedBox(height: spacing16),
-
-        // 4. View Full Technical Changelog Button
-        PressableScale(
-          onTap: () => _openWebChangelog(context),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            decoration: BoxDecoration(
-              color: p.accent.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: p.accent.withValues(alpha: 0.3)),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(CupertinoIcons.book_fill, color: p.accent, size: 18),
-                const SizedBox(width: 8),
-                Text(
-                  'View Full Technical Changelog'.localized(context),
-                  style: TextStyle(
-                    color: p.accent,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.1,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-
         const SizedBox(height: spacing12),
 
         SettingsPageDescription(
@@ -550,7 +518,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
             SettingsRow(
               p: p,
               icon: CupertinoIcons.clock_fill,
-              title: 'Full Release Archive on Web'.localized(context),
+              title: 'View Previous Versions'.localized(context),
               subtitle: 'Browse all historical versions and beta releases.'
                   .localized(context),
               color: p.accent,

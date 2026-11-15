@@ -72,7 +72,7 @@ class AppPhilosophySettingsPage extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
-                  'Technology married with liberal arts. Software crafted to serve the human spirit, not harvest it.'
+                  'Technology married with the liberal arts. Software crafted to serve the human spirit.'
                       .localized(context),
                   textAlign: TextAlign.center,
                   style: TextStyle(

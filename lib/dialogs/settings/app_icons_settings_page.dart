@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
-import 'package:notekar/widgets/settings_widgets.dart';
 
 class AppIconData {
   final String key;
@@ -185,7 +184,6 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
         children: [
           const SizedBox(height: spacing8),
 
-          // 0. Instruction Card with Icon Count Badge
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: MediaQuery(
@@ -194,79 +192,51 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
                   MediaQuery.textScalerOf(context).scale(1.0).clamp(0.85, 1.25),
                 ),
               ),
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: p.surface2.withValues(alpha: 0.65),
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: p.border.withValues(alpha: 0.45),
-                    width: 0.8,
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8, bottom: 12),
+                child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  runSpacing: 6,
                   children: [
-                    Wrap(
-                      alignment: WrapAlignment.spaceBetween,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 8,
-                      runSpacing: 8,
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              CupertinoIcons.app_badge_fill,
-                              color: p.accent,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 7),
-                            Text(
-                              'CHOOSE APP ICON'.localized(context),
-                              style: TextStyle(
-                                color: p.accent,
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 1.0,
-                              ),
-                            ),
-                          ],
+                        Icon(
+                          CupertinoIcons.app_badge_fill,
+                          color: p.accent,
+                          size: 16,
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 9,
-                            vertical: 3.5,
-                          ),
-                          decoration: BoxDecoration(
-                            color: p.accent.withValues(alpha: 0.14),
-                            borderRadius: BorderRadius.circular(999),
-                            border: Border.all(
-                              color: p.accent.withValues(alpha: 0.35),
-                              width: 0.8,
-                            ),
-                          ),
-                          child: Text(
-                            '${availableIcons.length} Icons Available'
-                                .localized(context),
-                            style: TextStyle(
-                              color: p.accent,
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.2,
-                            ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'CHOOSE APP ICON'.localized(context),
+                          style: TextStyle(
+                            color: p.accent,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.8,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Scroll through the dock below to preview handcrafted icon artwork on the simulated home screen. Tap any icon to immediately set it as your sovereign Android launcher shortcut.'
-                          .localized(context),
-                      style: TextStyle(
-                        color: p.text2,
-                        fontSize: 13,
-                        height: 1.42,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: p.accent.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        '${availableIcons.length} Icons Available'.localized(
+                          context,
+                        ),
+                        style: TextStyle(
+                          color: p.accent,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],
@@ -275,8 +245,6 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
             ),
           ),
 
-          const SizedBox(height: spacing16),
-
           // 1. Phone Home Screen Preview Container
           _buildHomePhoneScreen(
             context: context,
@@ -284,20 +252,6 @@ class _AppIconsSettingsPageState extends State<AppIconsSettingsPage> {
             availableIcons: availableIcons,
             isVipGold: isVipGold,
             p: p,
-          ),
-
-          const SizedBox(height: spacing16),
-
-          // 2. Page Description
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: SettingsPageDescription(
-              p: p,
-              showIcon: true,
-              text:
-                  'App icons update your Android launcher shortcut dynamically. Some home screen launchers may take a few moments to reload the cache.'
-                      .localized(context),
-            ),
           ),
 
           const SizedBox(height: spacing32),

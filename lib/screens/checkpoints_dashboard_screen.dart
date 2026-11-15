@@ -74,7 +74,15 @@ class _CheckpointsDashboardScreenState
 
   @override
   Widget build(BuildContext context) {
-    final p = widget.p;
+    // Ensure Habit Checkpoints dashboard always retains its true theme canvas,
+    // immune to any active habit session accent or background color leakage.
+    final basePalette = paletteFor(widget.p.name, highContrast: false);
+    final p = widget.p.copyWith(
+      bg: basePalette.bg,
+      surface: basePalette.surface,
+      surface2: basePalette.surface2,
+      surface3: basePalette.surface3,
+    );
     final presets = CheckpointService.instance.presets;
 
     // Compute stats for all presets
@@ -227,7 +235,7 @@ class _CheckpointsDashboardScreenState
   ) {
     return Glass(
       p: p,
-      radius: 24,
+      radius: 28,
       padding: const EdgeInsets.all(18),
       child: Row(
         children: [
@@ -425,7 +433,7 @@ class _CheckpointsDashboardScreenState
         // Card: Timing Variance & Stats
         Glass(
           p: p,
-          radius: 24,
+          radius: 28,
           padding: const EdgeInsets.all(18),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -624,7 +632,7 @@ class _CheckpointsDashboardScreenState
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: p.surface2,
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(28),
               border: Border.all(color: p.border.withValues(alpha: 0.5)),
             ),
             alignment: Alignment.center,
@@ -756,7 +764,7 @@ class _CheckpointsDashboardScreenState
         // 7-Day Matrix Table Card
         Glass(
           p: p,
-          radius: 24,
+          radius: 28,
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -915,7 +923,7 @@ class _CheckpointsDashboardScreenState
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: p.surface2,
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(28),
                   border: Border.all(color: p.border.withValues(alpha: 0.5)),
                 ),
                 child: Row(

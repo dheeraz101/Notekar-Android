@@ -63,16 +63,14 @@ class SettingsGroup extends StatelessWidget {
           ),
         Container(
           clipBehavior: Clip.antiAlias,
-          decoration: ShapeDecoration(
+          decoration: BoxDecoration(
             color: p.surface2,
-            shape: NkTokens.radii.squircleCardBorder(
-              radius: 20,
-              side: BorderSide(
-                color: p.border.withValues(
-                  alpha: p.name == 'amoled' ? 0.45 : (!p.isDark ? 0.35 : 0.40),
-                ),
-                width: 0.5,
+            borderRadius: BorderRadius.circular(28), // Unified 28pt card radius
+            border: Border.all(
+              color: p.border.withValues(
+                alpha: p.name == 'amoled' ? 0.5 : (!p.isDark ? 0.35 : 0.45),
               ),
+              width: 0.8,
             ),
           ),
           child: Builder(

@@ -520,6 +520,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
   void dispose() {
     _noticeTimer?.cancel();
     _scrollController.dispose();
+    // Apple HIG: Reset timeline scroll state on close
+    AppScrollState.clear('history_dialog');
+    AppScrollState.clear('history_dialog_main');
     super.dispose();
   }
 

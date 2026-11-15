@@ -569,8 +569,8 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
             p: p,
             icon: CupertinoIcons.drop_fill,
             title: 'Liquid Accent Sanctuary',
-            subtitle:
-                'Immerse yourself in NoteKar\'s living color pond. Tap any swimming fish to morph the fluid theme across your entire device experience.',
+            subtitle: 'Personalize controls, highlights, and widgets.'
+                .localized(context),
             accentColor: _currentColor,
           ),
 
@@ -675,31 +675,7 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
               ],
             ),
           ),
-          const SizedBox(height: 10),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: p.surface.withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: p.border.withValues(alpha: 0.35)),
-              ),
-              child: Text(
-                'Immerse yourself in NoteKar\'s oceanic sanctuary. Whichever color fish you crown becomes the Queen Fish reigning in the sovereign deep, while companion species glide through the surface shallows above. Riverbed stones retain their fixed hues for destructive actions, alerts, and system ink, ensuring sovereign contrast remains pristine across all accent choices.'
-                    .localized(context),
-                style: TextStyle(
-                  color: p.text2,
-                  fontSize: 12.5,
-                  height: 1.45,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
           // 4. Living Oceanic Water Canvas (Edge-to-edge full width & depth, fluid flows into page)
           SizedBox(
@@ -733,6 +709,21 @@ class _AccentColorExperienceState extends State<_AccentColorExperience>
               },
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Text(
+              'Riverbed stones retain their fixed hues for alerts and system ink, ensuring sovereign contrast.'
+                  .localized(context),
+              style: TextStyle(
+                color: p.text3,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                height: 1.4,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: 24),
         ],
       ),
     );

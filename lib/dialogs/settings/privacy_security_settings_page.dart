@@ -140,26 +140,27 @@ class DataSafetySettingsPage extends StatelessWidget {
                 context: context,
                 title: 'Data Collected',
                 value: '0 KB (None)',
-                description:
-                    'No personal info, identity, or financial details logged',
+                description: 'No personal, identity, or financial data logged'
+                    .localized(context),
                 isSafe: true,
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 12),
               _buildSafetyMetricRow(
                 context: context,
                 title: 'Data Shared',
                 value: 'None',
-                description:
-                    'Zero third-party trackers, advertisers, or cloud brokers',
+                description: 'Zero analytics pings, ads, or third-party brokers'
+                    .localized(context),
                 isSafe: true,
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 12),
               _buildSafetyMetricRow(
                 context: context,
                 title: 'Security Practices',
                 value: 'Local Isar Encrypted',
                 description:
-                    'Encrypted at rest on device with 1-tap complete data wipe',
+                    'Encrypted on-device storage with one-tap instant erase'
+                        .localized(context),
                 isSafe: true,
               ),
             ],

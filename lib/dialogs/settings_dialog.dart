@@ -333,7 +333,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       final initial = AppScrollState.get('settings_$key');
       c = ScrollController(
         initialScrollOffset: initial,
-        keepScrollOffset: true,
+        keepScrollOffset: false,
       );
       c.addListener(() {
         if (c!.hasClients) {
@@ -1538,6 +1538,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
     widget.trashEntriesNotifier.removeListener(_onEntriesChanged);
     for (final c in _scrollControllers.values) {
       c.dispose();
+    }
+    // Apple HIG: Clear persisted scroll state on dialog close so reopening starts at top
+    AppScrollState.clear('settings_root');
+    for (final key in _scrollControllers.keys) {
+      AppScrollState.clear('settings_$key');
     }
     _activeController.dispose();
     _settingsSearchController.dispose();
@@ -2884,14 +2889,7 @@ $cleanStack
                                 delegate: SliverStickyHeaderDelegate(
                                   height: 64,
                                   child: Container(
-                                    color: p.surface.withValues(
-                                      alpha:
-                                          !reduceMotion &&
-                                              enableTranslucency &&
-                                              AdaptiveEngine().supportsBlur
-                                          ? 0.65
-                                          : 1.0,
-                                    ),
+                                    color: Colors.transparent,
                                     padding: const EdgeInsets.only(
                                       bottom: spacing8,
                                     ),

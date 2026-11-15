@@ -115,8 +115,8 @@ class NkRadii {
   final double mdVal = 12.0;
   final double buttonVal = 14.0;
   final double cardCompactVal = 16.0;
-  final double cardVal = 16.0;
-  final double cardGroupedVal = 20.0;
+  final double cardVal = 28.0;
+  final double cardGroupedVal = 28.0;
   final double cardLargeVal = 28.0;
   final double squircleCardVal = 24.0;
   final double squircleSheetVal = 28.0;
@@ -128,9 +128,9 @@ class NkRadii {
   BorderRadius get sm => BorderRadius.circular(8.0);
   BorderRadius get md => BorderRadius.circular(12.0);
   BorderRadius get button => BorderRadius.circular(14.0);
-  BorderRadius get card => BorderRadius.circular(16.0);
+  BorderRadius get card => BorderRadius.circular(28.0);
   BorderRadius get cardCompact => BorderRadius.circular(16.0);
-  BorderRadius get cardGrouped => BorderRadius.circular(20.0);
+  BorderRadius get cardGrouped => BorderRadius.circular(28.0);
   BorderRadius get cardLarge => BorderRadius.circular(28.0);
   BorderRadius get squircleCard => BorderRadius.circular(24.0);
   BorderRadius get squircleSheet => BorderRadius.circular(28.0);
@@ -142,7 +142,7 @@ class NkRadii {
   ShapeBorder squircleCardBorder({
     BorderSide side = BorderSide.none,
     double? radius,
-  }) => ContinuousSquircleBorder(
+  }) => RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(radius ?? 24.0),
     side: side,
   );
@@ -151,7 +151,7 @@ class NkRadii {
   ShapeBorder squircleSheetBorder({
     BorderSide side = BorderSide.none,
     double? radius,
-  }) => ContinuousSquircleBorder(
+  }) => RoundedRectangleBorder(
     borderRadius: BorderRadius.vertical(top: Radius.circular(radius ?? 28.0)),
     side: side,
   );
