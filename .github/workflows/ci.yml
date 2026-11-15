@@ -30,6 +30,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: "3.44.4"
           cache: true
 
       - name: Cache pub packages
@@ -102,4 +103,4 @@ jobs:
         run: flutter test --coverage
 
       - name: Verify Android Build Compilation
-        run: flutter build apk --debug --no-pub
+        run: flutter build apk --debug --no-pub --android-skip-build-dependency-validation

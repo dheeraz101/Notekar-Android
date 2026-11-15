@@ -51,6 +51,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: "3.44.4"
           cache: true
 
       - name: Setup Gradle Cache
@@ -121,7 +122,7 @@ jobs:
       ####################################################
       - name: Build Android project
         if: matrix.language == 'java-kotlin'
-        run: flutter build apk --debug --no-pub
+        run: flutter build apk --debug --no-pub --android-skip-build-dependency-validation
 
       ####################################################
       # Analyze

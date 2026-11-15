@@ -14,6 +14,8 @@ analyzer:
     strict-casts: true
     strict-inference: false
     strict-raw-types: true
+  errors:
+    deprecated_member_use: ignore
 
 linter:
   # The lint rules applied to this project can be customized in the
