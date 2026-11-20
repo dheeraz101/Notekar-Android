@@ -188,7 +188,7 @@ void main() {
               'channels': ['stable', 'beta'],
               'platforms': ['android'],
               'minVersion': '7.0.0',
-              'maxVersion': '8.0.0',
+              'maxVersion': '8.1.0',
             },
           ]),
         );

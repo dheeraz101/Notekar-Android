@@ -22,125 +22,124 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '8.0.0',
-    date: 'November 15, 2026',
+    version: '8.0.1',
+    date: 'November 20, 2026',
     edition:
-        'NoteKar 8.0 Sovereign Edition: The Apple HIG & Sovereign Intelligence Milestone',
+        'NoteKar 8.0.1: Apple HIG Refinements, User Feedback & Asset Optimization',
     badgeColor: Color(0xFF30D158),
     innovations: [
       (
-        title: 'On-Device Offline Auto-Categorization',
-        category: 'MACHINE INTELLIGENCE & PRIVACY',
-        headline: '100% Air-Gapped Classification. Multilingual Tokenization.',
+        title: 'Routine / Habits Quick Filter',
+        category: 'CHRONOLOGY & HABIT TRACKING',
+        headline: '1-Tap Routine Checkpoint Filter. Instant History Isolation.',
         desc:
-            '100% air-gapped Naive Bayes classifier trained exclusively on local notes. Features Unicode-aware tokenization preserving diacritics and matras across English, French, German, Spanish, Hindi/Devanagari, and CJK text without sending a single byte to external servers.',
-        icon: CupertinoIcons.sparkles,
+            'Dedicated 1-tap Routine filter pill directly in the primary horizontal filter bar in History, allowing instantaneous isolation of all habit checkpoints with full localization.',
+        icon: CupertinoIcons.flag,
         badgeColor: Color(0xFF007AFF),
         specs:
-            'Naive Bayes Engine · Zero-Network Air-Gap · Multilingual Tokenizer · Diacritics & Matras Preserved · Instant Category Suggestions',
+            '1-Tap Routine Filter · Primary Filter Row · Instant Habit Isolation · Localized Checkpoints',
       ),
       (
-        title: 'Universal Ledger Boundary Healing',
-        category: 'CHRONOLOGY & DATA INTEGRITY',
+        title: 'Natural Forward-Time Scheduling',
+        category: 'TIME ENGINE & USABILITY',
         headline:
-            'Mathematical Collision Healing. Non-Destructive Reconciliation.',
+            'Natural Human Forward Scheduling. Intuitive Time Progression.',
         desc:
-            'Mathematical reconciliation of overlapping session intervals in UniversalIntervalLedger, eliminating impossible chronological collisions and filtering zero-duration collapsed intervals without mutating raw moment records.',
-        icon: CupertinoIcons.arrow_merge,
+            'Selecting or increasing duration in habit sessions anchors start time and advances end time forward naturally. Dynamic boundaries eliminate Cupertino date picker assertion crashes.',
+        icon: CupertinoIcons.time,
         badgeColor: Color(0xFF34C759),
         specs:
-            'Mathematical Boundary Healing · Non-Destructive Raw Moments · Zero-Duration Interval Collapse · Interval Reconciliation',
+            'Forward-Time Scheduling · Anchored Start Time · Natural End Progression · Crash-Proof Boundary Guards',
       ),
       (
-        title: 'Multi-Category Target Allocations',
-        category: 'GOALS & TARGETS',
-        headline: 'Composite Focus Allocations. Zero Data-Loss Editing.',
+        title: 'Custom Habit Duration & iOS Picker',
+        category: 'APPLE HIG & CONTROLS',
+        headline: 'Dedicated + Chip. CupertinoTimerPicker Sheet.',
         desc:
-            'Define composite focus targets spanning multiple categories simultaneously in Goals & Targets. Category editing in CreateOrEditGoalView preserves multi-category selection cleanly without data loss.',
-        icon: CupertinoIcons.scope,
+            'Dedicated + custom duration pill at the end of habit duration chips opening an authentic Apple HIG bottom sheet with CupertinoTimerPicker for custom hours and minutes.',
+        icon: CupertinoIcons.plus_circle,
         badgeColor: Color(0xFFFF9500),
         specs:
-            'Multi-Category Selections · Composite Time Tracking · Safe Category Editing · Zero Data-Loss Schema',
+            'Custom Duration Pill · iOS CupertinoTimerPicker · Hours & Minutes · 28pt Continuous Squircle Sheet',
       ),
       (
-        title: 'Habit Checkpoints & DST Immunity',
+        title: 'Quick 5m & 10m Micro-Durations',
         category: 'HABIT TRACKING & CHECKPOINTS',
-        headline: 'Active Weekday Customization. Calendar-Exact Stepping.',
+        headline: 'Instant 5m and 10m Pills. Micro-Session Readiness.',
         desc:
-            'Choose specific active days of week (1..7) for routine habits. Day progression calculations use calendar-exact stepping, eliminating Daylight Savings Time clock drift with hardened number deserialization.',
-        icon: CupertinoIcons.calendar_badge_plus,
+            'Added 5m and 10m quick chips right at the start of the habit duration row ([5, 10, 15, 30, 45, 60, 90, 120]) for frictionless micro-habit logging.',
+        icon: CupertinoIcons.stopwatch,
         badgeColor: Color(0xFFAF52DE),
         specs:
-            'Weekday Customizer (1..7) · DST-Immune Calendar Stepping · Robust Deserialization · Checkpoint Integrity',
+            '5m & 10m Quick Chips · Micro-Habit Logging · Frictionless Selection · 8 Standard Durations',
       ),
       (
-        title: 'Rune-Safe Full-Text Search with Fuzzy Matching',
-        category: 'SEARCH & INFORMATION RETRIEVAL',
-        headline:
-            'Unicode-Safe Levenshtein Distance. Surrogate-Pair Protection.',
+        title: 'High-Density Asset Optimization (~4.8MB Saved)',
+        category: 'PERFORMANCE & APP SIZE',
+        headline: '94.7% Avatar Size Reduction. Instant Image Decoding.',
         desc:
-            'Rune-safe Levenshtein distance 1 comparison comparing Unicode Runes, preventing surrogate-pair corruption when searching text containing non-BMP characters, regional scripts, and emojis.',
-        icon: CupertinoIcons.search,
+            'Downsampled and optimized 8 uncompressed preset avatar JPEG images from 4.44 MB to 237 KB and the Diwali banner from 730 KB to 139 KB, saving ~4.8MB directly from the APK bundle with zero image decoding lag.',
+        icon: CupertinoIcons.bolt_fill,
         badgeColor: Color(0xFFFF2D55),
         specs:
-            'Levenshtein Distance 1 · Unicode Rune Comparison · Emoji & Non-BMP Protection · Zero Surrogate Corruption',
+            '~4.8MB Bundle Savings · 94.7% Avatar Reduction · 512×512 Lanczos Downsampling · Zero Frame Drops',
       ),
       (
-        title: 'Sovereign Vault Cryptographic Hardening (200k PBKDF2)',
-        category: 'SECURITY & SOVEREIGN ENCRYPTION',
-        headline: 'OWASP-Grade Key Derivation. Strict Path Traversal Defense.',
+        title: 'Resilient Multi-Hop In-App Updater',
+        category: 'INFRASTRUCTURE & UPDATES',
+        headline: '10-Hop S3 Redirects. Multi-Manifest Verification.',
         desc:
-            'Elevated key derivation to 200,000 PBKDF2-HMAC-SHA256 iterations for new sovereign .notekar-vault backups with backward-compatible 100k decryption. Enforced sandbox boundary path validation preventing "../" traversal.',
-        icon: CupertinoIcons.lock_shield_fill,
+            'Enhanced in-app update engine supporting 10-hop GitHub AWS S3 redirects, paired with multi-manifest checksum verification and ZIP binary fallback validation.',
+        icon: CupertinoIcons.arrow_down_circle_fill,
         badgeColor: Color(0xFF30B0C7),
         specs:
-            '200,000 PBKDF2 Iterations · AES-256-GCM Sovereign Backups · Sandbox Boundary Validation · Backward-Compatible Decryption',
+            '10-Hop Redirect Following · GitHub Releases S3 · Multi-Manifest Fallback · Binary Header Verification',
       ),
       (
-        title: 'Apple HIG Design & 28pt Card Geometry Unification',
-        category: 'APPLE HIG & ERGONOMICS',
-        headline: 'Continuous Squircle Borders. 48×48dp Minimum Touch Slop.',
+        title: 'Dual-Key Theme & Accent Persistence',
+        category: 'STATE & VISUAL SANCTUARY',
+        headline: 'Dual-Key Persistence. Instant Live Propagation.',
         desc:
-            'Standardized SettingsGroup on ContinuousSquircleBorder with uniform 28pt rounded card radii, enforced 56.0pt inset dividers, 52pt button heights, OpenType tabular figures on live chronometers, and expanded all compact tap targets to meet or exceed 48×48dp.',
-        icon: CupertinoIcons.slider_horizontal_3,
+            'Dual-key persistence (m-theme/theme, m-accent-color/accent_color) ensuring visual preferences persist across APK updates, with synchronous live propagation across open sheets without restart.',
+        icon: CupertinoIcons.paintbrush_fill,
         badgeColor: Color(0xFF5856D6),
         specs:
-            'ContinuousSquircleBorder · 28pt Card Radii · 56pt Inset Dividers · 52pt Button Height · Tabular Numbers · 48x48dp Touch Targets',
+            'Dual-Key Storage · Update State Persistence · Synchronous Live Update · Zero-Restart Theme Switch',
       ),
       (
-        title: 'Robust Intra-Dialog Scroll Memory & Dismissal Reset',
-        category: 'NAVIGATION & ARCHITECTURE',
-        headline: 'Dual-Store Scroll Memory. Zero-Drift Sub-Tier Traversal.',
+        title: 'Light Theme High-Contrast Visibility',
+        category: 'APPLE HIG & CONTRAST',
+        headline: 'Apple HIG #D1D1D6 Borders. Deep Graphite #1C1C1E Icons.',
         desc:
-            'Dual-store scroll offset restoration preserving exact scroll position when navigating into sub-settings and returning, with clean reset to top on full dialog dismissal.',
-        icon: CupertinoIcons.arrow_counterclockwise,
-        badgeColor: Color(0xFF34C759),
-        specs:
-            'Dual-Store Restoration · Intra-Dialog Navigation · Sub-Tier Traversal · Clean Dismissal Reset',
-      ),
-      (
-        title: 'Android 15 Platform Parity & Background Maintenance',
-        category: 'ANDROID NATIVE ARCHITECTURE',
-        headline: '16KB Memory Page Parity. Automated Midnight Compaction.',
-        desc:
-            'Native C library 16KB memory page alignment verification, runtime exact alarm guards, internal broadcast receiver protection, and automated 30-day trash purging with database compaction during midnight maintenance.',
-        icon: CupertinoIcons.device_phone_portrait,
+            'Applied Apple HIG #D1D1D6 specular border tokens and deep graphite #1C1C1E icons/text across navigation toolbars, minimal capsules, and top toasts, synchronizing status bar brightness with theme luminance.',
+        icon: CupertinoIcons.sun_max_fill,
         badgeColor: Color(0xFFFFD700),
         specs:
-            '16KB ELF Alignment · Exact Alarm Runtime Guards · Protected Receivers · Automated Midnight DB Compaction',
+            'Apple HIG #D1D1D6 Borders · Deep Graphite #1C1C1E Contrast · Synchronized Status Bar · Anti-Washout',
+      ),
+      (
+        title: 'Apple HIG Accessible Single Timestamp Button',
+        category: 'ACCESSIBILITY & HIG',
+        headline: '48dp Minimum Touch Slop. Outlined Apple HIG Button.',
+        desc:
+            'Elevated "Log as single timestamp" into a prominent, high-contrast OutlinedButton with 48dp minimum touch slop meeting accessibility standards.',
+        icon: CupertinoIcons.checkmark_circle,
+        badgeColor: Color(0xFF34C759),
+        specs:
+            'OutlinedButton.icon · 48dp Accessibility Standard · Radio Icon · High-Contrast HIG Token',
       ),
     ],
     items: [
-      '• NoteKar 8.0 Sovereign Edition: The Apple HIG & Sovereign Intelligence Milestone',
-      '+ On-Device Auto-Categorization: 100% offline Naive Bayes classifier trained on local notes with Unicode-aware multilingual tokenization',
-      '+ Universal Interval Ledger: Boundary collision healing for overlapping sessions and zero-duration interval collapse',
-      '+ Multi-Category Target Allocations: Composite duration tracking across multiple categories in Goals & Targets without data loss',
-      '+ Habit Frequency Customizer: Custom active days of week with DST-immune calendar-exact streak calculations',
-      '+ Rune-Safe Fuzzy Search: Levenshtein distance 1 comparison comparing Unicode Runes preventing surrogate-pair emoji corruption',
-      '+ Sovereign Vault 200k PBKDF2: OWASP-grade 200,000 iterations for new backups and sandbox traversal injection protection',
-      '+ Apple HIG 28pt Card Geometry: Uniform 28pt rounded radii, continuous squircle borders, 56pt dividers, 52pt buttons, and 48x48dp touch slop',
-      '+ Robust Intra-Dialog Scroll Memory: Dual-store scroll offset restoration across in-dialog navigation tiers with clean dismissal reset',
-      '+ Android 15 & System Security: 16KB ELF alignment, exact alarm runtime checks, and automated midnight database vacuuming',
+      '• NoteKar 8.0.1: Apple HIG Refinements, User Feedback & Asset Optimization',
+      '+ Routine Filter: 1-tap Routine/Habits filter pill on History dialog',
+      '+ Forward Scheduling: Natural forward duration scheduling for live sessions',
+      '+ Custom Time: + pill with iOS CupertinoTimerPicker bottom sheet',
+      '+ Quick Chips: 5m & 10m micro-durations at the start of habit duration row',
+      '+ App Size: ~4.8MB direct APK bundle reduction via asset optimization',
+      '+ In-App Updater: 10-hop S3 redirect support & multi-manifest checksum fallback',
+      '+ Theme Persistence: Dual-key theme & accent persistence across updates with live propagation',
+      '+ Light Mode: High-contrast #D1D1D6 borders and synchronized status bar brightness',
+      '+ Single Timestamp: 48dp Apple HIG OutlinedButton for single timestamp habit logging',
     ],
   );
 

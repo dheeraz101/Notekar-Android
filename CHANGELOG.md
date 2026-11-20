@@ -6,6 +6,27 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [8.0.1] - 2026-11-20 (versionCode 26BR1120) [BR]
+
+### What's New
+- **Routine / Habits Quick Filter (`USR-01`)**: 1-tap `'Routine'` filter pill directly on the primary horizontal filter bar in History dialog (`HistoryDialog`), isolating habit checkpoints instantly with full localization support.
+- **Natural Forward-Time Scheduling (`USR-05`)**: Live session habit duration adjustments now naturally anchor the session start time and advance the end time forward (`_startPoint.add(duration)`), aligning with intuitive human expectations. Dynamic boundary guards eliminate Cupertino date picker assertion crashes.
+- **Custom Habit Duration with iOS Time Picker (`USR-06`)**: Dedicated `+` custom duration pill at the end of the habit duration row, presenting an authentic Apple HIG bottom sheet with `CupertinoTimerPicker` for custom hours and minutes.
+- **Quick 5m & 10m Habit Micro-Durations (`USR-08`)**: Integrated instant `5m` and `10m` quick duration chips at the beginning of the habit sheet duration row (`[5, 10, 15, 30, 45, 60, 90, 120]`).
+- **Apple HIG Accessible Single Timestamp Button (`USR-07`)**: Elevated "Log as single timestamp" into a prominent, high-contrast `OutlinedButton.icon` with 48dp touch slop (`NkTouchTarget.minInteractive`) and `Icons.radio_button_checked_rounded`.
+- **High-Density Asset Optimization (~4.8MB Direct Reduction) (`PERF-01`)**: Downsampled and optimized 8 uncompressed preset avatar JPEG images (reducing size from 4.44 MB to 237 KB, a 94.7% reduction) and the Diwali notice banner (reduced from 730 KB to 139 KB, an 81.0% reduction), cutting ~4.8 MB directly from the application package with zero decode stutter.
+- **Resilient Multi-Hop In-App Updater (`USR-02`)**: Enhanced `UpdateService.downloadApk` with 10-hop redirect following for GitHub AWS S3 asset delivery, paired with multi-manifest checksum verification and ZIP binary magic-byte fallback validation.
+- **Dual-Key Theme & Accent Persistence (`USR-03`)**: Implemented dual-key persistence (`m-theme`/`theme`, `m-accent-color`/`accent_color`, `m-high-contrast`/`high_contrast`) ensuring visual settings persist across updates, with synchronous live propagation across all open sheets and screens without restart.
+- **Light Theme High-Contrast Specular Borders & Visibility (`USR-04`)**: Applied Apple HIG `#D1D1D6` border tokens and deep graphite `#1C1C1E` icon/text contrast across toolbar navigation capsules, glass components, and top pill toasts. Synchronized system status bar brightness to `!p.isDark` so top notifications and navigation controls never wash out on light canvases.
+
+### Improvements & Bug Fixes
+- **Apple HIG Sheet Curvature & Grab Handles**: Standardized custom habit duration and time picker bottom sheets on authentic 28pt continuous squircle curvature (`NkRadii.squircleSheet`) and iOS top grab handles.
+- **Cupertino Time Picker Assertion Hardening**: Dynamically bounded `effectiveMin` and `effectiveMax` in `_pickTime` based on session anchor dates, eliminating assertion failures on extended sessions (> 60m).
+- **In-App Updater Checksum Fallbacks**: Added fallback verification to `version.json` and local APK binary structure (`PK\x03\x04` header check) when GitHub releases omit `sha256.txt`.
+- **Top Toast Visibility**: Ensured `showIosPillToast` renders deep graphite text and dark icons in light mode with subtle neutral depth shadows.
+- **System Status Bar Brightness Synchronization**: Aligned `statusBarIconBrightness` and `statusBarBrightness` to strictly track theme luminance across home lifecycle resets and session state changes.
+- Passed 605/605 automated tests across all 73+ repository test suites with 0 static analysis warnings.
+
 ## [8.0.0] - 2026-11-15 (versionCode 26SR1115) [Stable]
 
 ### What's New

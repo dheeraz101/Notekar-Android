@@ -1,0 +1,10 @@
+Update to 8.0.1 (build 26BR1120):
+- Routine Filter: 1-tap Routine/Habits pill on History filter bar
+- Forward Duration: Natural forward-time scheduling for habit sessions
+- Custom Time: '+' pill with iOS CupertinoTimerPicker bottom sheet
+- 5m & 10m Quick Chips: Instant micro-duration chips in habit popup
+- Single Timestamp Button: Prominent 48dp Apple HIG outlined button
+- App Size Reduction: ~4.8MB saved (-92.7%) across image assets
+- In-App Updater: 10-hop S3 redirect support & multi-manifest checksum verification
+- Theme Persistence: Dual-key theme & accent persistence across updates with live instant propagation
+- Light Mode Contrast: Apple HIG #D1D1D6 borders & synchronized status bar brightness
