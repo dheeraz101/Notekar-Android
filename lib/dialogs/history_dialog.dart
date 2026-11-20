@@ -1161,6 +1161,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                       'all',
                                                       'sessions',
                                                       'single',
+                                                      'checkpoints',
                                                     ])
                                                       Padding(
                                                         padding:
@@ -1201,7 +1202,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                                           context,
                                                                         ),
                                                                   'checkpoints' =>
-                                                                    'Checkpoints'
+                                                                    'Routine'
                                                                         .localized(
                                                                           context,
                                                                         ),
@@ -3086,7 +3087,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
   }
 
   bool get _hasSecondaryHistoryFilter =>
-      !(const {'all', 'sessions', 'single'}.contains(_filter)) ||
+      !(const {'all', 'sessions', 'single', 'checkpoints'}.contains(_filter)) ||
       _timelineFilterCriteria.isActive;
 
   String get _secondaryHistoryFilterLabel {
@@ -3184,7 +3185,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                         'out' => 'OUT Moments'.localized(context),
                         'single' => 'Single Logs'.localized(context),
                         'notes' => 'With Notes'.localized(context),
-                        'checkpoints' => 'Checkpoints'.localized(context),
+                        'checkpoints' => 'Routine / Habits'.localized(context),
                         'consolidate' => 'Grouped'.localized(context),
                         'media' => 'Media (Voice/Images)'.localized(context),
                         'date' => 'Pick Specific Date...'.localized(context),

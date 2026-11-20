@@ -406,28 +406,30 @@ BoxDecoration _bottomNavDecoration(Palette p, bool blur) {
   final isAmoled = p.name == 'amoled';
 
   final surfaceColor = isLight
-      ? const Color(0xFFFFFFFF).withValues(alpha: blur ? 0.75 : 0.96)
+      ? const Color(0xFFFFFFFF).withValues(alpha: blur ? 0.90 : 0.98)
       : (isAmoled
             ? const Color(0xFF0C0C0E).withValues(alpha: blur ? 0.88 : 0.98)
             : const Color(0xFF18181B).withValues(alpha: blur ? 0.75 : 0.95));
 
   final topRimColor = isLight
-      ? Colors.white.withValues(alpha: 0.45)
+      ? const Color(0xFFD1D1D6)
       : Colors.white.withValues(alpha: isAmoled ? 0.14 : 0.18);
 
   return BoxDecoration(
     color: surfaceColor,
     borderRadius: BorderRadius.circular(999),
     border: Border.all(
-      color: blur ? topRimColor : p.border.withValues(alpha: 0.5),
-      width: 0.5,
+      color: isLight
+          ? const Color(0xFFD1D1D6).withValues(alpha: 0.85)
+          : (blur ? topRimColor : p.border.withValues(alpha: 0.5)),
+      width: 0.8,
     ),
     boxShadow: (isAmoled && !blur)
         ? null
         : [
             BoxShadow(
-              color: Colors.black.withValues(alpha: isLight ? 0.06 : 0.28),
-              blurRadius: blur ? 20 : 14,
+              color: Colors.black.withValues(alpha: isLight ? 0.12 : 0.28),
+              blurRadius: blur ? 18 : 12,
               spreadRadius: 0,
               offset: const Offset(0, 4),
             ),

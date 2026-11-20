@@ -49,10 +49,11 @@ class Glass extends StatelessWidget {
     );
 
     // Apple Liquid Glass specular rim gradient:
-    // Light strikes from the top, creating a crisp white hairline highlight
-    // that tapers into ambient border tint at the bottom.
+    // Light strikes from the top, creating a crisp highlight that tapers
+    // into ambient border tint at the bottom. In light mode, enforce crisp
+    // #D1D1D6 border definition so surfaces never blend into light canvas.
     final topHighlightColor = isLight
-        ? Colors.white.withValues(alpha: 0.45)
+        ? const Color(0xFFD1D1D6).withValues(alpha: 0.85)
         : Colors.white.withValues(alpha: isAmoled ? 0.12 : 0.18);
 
     Widget content = DecoratedBox(
@@ -80,10 +81,12 @@ class Glass extends StatelessWidget {
               )
             : null,
         border: Border.all(
-          color: (effectiveBlur && showSpecularHighlight)
-              ? topHighlightColor
-              : p.border.withValues(alpha: opacity * p.border.a),
-          width: 0.5,
+          color: isLight
+              ? const Color(0xFFD1D1D6).withValues(alpha: 0.85)
+              : ((effectiveBlur && showSpecularHighlight)
+                    ? topHighlightColor
+                    : p.border.withValues(alpha: opacity * p.border.a)),
+          width: isLight ? 0.8 : 0.5,
         ),
         boxShadow: (isAmoled && !effectiveBlur) || p.name == 'eink'
             ? null
@@ -91,7 +94,7 @@ class Glass extends StatelessWidget {
                 // Soft restrained ambient depth shadow
                 BoxShadow(
                   color: Colors.black.withValues(
-                    alpha: isLight ? 0.05 : (isAmoled ? 0.20 : 0.25),
+                    alpha: isLight ? 0.12 : (isAmoled ? 0.20 : 0.25),
                   ),
                   blurRadius: effectiveBlur ? 20 : 16,
                   spreadRadius: effectiveBlur ? -1 : 0,
@@ -103,6 +106,12 @@ class Glass extends StatelessWidget {
                     blurRadius: 8,
                     spreadRadius: -1,
                     offset: const Offset(0, 2),
+                  ),
+                if (isLight)
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1),
                   ),
               ],
       ),

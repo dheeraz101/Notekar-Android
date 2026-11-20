@@ -92,14 +92,14 @@ class _CheckpointSessionSheetState extends State<CheckpointSessionSheet> {
   final TextEditingController _noteController = TextEditingController();
   bool _isSaving = false;
 
-  static const List<int> _quickDurations = [15, 30, 45, 60, 90, 120];
+  static const List<int> _quickDurations = [5, 10, 15, 30, 45, 60, 90, 120];
 
   @override
   void initState() {
     super.initState();
     final now = DateTime.now();
-    _endPoint = now;
-    _startPoint = now.subtract(Duration(minutes: _selectedDurationMinutes));
+    _startPoint = now;
+    _endPoint = now.add(Duration(minutes: _selectedDurationMinutes));
   }
 
   @override
@@ -137,8 +137,153 @@ class _CheckpointSessionSheetState extends State<CheckpointSessionSheet> {
     HapticFeedback.selectionClick();
     setState(() {
       _selectedDurationMinutes = minutes;
-      _startPoint = _endPoint.subtract(Duration(minutes: minutes));
+      _endPoint = _startPoint.add(Duration(minutes: minutes));
     });
+  }
+
+  Future<void> _pickCustomDuration() async {
+    HapticFeedback.selectionClick();
+    Duration initialDuration = Duration(
+      minutes: _selectedDurationMinutes.clamp(1, 1440),
+    );
+    Duration selectedDuration = initialDuration;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: widget.p.surface2,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36,
+                height: 5,
+                margin: const EdgeInsets.only(top: 8, bottom: 4),
+                decoration: BoxDecoration(
+                  color: widget.p.text3.withValues(alpha: 0.35),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: Text(
+                        'Cancel'.localized(context),
+                        style: TextStyle(color: widget.p.text3),
+                      ),
+                    ),
+                    Text(
+                      'Custom Duration'.localized(context),
+                      style: TextStyle(
+                        color: widget.p.text,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        final totalMins = selectedDuration.inMinutes;
+                        if (totalMins > 0) {
+                          _applyDuration(totalMins);
+                        }
+                      },
+                      child: Text(
+                        'Done'.localized(context),
+                        style: TextStyle(
+                          color: widget.p.accent,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 200,
+                child: CupertinoTheme(
+                  data: CupertinoThemeData(
+                    brightness: widget.p.isDark
+                        ? Brightness.dark
+                        : Brightness.light,
+                    textTheme: CupertinoTextThemeData(
+                      pickerTextStyle: TextStyle(
+                        color: widget.p.text,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  child: CupertinoTimerPicker(
+                    mode: CupertinoTimerPickerMode.hm,
+                    initialTimerDuration: initialDuration,
+                    onTimerDurationChanged: (d) {
+                      selectedDuration = d;
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCustomDurationPill(Palette p) {
+    final isCustom = !_quickDurations.contains(_selectedDurationMinutes);
+    return Padding(
+      padding: const EdgeInsets.only(right: 6),
+      child: PressableScale(
+        onTap: _pickCustomDuration,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(
+            color: isCustom ? p.accent : p.surface3,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isCustom ? p.accent : p.border.withValues(alpha: 0.4),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                CupertinoIcons.plus,
+                size: 13,
+                color: isCustom ? Colors.white : p.accent,
+              ),
+              if (isCustom) ...[
+                const SizedBox(width: 4),
+                Text(
+                  _selectedDurationMinutes >= 60
+                      ? (_selectedDurationMinutes % 60 == 0
+                            ? '${_selectedDurationMinutes ~/ 60}h'
+                            : '${_selectedDurationMinutes ~/ 60}h ${_selectedDurationMinutes % 60}m')
+                      : '${_selectedDurationMinutes}m',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _pickTime({required bool isStart}) async {
@@ -146,17 +291,36 @@ class _CheckpointSessionSheetState extends State<CheckpointSessionSheet> {
     final initialDt = isStart ? _startPoint : _endPoint;
     DateTime tempDt = initialDt;
 
+    final now = DateTime.now();
+    final baseMax = now.add(const Duration(days: 7));
+    final effectiveMax = initialDt.isAfter(baseMax)
+        ? initialDt.add(const Duration(days: 1))
+        : baseMax;
+    final baseMin = now.subtract(const Duration(days: 365));
+    final effectiveMin = initialDt.isBefore(baseMin)
+        ? initialDt.subtract(const Duration(days: 1))
+        : baseMin;
+
     await showModalBottomSheet<void>(
       context: context,
       backgroundColor: widget.p.surface2,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder: (ctx) {
         return SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              Container(
+                width: 36,
+                height: 5,
+                margin: const EdgeInsets.only(top: 8, bottom: 4),
+                decoration: BoxDecoration(
+                  color: widget.p.text3.withValues(alpha: 0.35),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -219,11 +383,26 @@ class _CheckpointSessionSheetState extends State<CheckpointSessionSheet> {
               ),
               SizedBox(
                 height: 200,
-                child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.dateAndTime,
-                  initialDateTime: initialDt,
-                  maximumDate: DateTime.now().add(const Duration(hours: 1)),
-                  onDateTimeChanged: (newDt) => tempDt = newDt,
+                child: CupertinoTheme(
+                  data: CupertinoThemeData(
+                    brightness: widget.p.isDark
+                        ? Brightness.dark
+                        : Brightness.light,
+                    textTheme: CupertinoTextThemeData(
+                      dateTimePickerTextStyle: TextStyle(
+                        color: widget.p.text,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  child: CupertinoDatePicker(
+                    mode: CupertinoDatePickerMode.dateAndTime,
+                    initialDateTime: initialDt,
+                    minimumDate: effectiveMin,
+                    maximumDate: effectiveMax,
+                    onDateTimeChanged: (newDt) => tempDt = newDt,
+                  ),
                 ),
               ),
             ],
@@ -525,46 +704,49 @@ class _CheckpointSessionSheetState extends State<CheckpointSessionSheet> {
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
                   child: Row(
-                    children: _quickDurations.map((mins) {
-                      final isSelected = _selectedDurationMinutes == mins;
-                      final label = mins >= 60
-                          ? (mins % 60 == 0
-                                ? '${mins ~/ 60}h'
-                                : '${mins ~/ 60}h ${mins % 60}m')
-                          : '${mins}m';
+                    children: [
+                      ..._quickDurations.map((mins) {
+                        final isSelected = _selectedDurationMinutes == mins;
+                        final label = mins >= 60
+                            ? (mins % 60 == 0
+                                  ? '${mins ~/ 60}h'
+                                  : '${mins ~/ 60}h ${mins % 60}m')
+                            : '${mins}m';
 
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 6),
-                        child: PressableScale(
-                          onTap: () => _applyDuration(mins),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 5,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isSelected ? p.accent : p.surface3,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: isSelected
-                                    ? p.accent
-                                    : p.border.withValues(alpha: 0.4),
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 6),
+                          child: PressableScale(
+                            onTap: () => _applyDuration(mins),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 5,
                               ),
-                            ),
-                            child: Text(
-                              label,
-                              style: TextStyle(
-                                color: isSelected ? Colors.white : p.text2,
-                                fontSize: 11.5,
-                                fontWeight: isSelected
-                                    ? FontWeight.w800
-                                    : FontWeight.w600,
+                              decoration: BoxDecoration(
+                                color: isSelected ? p.accent : p.surface3,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? p.accent
+                                      : p.border.withValues(alpha: 0.4),
+                                ),
+                              ),
+                              child: Text(
+                                label,
+                                style: TextStyle(
+                                  color: isSelected ? Colors.white : p.text2,
+                                  fontSize: 11.5,
+                                  fontWeight: isSelected
+                                      ? FontWeight.w800
+                                      : FontWeight.w600,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    }).toList(),
+                        );
+                      }),
+                      _buildCustomDurationPill(p),
+                    ],
                   ),
                 ),
               ],
@@ -641,6 +823,7 @@ class _CheckpointSessionSheetState extends State<CheckpointSessionSheet> {
                       foregroundColor: p.text,
                       side: BorderSide(color: p.border.withValues(alpha: 0.8)),
                       padding: const EdgeInsets.symmetric(vertical: 12),
+                      minimumSize: const Size.fromHeight(48),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
@@ -662,19 +845,36 @@ class _CheckpointSessionSheetState extends State<CheckpointSessionSheet> {
           ],
 
           if (widget.onLogSingle != null) ...[
-            const SizedBox(height: 4),
-            Center(
-              child: TextButton(
-                onPressed: _handleLogSingle,
-                child: Text(
-                  'Log as single timestamp'.localized(context),
-                  style: TextStyle(
-                    color: p.text3,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: p.text2,
+                      side: BorderSide(color: p.border.withValues(alpha: 0.8)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      minimumSize: const Size.fromHeight(48),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    onPressed: _handleLogSingle,
+                    icon: Icon(
+                      Icons.radio_button_checked_rounded,
+                      size: 16,
+                      color: p.accent,
+                    ),
+                    label: Text(
+                      'Log as single timestamp'.localized(context),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
           ],
         ],

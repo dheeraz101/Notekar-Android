@@ -105,11 +105,14 @@ class SettingsController extends ChangeNotifier {
   int get privacyLockDelayMinutes => _privacyLockDelayMinutes;
 
   void _loadFromPrefs() {
-    _theme = _prefs.getString('m-theme') ?? 'dark';
+    _theme = _prefs.getString('m-theme') ?? _prefs.getString('theme') ?? 'dark';
     _defaultMode = _prefs.getString('m-default-mode') ?? 'two-way';
     _locale = _prefs.getString('m-locale') ?? 'system';
     _hapticStyle = _prefs.getString('haptic_style') ?? 'standard';
-    _accentColor = _prefs.getString('m-accent-color') ?? 'blue';
+    _accentColor =
+        _prefs.getString('m-accent-color') ??
+        _prefs.getString('accent_color') ??
+        'blue';
     _appIconStyle = _prefs.getString('app_icon_style') ?? 'default';
     _csvDelimiter = _prefs.getString('csv_delimiter') ?? ',';
     _historyDensity = _prefs.getString('history_density') ?? 'comfortable';
@@ -190,6 +193,7 @@ class SettingsController extends ChangeNotifier {
     if (_accentColor == value) return;
     _accentColor = value;
     await _prefs.setString('m-accent-color', value);
+    await _prefs.setString('accent_color', value);
     notifyListeners();
   }
 

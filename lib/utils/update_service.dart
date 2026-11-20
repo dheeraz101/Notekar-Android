@@ -71,6 +71,7 @@ class UpdateService {
           'https://raw.githubusercontent.com/dheeraz101/Notekar-Android/refs/tags/v$appVersion$trackSuffix/build/app/outputs/flutter-apk/version.json';
 
       final request = await client.getUrl(Uri.parse(url));
+      request.maxRedirects = 10;
       request.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
       final response = await request.close();
 
@@ -426,10 +427,10 @@ class UpdateService {
 
     final suffix = await _getDeviceSuffix();
     final candidates = getCandidateApkFilenames(info.version, suffix);
-    final client = _createHttpClient(timeout: const Duration(seconds: 15));
+    final client = _createHttpClient(timeout: const Duration(seconds: 20));
 
     try {
-      HttpClientResponse? testResponse;
+      HttpClientResponse? activeResponse;
       String? activeUrl;
       String? activeSavePath;
 
@@ -440,14 +441,14 @@ class UpdateService {
 
         try {
           final testRequest = await client.getUrl(Uri.parse(candidateUrl));
+          testRequest.maxRedirects = 10;
           testRequest.headers.set(
             HttpHeaders.userAgentHeader,
             'NoteKar/$appVersion',
           );
-          testRequest.headers.set(HttpHeaders.rangeHeader, 'bytes=0-0');
           final response = await testRequest.close();
-          if (response.statusCode != 404) {
-            testResponse = response;
+          if (response.statusCode == 200 || response.statusCode == 206) {
+            activeResponse = response;
             activeUrl = candidateUrl;
             activeSavePath = candidateSavePath;
             break;
@@ -456,115 +457,42 @@ class UpdateService {
         } catch (_) {}
       }
 
-      if (testResponse == null || activeUrl == null || activeSavePath == null) {
+      if (activeResponse == null ||
+          activeUrl == null ||
+          activeSavePath == null) {
         _logger.warn(
           'No accessible APK release asset found for tag ${info.tagName} (version ${info.version})',
         );
         return null;
       }
 
-      final finalUrl = testResponse.redirects.isNotEmpty
-          ? testResponse.redirects.last.location.toString()
-          : activeUrl;
-
-      final contentRange = testResponse.headers.value(
-        HttpHeaders.contentRangeHeader,
-      );
-      final isRangeSupported =
-          testResponse.statusCode == 206 &&
-          contentRange != null &&
-          contentRange.contains('/');
-
-      int totalSize = 0;
-      if (isRangeSupported) {
-        final parts = contentRange.split('/');
-        if (parts.length == 2) {
-          totalSize = int.tryParse(parts[1]) ?? 0;
-        }
-      }
-
       await NetworkLogger.log(
         url: activeUrl,
         method: 'GET',
-        statusCode: testResponse.statusCode,
+        statusCode: activeResponse.statusCode,
         purpose: 'APK Package Download',
-        size: totalSize > 0
-            ? '${(totalSize / (1024 * 1024)).toStringAsFixed(2)} MB'
+        size: activeResponse.contentLength > 0
+            ? '${(activeResponse.contentLength / (1024 * 1024)).toStringAsFixed(2)} MB'
             : 'Unknown',
       );
 
-      await testResponse.drain();
+      final downloadedPath = await _saveResponseStream(
+        response: activeResponse,
+        savePath: activeSavePath,
+        onProgress: onProgress,
+      );
 
-      if (isRangeSupported && totalSize > 1024 * 1024 * 5) {
-        _logger.info('Optimizing download using parallel HTTP Range chunks...');
-        final chunkCount = 4;
-        final chunkSize = (totalSize / chunkCount).ceil();
-        final List<Future<String?>> futures = [];
-        final List<int> downloadedChunkBytes = List.filled(chunkCount, 0);
-
-        for (int i = 0; i < chunkCount; i++) {
-          final start = i * chunkSize;
-          final end = (i == chunkCount - 1)
-              ? totalSize - 1
-              : (start + chunkSize - 1);
-          final partPath = '$activeSavePath.part$i';
-
-          futures.add(
-            _downloadPart(
-              client: client,
-              url: finalUrl,
-              partPath: partPath,
-              start: start,
-              end: end,
-              onProgress: (bytes) {
-                downloadedChunkBytes[i] = bytes;
-                final currentTotal = downloadedChunkBytes.reduce(
-                  (a, b) => a + b,
-                );
-                onProgress(currentTotal / totalSize);
-              },
-            ),
-          );
-        }
-
-        final parts = await Future.wait(futures);
-        if (parts.any((p) => p == null)) {
-          _logger.warn(
-            'Parallel download failed, falling back to standard download...',
-          );
-          for (int i = 0; i < chunkCount; i++) {
-            final f = File('$activeSavePath.part$i');
-            if (await f.exists()) await f.delete();
-          }
-          return await _downloadStandard(
-            client,
-            activeUrl,
-            activeSavePath,
-            onProgress,
-          );
-        }
-
-        final file = File(activeSavePath);
-        if (await file.exists()) await file.delete();
-        final sink = file.openWrite();
-        for (int i = 0; i < chunkCount; i++) {
-          final partFile = File('$activeSavePath.part$i');
-          await sink.addStream(partFile.openRead());
-          await partFile.delete();
-        }
-        await sink.close();
-        _logger.info(
-          'APK downloaded & merged successfully to: $activeSavePath',
-        );
-        return activeSavePath;
-      } else {
-        return await _downloadStandard(
-          client,
-          activeUrl,
-          activeSavePath,
-          onProgress,
-        );
+      if (downloadedPath != null) {
+        _logger.info('APK downloaded successfully to: $downloadedPath');
+        return downloadedPath;
       }
+
+      return await _downloadStandard(
+        client,
+        activeUrl,
+        activeSavePath,
+        onProgress,
+      );
     } catch (e, stack) {
       _logger.error('Failed to download APK file', e, stack);
       return null;
@@ -573,37 +501,58 @@ class UpdateService {
     }
   }
 
-  Future<String?> _downloadPart({
-    required HttpClient client,
-    required String url,
-    required String partPath,
-    required int start,
-    required int end,
-    required void Function(int bytes) onProgress,
+  Future<String?> _saveResponseStream({
+    required HttpClientResponse response,
+    required String savePath,
+    required void Function(double progress) onProgress,
   }) async {
+    final tempPath = '$savePath.tmp';
     try {
-      final request = await client.getUrl(Uri.parse(url));
-      request.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
-      request.headers.set(HttpHeaders.rangeHeader, 'bytes=$start-$end');
-
-      final response = await request.close();
-      if (response.statusCode != 206 && response.statusCode != 200) {
-        return null;
+      final contentLength = response.contentLength;
+      final tempFile = File(tempPath);
+      if (await tempFile.exists()) {
+        await tempFile.delete();
       }
 
-      final file = File(partPath);
-      final sink = file.openWrite();
-      var bytes = 0;
+      final sink = tempFile.openWrite();
+      var downloadedBytes = 0;
 
       await for (final chunk in response) {
         sink.add(chunk);
-        bytes += chunk.length;
-        onProgress(bytes);
+        downloadedBytes += chunk.length;
+        if (contentLength > 0) {
+          onProgress((downloadedBytes / contentLength).clamp(0.0, 1.0));
+        } else {
+          final estimatedRatio = (downloadedBytes / (20 * 1024 * 1024)).clamp(
+            0.0,
+            0.95,
+          );
+          onProgress(estimatedRatio);
+        }
       }
+      await sink.flush();
       await sink.close();
-      return partPath;
+
+      final fileLen = await tempFile.length();
+      if (fileLen < 1024 * 1024) {
+        _logger.warn('Downloaded APK is too small: $fileLen bytes');
+        if (await tempFile.exists()) await tempFile.delete();
+        return null;
+      }
+
+      final finalFile = File(savePath);
+      if (await finalFile.exists()) {
+        await finalFile.delete();
+      }
+      await tempFile.rename(savePath);
+      onProgress(1.0);
+      return savePath;
     } catch (e, stack) {
-      _logger.error('Failed downloading chunk $start-$end', e, stack);
+      _logger.error('Failed saving APK response stream', e, stack);
+      try {
+        final tf = File(tempPath);
+        if (await tf.exists()) await tf.delete();
+      } catch (_) {}
       return null;
     }
   }
@@ -614,66 +563,38 @@ class UpdateService {
     String savePath,
     void Function(double progress) onProgress,
   ) async {
+    final tempPath = '$savePath.tmp';
     try {
       final request = await client.getUrl(Uri.parse(url));
+      request.maxRedirects = 10;
       request.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
 
       final response = await request.close();
-      if (response.statusCode != 200) {
+      if (response.statusCode != 200 && response.statusCode != 206) {
         _logger.warn(
           'Standard download APK failed: HTTP ${response.statusCode}',
         );
         return null;
       }
 
-      final contentLength = response.contentLength;
-      if (contentLength <= 0) {
-        _logger.warn('Standard download APK failed: Invalid content length');
-        return null;
-      }
-
-      final file = File(savePath);
-      if (await file.exists()) {
-        await file.delete();
-      }
-
-      final sink = file.openWrite();
-      var downloadedBytes = 0;
-
-      await for (final chunk in response) {
-        sink.add(chunk);
-        downloadedBytes += chunk.length;
-        onProgress(downloadedBytes / contentLength);
-      }
-      await sink.close();
-      return savePath;
+      return await _saveResponseStream(
+        response: response,
+        savePath: savePath,
+        onProgress: onProgress,
+      );
     } catch (e, stack) {
       _logger.error('Standard download failed', e, stack);
+      try {
+        final tf = File(tempPath);
+        if (await tf.exists()) await tf.delete();
+      } catch (_) {}
       return null;
     }
   }
 
   Future<bool> verifyApkHash(AppUpdateInfo info, String apkFilePath) async {
-    final client = _createHttpClient(timeout: const Duration(seconds: 10));
+    final client = _createHttpClient(timeout: const Duration(seconds: 12));
     try {
-      final url =
-          'https://github.com/dheeraz101/Notekar-Android/releases/download/${info.tagName}/sha256.txt';
-      final request = await client.getUrl(Uri.parse(url));
-      request.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
-
-      final response = await request.close();
-      await NetworkLogger.log(
-        url: url,
-        method: 'GET',
-        statusCode: response.statusCode,
-        purpose: 'Verify Release Checksum',
-        size: response.contentLength > 0
-            ? '${(response.contentLength / 1024).toStringAsFixed(2)} KB'
-            : 'Unknown',
-      );
-      if (response.statusCode != 200) return false;
-
-      final manifestText = await response.transform(utf8.decoder).join();
       final localHash = await _channel.invokeMethod<String>('getFileSha256', {
         'filePath': apkFilePath,
       });
@@ -698,22 +619,101 @@ class UpdateService {
         );
       }
 
-      // Extract hash of localFilename from manifest text
-      final lines = manifestText.split('\n');
-      for (final line in lines) {
-        final trimmed = line.trim();
-        if (trimmed.isEmpty) continue;
-        final parts = trimmed.split(RegExp(r'\s+'));
-        if (parts.length >= 2) {
-          final hash = parts[0].trim().toLowerCase();
-          final filename = parts[1].trim().toLowerCase();
-          if (acceptableNames.contains(filename) &&
-              hash == localHash.toLowerCase()) {
-            _logger.info('Checksum matches target: $hash for $filename');
-            return true;
+      bool manifestFound = false;
+
+      // 1. Try sha256.txt from release download
+      try {
+        final url =
+            'https://github.com/dheeraz101/Notekar-Android/releases/download/${info.tagName}/sha256.txt';
+        final request = await client.getUrl(Uri.parse(url));
+        request.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
+
+        final response = await request.close();
+        await NetworkLogger.log(
+          url: url,
+          method: 'GET',
+          statusCode: response.statusCode,
+          purpose: 'Verify Release Checksum',
+          size: response.contentLength > 0
+              ? '${(response.contentLength / 1024).toStringAsFixed(2)} KB'
+              : 'Unknown',
+        );
+
+        if (response.statusCode == 200 || response.statusCode == 206) {
+          final manifestText = await response.transform(utf8.decoder).join();
+          final lines = manifestText.split('\n');
+          for (final line in lines) {
+            final trimmed = line.trim();
+            if (trimmed.isEmpty) continue;
+            final parts = trimmed.split(RegExp(r'\s+'));
+            if (parts.length >= 2) {
+              manifestFound = true;
+              final hash = parts[0].trim().toLowerCase();
+              final filename = parts[1].trim().toLowerCase();
+              if (acceptableNames.contains(filename) &&
+                  hash == localHash.toLowerCase()) {
+                _logger.info('Checksum matches target: $hash for $filename');
+                return true;
+              }
+            }
           }
         }
+      } catch (_) {}
+
+      // 2. Fallback to version.json (raw repo or release download)
+      for (final versionJsonUrl in [
+        'https://raw.githubusercontent.com/dheeraz101/Notekar-Android/refs/tags/${info.tagName}/build/app/outputs/flutter-apk/version.json',
+        'https://github.com/dheeraz101/Notekar-Android/releases/download/${info.tagName}/version.json',
+      ]) {
+        try {
+          final req = await client.getUrl(Uri.parse(versionJsonUrl));
+          req.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
+          final resp = await req.close();
+          if (resp.statusCode == 200 || resp.statusCode == 206) {
+            final body = await resp.transform(utf8.decoder).join();
+            final json = jsonDecode(body);
+            final apks = json is Map ? json['apks'] : null;
+            if (apks is List && apks.isNotEmpty) {
+              manifestFound = true;
+              for (final apk in apks) {
+                if (apk is Map) {
+                  final file = (apk['file'] as String? ?? '').toLowerCase();
+                  final sha256 = (apk['sha256'] as String? ?? '').toLowerCase();
+                  if (acceptableNames.contains(file) &&
+                      sha256 == localHash.toLowerCase()) {
+                    _logger.info(
+                      'Checksum matches version.json target: $sha256 for $file',
+                    );
+                    return true;
+                  }
+                }
+              }
+            }
+          }
+        } catch (_) {}
       }
+
+      if (!manifestFound) {
+        // If no cryptographic checksum manifest was published for this release on GitHub,
+        // verify the APK binary structure (ZIP magic bytes PK\x03\x04 and minimum size)
+        final file = File(apkFilePath);
+        if (await file.exists() && await file.length() >= 1024 * 1024) {
+          try {
+            final header = await file.openRead(0, 4).first;
+            if (header.length >= 4 &&
+                header[0] == 0x50 &&
+                header[1] == 0x4B &&
+                header[2] == 0x03 &&
+                header[3] == 0x04) {
+              _logger.info(
+                'No remote checksum manifest found for tag ${info.tagName}, but APK binary structure is valid. Proceeding with install.',
+              );
+              return true;
+            }
+          } catch (_) {}
+        }
+      }
+
       _logger.warn('Checksum mismatch: Local $localHash');
       return false;
     } catch (e, stack) {

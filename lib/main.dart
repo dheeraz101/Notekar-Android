@@ -171,9 +171,18 @@ class NoteKarAppState extends State<NoteKarApp> {
   void initState() {
     super.initState();
     _locale = widget.prefs?.getString('m-locale') ?? 'system';
-    _theme = widget.prefs?.getString('m-theme') ?? 'dark';
-    _accent = widget.prefs?.getString('m-accent-color') ?? 'blue';
-    _highContrast = widget.prefs?.getBool('m-high-contrast') ?? false;
+    _theme =
+        widget.prefs?.getString('m-theme') ??
+        widget.prefs?.getString('theme') ??
+        'dark';
+    _accent =
+        widget.prefs?.getString('m-accent-color') ??
+        widget.prefs?.getString('accent_color') ??
+        'blue';
+    _highContrast =
+        widget.prefs?.getBool('m-high-contrast') ??
+        widget.prefs?.getBool('high_contrast') ??
+        false;
     final obfuscate = widget.prefs?.getBool('obfuscate_in_recents') ?? false;
     if (obfuscate) {
       const MethodChannel(
@@ -192,18 +201,24 @@ class NoteKarAppState extends State<NoteKarApp> {
   void setTheme(String theme) {
     if (_theme != theme) {
       setState(() => _theme = theme);
+      widget.prefs?.setString('m-theme', theme);
+      widget.prefs?.setString('theme', theme);
     }
   }
 
   void setAccent(String accent) {
     if (_accent != accent) {
       setState(() => _accent = accent);
+      widget.prefs?.setString('m-accent-color', accent);
+      widget.prefs?.setString('accent_color', accent);
     }
   }
 
   void setHighContrast(bool highContrast) {
     if (_highContrast != highContrast) {
       setState(() => _highContrast = highContrast);
+      widget.prefs?.setBool('m-high-contrast', highContrast);
+      widget.prefs?.setBool('high_contrast', highContrast);
     }
   }
 

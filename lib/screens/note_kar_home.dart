@@ -717,7 +717,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
           : null;
       _sobrietyMilestoneTheme =
           prefs.getString('sobriety_milestone_theme') ?? 'science';
-      _theme = prefs.getString('m-theme') ?? 'dark';
+      _theme = prefs.getString('m-theme') ?? prefs.getString('theme') ?? 'dark';
       _defaultMode = prefs.getString('m-default-mode') ?? 'two-way';
       _sessionStart = prefs.getInt('m-ses');
       final targetMins = prefs.getInt('m-session-target-duration-mins');
@@ -760,7 +760,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _haptics = _hapticStyle != 'off';
       _acousticFeedback = prefs.getBool('m-acoustic-feedback') ?? true;
       AppSound.setEnabled(_acousticFeedback);
-      _accentColor = prefs.getString('m-accent-color') ?? 'blue';
+      _accentColor =
+          prefs.getString('m-accent-color') ??
+          prefs.getString('accent_color') ??
+          'blue';
       final savedAppIconStyle =
           prefs.getString('m-app-icon-style') ?? 'default';
       _appIconStyle = isAppIconStyle(savedAppIconStyle)
@@ -1241,9 +1244,16 @@ class _NoteKarHomeState extends State<NoteKarHome>
   Future<void> _saveSetting(String key, Object value) async {
     final prefs = _prefs;
     if (prefs == null) return;
-    if (value is String) await prefs.setString(key, value);
+    if (value is String) {
+      await prefs.setString(key, value);
+      if (key == 'm-theme') await prefs.setString('theme', value);
+      if (key == 'm-accent-color') await prefs.setString('accent_color', value);
+    }
     if (value is int) await prefs.setInt(key, value);
-    if (value is bool) await prefs.setBool(key, value);
+    if (value is bool) {
+      await prefs.setBool(key, value);
+      if (key == 'm-high-contrast') await prefs.setBool('high_contrast', value);
+    }
   }
 
   Future<void> _showWelcomeIfNeeded(SharedPreferences prefs) async {
@@ -3671,6 +3681,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
           NoteKarApp.of(context)?.setAccent(value);
           setState(() => _accentColor = value);
           _saveSetting('m-accent-color', value);
+          _applySystemUiStyle();
         },
         onAdaptiveColorChanged: (value) {
           setState(() => _adaptiveModeColor = value);
@@ -4996,20 +5007,20 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   void _applySystemUiStyle() {
-    final light = _theme == 'light';
+    final isDarkIcons = !p.isDark;
     // System status bar icon brightness strictly tracks the actual theme canvas,
     // never being misled by an active session accent color.
-    final isDarkIcons = light;
 
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Colors.transparent,
-        systemNavigationBarDividerColor: Colors.transparent,
-        systemNavigationBarContrastEnforced: false,
+        statusBarBrightness: isDarkIcons ? Brightness.light : Brightness.dark,
         statusBarIconBrightness: isDarkIcons
             ? Brightness.dark
             : Brightness.light,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarDividerColor: Colors.transparent,
+        systemNavigationBarContrastEnforced: false,
         systemNavigationBarIconBrightness: isDarkIcons
             ? Brightness.dark
             : Brightness.light,
@@ -5577,23 +5588,40 @@ class _NoteKarHomeState extends State<NoteKarHome>
       body = MediaQuery(data: largerTextQuery(context), child: body);
     }
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) {
-        if (didPop) return;
-        final now = DateTime.now();
-        if (_lastBackPressTime == null ||
-            now.difference(_lastBackPressTime!) > const Duration(seconds: 2)) {
-          _lastBackPressTime = now;
-          _showToast('Press back again to exit');
-          return;
-        }
-        SystemNavigator.pop();
-      },
-      child: Scaffold(
-        backgroundColor: palette.bg,
-        resizeToAvoidBottomInset: false,
-        body: body,
+    final isDarkIcons = !palette.isDark;
+    final overlayStyle = SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarBrightness: isDarkIcons ? Brightness.light : Brightness.dark,
+      statusBarIconBrightness: isDarkIcons ? Brightness.dark : Brightness.light,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarContrastEnforced: false,
+      systemNavigationBarIconBrightness: isDarkIcons
+          ? Brightness.dark
+          : Brightness.light,
+    );
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: overlayStyle,
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          final now = DateTime.now();
+          if (_lastBackPressTime == null ||
+              now.difference(_lastBackPressTime!) >
+                  const Duration(seconds: 2)) {
+            _lastBackPressTime = now;
+            _showToast('Press back again to exit');
+            return;
+          }
+          SystemNavigator.pop();
+        },
+        child: Scaffold(
+          backgroundColor: palette.bg,
+          resizeToAvoidBottomInset: false,
+          body: body,
+        ),
       ),
     );
   }

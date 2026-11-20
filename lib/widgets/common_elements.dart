@@ -609,7 +609,7 @@ class _IosPillToastWidgetState extends State<_IosPillToastWidget>
                       borderRadius: BorderRadius.circular(999),
                       border: Border.all(
                         color: !p.isDark
-                            ? p.border
+                            ? const Color(0xFFD1D1D6)
                             : (p.name == 'amoled'
                                   ? p.border
                                   : Colors.white.withValues(alpha: 0.15)),
@@ -620,7 +620,7 @@ class _IosPillToastWidgetState extends State<_IosPillToastWidget>
                           : [
                               BoxShadow(
                                 color: Colors.black.withValues(
-                                  alpha: !p.isDark ? 0.10 : 0.35,
+                                  alpha: !p.isDark ? 0.12 : 0.35,
                                 ),
                                 blurRadius: 18,
                                 offset: const Offset(0, 6),
@@ -637,7 +637,9 @@ class _IosPillToastWidgetState extends State<_IosPillToastWidget>
                           child: Text(
                             widget.message,
                             style: TextStyle(
-                              color: p.text,
+                              color: !p.isDark
+                                  ? const Color(0xFF1C1C1E)
+                                  : p.text,
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
                               letterSpacing: -0.2,

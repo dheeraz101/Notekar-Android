@@ -30,24 +30,38 @@ class HomeMinimalToolbarCapsule extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLight = !palette.isDark;
+    final iconColor = isLight ? const Color(0xFF1C1C1E) : palette.text;
+    final secondaryIconColor = isLight
+        ? const Color(0xFF3C3C43)
+        : palette.text2;
+
     return Container(
       constraints: const BoxConstraints(minHeight: 44),
       padding: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
-        color: palette.surface2.withValues(
-          alpha: enableTranslucency && AdaptiveEngine().supportsBlur
-              ? 0.75
-              : 0.95,
-        ),
+        color: isLight
+            ? const Color(0xFFFFFFFF).withValues(
+                alpha: enableTranslucency && AdaptiveEngine().supportsBlur
+                    ? 0.90
+                    : 0.98,
+              )
+            : palette.surface2.withValues(
+                alpha: enableTranslucency && AdaptiveEngine().supportsBlur
+                    ? 0.75
+                    : 0.95,
+              ),
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color: palette.border.withValues(alpha: 0.35),
-          width: 0.5,
+          color: isLight
+              ? const Color(0xFFD1D1D6).withValues(alpha: 0.85)
+              : palette.border.withValues(alpha: 0.35),
+          width: 0.8,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
-            blurRadius: 10,
+            color: Colors.black.withValues(alpha: isLight ? 0.14 : 0.12),
+            blurRadius: 12,
             offset: const Offset(0, 3),
           ),
         ],
@@ -73,7 +87,11 @@ class HomeMinimalToolbarCapsule extends StatelessWidget {
                             : Icons.all_inclusive_rounded),
                   size: 18,
                   color: isSessionActive
-                      ? (isPaused ? palette.orange : palette.text)
+                      ? (isPaused
+                            ? palette.orange
+                            : (isLight
+                                  ? const Color(0xFF1C1C1E)
+                                  : palette.text))
                       : palette.accent,
                 ),
               ),
@@ -83,7 +101,9 @@ class HomeMinimalToolbarCapsule extends StatelessWidget {
             width: 0.5,
             height: 16,
             margin: const EdgeInsets.symmetric(horizontal: 2),
-            color: palette.border.withValues(alpha: 0.4),
+            color: isLight
+                ? const Color(0xFFD1D1D6).withValues(alpha: 0.7)
+                : palette.border.withValues(alpha: 0.4),
           ),
           PressableScale(
             onTap: onOpenHistory,
@@ -94,7 +114,7 @@ class HomeMinimalToolbarCapsule extends StatelessWidget {
                 child: Icon(
                   Icons.access_time_rounded,
                   size: 18,
-                  color: palette.text,
+                  color: iconColor,
                 ),
               ),
             ),
@@ -103,7 +123,9 @@ class HomeMinimalToolbarCapsule extends StatelessWidget {
             width: 0.5,
             height: 16,
             margin: const EdgeInsets.symmetric(horizontal: 2),
-            color: palette.border.withValues(alpha: 0.4),
+            color: isLight
+                ? const Color(0xFFD1D1D6).withValues(alpha: 0.7)
+                : palette.border.withValues(alpha: 0.4),
           ),
           PressableScale(
             onTap: onOpenSettings,
@@ -114,7 +136,7 @@ class HomeMinimalToolbarCapsule extends StatelessWidget {
                 child: Icon(
                   Icons.settings_rounded,
                   size: 18,
-                  color: palette.text2,
+                  color: secondaryIconColor,
                 ),
               ),
             ),
